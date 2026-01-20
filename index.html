@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DB+ | Architectural Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+        overflow: hidden;
+        cursor: none; /* Hide default cursor for non-touch devices */
+      }
+      
+      /* Ensure interactive elements also hide the cursor for non-touch devices */
+      a, button, input, select, textarea, [role="button"], .cursor-pointer {
+        cursor: none !important;
+      }
+
+      .cinematic-text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+      }
+
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-fade-in {
+        animation: fade-in-up 1s ease-out forwards;
+      }
+
+      .transition-all-slow {
+        transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+      }
+
+      /* Custom scrollbar for project view */
+      .custom-scroll::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #000;
+      }
+
+      /* Custom Cursor Styles */
+      #custom-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        background-color: black;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transition: transform 0.15s ease-out, background-color 0.3s ease;
+        transform: translate(-50%, -50%);
+      }
+
+      #custom-cursor.active {
+        background-color: #ff0000;
+        transform: translate(-50%, -50%) scale(2.5);
+      }
+
+      /* Hide custom cursor and restore default cursor for touch devices */
+      @media (hover: none) and (pointer: coarse) {
+        body {
+          cursor: auto; /* Restore default cursor */
+        }
+        a, button, input, select, textarea, [role="button"], .cursor-pointer {
+          cursor: pointer !important; /* Restore default pointer for interactive elements */
+        }
+        #custom-cursor {
+          display: none; /* Hide the custom cursor */
+        }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <div id="custom-cursor"></div>
+  </body>
+</html>
