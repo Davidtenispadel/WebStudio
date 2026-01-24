@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Project, StudioSection } from '../types'; // Importa StudioSection
+import { ChevronRight } from 'lucide-react'; // Importa ChevronRight
 
 interface ProjectCardProps {
   project: Project;
@@ -24,7 +25,7 @@ const capitalizeTitle = (title: string): string => {
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSectionName }) => {
-  const isDesignSection = currentSectionName === StudioSection.DESIGN;
+  const isStaticVisualSection = currentSectionName === StudioSection.DESIGN || currentSectionName === StudioSection.STRUCTURE;
 
   return (
     <div 
@@ -36,16 +37,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSect
           src={project.imageUrl} 
           alt={project.title}
           className={`object-cover w-full h-full transition-all duration-[1400ms] ease-in-out ${
-            isDesignSection
-              ? '' // Estática: sin grayscale, sin efectos de hover
+            isStaticVisualSection // Aplica estilos estáticos si es una sección de visualización estática
+              ? '' 
               : 'grayscale group-hover:grayscale-0 group-hover:scale-125 group-hover:brightness-[3.00] group-hover:saturate-[0.80]'
           }`}
           loading="lazy"
         />
         <div className="absolute inset-0 bg-black/0 transition-colors duration-500"></div>
         
-        {/* Project Title Overlay on Hover (Conditional for Design section) */}
-        {!isDesignSection && ( // Renderiza el título solo si NO es la sección Design
+        {/* Project Title Overlay on Hover (Conditional) */}
+        {!isStaticVisualSection && ( // Renderiza el título como overlay solo si NO es una sección estática
           <div className="absolute top-8 left-8 right-8 text-black opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out">
             <h3 className="text-xl font-normal tracking-[0.15em]">
               {capitalizeTitle(project.title)}
@@ -53,6 +54,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSect
           </div>
         )}
       </div>
+
+      {/* Project Title Below Image (Conditional for static visual sections) */}
+      {isStaticVisualSection && ( // Renderiza el título debajo de la imagen si es una sección estática
+        <h3 className="text-xl font-normal tracking-[0.15em] mt-8 text-black">
+          {capitalizeTitle(project.title)}
+        </h3>
+      )}
     </div>
   );
 };

@@ -22,6 +22,27 @@ export const CATEGORIES: CategoryGroup[] = [
     description: "Desarrollo de soluciones arquitectónicas que equilibran la lógica formal rigurosa con experiencias espaciales centradas en el ser humano y la gestión ambiental.",
     projects: [
       {
+        id: 'a8', // Nuevo proyecto: Wraparound House Extension - MOVIDO AL INICIO
+        title: 'House Extension',
+        location: '', 
+        year: '', 
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png', 
+        category: StudioSection.ARCHITECTURE,
+        description: 'Una extensión de vivienda que envuelve la estructura existente, creando espacios fluidos y luminosos que se integran armoniosamente con el entorno exterior, redefiniendo la vida moderna.',
+        additionalImages: [
+          // Imágenes añadidas después de la primera (imageUrl)
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256227/Proposal_Section_1_eukhba.jpg',
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256234/Proposal_3d_u184de.jpg',
+          // Imagen adicional original
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934572/PHOTO-2026-01-20-15-08-45-2_n2j93c.jpg', 
+          // Imagen de cocina añadida anteriormente
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769254262/Kitchen_4_qsxvpt.jpg', 
+          // Nuevas imágenes añadidas al final
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256248/Elevation1_xbskva.png',
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256264/Plan_View1_bxocj1.png'
+        ]
+      },
+      {
         id: 'a1',
         title: 'Police Station',
         location: '', 
@@ -70,19 +91,6 @@ export const CATEGORIES: CategoryGroup[] = [
         ]
       },
       {
-        id: 'a8', // Nuevo proyecto: Wraparound House Extension
-        title: 'House Extension',
-        location: '', 
-        year: '', 
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png', 
-        category: StudioSection.ARCHITECTURE,
-        description: 'Una extensión de vivienda que envuelve la estructura existente, creando espacios fluidos y luminosos que se integran armoniosamente con el entorno exterior, redefiniendo la vida moderna.',
-        additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png', // Primera imagen adicional (la misma que la principal)
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934572/PHOTO-2026-01-20-15-08-45-2_n2j93c.jpg' // NUEVA IMAGEN ADICIONAL
-        ]
-      },
-      {
         id: 'a7', // Nuevo ID para Residential Building
         title: 'Residential Building',
         location: '', 
@@ -111,11 +119,15 @@ export const CATEGORIES: CategoryGroup[] = [
       },
       {
         id: 'd2',
-        title: 'Modular Living Concept',
+        title: 'Modern Architectural Vision for Community Engagement and Public Services', // TÍTULO ACTUALIZADO
         location: 'Berlin, DE',
         year: '2021',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768935843/Police_Station_3_rp9gk4.png', 
-        category: StudioSection.DESIGN
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png', // IMAGEN ACTUALIZADA
+        category: StudioSection.DESIGN,
+        description: 'Un diseño arquitectónico moderno que transforma un centro cívico en un vibrante espacio de interacción comunitaria, priorizando la sostenibilidad y la adaptabilidad.',
+        additionalImages: [
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246957/Edit_the_previous_im_f8flks.png' // NUEVA IMAGEN ADICIONAL
+        ]
       },
       {
         id: 'd3', // NUEVO PROYECTO
@@ -162,29 +174,22 @@ export const CATEGORIES: CategoryGroup[] = [
     description: "Amplio conocimiento de los sistemas estructurales para anticipar los requisitos espaciales, predimensionar elementos clave y garantizar diseños válidos y precisos desde el principio, evitando la incertidumbre o imprecisión durante el proceso de diseño.",
     projects: [
       {
-        id: 's1',
-        title: 'Exoskeleton Stadium',
-        location: 'London, UK',
-        year: '2023',
-        imageUrl: 'https://images.unsplash.com/photo-1503387762-592dea58ef21?auto=format&fit=crop&q=80&w=1200',
-        category: StudioSection.STRUCTURE
-      },
-      {
-        id: 's2',
-        title: 'Tensile Bridge Span',
-        location: 'Oslo, NO',
-        year: '2024',
-        imageUrl: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&q=80&w=1200',
-        category: StudioSection.STRUCTURE
-      },
-      {
-        id: 's3', 
-        title: 'Concrete Structure',
-        location: '', 
-        year: '', 
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768758420/Structure_xyqhqp.png', 
+        id: 's4', // Nuevo proyecto: Dynamic Structural Grid
+        title: 'Dynamic Structural Grid',
+        location: '',
+        year: '',
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769257170/Structure_dvq57l.png',
         category: StudioSection.STRUCTURE,
-        description: 'Diseños estructurales de hormigón innovadores que enfatizan la durabilidad, la integración estética y las técnicas de construcción avanzadas para varios tipos de edificios.'
+        description: 'Exploración de un sistema de rejilla estructural dinámica, diseñado para la eficiencia y la adaptabilidad en el diseño arquitectónico moderno.'
+      },
+      {
+        id: 's5', // Nuevo proyecto: Advanced Structural Analysis
+        title: 'Advanced Structural Analysis',
+        location: '',
+        year: '',
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769259396/Structure_2_caabgc.png',
+        category: StudioSection.STRUCTURE,
+        description: 'Análisis estructural avanzado que emplea modelos computacionales y simulación para optimizar el rendimiento y la resistencia de los edificios complejos.'
       }
     ]
   },

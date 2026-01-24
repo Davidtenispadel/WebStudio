@@ -82,6 +82,14 @@ const App: React.FC = () => {
     setCurrentCategoryIndex(0); // 'Home' is always the first category
   }, []);
 
+  // New handler for project clicks, conditionally opening the modal
+  const handleProjectCardClick = useCallback((project: Project) => {
+    // Only open the ProjectModal if the current section is NOT 'Structure'
+    if (activeCategory.name !== StudioSection.STRUCTURE) {
+      setSelectedProject(project);
+    }
+  }, [activeCategory.name]); // Dependency on activeCategory.name to re-create if current section changes
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
@@ -102,8 +110,8 @@ const App: React.FC = () => {
 
       <SectionView 
         category={activeCategory} 
+        onProjectClick={handleProjectCardClick} // Use the new conditional handler
         isActive={true} 
-        onProjectClick={setSelectedProject} 
         currentSectionName={activeCategory.name} // Pasa el nombre de la sección actual
       />
 

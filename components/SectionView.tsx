@@ -111,7 +111,7 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
   const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
   const isHomeSection = displayedCategory.name === StudioSection.HOME;
   const isAboutUsSection = displayedCategory.name === StudioSection.ABOUT_US;
-  const isDesignSection = displayedCategory.name === StudioSection.DESIGN; // Nuevo: Comprueba si es la sección de Diseño
+  // const isDesignSection = displayedCategory.name === StudioSection.DESIGN; // Ya no es necesario un manejo especial para la sección Design aquí
 
   return (
     <div className={`fixed inset-0 w-full bg-white transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
@@ -140,7 +140,7 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
             </span>
           </div>
 
-          <div className={`transition-all duration-700 ease-out ${
+          <div className={`transition-all duration-700 ease-out overflow-hidden flex-1 ${
             showName ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
           }`}>
             <span 
@@ -213,30 +213,8 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
                 ))}
               </div>
             </div>
-          ) : isDesignSection ? ( // NUEVO: CONTENIDO DE LA SECCIÓN DE DISEÑO (fijo, centrado, no clicable)
-            <div className={`flex flex-col items-center gap-24 animate-fade-in transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'}`}>
-              {displayedCategory.projects.map((project, idx) => (
-                <div 
-                  key={project.id} 
-                  className={`w-full max-w-6xl transition-all duration-1000 ease-out text-center 
-                              ${showGalleryItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}
-                  style={{ transitionDelay: `${idx * 150}ms` }}
-                >
-                  <img 
-                    src={project.imageUrl} 
-                    alt={project.title}
-                    className="w-full h-auto object-cover object-center aspect-[3/2] mb-4 shadow-lg border border-black/5"
-                    loading="lazy"
-                    // Las imágenes de la sección de diseño no tienen efectos de hover ni son clicables
-                  />
-                  <h3 className="text-xl font-normal tracking-[0.15em] text-black">
-                    {capitalizeTitle(project.title)} 
-                  </h3>
-                </div>
-              ))}
-            </div>
           ) : !isEnquiry ? (
-            /* PROJECT GALLERY (para otras categorías) */
+            /* PROJECT GALLERY (para todas las categorías, incluyendo Design) */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-32">
               {displayedCategory.projects.map((project, idx) => (
                 <div 

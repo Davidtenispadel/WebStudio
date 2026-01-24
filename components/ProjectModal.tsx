@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Project } from '../types';
 import { generateStudioInsight } from '../services/geminiService';
-import { X, MapPin, Calendar, Sparkles } from 'lucide-react';
+import { X, MapPin, Calendar, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'; // Importa ChevronLeft y ChevronRight
 
 interface ProjectModalProps {
   project: Project | null;
@@ -12,7 +12,9 @@ interface ProjectModalProps {
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [imageAnimPlayed, setImageAnimPlayed] = useState(false); // Estado para controlar la animación de la imagen
+  const [imageAnimPlayed, setImageAnimPlayed] = useState(false); // Estado para controlar la animación de la imagen inicial
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Nuevo estado para el índice de la imagen actual
+  const [imageFade, setImageFade] = useState(true); // Estado para la transición de fade
 
   useEffect(() => {
     if (project) {
@@ -22,6 +24,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
         setLoading(false);
       });
       document.body.style.overflow = 'hidden';
+      setCurrentImageIndex(0); // Reinicia a la primera imagen al abrir un nuevo proyecto
+      setImageFade(true); // Asegura que la primera imagen aparezca con fade
       // Inicia la animación de la imagen después de un pequeño retraso para asegurar el montaje
       const animTimer = setTimeout(() => setImageAnimPlayed(true), 100);
       return () => {
@@ -40,6 +44,22 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   // Usa imágenes adicionales si están disponibles, de lo contrario solo la principal
   const images = [project.imageUrl, ...(project.additionalImages || [])];
 
+  const handleNextImage = () => {
+    setImageFade(false); // Inicia la desaparición de la imagen actual
+    setTimeout(() => { // Espera un poco antes de cambiar la imagen y hacerla aparecer
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      setImageFade(true); // Inicia la aparición de la nueva imagen
+    }, 300); // Duración de la transición de fade
+  };
+
+  const handlePrevImage = () => {
+    setImageFade(false); // Inicia la desaparición de la imagen actual
+    setTimeout(() => { // Espera un poco antes de cambiar la imagen y hacerla aparecer
+      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+      setImageFade(true); // Inicia la aparición de la nueva imagen
+    }, 300); // Duración de la transición de fade
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
       <div className="absolute inset-0 bg-white/98 backdrop-blur-xl" onClick={onClose}></div>
@@ -52,28 +72,50 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
           <X className="w-6 h-6" />
         </button>
 
-        {/* Cinematic Image Gallery */}
-        <div className="w-full md:w-3/5 overflow-y-auto custom-scroll bg-gray-50 flex flex-col gap-1 p-0">
-          {images.map((img, idx) => (
-            <img 
-              key={idx}
-              src={img} 
-              alt={`${project.title} - view ${idx + 1}`}
-              className={`
-                w-full object-cover object-bottom-right min-h-[400px] md:min-h-0
-                transition-all duration-[1500ms] ease-out
-                ${imageAnimPlayed
-                  ? 'opacity-100 scale-100' // Estado final: Opacidad y escala completas (color original)
-                  : 'opacity-0 scale-95'    // Estado inicial: Opaco y ligeramente reducido
-                }
-              `}
-              style={{ maxHeight: 'none' }}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200';
-              }}
-              loading="lazy"
-            />
-          ))}
+        {/* Cinematic Image Gallery / Carousel */}
+        <div className="w-full md:w-3/5 relative overflow-hidden bg-gray-50 flex items-center justify-center">
+          <img 
+            src={images[currentImageIndex]} 
+            alt={`${project.title} - view ${currentImageIndex + 1}`}
+            className={`
+              w-full object-cover object-bottom-right min-h-[400px] md:min-h-0
+              transition-opacity duration-300 ease-in-out
+              ${imageFade ? 'opacity-100' : 'opacity-0'}
+            `}
+            style={{ maxHeight: 'none' }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200';
+            }}
+            loading="lazy"
+          />
+          
+          {images.length > 1 && ( // Mostrar controles solo si hay más de una imagen
+            <>
+              <button 
+                onClick={handlePrevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={handleNextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black transition-colors"
+                aria-label="Siguiente imagen"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {images.map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    className={`block w-2 h-2 rounded-full ${idx === currentImageIndex ? 'bg-white' : 'bg-gray-400 opacity-50'}`}
+                    aria-label={`Ir a la imagen ${idx + 1}`}
+                  ></span>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Info Sidebar */}
