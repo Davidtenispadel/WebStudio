@@ -1,4 +1,3 @@
-
 export interface Project {
   id: string;
   title: string;
@@ -8,23 +7,24 @@ export interface Project {
   category: string;
   description?: string;
   additionalImages?: string[];
+  useAiInsight?: boolean; 
 }
 
 export interface CategoryGroup {
   id: string;
   name: string;
   description: string;
-  imageUrl?: string; // Add optional imageUrl for category hero shots (e.g., Home)
+  imageUrl?: string; 
   projects: Project[];
 }
 
 export enum StudioSection {
-  HOME = 'Home', // Nuevo: Representa la página principal/introductoria del estudio
-  ABOUT_US = 'About Us', // Nuevo: Página explicativa de los tipos de trabajos del estudio
+  HOME = 'Home', 
   ARCHITECTURE = 'Architecture',
   DESIGN = 'Design',
-  URBANISM = 'Urbanism',
-  STRUCTURE = 'Structure',
+  URBANISM = 'Masterplanning + Urban Design',
+  STRUCTURE = 'MEP & Structure',
   PROJECT_SUPPORT = 'Project Support',
+  BEHIND_DB = 'Behind DB+', // New section
   ENQUIRY = 'Enquiry'
 }

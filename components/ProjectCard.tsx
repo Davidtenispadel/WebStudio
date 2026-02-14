@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Project, StudioSection } from '../types'; // Importa StudioSection
 import { ChevronRight } from 'lucide-react'; // Importa ChevronRight
@@ -25,7 +24,9 @@ const capitalizeTitle = (title: string): string => {
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSectionName }) => {
-  const isStaticVisualSection = currentSectionName === StudioSection.DESIGN || currentSectionName === StudioSection.STRUCTURE;
+  // Check if titles should be hidden for this section (Design section visual purely)
+  const isDesignSection = currentSectionName === StudioSection.DESIGN;
+  const isStaticVisualSection = currentSectionName === StudioSection.STRUCTURE;
 
   return (
     <div 
@@ -36,17 +37,21 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSect
         <img 
           src={project.imageUrl} 
           alt={project.title}
-          className={`object-cover w-full h-full transition-all duration-[1400ms] ease-in-out ${
-            isStaticVisualSection // Aplica estilos estáticos si es una sección de visualización estática
+          className={`object-cover w-full h-full transition-all ease-in-out ${
+            (isStaticVisualSection || isDesignSection) // Aplica estilos estáticos si es una sección de visualización estática
               ? '' 
-              : 'grayscale group-hover:grayscale-0 group-hover:scale-125 group-hover:brightness-[3.00] group-hover:saturate-[0.80]'
+              : 'project-card-image-effects' // Aplica la nueva clase CSS para efectos de hover
           }`}
+          style={{ transitionDuration: '1400ms' }} // Movido desde className
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200';
+          }}
           loading="lazy"
         />
         <div className="absolute inset-0 bg-black/0 transition-colors duration-500"></div>
         
         {/* Project Title Overlay on Hover (Conditional) */}
-        {!isStaticVisualSection && ( // Renderiza el título como overlay solo si NO es una sección estática
+        {(!isStaticVisualSection && !isDesignSection) && ( // Renderiza el título como overlay solo si NO es una sección estática/design
           <div className="absolute top-8 left-8 right-8 text-black opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out">
             <h3 className="text-xl font-normal tracking-[0.15em]">
               {capitalizeTitle(project.title)}
@@ -56,11 +61,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSect
       </div>
 
       {/* Project Title Below Image (Conditional for static visual sections) */}
-      {isStaticVisualSection && ( // Renderiza el título debajo de la imagen si es una sección estática
+      {isStaticVisualSection && ( // Renderiza el título debajo de la imagen si es una sección estática (e.g. Structure)
         <h3 className="text-xl font-normal tracking-[0.15em] mt-8 text-black">
           {capitalizeTitle(project.title)}
         </h3>
       )}
+      {/* Design section specifically requested to remove footer text */}
     </div>
   );
 };

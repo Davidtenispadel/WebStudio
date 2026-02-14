@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -57,7 +58,7 @@
         left: 0;
         width: 12px;
         height: 12px;
-        background-color: black;
+        background-color: #333333; /* Changed from black to dark grey */
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
@@ -68,6 +69,16 @@
       #custom-cursor.active {
         background-color: #ff0000;
         transform: translate(-50%, -50%) scale(2.5);
+      }
+
+      /* Styles for ProjectCard images to avoid complex Tailwind in JSX */
+      .project-card-image-effects {
+        filter: grayscale(100%);
+        transition: all 0.5s ease-in-out; /* General transition for hover effects */
+      }
+      .group:hover .project-card-image-effects {
+        filter: grayscale(0%) brightness(300%) saturate(80%);
+        transform: scale(1.25);
       }
 
       /* Hide custom cursor and restore default cursor for touch devices */

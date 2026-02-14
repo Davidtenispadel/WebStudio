@@ -31,11 +31,10 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
   };
 
   const handleDbPlusLogoClick = () => {
+    // On mobile, clicking the DB+ logo should go to the Home section now
+    onGoHomeClick(); 
     if (isMobile) {
-      onNavClick(StudioSection.ABOUT_US); // Navigate to About Us on mobile DB+ click
       setIsMenuOpen(false); // Ensure menu is closed if it was open
-    } else {
-      onGoHomeClick(); // Go to Home section on desktop DB+ click
     }
   };
 
@@ -46,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
           <div 
             className="flex items-center gap-1 cursor-pointer group"
             onClick={handleDbPlusLogoClick} // Dynamic click handler for DB+ logo
-            aria-label={isMobile ? "Go to About Us page" : "Go to home page"}
+            aria-label={isMobile ? "Go to Home page" : "Go to home page"}
           >
             <span className="text-3xl font-light tracking-tighter transition-all group-hover:tracking-normal">DB</span>
             <span className="text-2xl font-thin text-gray-300 transition-transform group-hover:scale-125">+</span>
@@ -80,9 +79,11 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
 
       {/* Mobile/Side Menu (hidden on desktop) */}
       <div 
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl z-[70] transform transition-transform duration-500 ease-in-out md:hidden
-          ${isMenuOpen && isMobile ? 'translate-x-0' : 'translate-x-[-100%]'}
-        `}
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden`}
+        style={{ 
+          zIndex: 70, 
+          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)' // Maneja la transformación directamente en style
+        }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
           <div 
@@ -111,9 +112,10 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
 
       {/* Overlay (hidden on desktop) */}
       <div 
-        className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-500 md:hidden
+        className={`fixed inset-0 bg-black/50 transition-opacity duration-500 md:hidden
           ${isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}
+        style={{ zIndex: 60 }}
         onClick={() => setIsMenuOpen(false)}
         aria-hidden={!isMenuOpen}
       ></div>

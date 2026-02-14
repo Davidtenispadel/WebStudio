@@ -1,30 +1,15 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { CategoryGroup, Project, StudioSection } from '../types';
 import ProjectCard from './ProjectCard';
-import { Mail, User, FileText, ChevronRight, CheckCircle, Send as SendIcon, MessageSquare } from 'lucide-react';
-import { CORE_SERVICE_CATEGORIES } from '../constants'; // Import CORE_SERVICE_CATEGORIES
+import { ChevronRight, CheckCircle, Maximize2 } from 'lucide-react';
+import { CATEGORIES, designFocusAreas, urbanMasterplanningHeaderDescription, projectSupportHeaderDescription } from '../constants';
 
 interface SectionViewProps {
   category: CategoryGroup;
   onProjectClick: (project: Project) => void;
   isActive: boolean;
-  currentSectionName: string; // Nueva prop para el nombre de la sección actual
+  currentSectionName: string;
 }
-
-// Helper function to capitalize title words, excluding articles/conjunctions
-// Moved here for reusability in Design section rendering
-const capitalizeTitle = (title: string): string => {
-  const words = title.toLowerCase().split(' ');
-  const articlesAndConjunctions = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'y'];
-
-  return words.map((word, index) => {
-    if (index > 0 && articlesAndConjunctions.includes(word)) {
-      return word;
-    }
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  }).join(' ');
-};
 
 const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isActive, currentSectionName }) => {
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
@@ -37,14 +22,14 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
   const [isTransitioning, setIsTransitioning] = useState(false);
   const isFirstRender = useRef(true);
 
-  // Enquiry Form State
   const [enquiryStep, setEnquiryStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     projectType: '',
-    message: ''
+    message: '',
+    files: [] as File[]
   });
 
   const resetSequence = () => {
@@ -61,9 +46,9 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
     setShowDB(true);
     const t1 = setTimeout(() => setShowPlus(true), 400);
     const t2 = setTimeout(() => setShowName(true), 700);
-    const t3 = setTimeout(() => setStage('gallery'), 1800);
-    const t4 = setTimeout(() => setShowDesc(true), 3000);
-    const t5 = setTimeout(() => setShowGalleryItems(true), 3600);
+    const t3 = setTimeout(() => setStage('gallery'), 1000); 
+    const t4 = setTimeout(() => setShowDesc(true), 1300); 
+    const t5 = setTimeout(() => setShowGalleryItems(true), 1600); 
     return [t1, t2, t3, t4, t5];
   };
 
@@ -77,25 +62,19 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
 
   useEffect(() => {
     if (isFirstRender.current) return;
-
     if (category.id !== displayedCategory.id) {
       setIsTransitioning(true);
-      
       const tOut = setTimeout(() => {
         resetSequence();
         setDisplayedCategory(category);
         setIsTransitioning(false);
-        
         const tIn = setTimeout(() => {
           startSequence();
         }, 100);
-        
-        return () => clearTimeout(tIn);
       }, 500);
-
       return () => clearTimeout(tOut);
     }
-  }, [category]);
+  }, [category, displayedCategory.id]);
 
   const handleEnquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +82,14 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
       setEnquiryStep(enquiryStep + 1);
     } else {
       setEnquiryStep(4);
+      setFormData({ name: '', email: '', phone: '', projectType: '', message: '', files: [] });
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files).filter((file: File) => file.size <= 10 * 1024 * 1024);
+      setFormData(prev => ({ ...prev, files: selectedFiles }));
     }
   };
 
@@ -110,256 +97,137 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
 
   const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
   const isHomeSection = displayedCategory.name === StudioSection.HOME;
-  const isAboutUsSection = displayedCategory.name === StudioSection.ABOUT_US;
-  // const isDesignSection = displayedCategory.name === StudioSection.DESIGN; // Ya no es necesario un manejo especial para la sección Design aquí
+  const isUrbanSection = displayedCategory.name === StudioSection.URBANISM;
+  const isDesignSection = displayedCategory.name === StudioSection.DESIGN;
+  const isArchitectureSection = displayedCategory.name === StudioSection.ARCHITECTURE;
+  const isProjectSupportSection = displayedCategory.name === StudioSection.PROJECT_SUPPORT;
+  const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE; 
+  const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
 
   return (
-    <div className={`fixed inset-0 w-full bg-white transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+    <div
+      className={`fixed inset-0 w-full transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'} bg-white`}
+    >
+      {isEnquiry && <div className="absolute inset-0 bg-black/70 z-0"></div>}
       
-      {/* Cinematic Brand Header Unit - DB in black, + in grey */}
       <div 
-        className={`fixed z-30 flex items-center transition-all duration-[1800ms] cubic-bezier(0.77, 0, 0.175, 1) ${
+        className={`fixed z-30 flex items-center transition-all ${
           stage === 'intro' 
-            ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-7xl px-10 justify-center' 
-            : 'top-24 left-10 translate-x-0 translate-y-0 w-[calc(100%-80px)] pointer-events-none justify-start'
+            ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center' 
+            : 'top-24 left-10 translate-x-0 translate-y-0 pointer-events-none justify-start'
         }`}
+        style={{ 
+          transitionTimingFunction: 'cubic-bezier(0.77, 0, 0.175, 1)',
+          transitionDuration: '1000ms',
+          width: stage === 'intro' ? '100%' : 'calc(100% - 80px)' 
+        }}
       >
-        <div className={`flex items-center gap-6 transition-all duration-[1800ms] cubic-bezier(0.77, 0, 0.175, 1) shrink-0 ${
-          stage === 'gallery' ? 'scale-[0.4] md:scale-[0.5] origin-left' : 'scale-100'
-        }`}>
+        <div className="flex items-center gap-6 transition-all shrink-0" style={{ transitionTimingFunction: 'cubic-bezier(0.77, 0, 0.175, 1)', transitionDuration: '1000ms', transform: stage === 'gallery' ? `scale(${window.innerWidth >= 768 ? 0.5 : 0.4})` : 'scale(1)', transformOrigin: 'left' }}>
           <div className="flex items-center gap-3">
-            <h2 className={`text-9xl md:text-[12rem] font-light tracking-tighter text-black transition-all duration-1000 cubic-bezier(0.23, 1, 0.32, 1) ${
-              showDB ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
-            }`}>
-              DB
-            </h2>
-            <span className={`text-6xl md:text-8xl font-thin text-gray-300 transition-all duration-700 ${
-              showPlus ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-45'
-            }`}>
-              +
-            </span>
+            <h2 className={`text-9xl font-light tracking-tighter text-black transition-all ${showDB ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{ fontSize: window.innerWidth >= 768 ? '12rem' : '9rem', transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)', transitionDuration: '1000ms' }}>DB</h2>
+            <span className={`text-6xl md:text-8xl font-thin text-gray-300 transition-all ${showPlus ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-45'}`} style={{ transitionDuration: '700ms' }}>+</span>
           </div>
-
-          <div className={`transition-all duration-700 ease-out overflow-hidden flex-1 ${
-            showName ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
-          }`}>
-            <span 
-              className="text-4xl md:text-6xl tracking-[0.15em] font-light whitespace-nowrap text-black"
-            >
-              {isHomeSection ? '' : displayedCategory.name} {/* Hide category name for Home */}
-            </span>
+          <div className="transition-all ease-out overflow-hidden flex-1" style={{ transitionDuration: '700ms', transform: showName ? 'translateX(0)' : 'translateX(-48px)', opacity: showName ? 1 : 0 }}>
+            <span className="text-4xl md:text-6xl tracking-[0.15em] font-light whitespace-nowrap text-black">{isHomeSection ? '' : displayedCategory.name}</span>
           </div>
         </div>
 
-        <div className={`transition-all duration-1000 ease-out overflow-hidden flex-1 ${
-          stage === 'gallery' 
-            ? `ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl ${showDesc ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}` 
-            : 'opacity-0 pointer-events-none w-0 h-0'
-        }`}>
-          <p className="text-sm md:text-base lg:text-lg font-light text-gray-400 leading-relaxed tracking-tight italic">
-            {displayedCategory.description}
-          </p>
-        </div>
+        {displayedCategory.description && !isHomeSection && !isDesignSection && !isEnquiry && !isProjectSupportSection && !isStructureSection && !isBehindDBSection && (
+          <div className={`transition-all ease-out overflow-hidden flex-1 ${stage === 'gallery' ? 'ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl ' : 'pointer-events-none w-0 h-0'}`} style={{ transitionDuration: '1000ms', opacity: (stage === 'gallery' && showDesc) ? 1 : 0, transform: (stage === 'gallery' && showDesc) ? 'translateX(0)' : 'translateX(-40px)' }}>
+            {isArchitectureSection ? (
+              <span className="font-light text-gray-400 leading-relaxed tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">Portfolio of selected projects</span>
+            ) : isUrbanSection ? (
+              <span className="font-light text-gray-400 leading-relaxed tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">{urbanMasterplanningHeaderDescription}</span>
+            ) : (
+              <div className="font-light text-gray-400 leading-relaxed tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Main Content Area */}
-      <div 
-        className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === 'gallery' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        style={{ paddingTop: '340px' }}
-      >
+      <div className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${stage === 'gallery' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} style={{ paddingTop: '340px' }}>
         <div className="max-w-7xl mx-auto">
           {isHomeSection ? (
-            /* HOME PAGE CONTENT */
             <div className={`flex flex-col animate-fade-in transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'}`}>
-              {displayedCategory.imageUrl && (
-                <img 
-                  src={displayedCategory.imageUrl} 
-                  alt="DB+ Studio Overview"
-                  className="w-full object-cover object-center aspect-[16/9] mb-16 shadow-lg border border-black/5"
-                  loading="lazy"
-                />
-              )}
-              <div className="md:w-3/4 lg:w-2/3 mx-auto text-center py-12 px-4 md:px-0">
-                <p className="text-lg md:text-xl font-light text-gray-700 leading-relaxed">
-                  {displayedCategory.description}
-                </p>
-              </div>
-            </div>
-          ) : isAboutUsSection ? (
-            /* ABOUT US PAGE CONTENT */
-            <div className={`flex flex-col animate-fade-in transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'}`}>
-              {displayedCategory.imageUrl && (
-                <img 
-                  src={displayedCategory.imageUrl} 
-                  alt="About DB+ Studio"
-                  className="w-full object-cover object-center aspect-[16/9] mb-16 shadow-lg border border-black/5"
-                  loading="lazy"
-                />
-              )}
-              <div className="md:w-3/4 lg:w-2/3 mx-auto text-center py-12 px-4 md:px-0">
-                <p className="text-lg md:text-xl font-light text-gray-700 leading-relaxed">
-                  {displayedCategory.description}
-                </p>
+              <div className="max-w-4xl mb-24">
+                 <p className="text-xl md:text-2xl font-light text-black leading-relaxed">{CATEGORIES[0].description}</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                {CORE_SERVICE_CATEGORIES.map((serviceCat) => (
-                  <div key={serviceCat.id} className="p-6 bg-gray-50 border border-black/5 flex flex-col items-start text-left">
-                    <h3 className="text-2xl font-bold tracking-tight text-black mb-4">{serviceCat.name}</h3>
-                    <p className="text-sm text-gray-700 leading-relaxed">{serviceCat.description}</p>
+              <div className="w-full mb-16 overflow-hidden relative group rounded-xl shadow-2xl">
+                <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769971319/scketch_5_vaanb9.jpg" alt="DB+ Architecture Insight" className="w-full object-cover transition-transform duration-[2000ms] group-hover:scale-[1.02]" style={{ aspectRatio: '16 / 9' }} loading="lazy" />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-24 px-4 md:px-0">
+                <div className="lg:col-span-8">
+                  <div className="font-light text-black leading-relaxed whitespace-pre-line text-lg md:text-xl" dangerouslySetInnerHTML={{ __html: CATEGORIES[1].description }} />
+                </div>
+                <div className="lg:col-span-4 flex justify-center lg:justify-end">
+                  <h1 className="text-6xl md:text-8xl lg:text-9xl font-thin tracking-tighter text-black/5 uppercase select-none pointer-events-none">ARCHITECTURE</h1>
+                </div>
+              </div>
+
+              <div className="w-full mb-16 overflow-hidden relative group rounded-xl shadow-2xl">
+                <div className="absolute top-6 right-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-black/5 backdrop-blur-md px-3 py-1 border border-black/10 flex items-center gap-2 rounded-full">
+                   <Maximize2 className="w-3 h-3 text-black" />
+                   <span className="text-[9px] font-bold tracking-widest text-black">ORTHOGRAPHIC PROJECTION</span>
+                </div>
+                <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769246957/Edit_the_previous_im_f8flks.png" alt="DB+ Studio Overview" className="w-full object-cover shadow-2xl transition-transform duration-[2000ms] group-hover:scale-[1.01]" style={{ aspectRatio: '16 / 9' }} loading="lazy" />
+              </div>
+            </div>
+          ) : isEnquiry ? (
+            <div className={`max-w-4xl mx-auto transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'} relative z-10`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
+                <div className="flex flex-col gap-20">
+                  <div className="text-white p-10 space-y-6 rounded-2xl shadow-2xl bg-black border border-white/10">
+                    <h3 className="text-4xl font-light tracking-tight mb-4">Office</h3>
+                    <p className="text-base font-light leading-relaxed">108 Kestrel Road, Corby,<br/>Northamptonshire England</p>
+                    <p className="text-base font-light">Telephone: +44 07955018937</p>
+                    <p className="text-base font-light"><a href="mailto:DB+@dbsdesigner.com" className="hover:underline text-white">DB+@dbsdesigner.com</a></p>
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : !isEnquiry ? (
-            /* PROJECT GALLERY (para todas las categorías, incluyendo Design) */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-32">
-              {displayedCategory.projects.map((project, idx) => (
-                <div 
-                  key={project.id} 
-                  className={`transition-all duration-1000 ease-out ${
-                    showGalleryItems 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-24'
-                  } ${idx % 3 === 1 ? 'md:mt-48' : ''}`}
-                  style={{ 
-                    transitionDelay: `${idx * 150}ms` 
-                  }}
-                >
-                  <ProjectCard 
-                    project={project} 
-                    onClick={onProjectClick} 
-                    currentSectionName={currentSectionName} // Pasa el nombre de la sección
-                  />
                 </div>
-              ))}
-            </div>
-          ) : (
-            /* ENQUIRY PAGE CONTENT */
-            <div className={`flex flex-col md:flex-row bg-white border border-black/5 shadow-2xl overflow-hidden min-h-[600px] transition-all duration-1000 ${showGalleryItems ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}>
-              {/* Left Cinematic Panel - Connection text in grey */}
-              <div className="hidden md:block w-3/5 relative overflow-hidden bg-white border-r border-black/5">
-                <img 
-                  src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200" 
-                  alt="Architecture and Motion Connection"
-                  className="absolute inset-0 w-full h-full object-cover grayscale contrast-[1.8] brightness-105"
-                />
-                <div className="absolute inset-0 bg-white/5"></div>
-                
-                <div className="absolute bottom-12 left-12 right-12 transition-all duration-1000">
-                  <span className="text-5xl md:text-6xl tracking-[0.15em] font-light block text-gray-400">
-                    Connection
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Form Panel */}
-              <div className="w-full md:w-2/5 p-12 flex flex-col bg-white">
-                <div className="mb-8">
-                  <div className="flex-1 h-[1px] bg-gray-100 relative mb-6">
-                    <div className="absolute left-0 top-0 h-full bg-black transition-all duration-700" style={{ width: `${(enquiryStep / 3) * 100}%` }}></div>
-                  </div>
-                  <p className="text-[11px] text-gray-500 font-medium tracking-wide leading-relaxed">
-                    Ofrecemos evaluaciones y cotizaciones de proyectos adaptadas al alcance y la especificidad de sus requisitos. Para solicitudes muy detalladas o técnicamente complejas, recomendamos programar una cita para asegurar que todos los aspectos estén claramente definidos antes de proceder con la evaluación y el precio.
-                  </p>
-                  <p className="text-[11px] text-gray-500 font-medium tracking-wide leading-relaxed mt-4">
-                    Por favor, envíe cualquier detalle relevante, dibujos o referencias visuales que nos ayuden a comprender sus necesidades a: <span className="font-bold text-black">projectinfo@dbsdesigner.com</span>
-                  </p>
-                </div>
-
-                <form onSubmit={handleEnquirySubmit} className="flex-1 flex flex-col justify-center">
-                  {enquiryStep === 1 && (
-                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-                      <p className="text-gray-400 text-xs font-medium uppercase tracking-widest leading-relaxed mb-4">Identificación y Mensaje</p>
-                      <div className="relative group">
-                        <User className="absolute left-0 top-3 w-4 h-4 text-gray-300 group-focus-within:text-black transition-colors" />
-                        <input required type="text" placeholder="NOMBRE COMPLETO" className="w-full pl-8 py-3 bg-transparent border-b border-gray-200 focus:border-black outline-none text-[10px] font-bold tracking-widest uppercase transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                      </div>
-                      <div className="relative group">
-                        <Mail className="absolute left-0 top-3 w-4 h-4 text-gray-300 group-focus-within:text-black transition-colors" />
-                        <input required type="email" placeholder="DIRECCIÓN DE CORREO ELECTRÓNICO" className="w-full pl-8 py-3 bg-transparent border-b border-gray-200 focus:border-black outline-none text-[10px] font-bold tracking-widest uppercase transition-all" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                      </div>
-                      
-                      {/* Message field without requirements text */}
-                      <div className="relative group pt-4">
-                        <MessageSquare className="absolute left-0 top-3 w-4 h-4 text-gray-300 group-focus-within:text-black transition-colors" />
-                        <textarea 
-                          required 
-                          placeholder="MENSAJE" 
-                          maxLength={10000}
-                          rows={8} 
-                          className="w-full pl-8 py-3 bg-transparent border-b border-gray-200 focus:border-black outline-none text-[10px] font-bold tracking-widest uppercase transition-all resize-none custom-scroll" 
-                          value={formData.message} 
-                          onChange={e => setFormData({...formData, message: e.target.value})} 
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {enquiryStep === 2 && (
-                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-                      <p className="text-gray-400 text-xs font-medium uppercase tracking-widest leading-relaxed mb-4">Alcance del Proyecto</p>
-                      <select required className="w-full py-3 bg-transparent border-b border-gray-200 focus:border-black outline-none text-[10px] font-bold tracking-widest uppercase transition-all mb-4" value={formData.projectType} onChange={e => setFormData({...formData, projectType: e.target.value})}>
-                        <option value="" disabled>CATEGORÍA DEL PROYECTO</option>
-                        <option value="arch">Arquitectura</option>
-                        <option value="design">Diseño</option>
-                        <option value="urban">Urbanismo</option>
-                        <option value="struct">Estructura</option>
-                      </select>
-                      <p className="text-[10px] text-gray-400 italic">Seleccione la categoría que mejor se adapte a su consulta para ayudarnos a dirigirla al especialista adecuado.</p>
-                    </div>
-                  )}
-
-                  {enquiryStep === 3 && (
-                    <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-                      <p className="text-gray-400 text-xs font-medium uppercase tracking-widest leading-relaxed">Canal de Revisión</p>
-                      <div className="bg-gray-50 p-6 space-y-3">
-                        <div className="flex justify-between text-[9px] font-bold tracking-widest text-gray-400 uppercase"><span>Identificar</span><span className="text-black">{formData.name}</span></div>
-                        <div className="flex justify-between text-[9px] font-bold tracking-widest text-gray-400 uppercase"><span>Email</span><span className="text-black">{formData.email}</span></div>
-                        <div className="flex flex-col text-[9px] font-bold tracking-widest text-gray-400 uppercase border-t border-gray-100 pt-2">
-                          <span>Vista Previa del Mensaje</span>
-                          <span className="text-black mt-1 line-clamp-3 italic">{formData.message}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-4 border border-black/5">
-                        <Mail className="w-4 h-4 text-black" />
-                        <div>
-                          <span className="block text-[7px] font-black text-gray-300 tracking-[0.4em] uppercase">Oficina de Correo Electrónico</span>
-                          <a href="mailto:projectinfo@dbsdesigner.com" className="text-[10px] font-bold hover:underline">projectinfo@dbsdesigner.com</a>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {enquiryStep === 4 && (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
-                      <CheckCircle className="w-12 h-12 text-black mb-6" />
-                      <h4 className="text-xl font-black uppercase tracking-tighter mb-2">Enviado</h4>
-                      <p className="text-gray-400 text-[9px] tracking-widest uppercase">Su consulta ha sido enviada.</p>
-                    </div>
-                  )}
-
-                  {enquiryStep < 4 && (
-                    <div className="mt-12 flex justify-between items-center">
-                      {enquiryStep > 1 && (
-                        <button type="button" onClick={() => setEnquiryStep(enquiryStep - 1)} className="text-[9px] font-black tracking-widest text-gray-300 hover:text-black transition-colors uppercase">Atrás</button>
-                      )}
-                      <button type="submit" className="ml-auto bg-black text-white px-8 py-4 text-[10px] font-bold tracking-[0.3em] uppercase hover:bg-neutral-800 transition-all flex items-center gap-4 rounded-sm">
-                        {enquiryStep === 3 ? 'Finalizar' : 'Siguiente'}
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
+                <form onSubmit={handleEnquirySubmit} className="space-y-8 p-10 bg-black rounded-2xl border border-white/10">
+                  {enquiryStep < 4 ? (
+                    <>
+                      <div className="space-y-4"><label htmlFor="name" className="block text-[10px] font-bold tracking-[0.4em] uppercase text-white/60">Name</label><input type="text" id="name" className="w-full bg-white/5 border-b border-white/20 py-4 px-4 focus:outline-none focus:border-white transition-colors text-sm font-light text-white placeholder-gray-500" placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required /></div>
+                      <div className="space-y-4"><label htmlFor="email" className="block text-[10px] font-bold tracking-[0.4em] uppercase text-white/60">Email</label><input type="email" id="email" className="w-full bg-white/5 border-b border-white/20 py-4 px-4 focus:outline-none focus:border-white transition-colors text-sm font-light text-white placeholder-gray-500" placeholder="Your Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required /></div>
+                      <div className="space-y-4"><label htmlFor="message" className="block text-[10px] font-bold tracking-[0.4em] uppercase text-white/60">Message</label><textarea id="message" className="w-full bg-white/5 border-b border-white/20 py-4 px-4 focus:outline-none focus:border-white transition-colors min-h-[120px] text-sm font-light resize-none text-white placeholder-gray-500" placeholder="Project Details..." value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} required /></div>
+                      <button type="submit" className="flex items-center gap-6 group mt-12 text-white bg-black px-10 py-5 rounded-full border border-white/20 hover:bg-white hover:text-black transition-all shadow-xl"><span className="text-xs font-bold tracking-[0.4em] uppercase">Send Vision</span><ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-500" /></button>
+                    </>
+                  ) : (
+                    <div className="py-20 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-700"><CheckCircle className="w-16 h-16 text-white" /><div><h4 className="text-2xl font-light mb-2 text-white">Message Received.</h4><p className="text-sm text-gray-200 font-light">We will be in touch shortly to discuss your vision.</p></div></div>
                   )}
                 </form>
+              </div>
+            </div>
+          ) : isBehindDBSection ? (
+            <div className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                <div className="md:col-span-1">
+                  <p className="text-base md:text-lg lg:text-xl font-light leading-relaxed text-justify">{displayedCategory.description}</p>
+                </div>
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-black/5">
+                  <img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" style={{ aspectRatio: window.innerWidth < 768 ? '1/1' : 'unset' }} loading="lazy" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className={`transition-opacity duration-1000 ${showGalleryItems ? 'opacity-100' : 'opacity-0'}`}>
+              {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection) && ( 
+                <div className={`flex flex-col gap-12 ${isDesignSection ? 'mb-8' : 'mb-24'}`}>
+                  <div className="w-full max-w-5xl">
+                    <div className={`whitespace-pre-line text-black font-normal text-lg md:text-xl leading-relaxed`} dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+                {displayedCategory.projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} onClick={onProjectClick} currentSectionName={currentSectionName} />
+                ))}
               </div>
             </div>
           )}
         </div>
       </div>
-
-      <div className={`fixed inset-0 bg-neutral-50/10 -z-10 transition-opacity duration-1000 ${stage === 'gallery' ? 'opacity-100' : 'opacity-0'}`}></div>
     </div>
   );
 };
