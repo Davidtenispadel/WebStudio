@@ -1,49 +1,69 @@
 import { Project, CategoryGroup, StudioSection } from './types';
 
-export const designPhilosophy = `<div class="space-y-4 text-black">
-  <p class="text-lg md:text-xl font-light leading-relaxed">
-    <span class="text-xl md:text-2xl font-bold">DB+ Design</span> is our clear vision, meaningful spatial experience, close client collaboration, sustainable thinking, and a rigorous end‑to‑end design process that ensures every project is coherent, functional, and expressive from concept to completion.
+export const isoContent = `
+<div class="text-black leading-tight">
+  <div>
+    <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
+    <p class="text-lg md:text-xl font-light pt-6">
+      We apply the principles of ISO 19650, the international standard developed in the UK for managing information in BIM‑based projects.<br/>
+      For experienced clients, ISO 19650 is familiar territory. But for those who are not aware of it, the benefits are simple and tangible:
+    </p>
+  </div>
+  
+  <ul class="space-y-1 text-lg md:text-xl font-light pt-6">
+    <li>• <span class="font-bold">Everyone works in unison:</span> all teams share the same organised and up‑to‑date information, eliminating misunderstandings and inconsistencies.</li>
+    <li>• <span class="font-bold">Fewer errors and last‑minute changes:</span> issues are detected early, long before reaching construction.</li>
+    <li>• <span class="font-bold">Reduced unexpected costs:</span> by avoiding mistakes and rework, the project experiences fewer surprises and budget deviations.</li>
+    <li>• <span class="font-bold">Clear communication and full transparency:</span> clients always know what is happening, why, and with what information.</li>
+    <li>• <span class="font-bold">Better coordination across all disciplines:</span> architects, engineers, and contractors collaborate through a unified framework.</li>
+  </ul>
+
+  <div>
+    <p class="text-lg md:text-xl font-bold pt-6">This standard promotes:</p>
+    <ul class="space-y-0.5 text-lg md:text-xl font-light pt-2">
+      <li>• Shared responsibility among all project participants</li>
+      <li>• Early detection and resolution of issues</li>
+      <li>• Genuine multidisciplinary coordination</li>
+      <li>• Reduced risks and minimised cost overruns</li>
+      <li>• Transparency and traceability at every stage</li>
+    </ul>
+  </div>
+
+  <p class="text-lg md:text-xl font-light italic pt-6">
+    ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure, efficiency, and a stronger collaborative culture across all stakeholders.
   </p>
-
-  <div class="space-y-0">
-    <h3 class="text-xl md:text-2xl font-bold">Vision</h3>
-    <p class="text-lg md:text-xl font-light leading-relaxed">We define a strong guiding idea that sets the tone for the entire project, ensuring clarity, consistency, and purposeful design decisions at every stage</p>
-  </div>
-
-  <div class="space-y-0">
-    <h3 class="text-xl md:text-2xl font-bold">Experience</h3>
-    <p class="text-lg md:text-xl font-light leading-relaxed">We craft spaces that feel alive shaped through light, materials, proportion, movement, and atmosphere to enhance how users inhabit and perceive their environment</p>
-  </div>
-
-  <div class="space-y-0">
-    <h3 class="text-xl md:text-2xl font-bold">Close Client Collaboration</h3>
-    <p class="text-lg md:text-xl font-light leading-relaxed">We listen carefully, translate needs into precise solutions, and maintain ongoing dialogue throughout the process so the final result truly reflects the client’s goals</p>
-  </div>
-
-  <div class="space-y-0">
-    <h3 class="text-xl md:text-2xl font-bold">Sustainable Design</h3>
-    <p class="text-lg md:text-xl font-light leading-relaxed">We integrate passive strategies, efficient energy use, responsible materials, and long‑term performance criteria from the earliest design steps to create resilient, future‑proof architecture</p>
-  </div>
-
-  <div class="space-y-0">
-    <h3 class="text-xl md:text-2xl font-bold">How We Work</h3>
-    <p class="text-lg md:text-xl font-light leading-relaxed">Our workflow moves through concept development, design refinement, technical coordination, permit documentation, construction detailing, and site support, ensuring quality, feasibility, and full alignment with the original design intent</p>
-  </div>
 </div>`;
 
-export const designFocusAreas = `We craft functional, visually compelling environments that reflect your vision.
+export const designPhilosophy = `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">At DB+ Design & Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process. Every project is developed with coherence, functionality, and quality from concept to completion.</p>
 
-<span class="text-xl font-bold">Focus areas:</span>
-• <span class="text-xl font-bold">Lighting</span> – Interior and exterior strategies to enhance atmosphere and usability.
-• <span class="text-xl font-bold">Materials</span> – Selected for durability, aesthetics, and sustainability.
-• <span class="text-xl font-bold">Client focused Solutions</span> – Spaces designed to meet your needs while optimising comfort and flow.`;
+  <p class="text-lg md:text-xl font-light pt-6">We listen carefully, translate real needs into precise design solutions, and maintain continuous dialogue to ensure that the final outcome reflects both the client’s goals and the project’s technical and urban context.</p>
 
-export const architectureDescription = `<span class="text-xl md:text-2xl font-bold">DB+</span> is a full-service architecture and design studio, delivering <strong>projects from initial concept to full realisation</strong> using BIM technology. We combine <strong>innovation, functionality, and sustainability</strong> to create buildings that inspire and endure.
+  <p class="text-lg md:text-xl font-light pt-6">Our workflow covers concept development, design refinement, technical coordination, permit documentation, construction detailing, and on‑site support ensuring feasibility and full alignment with the original design intent.</p>
+</div>`;
 
-<span class="text-xl font-bold">What we offer:</span>
-• <span class="text-xl font-bold">Extensions & Renovations</span> – Improve comfort, flow, and aesthetics with partial or full refurbishments.
-• <span class="text-xl font-bold">New Build Projects</span> – Single-family homes, multi-family developments, and residential blocks.
-• <span class="text-xl font-bold">All Building Types</span> – Tailored solutions for any building, ensuring compliance, performance, and long-term quality.`;
+export const architectureDescription = `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.</p>
+
+  <p class="text-xl font-bold pt-6">What we offer</p>
+  
+  <div class="pt-6">
+    <div class="pb-6">
+      <p class="text-lg font-bold">• Extensions & Renovations</p>
+      <p class="text-base font-light">Enhance comfort, improve spatial flow, and elevate aesthetics through partial or full refurbishments.</p>
+    </div>
+
+    <div class="pb-6">
+      <p class="text-lg font-bold">• New Build Projects</p>
+      <p class="text-base font-light">From single‑family homes to multi‑unit developments, we design efficient, contemporary, and future‑ready residential buildings.</p>
+    </div>
+
+    <div>
+      <p class="text-lg font-bold">• All Building Types</p>
+      <p class="text-base font-light">We provide tailored architectural solutions for any building, ensuring full compliance, optimal performance, and long‑term durability.</p>
+    </div>
+  </div>
+</div>`;
 
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
 
@@ -162,10 +182,10 @@ export const CATEGORIES: CategoryGroup[] = [
     projects: [
       {
         id: 'd1',
-        title: 'Kinetic Workspace',
+        title: '',
         location: '',
         year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768851322/House_Extension_i8awqi.png', 
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768940290/Irsham_dumpx3.png', 
         category: StudioSection.DESIGN
       },
       {
@@ -173,28 +193,12 @@ export const CATEGORIES: CategoryGroup[] = [
         title: 'Modern Architectural Vision', 
         location: '',
         year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png', 
-        category: StudioSection.DESIGN
-      },
-      {
-        id: 'd3',
-        title: 'Irsham',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768940290/Irsham_dumpx3.png',
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246957/Edit_the_previous_im_f8flks.png', 
         category: StudioSection.DESIGN
       },
       {
         id: 'd4',
-        title: 'Design Study I',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768935843/Police_Station_3_rp9gk4.png',
-        category: StudioSection.DESIGN
-      },
-      {
-        id: 'd5',
-        title: 'Design Study II',
+        title: '',
         location: '',
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769696194/Police_Station_2_p4fw4q.png',
@@ -205,14 +209,19 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'urban',
     name: StudioSection.URBANISM,
-    description: `We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs
+    description: `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
 
-<span class="text-xl font-bold">Our approach:</span>
-• <span class="text-xl font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies
-• <span class="text-xl font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments
-• <span class="text-xl font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing
-• <span class="text-xl font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations`,
-    imageUrl: undefined, // Removed the main image for the category
+  <p class="text-xl font-bold pt-6">Our approach:</p>
+
+  <ul class="pt-6 space-y-3 text-base md:text-lg font-light">
+    <li>• <span class="font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
+    <li>• <span class="font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments</li>
+    <li>• <span class="font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing</li>
+    <li>• <span class="font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations</li>
+  </ul>
+</div>`,
+    imageUrl: undefined, 
     projects: [
       {
         id: 'u3', 
@@ -223,9 +232,9 @@ export const CATEGORIES: CategoryGroup[] = [
         category: StudioSection.URBANISM,
         description: 'Planificación y desarrollo urbano integral con múltiples vistas y enfoques, incluyendo pavimentos y diseño paisajístico.',
         additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770443971/Urbanisation02_z4mn6s.png', // Moved from u5
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770442038/Paviment_1_p5gdl4.png', // Moved from u4
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770451143/Ducts_z8oncn.png' // New image added here
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770443971/Urbanisation02_z4mn6s.png', 
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770442038/Paviment_1_p5gdl4.png', 
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770451143/Ducts_z8oncn.png' 
         ]
       },
       {
@@ -237,11 +246,11 @@ export const CATEGORIES: CategoryGroup[] = [
         category: StudioSection.URBANISM,
         description: 'Diseño e integración paisajística de una subestación transformadora, minimizando su impacto visual en el entorno urbano y rural, complementado con la creación de un parque urbano con elementos de diseño sostenible y espacios multifuncionales para la comunidad.',
         additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770407387/Gemini_Generated_Image_jo8e2fjo8e2fjo8e_1_y4hvfn.png' // This image remains here
+          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770407387/Gemini_Generated_Image_jo8e2fjo8e2fjo8e_1_y4hvfn.png' 
         ]
       },
       {
-        id: 'u8', // New project ID
+        id: 'u8', 
         title: 'Urbanisation Project C & Sanitation Profiles',
         location: '',
         year: '',
@@ -258,13 +267,18 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'struct',
     name: StudioSection.STRUCTURE,
-    description: `Delivering building systems through the calculation and design of all required installations
+    description: `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
 
-<span class="text-xl font-bold">Our approach:</span>
-• <span class="text-xl font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.
-• <span class="text-xl font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.
-• <span class="text-xl font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.
-• <span class="text-xl font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.`,
+  <p class="text-xl font-bold pt-6">Our approach:</p>
+
+  <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
+    <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
+    <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
+    <li>• <span class="font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
+    <li>• <span class="font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
+  </ul>
+</div>`,
     projects: [
       {
         id: 's4', 
@@ -318,7 +332,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770141835/thermal_load_dnffmx.png',
         category: StudioSection.STRUCTURE,
-        description: 'Technical analysis and calculation of thermal energy transfer within building environments. We provide detailed simulation of heat gains and losses to determine the precise capacity required for heating and cooling systems.'
+        description: 'Technical analysis and calculation of thermal energy transfer within building environments. We provide detailed simulation of heat gains and losses to determine the capacity required for heating and cooling systems.'
       },
       {
         id: 's11',
@@ -352,7 +366,10 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'support', 
     name: StudioSection.PROJECT_SUPPORT,
-    description: "Through companies such as Sir Robert McAlpine (Logistics & Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio, specifying mobile and fixed cranes for material delivery, siting goods and personnel hoists, and preparing all necessary project documentation for windows and curtain wall systems",
+    description: `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">Through companies such as Sir Robert McAlpine (Logistics & Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio.</p>
+  <p class="text-lg md:text-xl font-light pt-6">We specify mobile and fixed cranes for material delivery, site goods and personnel hoists, and prepare all necessary project documentation for windows and curtain wall systems.</p>
+</div>`,
     projects: [
       {
         id: 'ps1',
@@ -481,7 +498,11 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
-    description: 'Meet the vision behind DB+ Studio, where architectural clarity meets technical excellence. Founder and Lead Architect David Bonilla combines design expertise with advanced technical training to guide DB+ from concept to execution. He is qualified as an Architect at Master’s level (EQF 7 / RQF 7), is registered with ARB and RIBA, and holds a UK Master’s in BIM Management from Middlesex University. His training also qualifies him to develop all required MEP systems for any type of building, produce structural calculations used for structural pre‑design, and provide specialised input in urban planning. This multidisciplinary foundation enables him to deliver clear, efficient and well‑coordinated solutions that align design intent with technical performance and client goals',
+    description: `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio, where architectural clarity meets technical excellence.</p>
+  <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla combines design expertise with advanced technical training to guide DB+ from concept to execution. He is qualified as an Architect at Master’s level (EQF 7 / RQF 7), is registered with ARB and RIBA, and holds a UK Master’s in BIM Management from Middlesex University.</p>
+  <p class="text-lg md:text-xl font-light pt-6">His training also qualifies him to develop all required MEP systems for any type of building, produce structural calculations used for structural pre‑design, and provide specialised input in urban planning. This multidisciplinary foundation enables him to deliver clear, efficient and well‑coordinated solutions that align design intent with technical performance and client goals.</p>
+</div>`,
     imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
     projects: []
   },

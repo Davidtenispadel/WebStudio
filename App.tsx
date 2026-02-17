@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
+import VideoBackground from './components/VideoBackground';
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 import { MessageSquare, Send } from 'lucide-react';
@@ -15,6 +17,10 @@ const App: React.FC = () => {
   const [chatMessage, setChatMessage] = useState('');
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  
+  const [videoUrl, setVideoUrl] = useState<string | null>("https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4");
+
+  const isHome = activeCategory.name === StudioSection.HOME;
 
   useEffect(() => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
@@ -22,12 +28,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (isTouchDevice) {
-      const cursor = document.getElementById('custom-cursor');
-      if (cursor) cursor.style.display = 'none';
-      document.body.style.cursor = 'auto';
-      return; 
-    }
+    if (isTouchDevice) return;
 
     const cursor = document.getElementById('custom-cursor');
     if (!cursor) return;
@@ -36,7 +37,7 @@ const App: React.FC = () => {
       cursor.style.left = `${e.clientX}px`;
       cursor.style.top = `${e.clientY}px`;
       const target = e.target as HTMLElement;
-      const isInteractive = target.closest('button') || target.closest('a') || target.closest('input') || target.closest('textarea') || target.closest('select') || target.closest('.cursor-pointer') || target.hasAttribute('onClick') || window.getComputedStyle(target).cursor === 'pointer';
+      const isInteractive = target.closest('button') || target.closest('a') || target.closest('input') || target.closest('textarea') || target.closest('select') || target.closest('.cursor-pointer');
       if (isInteractive) {
         cursor.classList.add('active');
       } else {
@@ -44,7 +45,7 @@ const App: React.FC = () => {
       }
     };
 
-    window.addEventListener('mousemove', moveCursor);
+    window.addEventListener('mousemove', moveCursor, { passive: true });
     return () => {
       window.removeEventListener('mousemove', moveCursor);
     };
@@ -80,7 +81,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen bg-white text-black overflow-hidden">
+    <div className={`min-h-screen w-screen transition-colors duration-700 ${isHome ? 'bg-transparent' : 'bg-white'} text-black overflow-hidden`}>
+      {/* Hidden H1 for SEO Visibility in Corby UK 20-mile radius */}
+      <h1 className="sr-only">DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17</h1>
+      
+      {isHome && <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />}
+      
       <Header onNavClick={handleNavClick} onGoHomeClick={handleGoHome} />
 
       <SectionView 
@@ -99,12 +105,12 @@ const App: React.FC = () => {
         {!isChatOpen ? (
           <button 
             onClick={() => setIsChatOpen(true)}
-            className="bg-black text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all group flex items-center gap-2"
+            className="bg-black text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all flex items-center gap-2"
           >
             <MessageSquare className="w-6 h-6" />
           </button>
         ) : (
-          <div className="bg-white w-80 md:w-96 shadow-2xl rounded-2xl flex flex-col border border-gray-100 overflow-hidden" style={{ height: '500px' }}>
+          <div className="bg-white/90 backdrop-blur-xl w-80 md:w-96 shadow-2xl rounded-2xl flex flex-col border border-white/20 overflow-hidden" style={{ height: '500px' }}>
             <div className="bg-black p-4 text-white flex justify-between items-center">
               <span className="text-xs font-bold tracking-widest uppercase">DB+ Assistant</span>
               <button onClick={() => setIsChatOpen(false)} className="text-gray-400 hover:text-white">&times;</button>
@@ -131,7 +137,7 @@ const App: React.FC = () => {
             </div>
             <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white">
               <div className="relative">
-                <input type="text" value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} placeholder="Inquiry..." className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-black" />
+                <input type="text" value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} placeholder="Enquire about services..." className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-black" />
                 <button type="submit" className="absolute right-2 top-2 p-1 text-black">
                   <Send className="w-3 h-3" />
                 </button>

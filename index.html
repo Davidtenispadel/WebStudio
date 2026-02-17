@@ -1,22 +1,52 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background: transparent;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DB+ | Architectural Studio</title>
+    <title>DB+ | Expert Architecture Services Corby & 20-Mile Radius</title>
+    <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton." />
+    <meta name="keywords" content="Any architecture service Corby, Architect Kettering, BIM Design UK, Planning Permission Corby, House Extensions Market Harborough, Stamford Architect, New Build Design Oundle, Structural pre-design Weldon, MEP Services Gretton, Weldon, Gretton, Stanion, Brigstock, Geddington, Cottingham, Middleton, Wilbarston, Harringworth, Bulwick, King's Cliffe, Woodnewton, Nassington, Tansor, Glapthorn, Benefield, Barnwell, Islip, Sudborough, Twywell, Cranford, Rushton, Pipewell, Arthingworth, Harrington, Loddington, Pytchley, Isham, Orlingbury, Finedon, Corby Architect, Kettering Architect, Market Harborough Architect, Stamford Architect, Wellingborough Architect, Oundle Architect, Thrapston Architect, Uppingham Architect, Burton Latimer Architect, Desborough Architect, Rothwell Architect, Higham Ferrers Architect, Raunds Architect, Irthlingborough Architect" />
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- JSON-LD for Local Business SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ArchitecturalService",
+      "name": "DB+ Design & Management",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "108 Kestrel Road",
+        "addressLocality": "Corby",
+        "addressRegion": "Northamptonshire",
+        "postalCode": "NN18 8",
+        "addressCountry": "GB"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 52.4912,
+        "longitude": -0.6975
+      },
+      "url": "https://dbsdesigner.com",
+      "telephone": "+4407955018937",
+      "areaServed": [
+        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle", "Thrapston", "Uppingham", "Stamford", "Rushden", "Desborough", "Rothwell", "Weldon", "Gretton", "Stanion", "Brigstock", "Geddington", "Cottingham", "Middleton", "Wilbarston", "Harringworth", "Bulwick", "Deene", "Blatherwycke", "King's Cliffe", "Woodnewton", "Nassington", "Yarwell", "Apethorpe", "Fotheringhay", "Southwick", "Cotterstock", "Tansor", "Glapthorn", "Benefield", "Barnwell", "Hemington", "Luddington", "Lutton", "Polebrook", "Armston", "Wigsthorpe", "Thorpe Waterville", "Achurch", "Titchmarsh", "Islip", "Lowick", "Sudborough", "Slipton", "Twywell", "Cranford", "Grafton Underwood", "Weekly", "Little Oakley", "Newton", "Great Oakley", "Rushton", "Pipewell", "Stoke Albany", "Ashley", "Weston by Welland", "Sutton Bassett", "Dingley", "Brampton Ash", "Braybrooke", "Arthingworth", "Great Oxendon", "Clipston", "Kelmarsh", "Harrington", "Orton", "Loddington", "Thorpe Malsor", "Cransley", "Broughton", "Pytchley", "Isham", "Orlingbury", "Little Harrowden", "Great Harrowden", "Finedon"
+      ],
+      "description": "DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. Serving Corby and a 20-mile radius with planning, design, and structural services."
+    }
+    </script>
+
     <style>
-      body {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent !important;
         font-family: Arial, Helvetica, sans-serif;
-        background-color: #ffffff;
         color: #000000;
-        overflow: hidden;
-        cursor: none; /* Hide default cursor for non-touch devices */
+        overflow-x: hidden;
+        cursor: none;
       }
       
-      /* Ensure interactive elements also hide the cursor for non-touch devices */
       a, button, input, select, textarea, [role="button"], .cursor-pointer {
         cursor: none !important;
       }
@@ -25,73 +55,67 @@
         font-family: Arial, Helvetica, sans-serif;
         font-weight: 900;
         letter-spacing: -0.05em;
+        will-change: transform, opacity;
       }
 
       @keyframes fade-in-up {
-        from { opacity: 0; transform: translateY(20px); }
+        from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
 
       .animate-fade-in {
-        animation: fade-in-up 1s ease-out forwards;
+        animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
       }
 
       .transition-all-slow {
-        transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
       }
 
-      /* Custom scrollbar for project view */
       .custom-scroll::-webkit-scrollbar {
-        width: 4px;
+        width: 3px;
       }
       .custom-scroll::-webkit-scrollbar-track {
         background: transparent;
       }
       .custom-scroll::-webkit-scrollbar-thumb {
-        background: #000;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
       }
 
-      /* Custom Cursor Styles */
       #custom-cursor {
         position: fixed;
         top: 0;
         left: 0;
-        width: 12px;
-        height: 12px;
-        background-color: #333333; /* Changed from black to dark grey */
+        width: 10px;
+        height: 10px;
+        background-color: #333333;
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
-        transition: transform 0.15s ease-out, background-color 0.3s ease;
+        transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.3s ease;
         transform: translate(-50%, -50%);
+        will-change: transform;
       }
 
       #custom-cursor.active {
         background-color: #ff0000;
-        transform: translate(-50%, -50%) scale(2.5);
+        transform: translate(-50%, -50%) scale(3);
       }
 
-      /* Styles for ProjectCard images to avoid complex Tailwind in JSX */
       .project-card-image-effects {
         filter: grayscale(100%);
-        transition: all 0.5s ease-in-out; /* General transition for hover effects */
+        transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1), filter 0.8s ease;
+        will-change: transform, filter;
       }
       .group:hover .project-card-image-effects {
-        filter: grayscale(0%) brightness(300%) saturate(80%);
-        transform: scale(1.25);
+        filter: grayscale(0%) brightness(1.1);
+        transform: scale(1.15);
       }
 
-      /* Hide custom cursor and restore default cursor for touch devices */
       @media (hover: none) and (pointer: coarse) {
-        body {
-          cursor: auto; /* Restore default cursor */
-        }
-        a, button, input, select, textarea, [role="button"], .cursor-pointer {
-          cursor: pointer !important; /* Restore default pointer for interactive elements */
-        }
-        #custom-cursor {
-          display: none; /* Hide the custom cursor */
-        }
+        body { cursor: auto; background-color: #ffffff !important; }
+        a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
+        #custom-cursor { display: none; }
       }
     </style>
   <script type="importmap">

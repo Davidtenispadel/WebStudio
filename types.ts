@@ -1,3 +1,4 @@
+
 export interface Project {
   id: string;
   title: string;
@@ -21,10 +22,10 @@ export interface CategoryGroup {
 export enum StudioSection {
   HOME = 'Home', 
   ARCHITECTURE = 'Architecture',
-  DESIGN = 'Design',
-  URBANISM = 'Masterplanning + Urban Design',
+  DESIGN = 'Design & Management',
+  URBANISM = 'Masterplanning + Urban',
   STRUCTURE = 'MEP & Structure',
   PROJECT_SUPPORT = 'Project Support',
-  BEHIND_DB = 'Behind DB+', // New section
+  BEHIND_DB = 'Behind DB+', 
   ENQUIRY = 'Enquiry'
 }
