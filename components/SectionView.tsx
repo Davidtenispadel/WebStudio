@@ -171,7 +171,7 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
         <div className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0" style={{ transitionTimingFunction: 'cubic-bezier(0.77, 0, 0.175, 1)', transitionDuration: '1000ms', transform: stage === 'gallery' ? `scale(${window.innerWidth >= 768 ? 0.5 : 0.4})` : 'scale(1)', transformOrigin: 'left' }}>
           <div className="flex items-center gap-3 shrink-0">
             <h2 className={`text-9xl font-light tracking-tighter text-black transition-all ${showDB ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`} style={{ fontSize: window.innerWidth >= 768 ? '12rem' : '9rem', transitionTimingFunction: 'cubic-bezier(0.23, 1, 0.32, 1)', transitionDuration: '1000ms' }}>DB</h2>
-            <span className={`text-6xl md:text-8xl font-thin transition-all ${showPlus ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-45'} ${isHomeSection ? 'text-red-600' : 'text-gray-300'}`} style={{ transitionDuration: '700ms' }}>+</span>
+            <span className={`text-6xl md:text-8xl font-thin transition-all ${showPlus ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-0 rotate-45'} text-gray-400`} style={{ transitionDuration: '700ms' }}>+</span>
           </div>
           <div className="transition-all ease-out overflow-hidden flex-1" style={{ transitionDuration: '700ms', transform: showName ? 'translateX(0)' : 'translateX(-48px)', opacity: showName ? 1 : 0 }}>
             {isUrbanSection ? (
