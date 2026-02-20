@@ -92,9 +92,9 @@
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
-        transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.3s ease;
+        transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
         transform: translate(-50%, -50%);
-        will-change: transform;
+        will-change: transform, top, left;
       }
 
       #custom-cursor.active {
@@ -133,5 +133,46 @@
   <body>
     <div id="root"></div>
     <div id="custom-cursor"></div>
+    <script>
+      const cursor = document.getElementById("custom-cursor");
+
+      if (cursor) {
+        window.addEventListener("mousemove", (e) => {
+          cursor.style.top = e.clientY + "px";
+          cursor.style.left = e.clientX + "px";
+          
+          // Hover logic
+          const target = e.target;
+          const isInteractive = target.closest('button') || 
+                               target.closest('a') || 
+                               target.closest('input') || 
+                               target.closest('textarea') || 
+                               target.closest('select') || 
+                               target.closest('.cursor-pointer');
+          
+          if (isInteractive) {
+            cursor.classList.add('active');
+          } else {
+            cursor.classList.remove('active');
+          }
+        });
+
+        window.addEventListener("mousedown", () => {
+          cursor.classList.add("active");
+        });
+
+        window.addEventListener("mouseup", () => {
+          cursor.classList.remove("active");
+        });
+
+        window.addEventListener("mouseleave", () => {
+          cursor.style.opacity = "0";
+        });
+
+        window.addEventListener("mouseenter", () => {
+          cursor.style.opacity = "1";
+        });
+      }
+    </script>
   </body>
 </html>

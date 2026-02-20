@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { CategoryGroup, Project, StudioSection } from '../types';
 import ProjectCard from './ProjectCard';
