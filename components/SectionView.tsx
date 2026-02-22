@@ -192,7 +192,7 @@ const SectionView: React.FC<SectionViewProps> = ({ category, onProjectClick, isA
         {displayedCategory.description && !isHomeSection && !isDesignSection && !isEnquiry && !isProjectSupportSection && !isStructureSection && !isBehindDBSection && (
           <div className={`transition-all ease-out overflow-hidden flex-1 ${stage === 'gallery' ? 'ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl ' : 'pointer-events-none w-0 h-0'}`} style={{ transitionDuration: '1000ms', opacity: (stage === 'gallery' && showDesc) ? 1 : 0, transform: (stage === 'gallery' && showDesc) ? 'translateX(0)' : 'translateX(-40px)' }}>
             {isArchitectureSection ? (
-              <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">Portfolio of selected projects</span>
+              null
             ) : isUrbanSection ? (
               <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">{urbanMasterplanningHeaderDescription}</span>
             ) : (
