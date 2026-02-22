@@ -118,22 +118,26 @@
         #custom-cursor { display: none; }
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="./index.css">
+  </head>
+
   <body>
     <div id="root"></div>
     <div id="custom-cursor"></div>
+
     <script>
       const cursor = document.getElementById("custom-cursor");
 
@@ -142,7 +146,6 @@
           cursor.style.top = e.clientY + "px";
           cursor.style.left = e.clientX + "px";
           
-          // Hover logic
           const target = e.target;
           const isInteractive = target.closest('button') || 
                                target.closest('a') || 
@@ -175,6 +178,9 @@
         });
       }
     </script>
-  <script type="module" src="/WebStudio.tsx"></script>
-</body>
+
+    <!-- ⭐ CORREGIDO: ruta relativa para que Netlify funcione -->
+    <script type="module" src="./WebStudio.tsx"></script>
+
+  </body>
 </html>
