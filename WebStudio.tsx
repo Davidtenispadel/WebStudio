@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Studio from './Studio';
+import './index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

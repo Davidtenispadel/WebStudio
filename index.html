@@ -3,19 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>DB+ | Expert Architecture Services Corby & 20-Mile Radius</title>
-
-    <!-- SEO -->
-    <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds." />
-    <meta name="keywords" content="Architecture Corby, Architect Kettering, BIM UK, Planning Permission Corby, Extensions Market Harborough, Stamford Architect, Oundle Architect" />
-
-    <!-- JSON-LD -->
+    <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton." />
+    
+    <!-- JSON-LD for Local Business SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "ArchitecturalService",
-      "name": "DB+ Architectural Practice",
+      "name": "DB+ Design & Management",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "108 Kestrel Road",
@@ -24,75 +20,147 @@
         "postalCode": "NN18 8",
         "addressCountry": "GB"
       },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 52.4912,
+        "longitude": -0.6975
+      },
       "url": "https://dbsdesigner.com",
-      "telephone": "+4407955018937"
+      "telephone": "+4407955018937",
+      "areaServed": [
+        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle", "Thrapston", "Uppingham", "Stamford", "Rushden", "Desborough", "Rothwell", "Weldon", "Gretton", "Stanion", "Brigstock", "Geddington", "Cottingham", "Middleton", "Wilbarston", "Harringworth", "Bulwick", "Deene", "Blatherwycke", "King's Cliffe", "Woodnewton", "Nassington", "Yarwell", "Apethorpe", "Fotheringhay", "Southwick", "Cotterstock", "Tansor", "Glapthorn", "Benefield", "Barnwell", "Hemington", "Luddington", "Lutton", "Polebrook", "Armston", "Wigsthorpe", "Thorpe Waterville", "Achurch", "Titchmarsh", "Islip", "Lowick", "Sudborough", "Slipton", "Twywell", "Cranford", "Grafton Underwood", "Weekly", "Little Oakley", "Newton", "Great Oakley", "Rushton", "Pipewell", "Stoke Albany", "Ashley", "Weston by Welland", "Sutton Bassett", "Dingley", "Brampton Ash", "Braybrooke", "Arthingworth", "Great Oxendon", "Clipston", "Kelmarsh", "Harrington", "Orton", "Loddington", "Thorpe Malsor", "Cransley", "Broughton", "Pytchley", "Isham", "Orlingbury", "Little Harrowden", "Great Harrowden", "Finedon"
+      ],
+      "description": "DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. Serving Corby and a 20-mile radius with planning, design, and structural services."
     }
     </script>
 
-    <!-- Tailwind (solo si NO lo usas vía Vite) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Cursor personalizado -->
     <style>
       html, body {
         margin: 0;
         padding: 0;
-        background: #ffffff;
+        background: transparent;
         font-family: Arial, Helvetica, sans-serif;
+        color: #000000;
         overflow-x: hidden;
         cursor: none;
       }
-      a, button, input, textarea, select, [role="button"], .cursor-pointer {
+      
+      a, button, input, select, textarea, [role="button"], .cursor-pointer {
         cursor: none !important;
       }
+
+      .cinematic-text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        will-change: transform, opacity;
+      }
+
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-fade-in {
+        animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      }
+
+      .transition-all-slow {
+        transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+      }
+
+      .custom-scroll::-webkit-scrollbar {
+        width: 3px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+      }
+
       #custom-cursor {
         position: fixed;
         top: 0;
         left: 0;
         width: 10px;
         height: 10px;
-        background-color: #333;
+        background-color: #333333;
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
+        transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
         transform: translate(-50%, -50%);
-        transition: transform 0.1s ease-out, opacity 0.3s ease;
+        will-change: transform, top, left;
       }
+
       #custom-cursor.active {
-        background-color: red;
+        background-color: #ff0000;
         transform: translate(-50%, -50%) scale(3);
       }
+
+      .project-card-image-effects {
+        filter: grayscale(100%);
+        transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1), filter 0.8s ease;
+        will-change: transform, filter;
+      }
+      .group:hover .project-card-image-effects {
+        filter: grayscale(0%) brightness(1.1);
+        transform: scale(1.15);
+      }
+
       @media (hover: none) and (pointer: coarse) {
-        body { cursor: auto; }
+        body { cursor: auto; background-color: #ffffff !important; }
+        a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
         #custom-cursor { display: none; }
       }
     </style>
-  </head>
-
+</head>
   <body>
     <div id="root"></div>
     <div id="custom-cursor"></div>
-
     <script>
       const cursor = document.getElementById("custom-cursor");
+
       if (cursor) {
         window.addEventListener("mousemove", (e) => {
           cursor.style.top = e.clientY + "px";
           cursor.style.left = e.clientX + "px";
+          
+          // Hover logic
           const target = e.target;
-          const isInteractive =
-            target.closest("button") ||
-            target.closest("a") ||
-            target.closest("input") ||
-            target.closest("textarea") ||
-            target.closest("select") ||
-            target.closest(".cursor-pointer");
-          cursor.classList.toggle("active", !!isInteractive);
+          const isInteractive = target.closest('button') || 
+                               target.closest('a') || 
+                               target.closest('input') || 
+                               target.closest('textarea') || 
+                               target.closest('select') || 
+                               target.closest('.cursor-pointer');
+          
+          if (isInteractive) {
+            cursor.classList.add('active');
+          } else {
+            cursor.classList.remove('active');
+          }
+        });
+
+        window.addEventListener("mousedown", () => {
+          cursor.classList.add("active");
+        });
+
+        window.addEventListener("mouseup", () => {
+          cursor.classList.remove("active");
+        });
+
+        window.addEventListener("mouseleave", () => {
+          cursor.style.opacity = "0";
+        });
+
+        window.addEventListener("mouseenter", () => {
+          cursor.style.opacity = "1";
         });
       }
     </script>
-
-    <!-- ESTE ES EL ÚNICO SCRIPT QUE DEBE EXISTIR EN VITE -->
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <script type="module" src="./WebStudio.tsx"></script>
+</body>
 </html>

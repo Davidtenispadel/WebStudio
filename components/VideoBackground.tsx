@@ -10,7 +10,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({ videoUrl }) => {
   const targetVideo = "https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4";
 
   return (
-    <div className="fixed inset-0 z-[-20] overflow-hidden pointer-events-none bg-black">
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black">
       <video 
         autoPlay 
         muted 
