@@ -9,7 +9,7 @@ import { Project, CategoryGroup, StudioSection } from './types';
 import { MessageSquare, Send } from 'lucide-react';
 import { askStudioAssistant } from './services/geminiService';
 
-const Studio: React.FC = () => {
+const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
@@ -152,4 +152,4 @@ const Studio: React.FC = () => {
   );
 };
 
-export default Studio;
+export default App;
