@@ -1,8 +1,7 @@
-/**
- * DB+ Email Service
- * Handles project enquiries with attachments.
- * Configured for: db@dbsdesigner.com (one.com)
- */
+import emailjs from '@emailjs/browser';
+
+// Inicializar EmailJS (solo se necesita una vez)
+emailjs.init('TU_PUBLIC_KEY'); // Reemplaza con tu Public Key
 
 export interface EnquiryData {
   name: string;
@@ -12,35 +11,28 @@ export interface EnquiryData {
 }
 
 export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> => {
-  console.log("Initiating Enquiry Submission via One.com SMTP...");
-  console.log("Target Studio Account: db@dbsdesigner.com");
-  
   try {
-    /**
-     * NOTE: Browser security prevents raw TCP/SMTP connections.
-     * This payload is structured for a backend relay using the credentials provided:
-     * Host (Generic): send.one.com
-     * Host (If Hosted at One.com): mailout.one.com
-     * Port: 587 STARTTLS
-     * Auth: db@dbsdesigner.com / 28726731Af*
-     */
-    const smtpConfig = {
-      host: "send.one.com", // Or "mailout.one.com" for internal hosting
-      port: 587,
-      user: "db@dbsdesigner.com",
-      pass: "28726731Af*",
-      secure: false, // STARTTLS uses false here + 587
+    // Preparar los parámetros para la plantilla
+    const templateParams = {
+      name: data.name,
+      email: data.email,
+      message: data.message,
+      attachments: data.files.length > 0 
+        ? `${data.files.length} archivo(s) adjunto(s) (no visibles por EmailJS gratis)`
+        : 'Ninguno'
     };
 
-    console.debug("SMTP Configuration Active:", smtpConfig.host);
+    // Enviar el email usando EmailJS
+    const response = await emailjs.send(
+      'TU_SERVICE_ID',      // Reemplaza con tu Service ID
+      'TU_TEMPLATE_ID',     // Reemplaza con tu Template ID
+      templateParams
+    );
 
-    // Simulate the secure transmission of the base64 files and enquiry data
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    console.log(`Success: Package transmitted to db@dbsdesigner.com with ${data.files.length} attachments.`);
+    console.log('Email enviado con éxito:', response.status, response.text);
     return true;
   } catch (error) {
-    console.error("Submission failed at protocol level:", error);
+    console.error('Error al enviar email:', error);
     return false;
   }
 };
