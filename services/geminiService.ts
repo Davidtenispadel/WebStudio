@@ -4,11 +4,14 @@ let aiInstance: GoogleGenAI | null = null;
 
 const getAI = () => {
   if (!aiInstance) {
+    // En Vite, las variables de entorno deben tener prefijo VITE_ y se accede con import.meta.env
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
     if (!apiKey) {
       console.warn("Gemini API Key not found. AI Assistant will be unavailable.");
       return null;
     }
+    
     aiInstance = new GoogleGenAI({ apiKey });
   }
   return aiInstance;
@@ -20,10 +23,10 @@ export const askStudioAssistant = async (question: string) => {
     if (!ai) return "Our studio is currently focused on redefining the boundaries of spatial experience.";
 
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash', // Ajusta según disponibilidad
+      model: 'gemini-1.5-flash', // Modelo válido actualmente
       contents: question,
       config: {
-        systemInstruction: "You are the AI assistant for DB+, a world-class architectural and design studio. You speak with elegance, brevity, and deep architectural knowledge.",
+        systemInstruction: "You are the AI assistant for DB+, a world-class architectural and design studio. You speak with elegance, brevity, and deep architectural knowledge. Focus on 'DB+ Architecture', 'DB+ Design', 'DB+ Urbanism', and 'DB+ Interiors'.",
       }
     });
     return response.text;
