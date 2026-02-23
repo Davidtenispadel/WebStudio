@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background: transparent;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DB+ | Expert Architecture Services Corby & 20-Mile Radius</title>
     <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton." />
-
+    <meta name="keywords" content="Any architecture service Corby, Architect Kettering, BIM Design UK, Planning Permission Corby, House Extensions Market Harborough, Stamford Architect, New Build Design Oundle, Structural pre-design Weldon, MEP Services Gretton, Weldon, Gretton, Stanion, Brigstock, Geddington, Cottingham, Middleton, Wilbarston, Harringworth, Bulwick, King's Cliffe, Woodnewton, Nassington, Tansor, Glapthorn, Benefield, Barnwell, Islip, Sudborough, Twywell, Cranford, Rushton, Pipewell, Arthingworth, Harrington, Loddington, Pytchley, Isham, Orlingbury, Finedon, Corby Architect, Kettering Architect, Market Harborough Architect, Stamford Architect, Wellingborough Architect, Oundle Architect, Thrapston Architect, Uppingham Architect, Burton Latimer Architect, Desborough Architect, Rothwell Architect, Higham Ferrers Architect, Raunds Architect, Irthlingborough Architect" />
+    
+    <!-- Tailwind CDN (opcional, solo para desarrollo; en producción deberías usar el build de Tailwind) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- JSON-LD for Local Business SEO -->
     <script type="application/ld+json">
     {
@@ -28,31 +32,118 @@
       "url": "https://dbsdesigner.com",
       "telephone": "+4407955018937",
       "areaServed": [
-        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle",
-        "Thrapston", "Uppingham", "Stamford", "Rushden", "Desborough",
-        "Rothwell", "Weldon", "Gretton", "Stanion", "Brigstock", "Geddington",
-        "Cottingham", "Middleton", "Wilbarston", "Harringworth", "Bulwick",
-        "Deene", "Blatherwycke", "King's Cliffe", "Woodnewton", "Nassington",
-        "Yarwell", "Apethorpe", "Fotheringhay", "Southwick", "Cotterstock",
-        "Tansor", "Glapthorn", "Benefield", "Barnwell", "Hemington",
-        "Luddington", "Lutton", "Polebrook", "Armston", "Wigsthorpe",
-        "Thorpe Waterville", "Achurch", "Titchmarsh", "Islip", "Lowick",
-        "Sudborough", "Slipton", "Twywell", "Cranford", "Grafton Underwood",
-        "Weekly", "Little Oakley", "Newton", "Great Oakley", "Rushton",
-        "Pipewell", "Stoke Albany", "Ashley", "Weston by Welland",
-        "Sutton Bassett", "Dingley", "Brampton Ash", "Braybrooke",
-        "Arthingworth", "Great Oxendon", "Clipston", "Kelmarsh", "Harrington",
-        "Orton", "Loddington", "Thorpe Malsor", "Cransley", "Broughton",
-        "Pytchley", "Isham", "Orlingbury", "Little Harrowden",
-        "Great Harrowden", "Finedon"
+        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle", "Thrapston", "Uppingham", "Stamford", "Rushden", "Desborough", "Rothwell", "Weldon", "Gretton", "Stanion", "Brigstock", "Geddington", "Cottingham", "Middleton", "Wilbarston", "Harringworth", "Bulwick", "Deene", "Blatherwycke", "King's Cliffe", "Woodnewton", "Nassington", "Yarwell", "Apethorpe", "Fotheringhay", "Southwick", "Cotterstock", "Tansor", "Glapthorn", "Benefield", "Barnwell", "Hemington", "Luddington", "Lutton", "Polebrook", "Armston", "Wigsthorpe", "Thorpe Waterville", "Achurch", "Titchmarsh", "Islip", "Lowick", "Sudborough", "Slipton", "Twywell", "Cranford", "Grafton Underwood", "Weekly", "Little Oakley", "Newton", "Great Oakley", "Rushton", "Pipewell", "Stoke Albany", "Ashley", "Weston by Welland", "Sutton Bassett", "Dingley", "Brampton Ash", "Braybrooke", "Arthingworth", "Great Oxendon", "Clipston", "Kelmarsh", "Harrington", "Orton", "Loddington", "Thorpe Malsor", "Cransley", "Broughton", "Pytchley", "Isham", "Orlingbury", "Little Harrowden", "Great Harrowden", "Finedon"
       ],
       "description": "DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. Serving Corby and a 20-mile radius with planning, design, and structural services."
     }
+    </script>
+
+    <!-- Estilos personalizados (ya no se necesita link a index.css, Vite lo inyectará) -->
+    <style>
+      /* Algunos estilos críticos para evitar parpadeos */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent !important;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000000;
+        overflow-x: hidden;
+        cursor: none;
+      }
+      
+      a, button, input, select, textarea, [role="button"], .cursor-pointer {
+        cursor: none !important;
+      }
+
+      #custom-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        background-color: #333333;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
+        transform: translate(-50%, -50%);
+        will-change: transform, top, left;
+      }
+
+      #custom-cursor.active {
+        background-color: #ff0000;
+        transform: translate(-50%, -50%) scale(3);
+      }
+
+      @media (hover: none) and (pointer: coarse) {
+        body { cursor: auto; background-color: #ffffff !important; }
+        a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
+        #custom-cursor { display: none; }
+      }
+    </style>
+
+    <!-- Import map para las dependencias (si las usas) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+          "react/": "https://esm.sh/react@^19.2.3/",
+          "react": "https://esm.sh/react@^19.2.3",
+          "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+        }
+      }
     </script>
   </head>
 
   <body>
     <div id="root"></div>
+    <div id="custom-cursor"></div>
+
+    <!-- Script del cursor (puede ir aquí o en un archivo aparte) -->
+    <script>
+      const cursor = document.getElementById("custom-cursor");
+
+      if (cursor) {
+        window.addEventListener("mousemove", (e) => {
+          cursor.style.top = e.clientY + "px";
+          cursor.style.left = e.clientX + "px";
+          
+          // Hover logic
+          const target = e.target;
+          const isInteractive = target.closest('button') || 
+                               target.closest('a') || 
+                               target.closest('input') || 
+                               target.closest('textarea') || 
+                               target.closest('select') || 
+                               target.closest('.cursor-pointer');
+          
+          if (isInteractive) {
+            cursor.classList.add('active');
+          } else {
+            cursor.classList.remove('active');
+          }
+        });
+
+        window.addEventListener("mousedown", () => {
+          cursor.classList.add("active");
+        });
+
+        window.addEventListener("mouseup", () => {
+          cursor.classList.remove("active");
+        });
+
+        window.addEventListener("mouseleave", () => {
+          cursor.style.opacity = "0";
+        });
+
+        window.addEventListener("mouseenter", () => {
+          cursor.style.opacity = "1";
+        });
+      }
+    </script>
+
+    <!-- Punto de entrada de la aplicación (Vite lo transformará en el build) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
