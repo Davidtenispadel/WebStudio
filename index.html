@@ -7,7 +7,7 @@
     <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton." />
     <meta name="keywords" content="Any architecture service Corby, Architect Kettering, BIM Design UK, Planning Permission Corby, House Extensions Market Harborough, Stamford Architect, New Build Design Oundle, Structural pre-design Weldon, MEP Services Gretton, Weldon, Gretton, Stanion, Brigstock, Geddington, Cottingham, Middleton, Wilbarston, Harringworth, Bulwick, King's Cliffe, Woodnewton, Nassington, Tansor, Glapthorn, Benefield, Barnwell, Islip, Sudborough, Twywell, Cranford, Rushton, Pipewell, Arthingworth, Harrington, Loddington, Pytchley, Isham, Orlingbury, Finedon, Corby Architect, Kettering Architect, Market Harborough Architect, Stamford Architect, Wellingborough Architect, Oundle Architect, Thrapston Architect, Uppingham Architect, Burton Latimer Architect, Desborough Architect, Rothwell Architect, Higham Ferrers Architect, Raunds Architect, Irthlingborough Architect" />
     
-    <!-- Tailwind CDN (opcional, solo para desarrollo; en producción deberías usar el build de Tailwind) -->
+    <!-- Tailwind CDN (útil para desarrollo, pero en producción se recomienda el build incluido) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- JSON-LD for Local Business SEO -->
@@ -38,9 +38,8 @@
     }
     </script>
 
-    <!-- Estilos personalizados (ya no se necesita link a index.css, Vite lo inyectará) -->
+    <!-- Estilos críticos para el cursor y base (el resto se inyecta desde index.css vía Vite) -->
     <style>
-      /* Algunos estilos críticos para evitar parpadeos */
       html, body {
         margin: 0;
         padding: 0;
@@ -82,7 +81,7 @@
       }
     </style>
 
-    <!-- Import map para las dependencias (si las usas) -->
+    <!-- Import map para las dependencias -->
     <script type="importmap">
       {
         "imports": {
@@ -100,7 +99,7 @@
     <div id="root"></div>
     <div id="custom-cursor"></div>
 
-    <!-- Script del cursor (puede ir aquí o en un archivo aparte) -->
+    <!-- Script del cursor -->
     <script>
       const cursor = document.getElementById("custom-cursor");
 
@@ -109,7 +108,6 @@
           cursor.style.top = e.clientY + "px";
           cursor.style.left = e.clientX + "px";
           
-          // Hover logic
           const target = e.target;
           const isInteractive = target.closest('button') || 
                                target.closest('a') || 
@@ -143,7 +141,7 @@
       }
     </script>
 
-    <!-- Punto de entrada de la aplicación (Vite lo transformará en el build) -->
+    <!-- Punto de entrada de la aplicación (Vite lo transformará) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
