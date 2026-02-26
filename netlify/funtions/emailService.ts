@@ -1,4 +1,3 @@
-
 // src/services/emailService.ts
 export interface EnquiryData {
   name: string;
@@ -9,7 +8,9 @@ export interface EnquiryData {
 
 export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> => {
   try {
-    const response = await fetch('/.netlify/functions/send-enquiry', {
+    // ANTES: '/.netlify/functions/send-enquiry'
+    // DESPUÉS: '/api/send-enquiry' (para Cloudflare Pages)
+    const response = await fetch('/api/send-enquiry', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
