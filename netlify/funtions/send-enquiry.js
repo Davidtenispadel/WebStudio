@@ -31,4 +31,15 @@ export async function onRequestPost(context) {
         <p><strong>Mensaje:</strong> ${message}</p>
         <p><strong>Adjuntos:</strong> ${files.length}</p>
       `,
-      atta
+      attachments,
+    });
+
+    if (error) {
+      return new Response(JSON.stringify({ error }), { status: 500 });
+    }
+
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+}
