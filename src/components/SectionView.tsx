@@ -1,17 +1,23 @@
 // =====================
-// SECTIONVIEW COMPLETO
-// DB+ 2026 — Versión CORREGIDA
+// SECTIONVIEW COMPLETO — DB+
+// Con arreglo definitivo del formulario ENQUIRY
 // =====================
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CategoryGroup, Project, StudioSection } from '../types';
 import ProjectCard from './ProjectCard';
-import { ChevronRight, CheckCircle, Upload, Paperclip, X as CloseIcon, Loader2 } from 'lucide-react';
+import {
+  ChevronRight,
+  CheckCircle,
+  Upload,
+  Paperclip,
+  X as CloseIcon,
+  Loader2,
+} from 'lucide-react';
 import {
   CATEGORIES,
   urbanMasterplanningHeaderDescription,
-  projectSupportHeaderDescription,
-  isoContent
+  isoContent,
 } from '../constants';
 import { sendProjectEnquiry } from '../services/emailService';
 
@@ -26,13 +32,13 @@ const SectionView: React.FC<SectionViewProps> = ({
   category,
   onProjectClick,
   isActive,
-  currentSectionName
+  currentSectionName,
 }) => {
-
   // ==========================
-  // ANIMACIONES GENERALES DB+
+  // DB+ ANIMACIONES
   // ==========================
-  const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
+  const [displayedCategory, setDisplayedCategory] =
+    useState<CategoryGroup>(category);
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
   const [showName, setShowName] = useState(false);
@@ -53,11 +59,11 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   const startSequence = () => {
     setShowDB(true);
-    const t1 = setTimeout(() => setShowPlus(true), 400);
-    const t2 = setTimeout(() => setShowName(true), 700);
-    const t3 = setTimeout(() => setStage('gallery'), 1000);
-    const t4 = setTimeout(() => setShowDesc(true), 1300);
-    const t5 = setTimeout(() => setShowGalleryItems(true), 1600);
+    const t1 = setTimeout(() => setShowPlus(true), 300);
+    const t2 = setTimeout(() => setShowName(true), 500);
+    const t3 = setTimeout(() => setStage('gallery'), 800);
+    const t4 = setTimeout(() => setShowDesc(true), 1100);
+    const t5 = setTimeout(() => setShowGalleryItems(true), 1500);
     return [t1, t2, t3, t4, t5];
   };
 
@@ -80,35 +86,15 @@ const SectionView: React.FC<SectionViewProps> = ({
         setDisplayedCategory(category);
         setIsTransitioning(false);
 
-        setTimeout(() => startSequence(), 100);
-      }, 500);
+        setTimeout(() => startSequence(), 150);
+      }, 300);
 
       return () => clearTimeout(tOut);
     }
   }, [category, displayedCategory.id]);
 
   // ==========================
-  //       ENQUIRY FORM
+  // ENQUIRY FORM
   // ==========================
-  const [enquiryStep, setEnquiryStep] = useState(1);
-  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-    files: [] as File[]
-  });
-
-  // Convert file to Base64
-  const fileToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () =>
-        resolve((reader.result as string).split(',')[1]); // sin prefijo
-      reader.onerror = (err) => reject(err);
-    });
-
-  // FILE UPLOAD
