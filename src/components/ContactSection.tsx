@@ -1,5 +1,12 @@
 import { useState, useMemo, useRef } from "react";
-import { Send, Paperclip, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Send,
+  Paperclip,
+  X,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { sendProjectEnquiry, fileToBase64 } from "../services/emailService";
 
 type LocalFile = File;
@@ -36,7 +43,9 @@ export default function ContactSection() {
     [files]
   );
 
-  const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+  const isValidEmail = (val: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
   const pickFiles = () => inputRef.current?.click();
 
   function addFiles(list: FileList | null) {
@@ -49,11 +58,13 @@ export default function ContactSection() {
       const tooBig = f.size > MAX_MB * 1024 * 1024;
       const badType = !ALLOWED.includes(f.type || "");
       if (tooBig) {
-        setError(`“${f.name}” excede ${MAX_MB} MB.`);
+        setError(`“${f.name}” exceeds ${MAX_MB} MB.`);
         continue;
       }
       if (badType) {
-        setError(`Tipo no permitido: ${f.name}. Usa PDF, DOC/DOCX, JPG o PNG.`);
+        setError(
+          `File type not allowed: ${f.name}. Use PDF, DOC/DOCX, JPG or PNG.`
+        );
         continue;
       }
       next.push(f);
@@ -81,22 +92,19 @@ export default function ContactSection() {
     setError(null);
     setSuccess(null);
 
-    // Honeypot: si está relleno, aborta silenciosamente
+    // Honeypot
     if (hp.trim()) {
-      setSuccess("Solicitud enviada correctamente.");
-      setName("");
-      setEmail("");
-      setMessage("");
-      setFiles([]);
+      setSuccess("Your enquiry has been sent.");
+      resetForm();
       return;
     }
 
     if (!name.trim() || !isValidEmail(email) || !message.trim()) {
-      setError("Revisa nombre, email y mensaje.");
+      setError("Please check name, email and message.");
       return;
     }
     if (files.length > MAX_FILES) {
-      setError(`Máximo ${MAX_FILES} archivos.`);
+      setError(`Maximum ${MAX_FILES} files allowed.`);
       return;
     }
 
@@ -106,7 +114,7 @@ export default function ContactSection() {
         files.map(async (f) => ({
           name: f.name,
           type: f.type || "application/octet-stream",
-          data: await fileToBase64(f), // base64 limpio (sin prefijo)
+          data: await fileToBase64(f),
         }))
       );
 
@@ -118,42 +126,57 @@ export default function ContactSection() {
       });
 
       if (ok) {
-        setSuccess("Solicitud enviada correctamente.");
-        setName("");
-        setEmail("");
-        setMessage("");
-        setFiles([]);
+        setSuccess("Your enquiry has been sent.");
+        resetForm();
         setTimeout(() => setSuccess(null), 6000);
       } else {
-        setError("No se pudo enviar. Inténtalo de nuevo.");
+        setError("Could not send. Please try again.");
       }
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || "Fallo inesperado al enviar.");
+      setError(err?.message || "Unexpected error while sending.");
     } finally {
       setSending(false);
     }
   }
 
-  const formDisabled = sending || !name.trim() || !isValidEmail(email) || !message.trim();
+  function resetForm() {
+    setName("");
+    setEmail("");
+    setMessage("");
+    setFiles([]);
+  }
+
+  const formDisabled =
+    sending || !name.trim() || !isValidEmail(email) || !message.trim();
 
   return (
-    <section id="contacto" className="w-full bg-neutral-100">
+    <section id="contact" className="w-full bg-neutral-100">
       <div className="mx-auto max-w-5xl px-6 py-16">
-        {/* Cabecera */}
+        {/* Header */}
         <div className="mb-10">
-          <h2 className="text-3xl font-bold tracking-tight text-neutral-900" style={{ fontFamily: "Arial, sans-serif" }}>
-            Solicita tu presupuesto
+          <h2
+            className="text-3xl font-bold tracking-tight text-neutral-900"
+            style={{ fontFamily: "Arial, sans-serif" }}
+          >
+            Request your quote
           </h2>
-          <p className="mt-2 text-neutral-600" style={{ fontFamily: "Arial, sans-serif" }}>
-            Cuéntanos tu proyecto (BIM / Arquitectura). Respuesta en &lt; 24 h.
+          <p
+            className="mt-2 text-neutral-600"
+            style={{ fontFamily: "Arial, sans-serif" }}
+          >
+            Tell us about your project (BIM / Architecture). Response in &lt;24h.
           </p>
         </div>
 
-        {/* Tarjeta */}
+        {/* Card */}
         <div className="rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_0_#d4d4d8]">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2" noValidate>
-            {/* Honeypot invisible */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2"
+            noValidate
+          >
+            {/* Honeypot */}
             <input
               type="text"
               tabIndex={-1}
@@ -164,9 +187,14 @@ export default function ContactSection() {
               aria-hidden="true"
             />
 
-            {/* Nombre */}
+            {/* Name */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="name" className="text-sm font-semibold text-neutral-800">Nombre</label>
+              <label
+                htmlFor="name"
+                className="text-sm font-semibold text-neutral-800"
+              >
+                Name
+              </label>
               <input
                 id="name"
                 type="text"
@@ -179,7 +207,12 @@ export default function ContactSection() {
 
             {/* Email */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm font-semibold text-neutral-800">Email</label>
+              <label
+                htmlFor="email"
+                className="text-sm font-semibold text-neutral-800"
+              >
+                Email
+              </label>
               <input
                 id="email"
                 type="email"
@@ -190,9 +223,14 @@ export default function ContactSection() {
               />
             </div>
 
-            {/* Mensaje */}
+            {/* Message */}
             <div className="md:col-span-2 flex flex-col gap-2">
-              <label htmlFor="message" className="text-sm font-semibold text-neutral-800">Mensaje</label>
+              <label
+                htmlFor="message"
+                className="text-sm font-semibold text-neutral-800"
+              >
+                Message
+              </label>
               <textarea
                 id="message"
                 rows={5}
@@ -203,9 +241,11 @@ export default function ContactSection() {
               />
             </div>
 
-            {/* Adjuntos */}
+            {/* Attachments */}
             <div className="md:col-span-2">
-              <label className="text-sm font-semibold text-neutral-800">Adjuntar archivos</label>
+              <label className="text-sm font-semibold text-neutral-800">
+                Attach files
+              </label>
               <div
                 onDragOver={onDragOver}
                 onDrop={onDrop}
@@ -217,10 +257,11 @@ export default function ContactSection() {
                   className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-neutral-50"
                 >
                   <Paperclip className="h-4 w-4" />
-                  Seleccionar archivos
+                  Select files
                 </button>
                 <p className="text-xs text-neutral-500">
-                  Máx. {MAX_FILES} archivos — Tipos: PDF, DOC/DOCX, JPG, PNG — ≤ {MAX_MB} MB c/u
+                  Max {MAX_FILES} files — Types: PDF, DOC/DOCX, JPG, PNG — ≤{" "}
+                  {MAX_MB} MB each
                 </p>
                 <input
                   ref={inputRef}
@@ -235,67 +276,5 @@ export default function ContactSection() {
               {files.length > 0 && (
                 <div className="mt-4 divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
                   {files.map((f, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3">
-                      <div className="flex items-center gap-3">
-                        <Paperclip className="h-4 w-4 text-neutral-500" />
-                        <div className="text-sm">
-                          <div className="font-medium text-neutral-800">{filesInfo[idx].name}</div>
-                          <div className="text-neutral-500 text-xs">{filesInfo[idx].type} · {filesInfo[idx].sizeMB} MB</div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(idx)}
-                        className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-                        aria-label={`Eliminar ${filesInfo[idx].name}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Feedback */}
-            <div className="md:col-span-2 flex flex-col gap-2">
-              {error && (
-                <div className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-700">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-              {success && (
-                <div className="inline-flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-green-700">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-sm">{success}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Enviar */}
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                disabled={formDisabled}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-6 py-3 text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
-              >
-                {sending ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Enviando…
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-5 w-5" />
-                    Enviar solicitud
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  );
-}
+                    <div
+                      key={idx}
