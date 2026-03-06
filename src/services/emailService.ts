@@ -1,7 +1,4 @@
-import emailjs from '@emailjs/browser';
-
-// Inicializar EmailJS (solo se necesita una vez)
-emailjs.init('TU_PUBLIC_KEY'); // Reemplaza con tu Public Key
+// src/services/emailService.ts
 
 export interface EnquiryData {
   name: string;
@@ -10,29 +7,35 @@ export interface EnquiryData {
   files: { name: string; data: string; type: string }[];
 }
 
+// Convierte archivo a Base64 (sin prefijo)
+export const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () =>
+      resolve((reader.result as string).split(",")[1]); // <-- limpio
+    reader.onerror = reject;
+  });
+
+// Envía JSON con adjuntos al backend en Cloudflare Pages
 export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> => {
   try {
-    // Preparar los parámetros para la plantilla
-    const templateParams = {
-      name: data.name,
-      email: data.email,
-      message: data.message,
-      attachments: data.files.length > 0 
-        ? `${data.files.length} archivo(s) adjunto(s) (no visibles por EmailJS gratis)`
-        : 'Ninguno'
-    };
+    const response = await fetch("/api/send-enquiry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-    // Enviar el email usando EmailJS
-    const response = await emailjs.send(
-      'TU_SERVICE_ID',      // Reemplaza con tu Service ID
-      'TU_TEMPLATE_ID',     // Reemplaza con tu Template ID
-      templateParams
-    );
+    if (!response.ok) {
+      console.error("Error en la API:", await response.text());
+      throw new Error("Error al enviar la solicitud");
+    }
 
-    console.log('Email enviado con éxito:', response.status, response.text);
     return true;
   } catch (error) {
-    console.error('Error al enviar email:', error);
+    console.error("Error sending enquiry:", error);
     return false;
   }
 };
