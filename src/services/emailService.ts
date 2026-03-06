@@ -1,5 +1,4 @@
 // src/services/emailService.ts
-
 export interface EnquiryData {
   name: string;
   email: string;
@@ -7,35 +6,28 @@ export interface EnquiryData {
   files: { name: string; data: string; type: string }[];
 }
 
-// Convierte archivo a Base64 (sin prefijo)
 export const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () =>
-      resolve((reader.result as string).split(",")[1]); // <-- limpio
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
     reader.onerror = reject;
   });
 
-// Envía JSON con adjuntos al backend en Cloudflare Pages
 export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> => {
   try {
-    const response = await fetch("/api/send-enquiry", {
+    const res = await fetch("/api/send-enquiry", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
-    if (!response.ok) {
-      console.error("Error en la API:", await response.text());
-      throw new Error("Error al enviar la solicitud");
+    if (!res.ok) {
+      console.error("API error:", await res.text());
+      return false;
     }
-
     return true;
-  } catch (error) {
-    console.error("Error sending enquiry:", error);
+  } catch (e) {
+    console.error(e);
     return false;
   }
 };
