@@ -112,6 +112,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           <img
             src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769967857/make_the_background_2_xwqmiu.png"
             className="w-full h-full object-cover"
+            alt="Background"
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>
