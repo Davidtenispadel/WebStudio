@@ -1,27 +1,13 @@
-// =====================
-// SECTIONVIEW — DB+ (PARTE 1/3)
-// =====================
-
 import React, { useState, useEffect, useRef } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
-
-import {
-  ChevronRight,
-  CheckCircle,
-  Upload,
-  Paperclip,
-  X as CloseIcon,
-  Loader2,
-} from "lucide-react";
+import ContactSection from "./ContactSection";
 
 import {
   CATEGORIES,
   urbanMasterplanningHeaderDescription,
   isoContent,
 } from "../constants";
-
-import { sendProjectEnquiry } from "../services/emailService";
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -95,88 +81,6 @@ const SectionView: React.FC<SectionViewProps> = ({
   }, [category, displayedCategory.id]);
 
   // ==========================
-  // ENQUIRY FORM — ESTADO
-  // ==========================
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [enquiryStep, setEnquiryStep] = useState(1);
-  const [isSending, setIsSending] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-    files: [] as File[],
-  });
-
-  const fileToBase64 = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () =>
-        resolve((reader.result as string).split(",")[1] ?? "");
-      reader.onerror = reject;
-    });
-  // =========================
-// SECTIONVIEW — PARTE 2/3
-// ENQUIRY: FORM + SUBMIT + RESET REAL
-// =========================
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFormData({ ...formData, files: Array.from(e.target.files) });
-    }
-  };
-
-  const removeFile = (index: number) =>
-    setFormData({
-      ...formData,
-      files: formData.files.filter((_, i) => i !== index),
-    });
-
-  // 🔥 SUBMIT FIJO — Aquí está el reset REAL
-  const handleEnquirySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSending(true);
-
-    const processed = await Promise.all(
-      formData.files.map(async (file) => ({
-        name: file.name,
-        type: file.type,
-        data: await fileToBase64(file),
-      }))
-    );
-
-    const success = await sendProjectEnquiry({
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-      files: processed,
-    });
-
-    if (success) {
-      // Mostrar la pantalla "Vision Received"
-      setEnquiryStep(4);
-
-      // Después de 2s vaciamos la página
-      setTimeout(() => {
-        // 1. Vaciar inputs
-        setFormData({ name: "", email: "", message: "", files: [] });
-
-        // 2. Volver al paso 1
-        setEnquiryStep(1);
-
-        // 3. 🔥 Resetear SECCIÓN COMPLETA → esto es lo que realmente “vacía la página”
-        resetSequence();
-        setDisplayedCategory(category);
-        startSequence();
-      }, 2000);
-    }
-
-    setIsSending(false);
-  };
-
-  // ==========================
   // FLAGS
   // ==========================
   const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
@@ -212,9 +116,6 @@ const SectionView: React.FC<SectionViewProps> = ({
           <div className="absolute inset-0 bg-black/60" />
         </div>
       )}
-      // =========================
-// SECTIONVIEW — PARTE 3/3
-// =========================
 
       {/* CABECERA DB+ */}
       <div
@@ -230,10 +131,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         <div
           className="flex items-center gap-10 md:gap-20 transition-all"
           style={{
-            transform:
-              stage === "gallery"
-                ? `scale(${scaleTarget})`
-                : "scale(1)",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -284,7 +182,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 showGalleryItems ? "opacity-100" : "opacity-0"
               } transition-opacity duration-700 relative z-10`}
             >
-              {/* Aquí va el formulario (PARTE 2 ya lo incluiste) */}
+              <ContactSection />
             </div>
           ) : isBehindDB ? (
             /* ---------------- BEHIND_DB ---------------- */
