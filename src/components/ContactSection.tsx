@@ -37,7 +37,6 @@ export default function ContactSection() {
   );
 
   const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
-
   const pickFiles = () => inputRef.current?.click();
 
   function addFiles(list: FileList | null) {
@@ -107,8 +106,7 @@ export default function ContactSection() {
         files.map(async (f) => ({
           name: f.name,
           type: f.type || "application/octet-stream",
-          // fileToBase64 debe devolver la parte base64 sin prefijo
-          data: await fileToBase64(f),
+          data: await fileToBase64(f), // base64 limpio (sin prefijo)
         }))
       );
 
@@ -125,7 +123,6 @@ export default function ContactSection() {
         setEmail("");
         setMessage("");
         setFiles([]);
-        // ocultar mensaje tras unos segundos
         setTimeout(() => setSuccess(null), 6000);
       } else {
         setError("No se pudo enviar. Inténtalo de nuevo.");
@@ -138,35 +135,24 @@ export default function ContactSection() {
     }
   }
 
-  const formDisabled =
-    sending || !name.trim() || !isValidEmail(email) || !message.trim();
+  const formDisabled = sending || !name.trim() || !isValidEmail(email) || !message.trim();
 
   return (
     <section id="contacto" className="w-full bg-neutral-100">
       <div className="mx-auto max-w-5xl px-6 py-16">
         {/* Cabecera */}
         <div className="mb-10">
-          <h2
-            className="text-3xl font-bold tracking-tight text-neutral-900"
-            style={{ fontFamily: "Arial, sans-serif" }}
-          >
+          <h2 className="text-3xl font-bold tracking-tight text-neutral-900" style={{ fontFamily: "Arial, sans-serif" }}>
             Solicita tu presupuesto
           </h2>
-          <p
-            className="mt-2 text-neutral-600"
-            style={{ fontFamily: "Arial, sans-serif" }}
-          >
+          <p className="mt-2 text-neutral-600" style={{ fontFamily: "Arial, sans-serif" }}>
             Cuéntanos tu proyecto (BIM / Arquitectura). Respuesta en &lt; 24 h.
           </p>
         </div>
 
         {/* Tarjeta */}
         <div className="rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_0_#d4d4d8]">
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2"
-            noValidate
-          >
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2" noValidate>
             {/* Honeypot invisible */}
             <input
               type="text"
@@ -180,6 +166,136 @@ export default function ContactSection() {
 
             {/* Nombre */}
             <div className="flex flex-col gap-2">
-              <label
-                htmlFor="name"
-                className="text-sm font-semibold text-neutral-800"
+              <label htmlFor="name" className="text-sm font-semibold text-neutral-800">Nombre</label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-neutral-900 outline-none focus:border-neutral-500"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-sm font-semibold text-neutral-800">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-neutral-900 outline-none focus:border-neutral-500"
+                required
+              />
+            </div>
+
+            {/* Mensaje */}
+            <div className="md:col-span-2 flex flex-col gap-2">
+              <label htmlFor="message" className="text-sm font-semibold text-neutral-800">Mensaje</label>
+              <textarea
+                id="message"
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-neutral-900 outline-none focus:border-neutral-500"
+                required
+              />
+            </div>
+
+            {/* Adjuntos */}
+            <div className="md:col-span-2">
+              <label className="text-sm font-semibold text-neutral-800">Adjuntar archivos</label>
+              <div
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+                className="mt-2 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-neutral-700"
+              >
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm hover:bg-neutral-50"
+                >
+                  <Paperclip className="h-4 w-4" />
+                  Seleccionar archivos
+                </button>
+                <p className="text-xs text-neutral-500">
+                  Máx. {MAX_FILES} archivos — Tipos: PDF, DOC/DOCX, JPG, PNG — ≤ {MAX_MB} MB c/u
+                </p>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => addFiles(e.target.files)}
+                  accept={ALLOWED.join(",")}
+                />
+              </div>
+
+              {files.length > 0 && (
+                <div className="mt-4 divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
+                  {files.map((f, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3">
+                      <div className="flex items-center gap-3">
+                        <Paperclip className="h-4 w-4 text-neutral-500" />
+                        <div className="text-sm">
+                          <div className="font-medium text-neutral-800">{filesInfo[idx].name}</div>
+                          <div className="text-neutral-500 text-xs">{filesInfo[idx].type} · {filesInfo[idx].sizeMB} MB</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(idx)}
+                        className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                        aria-label={`Eliminar ${filesInfo[idx].name}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Feedback */}
+            <div className="md:col-span-2 flex flex-col gap-2">
+              {error && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-700">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
+              {success && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-green-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="text-sm">{success}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Enviar */}
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={formDisabled}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-6 py-3 text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Enviando…
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5" />
+                    Enviar solicitud
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
