@@ -1,4 +1,4 @@
-
+if (project?.category === "ENQUIRY") return null;
 import React, { useEffect, useState } from 'react';
 import { Project } from '../types';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'; // Removed MapPin, Calendar, generateStudioInsight
