@@ -46,8 +46,6 @@ export default function ContactSection() {
   const isValidEmail = (val: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
-  const pickFiles = () => inputRef.current?.click();
-
   function addFiles(list: FileList | null) {
     if (!list) return;
     const next = [...files];
@@ -278,3 +276,72 @@ export default function ContactSection() {
                   {files.map((f, idx) => (
                     <div
                       key={idx}
+                      className="flex items-center justify-between p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Paperclip className="h-4 w-4 text-neutral-500" />
+                        <div className="text-sm">
+                          <div className="font-medium text-neutral-800">
+                            {filesInfo[idx].name}
+                          </div>
+                          <div className="text-neutral-500 text-xs">
+                            {filesInfo[idx].type} · {filesInfo[idx].sizeMB} MB
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(idx)}
+                        className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+                        aria-label={`Remove ${filesInfo[idx].name}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Feedback */}
+            <div className="md:col-span-2 flex flex-col gap-2">
+              {error && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-700">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
+              {success && (
+                <div className="inline-flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-green-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="text-sm">{success}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Submit */}
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={formDisabled}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 px-6 py-3 text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5" />
+                    Send enquiry
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
