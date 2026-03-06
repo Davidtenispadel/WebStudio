@@ -1,4 +1,4 @@
-/*  SECTIONVIEW.TSX — VERSIÓN COMPLETA + ENQUIRY CON RECUADROS (NEGRO + GRIS)  */
+/*  SECTIONVIEW.TSX — VERSIÓN COMPLETA Y FUNCIONAL  */
 
 import React, { useState, useEffect, useRef } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
@@ -47,7 +47,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ==========================
-  // ANIMATION SEQUENCES
+  // ANIMATION LOGIC
   // ==========================
   const resetSequence = () => {
     setShowDB(false);
@@ -91,7 +91,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [category, displayedCategory.id]);
 
-  // Forzar "gallery" en ENQUIRY (evita opacidad/pointer-events)
+  // Force gallery mode in ENQUIRY
   useEffect(() => {
     if (displayedCategory.name === StudioSection.ENQUIRY) {
       setStage("gallery");
@@ -99,7 +99,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   }, [displayedCategory.name]);
 
   // ==========================
-  // HELPERS FORM
+  // FORM HELPERS
   // ==========================
   const fileToBase64 = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -165,13 +165,13 @@ const SectionView: React.FC<SectionViewProps> = ({
   // ==========================================
   return (
     <div
-      className={`fixed inset-0 w-full transition-opacity duration-500 ${
+      className={`fixed inset-0 w-full transition-opacity duration-500 z-[30] ${
         isTransitioning ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* Fondo ENQUIRY */}
+      {/* FONDO ENQUIRY */}
       {isEnquiry && (
-        <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 z-20 overflow-hidden">
           <img
             src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769967857/make_the_background_2_xwqmiu.png"
             alt=""
@@ -183,7 +183,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
       {/* CABECERA DB+ */}
       <div
-        className={`fixed z-30 flex items-center transition-all ${
+        className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
             ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
             : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none justify-start"
@@ -238,14 +238,14 @@ const SectionView: React.FC<SectionViewProps> = ({
         }`}
         style={{ paddingTop: "340px" }}
       >
-        <div className="max-w-7xl mx-auto relative z-20">
+        <div className="max-w-7xl mx-auto relative z-[50]">
           {/* ==========================================================
-              ENQUIRY — RECUADRO NEGRO (INFO) + RECUADRO GRIS (FORM)
+              ENQUIRY — RECUADRO NEGRO + RECUADRO GRIS
              ========================================================== */}
           {isEnquiry && (
-            <div className="relative z-20">
+            <div className="relative z-[60]">
               <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
-                {/* COLUMNA IZQUIERDA — TARJETA NEGRA */}
+                {/* COLUMNA IZQUIERDA — NEGRO */}
                 <aside className="bg-black/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/5">
                   <h3 className="text-3xl md:text-4xl font-light leading-tight">
                     Contact<br />Information
@@ -349,103 +349,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                           onClick={() => fileInputRef.current?.click()}
                           className="w-full flex flex-col items-center justify-center gap-3 py-8 hover:bg-white/5 rounded-lg transition"
                         >
-                          {/* Ícono upload inline (sin dependencia adicional) */}
                           <svg
                             width="28"
                             height="28"
                             viewBox="0 0 24 24"
                             className="opacity-80"
                           >
-                            <path
-                              fill="currentColor"
-                              d="M12 16V8m0 0l-3 3m3-3l3 3M6 20h12a2 2 0 0 0 2-2v-3a1 1 0 1 0-2 0v3H6v-3a1 1 0 1 0-2 0v3a2 2 0 0 0 2 2Z"
-                            />
-                          </svg>
-                          <span className="text-sm text-white/80">
-                            Click to attach blueprints, photos, or project requirements
-                          </span>
-                        </button>
-
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          multiple
-                          onChange={handleFileChange}
-                          className="hidden"
-                        />
-
-                        {formData.files.length > 0 && (
-                          <div className="mt-4 space-y-2">
-                            {formData.files.map((file, idx) => (
-                              <div
-                                key={`${file.name}-${idx}`}
-                                className="flex items-center justify-between bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm"
-                              >
-                                <span className="truncate max-w-[16rem]">
-                                  {file.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeFile(idx)}
-                                  className="text-red-300 hover:text-red-400"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* SUBMIT */}
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={isSending}
-                        className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full hover:bg-white/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        {isSending ? "Sending…" : "SUBMIT TO DB+  →"}
-                      </button>
-                    </div>
-
-                    {/* SUCCESS */}
-                    {enquiryStep === 4 && (
-                      <div className="flex items-center gap-3 text-base text-green-400">
-                        <CheckCircle />
-                        <span>Thank you — your enquiry has been sent.</span>
-                      </div>
-                    )}
-                  </form>
-                </section>
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================================
-              LISTA DE PROYECTOS (NO ENQUIRY)
-             ========================================================== */}
-          {!isEnquiry && (
-            <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 transition-all ${
-                showGalleryItems ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              {(displayedCategory.projects ?? []).map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onClick={() => onProjectClick(project)}
-                  currentSectionName={displayedCategory.name}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default SectionView;
-``
