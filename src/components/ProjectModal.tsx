@@ -8,7 +8,6 @@ interface ProjectModalProps {
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
-  // No mostrar modal cuando no hay proyecto o cuando pertenece a ENQUIRY
   if (!project) return null;
   if (project.category === "ENQUIRY") return null;
 
@@ -16,7 +15,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   const [imageFade, setImageFade] = useState(true);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";   // Evitar scroll de la página debajo
+    // Prevent background page scroll
+    document.body.style.overflow = "hidden";
     setCurrentImageIndex(0);
     setImageFade(true);
 
@@ -43,36 +43,44 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
     }, 300);
   };
 
+  const FALLBACK_IMG = "/fallbacks/project-fallback.jpg";
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      {/* BACKDROP OSCURO (NO BLANCO) */}
+      {/* BACKDROP */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* CONTENEDOR PRINCIPAL */}
+      {/* MODAL CONTAINER */}
       <div className="relative z-20 max-w-5xl w-full mx-auto px-6">
-        {/* BOTÓN CERRAR */}
+        {/* CLOSE BUTTON */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white hover:text-red-500 transition"
+          aria-label="Close project"
         >
           <X size={32} />
         </button>
 
-        {/* IMAGEN PRINCIPAL */}
+        {/* IMAGE CAROUSEL */}
         <div className="relative w-full aspect-[4/3] overflow-hidden rounded-lg bg-black">
           <img
             key={currentImageIndex}
             src={images[currentImageIndex]}
-            alt={project.title}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
+            alt={project.title || "Project image"}
+            className={`w-full h-full object-contain transition-opacity duration-300 ${
               imageFade ? "opacity-100" : "opacity-0"
             }`}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.src = FALLBACK_IMG;
+            }}
+            loading="lazy"
           />
 
-          {/* FLECHA IZQUIERDA */}
+          {/* PREVIOUS */}
           {images.length > 1 && (
             <button
               onClick={(e) => {
@@ -80,12 +88,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                 handlePrevImage();
               }}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60 transition"
+              aria-label="Previous image"
             >
               <ChevronLeft size={28} />
             </button>
           )}
 
-          {/* FLECHA DERECHA */}
+          {/* NEXT */}
           {images.length > 1 && (
             <button
               onClick={(e) => {
@@ -93,13 +102,14 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                 handleNextImage();
               }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60 transition"
+              aria-label="Next image"
             >
               <ChevronRight size={28} />
             </button>
           )}
         </div>
 
-        {/* INFORMACIÓN DEL PROYECTO */}
+        {/* PROJECT INFORMATION */}
         <div className="mt-6 text-center">
           <h2 className="text-3xl font-light text-white tracking-wide">
             {project.title}
@@ -117,3 +127,4 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
 };
 
 export default ProjectModal;
+``
