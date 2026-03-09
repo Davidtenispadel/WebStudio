@@ -2,7 +2,7 @@
 import emailjs from '@emailjs/browser';
 
 // Inicializa EmailJS con tu Public Key
-emailjs.init('SVBQHbGAkYV6qE7qo'); // <-- TU PUBLIC KEY
+emailjs.init('SVBQHbGAkYV6qE7qo');
 
 export interface EnquiryData {
   name: string;
@@ -36,8 +36,8 @@ export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> =>
     };
 
     const response = await emailjs.send(
-      'TU_SERVICE_ID',          // <-- REEMPLAZA CON TU SERVICE ID
-      'template_76z945r',        // <-- TU TEMPLATE ID
+      'service_6w3daws',      // <-- TU SERVICE ID
+      'template_76z945r',      // <-- TU TEMPLATE ID
       templateParams
     );
 
