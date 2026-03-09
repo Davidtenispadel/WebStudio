@@ -1,7 +1,8 @@
-/* SECTIONVIEW.TSX — UNIFICADO
-   - Estética A (primera versión IAStudio) para TODAS las secciones
-   - ENQUIRY intacto tal cual el segundo (sin cambios de estructura/estilo)
-*/
+/*
+ * SECTIONVIEW.TSX — UNIFICADO
+ * - Estética A (primera versión IAStudio) para TODAS las secciones
+ * - ENQUIRY intacto tal cual el segundo (sin cambios de estructura/estilo)
+ */
 
 import React, { useEffect, useRef, useState } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
@@ -575,9 +576,10 @@ const SectionView: React.FC<SectionViewProps> = ({
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection) && (
                 <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
-                  <div className="w-full max-w-5xl p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
+                  {/* Descripción sin fondo, sin borde, mismo estilo que el header */}
+                  <div className="w-full max-w-5xl">
                     <div
-                      className="text-black font-normal text-lg md:text-xl leading-tight"
+                      className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg"
                       dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                     />
                   </div>
@@ -634,4 +636,3 @@ const SectionView: React.FC<SectionViewProps> = ({
 };
 
 export default SectionView;
-``
