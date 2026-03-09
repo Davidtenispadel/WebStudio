@@ -3,42 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DB+ | Expert Architecture Services Corby & 20-Mile Radius</title>
-    <meta name="description" content="Any architecture service in Corby and a 20-mile radius. Expert full-service practice specializing in BIM, planning, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton." />
-    <meta name="keywords" content="Any architecture service Corby, Architect Kettering, BIM Design UK, Planning Permission Corby, House Extensions Market Harborough, Stamford Architect, New Build Design Oundle, Structural pre-design Weldon, MEP Services Gretton, Weldon, Gretton, Stanion, Brigstock, Geddington, Cottingham, Middleton, Wilbarston, Harringworth, Bulwick, King's Cliffe, Woodnewton, Nassington, Tansor, Glapthorn, Benefield, Barnwell, Islip, Sudborough, Twywell, Cranford, Rushton, Pipewell, Arthingworth, Harrington, Loddington, Pytchley, Isham, Orlingbury, Finedon, Corby Architect, Kettering Architect, Market Harborough Architect, Stamford Architect, Wellingborough Architect, Oundle Architect, Thrapston Architect, Uppingham Architect, Burton Latimer Architect, Desborough Architect, Rothwell Architect, Higham Ferrers Architect, Raunds Architect, Irthlingborough Architect" />
-    
-    <!-- Tailwind CDN (útil para desarrollo, pero en producción se recomienda el build incluido) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+
+    <title>DB+ | Expert Architecture Services in Corby & 20-Mile Radius</title>
+    <meta
+      name="description"
+      content="Full-service architecture studio in Corby covering a 20-mile radius. BIM-led design, planning applications, extensions, and new builds. Serving Kettering, Market Harborough, Stamford, Oundle, Weldon, and Gretton."
+    />
+    <!-- Note: the keywords meta tag has low SEO value; keep concise if used -->
+    <meta
+      name="keywords"
+      content="Architect Corby, Architect Kettering, BIM Design UK, Planning Permission Corby, House Extensions Market Harborough, Stamford Architect, New Build Design Oundle, MEP Services Gretton, Wellingborough Architect, Oundle Architect"
+    />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="DB+ | Expert Architecture Services in Corby & 20-Mile Radius" />
+    <meta property="og:description" content="Full-service architecture studio delivering concept to completion through BIM technology. Planning, design, and structural pre-design." />
+    <meta property="og:url" content="https://dbsdesigner.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <!-- JSON-LD for Local Business SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ArchitecturalService",
+      "@type": "LocalBusiness",
       "name": "DB+ Design & Management",
+      "url": "https://dbsdesigner.com",
+      "telephone": "+44 7955 018937",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "108 Kestrel Road",
         "addressLocality": "Corby",
         "addressRegion": "Northamptonshire",
-        "postalCode": "NN18 8",
+        "postalCode": "NN18",
         "addressCountry": "GB"
       },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 52.4912,
-        "longitude": -0.6975
-      },
-      "url": "https://dbsdesigner.com",
-      "telephone": "+4407955018937",
       "areaServed": [
-        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle", "Thrapston", "Uppingham", "Stamford", "Rushden", "Desborough", "Rothwell", "Weldon", "Gretton", "Stanion", "Brigstock", "Geddington", "Cottingham", "Middleton", "Wilbarston", "Harringworth", "Bulwick", "Deene", "Blatherwycke", "King's Cliffe", "Woodnewton", "Nassington", "Yarwell", "Apethorpe", "Fotheringhay", "Southwick", "Cotterstock", "Tansor", "Glapthorn", "Benefield", "Barnwell", "Hemington", "Luddington", "Lutton", "Polebrook", "Armston", "Wigsthorpe", "Thorpe Waterville", "Achurch", "Titchmarsh", "Islip", "Lowick", "Sudborough", "Slipton", "Twywell", "Cranford", "Grafton Underwood", "Weekly", "Little Oakley", "Newton", "Great Oakley", "Rushton", "Pipewell", "Stoke Albany", "Ashley", "Weston by Welland", "Sutton Bassett", "Dingley", "Brampton Ash", "Braybrooke", "Arthingworth", "Great Oxendon", "Clipston", "Kelmarsh", "Harrington", "Orton", "Loddington", "Thorpe Malsor", "Cransley", "Broughton", "Pytchley", "Isham", "Orlingbury", "Little Harrowden", "Great Harrowden", "Finedon"
+        "Corby", "Kettering", "Wellingborough", "Market Harborough", "Oundle", "Thrapston",
+        "Uppingham", "Stamford", "Rushden", "Desborough", "Rothwell", "Weldon", "Gretton"
       ],
-      "description": "DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. Serving Corby and a 20-mile radius with planning, design, and structural services."
+      "description": "Full-service architecture practice delivering projects from concept to completion using BIM."
     }
     </script>
 
-    <!-- Estilos críticos para el cursor y base (el resto se inyecta desde index.css vía Vite) -->
+    <!-- Critical minimal styles; Tailwind & app CSS are bundled by Vite -->
     <style>
       html, body {
         margin: 0;
@@ -49,11 +58,9 @@
         overflow-x: hidden;
         cursor: none;
       }
-      
       a, button, input, select, textarea, [role="button"], .cursor-pointer {
         cursor: none !important;
       }
-
       #custom-cursor {
         position: fixed;
         top: 0;
@@ -68,80 +75,48 @@
         transform: translate(-50%, -50%);
         will-change: transform, top, left;
       }
-
       #custom-cursor.active {
         background-color: #ff0000;
         transform: translate(-50%, -50%) scale(3);
       }
-
       @media (hover: none) and (pointer: coarse) {
         body { cursor: auto; background-color: #ffffff !important; }
         a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
         #custom-cursor { display: none; }
       }
-    </style>
-
-    <!-- Import map para las dependencias -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-          "react/": "https://esm.sh/react@^19.2.3/",
-          "react": "https://esm.sh/react@^19.2.3",
-          "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
-        }
+      @media (prefers-reduced-motion: reduce) {
+        #custom-cursor { transition: none; }
       }
-    </script>
+    </style>
   </head>
 
   <body>
     <div id="root"></div>
     <div id="custom-cursor"></div>
 
-    <!-- Script del cursor -->
+    <!-- Custom cursor script -->
     <script>
       const cursor = document.getElementById("custom-cursor");
-
       if (cursor) {
         window.addEventListener("mousemove", (e) => {
           cursor.style.top = e.clientY + "px";
           cursor.style.left = e.clientX + "px";
-          
           const target = e.target;
-          const isInteractive = target.closest('button') || 
-                               target.closest('a') || 
-                               target.closest('input') || 
-                               target.closest('textarea') || 
-                               target.closest('select') || 
-                               target.closest('.cursor-pointer');
-          
+          const isInteractive = target.closest('button, a, input, textarea, select, .cursor-pointer');
           if (isInteractive) {
             cursor.classList.add('active');
           } else {
             cursor.classList.remove('active');
           }
         });
-
-        window.addEventListener("mousedown", () => {
-          cursor.classList.add("active");
-        });
-
-        window.addEventListener("mouseup", () => {
-          cursor.classList.remove("active");
-        });
-
-        window.addEventListener("mouseleave", () => {
-          cursor.style.opacity = "0";
-        });
-
-        window.addEventListener("mouseenter", () => {
-          cursor.style.opacity = "1";
-        });
+        window.addEventListener("mousedown", () => cursor.classList.add("active"));
+        window.addEventListener("mouseup", () => cursor.classList.remove("active"));
+        window.addEventListener("mouseleave", () => { cursor.style.opacity = "0"; });
+        window.addEventListener("mouseenter", () => { cursor.style.opacity = "1"; });
       }
     </script>
 
-    <!-- Punto de entrada de la aplicación (Vite lo transformará) -->
+    <!-- Vite entry point -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
