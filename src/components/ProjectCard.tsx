@@ -1,76 +1,60 @@
-import React from "react";
-import { Project, StudioSection } from "../types";
+import React from 'react';
+import { Project, StudioSection } from '../types';
 
-interface ProjectCardProps {
-  project: Project;
-  onClick: (project: Project) => void;
-  currentSectionName: StudioSection; // Type safer than string
-}
+const capitalizeTitle = (title: string): string => {
+  if (!title) return '';
+  const words = title.toLowerCase().split(' ');
+  const articlesAndConjunctions = ['el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'y'];
 
-/**
- * Title case for English with common short words kept lowercase (except if first/last).
- * Examples: "house extension in corby" -> "House Extension in Corby"
- */
-const toEnglishTitleCase = (title: string): string => {
-  if (!title) return "";
-  const smallWords = new Set([
-    "a", "an", "the",
-    "and", "but", "or", "nor",
-    "for", "so", "yet",
-    "at", "by", "in", "of", "on", "to", "up", "via", "off", "per", "into", "with", "from"
-  ]);
-
-  const words = title.trim().split(/\s+/);
-  return words
-    .map((raw, idx) => {
-      const w = raw.toLowerCase();
-      const isFirst = idx === 0;
-      const isLast = idx === words.length - 1;
-      if (!isFirst && !isLast && smallWords.has(w)) return w;
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    })
-    .join(" ");
+  return words.map((word, index) => {
+    if (index > 0 && articlesAndConjunctions.includes(word)) {
+      return word;
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
 };
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  project,
-  onClick,
-  currentSectionName,
-}) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, currentSectionName }) => {
   const isStaticVisualSection = currentSectionName === StudioSection.STRUCTURE;
 
-  // Prefer project-specific alt text; fall back gracefully
-  const altText =
-    project?.alt ||
-    project?.title ||
-    "Architecture project image";
-
-  // Prefer a local fallback in /public for reliability in production
-  const FALLBACK_IMG = "/fallbacks/project-fallback.jpg";
-
-  const handleKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick(project);
-    }
-  };
-
   return (
-    <div
-      className="group cursor-pointer mb-16 outline-none"
+    <div 
+      className="group cursor-pointer mb-16"
       onClick={() => onClick(project)}
-      role="button"
-      tabIndex={0}
-      aria-label={project?.title ? `Open project: ${toEnglishTitleCase(project.title)}` : "Open project"}
-      onKeyUp={handleKeyUp}
     >
       <div className="project-image-container relative aspect-[4/5] w-full bg-gray-100 overflow-hidden">
-        <img
-          src={project.imageUrl}
-          alt={altText}
+        <img 
+          src={project.imageUrl} 
+          alt={project.title || 'Project Image'}
           className={`object-cover w-full h-full transition-all ease-in-out ${
-            isStaticVisualSection ? "" : "project-card-image-effects"
+            isStaticVisualSection 
+              ? '' 
+              : 'project-card-image-effects'
           }`}
-          style={{ transitionDuration: "1400ms" }}
-          loading="lazy"
+          style={{ transitionDuration: '1400ms' }}
           onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200';
+          }}
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-black/0 transition-colors duration-500"></div>
+        
+        {(!isStaticVisualSection && project.title) && (
+          <div className="absolute top-8 left-8 right-8 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out">
+            <h3 className="text-xl font-normal tracking-[0.15em]">
+              {capitalizeTitle(project.title)}
+            </h3>
+          </div>
+        )}
+      </div>
+
+      {isStaticVisualSection && project.title && (
+        <h3 className="text-xl font-normal tracking-[0.15em] mt-8 text-black group-hover:text-red-600 transition-colors">
+          {capitalizeTitle(project.title)}
+        </h3>
+      )}
+    </div>
+  );
+};
+
+export default ProjectCard;
