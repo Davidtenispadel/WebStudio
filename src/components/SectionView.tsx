@@ -1,7 +1,9 @@
 /*
- * SECTIONVIEW.TSX — Unified Version
- * - Aesthetic A applied to all sections
- * - ENQUIRY section preserved exactly as required (structure and style unchanged)
+ * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader)
+ * - Aesthetic A applied to all sections (unchanged)
+ * - ENQUIRY: Modern drag & drop uploader (upload -> URLs -> email)
+ * - No Base64; uploads go to https://api.dbsdesigner.com/upload.php
+ * - Sends fileUrls in sendProjectEnquiry
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -11,9 +13,11 @@ import {
   ChevronRight,
   CheckCircle,
   Upload,
-  Paperclip,
   X as CloseIcon,
   Loader2,
+  Link2,
+  File as FileIcon,
+  AlertCircle,
 } from "lucide-react";
 import {
   urbanMasterplanningHeaderDescription,
@@ -21,12 +25,44 @@ import {
 } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 
+// ============================
+// Types para el uploader
+// ============================
+type UploadStatus = "uploading" | "uploaded" | "error";
+
+interface UploadedItem {
+  id: string;
+  name: string;
+  size: number;
+  type?: string;
+  progress: number; // 0..100
+  status: UploadStatus;
+  url?: string; // Set al finalizar
+  error?: string;
+}
+
 interface SectionViewProps {
   category: CategoryGroup;
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
 }
+
+const UPLOAD_ENDPOINT = "https://api.dbsdesigner.com/upload.php";
+
+// Util: formatear bytes
+const formatBytes = (bytes: number) => {
+  if (!bytes && bytes !== 0) return "";
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 B";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
+  return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
+};
+
+// Generar id simple por archivo
+const fileId = (f: File) =>
+  `${f.name}-${f.size}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`;
 
 const SectionView: React.FC<SectionViewProps> = ({
   category,
@@ -52,7 +88,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const isFirstRender = useRef(true);
 
   // ============================
-  // ENQUIRY State (unchanged)
+  // ENQUIRY Form State
   // ============================
   const [enquiryStep, setEnquiryStep] = useState(1);
   const [isSending, setIsSending] = useState(false);
@@ -60,8 +96,12 @@ const SectionView: React.FC<SectionViewProps> = ({
     name: "",
     email: "",
     message: "",
-    files: [] as File[],
   });
+
+  // Uploader (A2) — Modernizado
+  const [items, setItems] = useState<UploadedItem[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================
@@ -123,65 +163,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
-  // ============================
-  // ENQUIRY File Helpers (unchanged)
-  // ============================
-  const fileToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = () =>
-        resolve((reader.result as string).split(",")[1] ?? "");
-      reader.onerror = reject;
-    });
-
-  const handleEnquirySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSending(true);
-
-    const processed = await Promise.all(
-      formData.files.map(async (file) => ({
-        name: file.name,
-        type: file.type,
-        data: await fileToBase64(file),
-      }))
-    );
-
-    const success = await sendProjectEnquiry({
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-      files: processed,
-    });
-
-    if (success) {
-      setEnquiryStep(4);
-      setTimeout(() => {
-        setFormData({ name: "", email: "", message: "", files: [] });
-      }, 2000);
-    }
-
-    setIsSending(false);
-  };
-
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (e.target.files) {
-      setFormData({
-        ...formData,
-        files: Array.from(e.target.files),
-      });
-    }
-  };
-
-  const removeFile = (index: number) =>
-    setFormData({
-      ...formData,
-      files: formData.files.filter((_, i) => i !== index),
-    });
-
   if (!isActive) return null;
 
   // ============================
@@ -201,9 +182,200 @@ const SectionView: React.FC<SectionViewProps> = ({
     displayedCategory.name === StudioSection.BEHIND_DB;
 
   const scaleTarget =
-    typeof window !== "undefined" && window.innerWidth >= 768
-      ? 0.5
-      : 0.4;
+    typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
+
+  // ============================
+  // Uploader Logic (A2)
+  // ============================
+
+  // Subir múltiples archivos (paralelo), con progreso por archivo
+  const uploadFiles = (files: File[]) => {
+    if (!files?.length) return;
+    setIsUploading(true);
+
+    // Inicializar items con estado "uploading"
+    const initial: UploadedItem[] = files.map((f) => ({
+      id: fileId(f),
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      progress: 0,
+      status: "uploading",
+    }));
+    setItems((prev) => [...prev, ...initial]);
+
+    // Lanzar subidas en paralelo
+    Promise.all(
+      files.map((file, idx) => uploadSingleFile(file, initial[idx].id))
+    )
+      .catch(() => {
+        // Silencio: cada archivo gestiona su propio error
+      })
+      .finally(() => {
+        setIsUploading(false);
+      });
+  };
+
+  // Subida individual con XHR para progreso
+  const uploadSingleFile = (file: File, id: string) => {
+    return new Promise<void>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable) return;
+        const pct = Math.round((e.loaded / e.total) * 100);
+        setItems((prev) =>
+          prev.map((it) => (it.id === id ? { ...it, progress: pct } : it))
+        );
+      };
+
+      xhr.onload = () => {
+        const statusOK = xhr.status >= 200 && xhr.status < 300;
+        if (!statusOK) {
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === id
+                ? {
+                    ...it,
+                    status: "error",
+                    error: `HTTP ${xhr.status}: ${xhr.statusText || "Error al subir"}`,
+                  }
+                : it
+            )
+          );
+          return resolve();
+        }
+
+        // Parseo defensivo de la respuesta
+        let json: any = null;
+        try {
+          json = JSON.parse(xhr.responseText);
+        } catch {
+          // A veces servidores devuelven texto plano con URL
+        }
+
+        // Detectar URL en distintas formas
+        let url: string | undefined;
+        if (typeof json === "string" && json.startsWith("http")) {
+          url = json;
+        } else if (json) {
+          url =
+            json?.url ||
+            json?.data?.url ||
+            (Array.isArray(json) && (json[0]?.url || (typeof json[0] === "string" ? json[0] : undefined))) ||
+            json?.location ||
+            json?.link;
+        } else if (typeof xhr.responseText === "string" && xhr.responseText.startsWith("http")) {
+          url = xhr.responseText.trim();
+        }
+
+        if (!url) {
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === id
+                ? {
+                    ...it,
+                    status: "error",
+                    error: "No se recibió una URL válida desde el servidor.",
+                  }
+                : it
+            )
+          );
+          return resolve();
+        }
+
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === id
+              ? { ...it, status: "uploaded", progress: 100, url }
+              : it
+          )
+        );
+        resolve();
+      };
+
+      xhr.onerror = () => {
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === id
+              ? { ...it, status: "error", error: "Fallo de red al subir archivo." }
+              : it
+          )
+        );
+        resolve();
+      };
+
+      xhr.open("POST", UPLOAD_ENDPOINT, true);
+      xhr.withCredentials = false; // CORS-friendly
+      xhr.send(formData);
+    });
+  };
+
+  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length) uploadFiles(files);
+    // Reset input para permitir la misma selección de nuevo
+    e.currentTarget.value = "";
+  };
+
+  const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const dtFiles = Array.from(e.dataTransfer.files || []);
+    if (dtFiles.length) uploadFiles(dtFiles);
+  };
+
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!dragActive) setDragActive(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((it) => it.id !== id));
+  };
+
+  const clearErrored = () => {
+    setItems((prev) => prev.filter((it) => it.status !== "error"));
+  };
+
+  const fileUrls = items.filter((it) => it.status === "uploaded" && it.url).map((it) => it.url!) ;
+
+  // ============================
+  // Submit Enquiry (URLs only)
+  // ============================
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isUploading) return; // Evitar envío durante carga
+    setIsSending(true);
+
+    const success = await sendProjectEnquiry({
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+      fileUrls, // <<<< Solo URLs
+    });
+
+    if (success) {
+      setEnquiryStep(4);
+      setTimeout(() => {
+        setFormData({ name: "", email: "", message: "" });
+        // Opcional: mantener archivos subidos para que el usuario los reutilice
+        // Si prefieres limpiar: setItems([]);
+      }, 2000);
+    }
+
+    setIsSending(false);
+  };
 
   // ============================
   // RENDER
@@ -238,25 +410,17 @@ const SectionView: React.FC<SectionViewProps> = ({
             : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none justify-start"
         }`}
         style={{
-          transitionTimingFunction:
-            "cubic-bezier(0.77, 0, 0.175, 1)",
+          transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
           transitionDuration: "1000ms",
-          width:
-            stage === "intro"
-              ? "100%"
-              : "calc(100% - 80px)",
+          width: stage === "intro" ? "100%" : "calc(100% - 80px)",
         }}
       >
         <div
           className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
           style={{
-            transitionTimingFunction:
-              "cubic-bezier(0.77, 0, 0.175, 1)",
+            transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
             transitionDuration: "1000ms",
-            transform:
-              stage === "gallery"
-                ? `scale(${scaleTarget})`
-                : "scale(1)",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -265,19 +429,13 @@ const SectionView: React.FC<SectionViewProps> = ({
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
                 isEnquiry ? "text-white" : "text-black"
-              } ${
-                showDB
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-20"
-              }`}
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
               style={{
                 fontSize:
-                  typeof window !== "undefined" &&
-                  window.innerWidth >= 768
+                  typeof window !== "undefined" && window.innerWidth >= 768
                     ? "12rem"
                     : "9rem",
-                transitionTimingFunction:
-                  "cubic-bezier(0.23, 1, 0.32, 1)",
+                transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
                 transitionDuration: "1000ms",
               }}
             >
@@ -287,11 +445,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             <span
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
-              } ${
-                showPlus
-                  ? "opacity-100 scale-100 rotate-0"
-                  : "opacity-0 scale-0 rotate-45"
-              }`}
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
               style={{ transitionDuration: "700ms" }}
             >
               +
@@ -303,9 +457,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             className="transition-all ease-out overflow-hidden flex-1"
             style={{
               transitionDuration: "700ms",
-              transform: showName
-                ? "translateX(0)"
-                : "translateX(-48px)",
+              transform: showName ? "translateX(0)" : "translateX(-48px)",
               opacity: showName ? 1 : 0,
             }}
           >
@@ -395,21 +547,18 @@ const SectionView: React.FC<SectionViewProps> = ({
       ============================ */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === "gallery"
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
+          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "340px" }}
       >
         <div className="max-w-7xl mx-auto">
           {/* ============================
-              ENQUIRY SECTION (unchanged)
+              ENQUIRY SECTION
           ============================ */}
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50]">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
-                  
                   {/* Left Column */}
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
                     <h3 className="text-3xl md:text-4xl font-light leading-tight">
@@ -434,9 +583,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                         <div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">
                           Telephone
                         </div>
-                        <div className="mt-2 text-base">
-                          +44 07955018937
-                        </div>
+                        <div className="mt-2 text-base">+44 07955018937</div>
                       </div>
 
                       <div>
@@ -455,10 +602,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
                   {/* Right Column (Form) */}
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
-                    <form
-                      onSubmit={handleEnquirySubmit}
-                      className="space-y-6"
-                    >
+                    <form onSubmit={handleEnquirySubmit} className="space-y-6">
                       {/* Name + Email */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -522,85 +666,173 @@ const SectionView: React.FC<SectionViewProps> = ({
                         />
                       </div>
 
-                      {/* Attachments */}
+                      {/* Modernized Uploader (Drag & Drop) */}
                       <div>
                         <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">
                           Attachments
                         </label>
 
-                        <div className="rounded-xl bg-neutral-700/50 border border-white/15 p-5 md:p-6 text-white/70">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              !isSending &&
-                              fileInputRef.current?.click()
-                            }
-                            className={`w-full flex flex-col items-center justify-center gap-3 py-8 rounded-lg transition ${
-                              isSending
-                                ? "opacity-50 cursor-not-allowed"
-                                : "hover:bg-white/5"
-                            }`}
-                          >
-                            <Upload className="w-7 h-7 opacity-80" />
-                            <span className="text-xs">
-                              Click to attach blueprints, photos, or project
-                              requirements
-                            </span>
-                            {formData.files.length > 0 && (
-                              <span className="text-xs text-red-400 font-bold">
-                                {formData.files.length} file(s) selected
-                              </span>
+                        <div
+                          className={[
+                            "rounded-xl border-2 border-dashed",
+                            dragActive
+                              ? "border-red-500 bg-red-500/10"
+                              : "border-white/20 bg-neutral-700/40",
+                            "p-6 md:p-8 transition-colors",
+                          ].join(" ")}
+                          onDragOver={onDragOver}
+                          onDragLeave={onDragLeave}
+                          onDrop={onDropFiles}
+                          onClick={() => !isSending && fileInputRef.current?.click()}
+                          role="button"
+                          aria-label="Zone to upload files"
+                        >
+                          <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
+                            <div className="p-3 rounded-full bg-white/10 border border-white/10">
+                              <Upload className="w-6 h-6 text-white/80" />
+                            </div>
+                            <div className="text-sm">
+                              <span className="text-white">
+                                Drag &amp; drop files here
+                              </span>{" "}
+                              <span className="text-white/60">or</span>{" "}
+                              <span className="text-red-400 underline">click to browse</span>
+                            </div>
+                            <div className="text-xs text-white/50">
+                              Blueprints, PDFs, images… Large files supported.
+                            </div>
+                            {(isUploading || items.some((it) => it.status === "uploading")) && (
+                              <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">
+                                Uploading…
+                              </div>
                             )}
-                          </button>
+                          </div>
 
                           <input
                             ref={fileInputRef}
                             type="file"
                             className="hidden"
                             multiple
-                            onChange={handleFileChange}
+                            onChange={onSelectFiles}
                             disabled={isSending}
                           />
+                        </div>
 
-                          {formData.files.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-4">
-                              {formData.files.map((file, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/10"
-                                >
-                                  <Paperclip className="w-3 h-3 text-red-400" />
-                                  <span className="text-[10px] text-white/80 max-w-[120px] truncate">
-                                    {file.name}
-                                  </span>
+                        {/* Lista de archivos con progreso / estado */}
+                        {items.length > 0 && (
+                          <div className="mt-5 space-y-3">
+                            {items.map((it) => (
+                              <div
+                                key={it.id}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="mt-0.5">
+                                    {it.status === "uploaded" ? (
+                                      <CheckCircle className="w-4 h-4 text-green-400" />
+                                    ) : it.status === "error" ? (
+                                      <AlertCircle className="w-4 h-4 text-red-400" />
+                                    ) : (
+                                      <FileIcon className="w-4 h-4 text-white/70" />
+                                    )}
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-sm text-white/90 truncate">
+                                        {it.name}
+                                      </div>
+                                      <div className="text-[11px] text-white/50">
+                                        · {formatBytes(it.size)}
+                                      </div>
+                                    </div>
+
+                                    {/* Progreso / Estado */}
+                                    {it.status === "uploading" && (
+                                      <div className="mt-2">
+                                        <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                          <div
+                                            className="h-2 bg-red-500 transition-all"
+                                            style={{ width: `${it.progress}%` }}
+                                          />
+                                        </div>
+                                        <div className="text-[11px] text-white/60 mt-1">
+                                          {it.progress}%
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {it.status === "error" && (
+                                      <div className="text-xs text-red-400 mt-2">
+                                        {it.error || "Upload failed"}
+                                      </div>
+                                    )}
+
+                                    {it.status === "uploaded" && it.url && (
+                                      <div className="mt-2 flex items-center gap-3">
+                                        <a
+                                          href={it.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1.5 text-xs text-red-300 hover:text-red-200 underline"
+                                        >
+                                          <Link2 className="w-3.5 h-3.5" />
+                                          Open file
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            try {
+                                              await navigator.clipboard.writeText(it.url!);
+                                            } catch {}
+                                          }}
+                                          className="text-xs text-white/60 hover:text-white"
+                                        >
+                                          Copy URL
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Remove */}
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      !isSending && removeFile(idx)
-                                    }
-                                    className="hover:text-red-400 text-white/40 transition-colors"
+                                    onClick={() => removeItem(it.id)}
+                                    className="text-white/40 hover:text-red-400 transition-colors"
+                                    title="Remove from list"
                                   >
-                                    <CloseIcon className="w-3 h-3" />
+                                    <CloseIcon className="w-4 h-4" />
                                   </button>
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                              </div>
+                            ))}
+
+                            {/* Acciones auxiliares */}
+                            {items.some((x) => x.status === "error") && (
+                              <div className="pt-1">
+                                <button
+                                  type="button"
+                                  onClick={clearErrored}
+                                  className="text-xs text-white/60 hover:text-white underline"
+                                >
+                                  Clear failed uploads
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Submit */}
                       <button
                         type="submit"
-                        disabled={isSending}
+                        disabled={isSending || isUploading}
                         className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="text-xs font-bold tracking-[0.4em] uppercase">
-                          {isSending
-                            ? "Transmitting..."
-                            : "Submit to db+"}
+                          {isSending ? "Transmitting..." : isUploading ? "Uploading…" : "Submit to db+"}
                         </span>
-                        {isSending ? (
+                        {isSending || isUploading ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                           <ChevronRight className="w-5 h-5" />
@@ -634,7 +866,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               </div>
             </div>
-
           ) : isBehindDBSection ? (
             // ============================
             // BEHIND DB SECTION
@@ -661,8 +892,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     className="w-full h-auto object-cover"
                     style={{
                       aspectRatio:
-                        typeof window !== "undefined" &&
-                        window.innerWidth < 768
+                        typeof window !== "undefined" && window.innerWidth < 768
                           ? "1/1"
                           : "unset",
                     }}
@@ -671,7 +901,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               </div>
             </div>
-
           ) : (
             // ============================
             // REMAINING SECTIONS
@@ -686,11 +915,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 isDesignSection ||
                 isProjectSupportSection ||
                 isArchitectureSection) && (
-                <div
-                  className={`flex flex-col gap-12 ${
-                    isDesignSection ? "mb-8" : "mb-24"
-                  }`}
-                >
+                <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
                   <div className="w-full max-w-5xl">
                     <div
                       className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg"
@@ -727,7 +952,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
-                      alt="Design & Management Vision"
+                      alt="Design &amp; Management Vision"
                       className="w-full h-auto object-cover"
                       loading="lazy"
                     />
@@ -756,3 +981,4 @@ const SectionView: React.FC<SectionViewProps> = ({
 };
 
 export default SectionView;
+``
