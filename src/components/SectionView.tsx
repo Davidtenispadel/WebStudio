@@ -1,8 +1,8 @@
 /*
- * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader)
+ * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader compatible with upload.php)
  * - Aesthetic A applied to all sections (unchanged)
- * - ENQUIRY: Modern drag & drop uploader (upload -> URLs -> email)
- * - No Base64; uploads go to https://api.dbsdesigner.com/upload.php
+ * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
+ * - No Base64; uploads go to https://api.dbsdesigner.com/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
  */
 
@@ -26,7 +26,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// Types para el uploader
+// Types for modern uploader
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 
@@ -35,9 +35,9 @@ interface UploadedItem {
   name: string;
   size: number;
   type?: string;
-  progress: number; // 0..100
+  progress: number; // 0..100 (batch progress reflected per item)
   status: UploadStatus;
-  url?: string; // Set al finalizar
+  url?: string; // set when uploaded
   error?: string;
 }
 
@@ -50,7 +50,7 @@ interface SectionViewProps {
 
 const UPLOAD_ENDPOINT = "https://api.dbsdesigner.com/upload.php";
 
-// Util: formatear bytes
+// Format bytes utility
 const formatBytes = (bytes: number) => {
   if (!bytes && bytes !== 0) return "";
   const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -60,7 +60,10 @@ const formatBytes = (bytes: number) => {
   return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
 };
 
-// Generar id simple por archivo
+// Local safeName (to map server response names)
+const toSafeName = (name: string) => name.replace(/[^A-Za-z0-9._-]/g, "_");
+
+// Generate simple id for UI items
 const fileId = (f: File) =>
   `${f.name}-${f.size}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -98,7 +101,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     message: "",
   });
 
-  // Uploader (A2) — Modernizado
+  // Modern Uploader (A2)
   const [items, setItems] = useState<UploadedItem[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -185,15 +188,14 @@ const SectionView: React.FC<SectionViewProps> = ({
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Uploader Logic (A2)
+  // Uploader Logic (A2 — batch upload, files[])
   // ============================
 
-  // Subir múltiples archivos (paralelo), con progreso por archivo
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
     setIsUploading(true);
 
-    // Inicializar items con estado "uploading"
+    // Initialize items (UI)
     const initial: UploadedItem[] = files.map((f) => ({
       id: fileId(f),
       name: f.name,
@@ -204,119 +206,104 @@ const SectionView: React.FC<SectionViewProps> = ({
     }));
     setItems((prev) => [...prev, ...initial]);
 
-    // Lanzar subidas en paralelo
-    Promise.all(
-      files.map((file, idx) => uploadSingleFile(file, initial[idx].id))
-    )
-      .catch(() => {
-        // Silencio: cada archivo gestiona su propio error
-      })
-      .finally(() => {
+    // Single POST with multiple files -> FormData "files[]"
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    for (const f of files) formData.append("files[]", f);
+
+    xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      // Reflect batch progress into each new item
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, progress: pct }
+            : it
+        )
+      );
+    };
+
+    xhr.onload = () => {
+      const ok = xhr.status >= 200 && xhr.status < 300;
+      if (!ok) {
+        setItems((prev) =>
+          prev.map((it) =>
+            initial.some((i) => i.id === it.id)
+              ? { ...it, status: "error", error: `HTTP ${xhr.status}` }
+              : it
+          )
+        );
         setIsUploading(false);
-      });
-  };
+        return;
+      }
 
-  // Subida individual con XHR para progreso
-  const uploadSingleFile = (file: File, id: string) => {
-    return new Promise<void>((resolve) => {
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append("file", file);
-
-      xhr.upload.onprogress = (e) => {
-        if (!e.lengthComputable) return;
-        const pct = Math.round((e.loaded / e.total) * 100);
-        setItems((prev) =>
-          prev.map((it) => (it.id === id ? { ...it, progress: pct } : it))
-        );
-      };
-
-      xhr.onload = () => {
-        const statusOK = xhr.status >= 200 && xhr.status < 300;
-        if (!statusOK) {
-          setItems((prev) =>
-            prev.map((it) =>
-              it.id === id
-                ? {
-                    ...it,
-                    status: "error",
-                    error: `HTTP ${xhr.status}: ${xhr.statusText || "Error al subir"}`,
-                  }
-                : it
-            )
-          );
-          return resolve();
-        }
-
-        // Parseo defensivo de la respuesta
-        let json: any = null;
-        try {
-          json = JSON.parse(xhr.responseText);
-        } catch {
-          // A veces servidores devuelven texto plano con URL
-        }
-
-        // Detectar URL en distintas formas
-        let url: string | undefined;
-        if (typeof json === "string" && json.startsWith("http")) {
-          url = json;
-        } else if (json) {
-          url =
-            json?.url ||
-            json?.data?.url ||
-            (Array.isArray(json) && (json[0]?.url || (typeof json[0] === "string" ? json[0] : undefined))) ||
-            json?.location ||
-            json?.link;
-        } else if (typeof xhr.responseText === "string" && xhr.responseText.startsWith("http")) {
-          url = xhr.responseText.trim();
-        }
-
-        if (!url) {
-          setItems((prev) =>
-            prev.map((it) =>
-              it.id === id
-                ? {
-                    ...it,
-                    status: "error",
-                    error: "No se recibió una URL válida desde el servidor.",
-                  }
-                : it
-            )
-          );
-          return resolve();
-        }
-
+      let json: any = null;
+      try {
+        json = JSON.parse(xhr.responseText);
+      } catch {
+        // Mark batch items as error
         setItems((prev) =>
           prev.map((it) =>
-            it.id === id
-              ? { ...it, status: "uploaded", progress: 100, url }
+            initial.some((i) => i.id === it.id)
+              ? { ...it, status: "error", error: "Invalid server response" }
               : it
           )
         );
-        resolve();
-      };
+        setIsUploading(false);
+        return;
+      }
 
-      xhr.onerror = () => {
-        setItems((prev) =>
-          prev.map((it) =>
-            it.id === id
-              ? { ...it, status: "error", error: "Fallo de red al subir archivo." }
-              : it
-          )
-        );
-        resolve();
-      };
+      // Expected array: [{ name, url } | { name, error: true }, ...]
+      const byName = new Map<string, { url?: string; error?: boolean }>();
+      if (Array.isArray(json)) {
+        json.forEach((r) => {
+          if (r && typeof r === "object" && r.name) {
+            byName.set(r.name, { url: r.url, error: r.error });
+          }
+        });
+      }
 
-      xhr.open("POST", UPLOAD_ENDPOINT, true);
-      xhr.withCredentials = false; // CORS-friendly
-      xhr.send(formData);
-    });
+      setItems((prev) =>
+        prev.map((it) => {
+          if (!initial.some((i) => i.id === it.id)) return it;
+          // Server responds with safeName; map using local safe transform
+          const safe = toSafeName(it.name);
+          const r = byName.get(safe);
+          if (!r) {
+            // If missing, mark as error to avoid ghost items
+            return { ...it, status: "error", error: "File not returned by server" };
+          }
+          if (r.error) {
+            return { ...it, status: "error", error: "Upload failed" };
+          }
+          return { ...it, status: "uploaded", progress: 100, url: r.url };
+        })
+      );
+
+      setIsUploading(false);
+    };
+
+    xhr.onerror = () => {
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, status: "error", error: "Network error" }
+            : it
+        )
+      );
+      setIsUploading(false);
+    };
+
+    xhr.open("POST", UPLOAD_ENDPOINT, true);
+    xhr.withCredentials = false;
+    xhr.send(formData);
   };
 
   const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length) uploadFiles(files);
-    // Reset input para permitir la misma selección de nuevo
+    // Reset input to allow re-selecting same files
     e.currentTarget.value = "";
   };
 
@@ -348,29 +335,31 @@ const SectionView: React.FC<SectionViewProps> = ({
     setItems((prev) => prev.filter((it) => it.status !== "error"));
   };
 
-  const fileUrls = items.filter((it) => it.status === "uploaded" && it.url).map((it) => it.url!) ;
+  const fileUrls = items
+    .filter((it) => it.status === "uploaded" && it.url)
+    .map((it) => it.url!) ;
 
   // ============================
   // Submit Enquiry (URLs only)
   // ============================
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isUploading) return; // Evitar envío durante carga
+    if (isUploading) return; // avoid submit while uploading
     setIsSending(true);
 
     const success = await sendProjectEnquiry({
       name: formData.name,
       email: formData.email,
       message: formData.message,
-      fileUrls, // <<<< Solo URLs
+      fileUrls, // only URLs
     });
 
     if (success) {
       setEnquiryStep(4);
       setTimeout(() => {
         setFormData({ name: "", email: "", message: "" });
-        // Opcional: mantener archivos subidos para que el usuario los reutilice
-        // Si prefieres limpiar: setItems([]);
+        // Optional: clear uploaded items as well
+        // setItems([]);
       }, 2000);
     }
 
@@ -678,7 +667,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                             dragActive
                               ? "border-red-500 bg-red-500/10"
                               : "border-white/20 bg-neutral-700/40",
-                            "p-6 md:p-8 transition-colors",
+                            "p-6 md:p-8 transition-colors cursor-pointer",
                           ].join(" ")}
                           onDragOver={onDragOver}
                           onDragLeave={onDragLeave}
@@ -701,7 +690,8 @@ const SectionView: React.FC<SectionViewProps> = ({
                             <div className="text-xs text-white/50">
                               Blueprints, PDFs, images… Large files supported.
                             </div>
-                            {(isUploading || items.some((it) => it.status === "uploading")) && (
+                            {(isUploading ||
+                              items.some((it) => it.status === "uploading")) && (
                               <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">
                                 Uploading…
                               </div>
@@ -718,7 +708,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                           />
                         </div>
 
-                        {/* Lista de archivos con progreso / estado */}
+                        {/* Files list with progress / state */}
                         {items.length > 0 && (
                           <div className="mt-5 space-y-3">
                             {items.map((it) => (
@@ -747,7 +737,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                                       </div>
                                     </div>
 
-                                    {/* Progreso / Estado */}
+                                    {/* Progress / State */}
                                     {it.status === "uploading" && (
                                       <div className="mt-2">
                                         <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
@@ -807,7 +797,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                               </div>
                             ))}
 
-                            {/* Acciones auxiliares */}
+                            {/* Aux actions */}
                             {items.some((x) => x.status === "error") && (
                               <div className="pt-1">
                                 <button
@@ -830,9 +820,13 @@ const SectionView: React.FC<SectionViewProps> = ({
                         className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="text-xs font-bold tracking-[0.4em] uppercase">
-                          {isSending ? "Transmitting..." : isUploading ? "Uploading…" : "Submit to db+"}
+                          {isSending
+                            ? "Transmitting..."
+                            : isUploading
+                            ? "Uploading…"
+                            : "Submit to db+"}
                         </span>
-                        {isSending || isUploading ? (
+                        {(isSending || isUploading) ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                           <ChevronRight className="w-5 h-5" />
@@ -952,7 +946,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
-                      alt="Design &amp; Management Vision"
+                      alt="Design & Management Vision"
                       className="w-full h-auto object-cover"
                       loading="lazy"
                     />
