@@ -1,7 +1,14 @@
 <?php
+// Allow your Cloudflare frontend
 header("Access-Control-Allow-Origin: https://dbsdesigner.com");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
+
+// Increase server limits (1000 MB)
+ini_set('upload_max_filesize', '1000M');
+ini_set('post_max_size', '1000M');
+ini_set('max_execution_time', '300');
+ini_set('max_input_time', '300');
 
 $uploadDir = __DIR__ . "/uploads/";
 
@@ -13,20 +20,18 @@ $response = [];
 
 foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
     $name = basename($_FILES['files']['name'][$key]);
-
     $safeName = preg_replace("/[^A-Za-z0-9._-]/", "_", $name);
-    $uniqueName = time() . "_" . $safeName;
-
-    $target = $uploadDir . $uniqueName;
+    $unique = time() . "_" . $safeName;
+    $target = $uploadDir . $unique;
 
     if (move_uploaded_file($tmpName, $target)) {
         $response[] = [
-            "name" => $uniqueName,
-            "url"  => "https://api.dbsdesigner.com/uploads/" . $uniqueName
+            "name" => $safeName,
+            "url"  => "https://api.dbsdesigner.com/uploads/" . $unique
         ];
     } else {
         $response[] = [
-            "name" => $uniqueName,
+            "name"  => $safeName,
             "error" => true
         ];
     }
