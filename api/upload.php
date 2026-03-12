@@ -1,38 +1,65 @@
 <?php
-// Allow your Cloudflare frontend
-header("Access-Control-Allow-Origin: https://dbsdesigner.com");
-header("Access-Control-Allow-Methods: POST");
+// CORS dinámico para permitir únicamente tus dominios reales
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowed = [
+    "https://dbsdesigner.com",
+    "https://www.dbsdesigner.com"
+];
+
+if (in_array($origin, $allowed, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
+
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Increase server limits (1000 MB)
-ini_set('upload_max_filesize', '1000M');
-ini_set('post_max_size', '1000M');
-ini_set('max_execution_time', '300');
-ini_set('max_input_time', '300');
+// Preflight
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
+// Ruta uploads
 $uploadDir = __DIR__ . "/uploads/";
-
 if (!file_exists($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    mkdir($uploadDir, 0775, true);
 }
 
 $response = [];
 
+if (!isset($_FILES['files']) || !is_array($_FILES['files']['tmp_name'])) {
+    echo json_encode(["error" => "No files[] received"]);
+    exit;
+}
+
+// Procesar cada archivo
 foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
-    $name = basename($_FILES['files']['name'][$key]);
-    $safeName = preg_replace("/[^A-Za-z0-9._-]/", "_", $name);
-    $unique = time() . "_" . $safeName;
-    $target = $uploadDir . $unique;
+
+    $originalName = basename($_FILES['files']['name'][$key] ?? "file");
+    $safeName = preg_replace("/[^A-Za-z0-9._-]/", "_", $originalName);
+    $uniqueName = time() . "_" . bin2hex(random_bytes(4)) . "_" . $safeName;
+
+    $target = $uploadDir . $uniqueName;
+
+    if (!is_uploaded_file($tmpName)) {
+        $response[] = [
+            "name" => $safeName,
+            "error" => true,
+            "msg" => "Invalid temp file"
+        ];
+        continue;
+    }
 
     if (move_uploaded_file($tmpName, $target)) {
         $response[] = [
-            "name" => $safeName,
-            "url"  => "https://api.dbsdesigner.com/uploads/" . $unique
+            "name"  => $safeName,
+            "saved" => $uniqueName,
+            "url"   => "https://dbsdesigner.com/api/uploads/" . $uniqueName
         ];
     } else {
         $response[] = [
             "name"  => $safeName,
-            "error" => true
+            "error" => true,
+            "msg"   => "Failed to move file"
         ];
     }
 }
