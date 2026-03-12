@@ -1,118 +1,90 @@
-// ----------------------------
-// Modern Uploader (A2, stable)
-// ----------------------------
+<?php
+// ============================
+//   CORS dinámico seguro
+// ============================
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowed = [
+    "https://dbsdesigner.com",
+    "https://www.dbsdesigner.com"
+];
 
-const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
+if (in_array($origin, $allowed, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 
-const uploadFiles = (files: File[]) => {
-  if (!files?.length) return;
-  setIsUploading(true);
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-  const initial: UploadedItem[] = files.map((f) => ({
-    id: fileId(f),
-    name: f.name,
-    size: f.size,
-    type: f.type,
-    progress: 0,
-    status: "uploading",
-  }));
+// Preflight (navegadores)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
-  setItems((prev) => [...prev, ...initial]);
+// ============================
+//   Carpeta uploads
+// ============================
 
-  const xhr = new XMLHttpRequest();
-  const formData = new FormData();
-  files.forEach((f) => formData.append("files[]", f));
+$uploadDir = __DIR__ . "/uploads/";
 
-  xhr.upload.onprogress = (e) => {
-    if (!e.lengthComputable) return;
-    const pct = Math.round((e.loaded / e.total) * 100);
-    setItems((prev) =>
-      prev.map((it) =>
-        initial.some((i) => i.id === it.id)
-          ? { ...it, progress: pct }
-          : it
-      )
-    );
-  };
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0775, true);
+}
 
-  xhr.onload = () => {
-    const ok = xhr.status >= 200 && xhr.status < 300;
-    const raw = xhr.responseText || "";
+// ============================
+//   Validación inicial
+// ============================
 
-    let json: any = null;
-    try {
-      json = JSON.parse(raw);
-    } catch {
-      json = null;
+$response = [];
+
+if (!isset($_FILES['files']) || !is_array($_FILES['files']['tmp_name'])) {
+    echo json_encode(["error" => "No files[] received"]);
+    exit;
+}
+
+// ============================
+//   Procesado de ficheros
+// ============================
+
+foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
+
+    $originalName = basename($_FILES['files']['name'][$key] ?? "file");
+
+    // Saneado
+    $safeName = preg_replace("/[^A-Za-z0-9._-]/", "_", $originalName);
+
+    // Nombre único robusto
+    $uniqueName = time() . "_" . bin2hex(random_bytes(4)) . "_" . $safeName;
+
+    // Ruta final
+    $target = $uploadDir . $uniqueName;
+
+    // Archivo temporal inválido
+    if (!is_uploaded_file($tmpName)) {
+        $response[] = [
+            "name"  => $safeName,
+            "error" => true,
+            "msg"   => "Invalid temp file"
+        ];
+        continue;
     }
 
-    if (!ok || !Array.isArray(json)) {
-      setItems((prev) =>
-        prev.map((it) =>
-          initial.some((i) => i.id === it.id)
-            ? { ...it, status: "error", error: "Invalid server response" }
-            : it
-        )
-      );
-      setIsUploading(false);
-      return;
+    // Mover archivo
+    if (move_uploaded_file($tmpName, $target)) {
+        $response[] = [
+            "name"  => $safeName,
+            "saved" => $uniqueName,
+            "url"   => "https://dbsdesigner.com/api/uploads/" . $uniqueName
+        ];
+    } else {
+        $response[] = [
+            "name"  => $safeName,
+            "error" => true,
+            "msg"   => "Failed to move file"
+        ];
     }
+}
 
-    const byName = new Map<string, { url?: string; error?: boolean }>();
-    json.forEach((r: any) => {
-      if (r && typeof r === "object" && typeof r.name === "string") {
-        byName.set(r.name, { url: r.url, error: !!r.error });
-      }
-    });
-
-    setItems((prev) =>
-      prev.map((it) => {
-        if (!initial.some((i) => i.id === it.id)) return it;
-        const safe = it.name.replace(/[^A-Za-z0-9._-]/g, "_");
-        const r = byName.get(safe);
-
-        if (!r) {
-          return { ...it, status: "error", error: "File missing" };
-        }
-        if (r.error) {
-          return { ...it, status: "error", error: "Upload failed" };
-        }
-        return { ...it, status: "uploaded", progress: 100, url: r.url };
-      })
-    );
-
-    setIsUploading(false);
-  };
-
-  xhr.onerror = () => {
-    setItems((prev) =>
-      prev.map((it) =>
-        initial.some((i) => i.id === it.id)
-          ? { ...it, status: "error", error: "Network error" }
-          : it
-      )
-    );
-    setIsUploading(false);
-  };
-
-  xhr.open("POST", UPLOAD_ENDPOINT, true);
-  xhr.withCredentials = false;
-  xhr.send(formData);
-};
-
-// Defensive drag-drop
-const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
-  e.preventDefault();
-  e.stopPropagation();
-  setDragActive(false);
-  const list = e.dataTransfer?.files;
-  const files = list && list.length ? Array.from(list) : [];
-  if (files.length) uploadFiles(files);
-};
-
-const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const list = e.target?.files;
-  const files = list && list.length ? Array.from(list) : [];
-  if (files.length) uploadFiles(files);
-  if (e.currentTarget) e.currentTarget.value = "";
-};
+// ============================
+//   Salida JSON
+// ============================
+echo json_encode($response);
