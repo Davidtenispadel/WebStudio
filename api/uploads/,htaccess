@@ -1,4 +1,4 @@
-# No ejecutar código: solo estáticos
+# Evitar ejecución de PHP u otros scripts peligrosos
 RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8
 RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8
 php_flag engine off
@@ -9,7 +9,7 @@ Options -ExecCGI
 </FilesMatch>
 
 # Permitir solo archivos estáticos
-<FilesMatch "\.(jpg|jpeg|png|gif|pdf|webp|txt|zip|rar|dxf|dwg)$">
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|pdf|txt|zip|rar|dxf|dwg)$">
   Require all granted
 </FilesMatch>
 
@@ -17,6 +17,7 @@ Options -ExecCGI
   Require all denied
 </FilesMatch>
 
+# CORS para servir archivos a tu web
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "https://dbsdesigner.com"
 </IfModule>
