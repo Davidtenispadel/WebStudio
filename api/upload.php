@@ -1,5 +1,5 @@
 <?php
-// CORS dinámico para permitir únicamente tus dominios reales
+// CORS dinámico: permite solo los orígenes reales de tu web
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = [
     "https://dbsdesigner.com",
@@ -18,33 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Ruta uploads
+// Ruta de uploads
 $uploadDir = __DIR__ . "/uploads/";
+
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0775, true);
 }
 
 $response = [];
 
+// Validar estructura
 if (!isset($_FILES['files']) || !is_array($_FILES['files']['tmp_name'])) {
     echo json_encode(["error" => "No files[] received"]);
     exit;
 }
 
-// Procesar cada archivo
+// Procesar archivos
 foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
 
     $originalName = basename($_FILES['files']['name'][$key] ?? "file");
     $safeName = preg_replace("/[^A-Za-z0-9._-]/", "_", $originalName);
-    $uniqueName = time() . "_" . bin2hex(random_bytes(4)) . "_" . $safeName;
 
+    $uniqueName = time() . "_" . bin2hex(random_bytes(4)) . "_" . $safeName;
     $target = $uploadDir . $uniqueName;
 
     if (!is_uploaded_file($tmpName)) {
         $response[] = [
-            "name" => $safeName,
+            "name"  => $safeName,
             "error" => true,
-            "msg" => "Invalid temp file"
+            "msg"   => "Invalid temp file"
         ];
         continue;
     }
