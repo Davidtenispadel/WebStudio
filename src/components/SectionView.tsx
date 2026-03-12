@@ -2,7 +2,7 @@
  * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader compatible with upload.php)
  * - Aesthetic A applied to all sections (unchanged)
  * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
- * - No Base64; uploads go to https://api.dbsdesigner.com/upload.php (expects files[])
+ * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
  */
 
@@ -48,7 +48,7 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-const UPLOAD_ENDPOINT = "https://api.dbsdesigner.com/upload.php";
+const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
@@ -195,7 +195,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     if (!files?.length) return;
     setIsUploading(true);
 
-    // Initialize items (UI)
     const initial: UploadedItem[] = files.map((f) => ({
       id: fileId(f),
       name: f.name,
@@ -204,17 +203,16 @@ const SectionView: React.FC<SectionViewProps> = ({
       progress: 0,
       status: "uploading",
     }));
+
     setItems((prev) => [...prev, ...initial]);
 
-    // Single POST with multiple files -> FormData "files[]"
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
-    for (const f of files) formData.append("files[]", f);
+    files.forEach((f) => formData.append("files[]", f));
 
     xhr.upload.onprogress = (e) => {
       if (!e.lengthComputable) return;
       const pct = Math.round((e.loaded / e.total) * 100);
-      // Reflect batch progress into each new item
       setItems((prev) =>
         prev.map((it) =>
           initial.some((i) => i.id === it.id)
@@ -226,23 +224,16 @@ const SectionView: React.FC<SectionViewProps> = ({
 
     xhr.onload = () => {
       const ok = xhr.status >= 200 && xhr.status < 300;
-      if (!ok) {
-        setItems((prev) =>
-          prev.map((it) =>
-            initial.some((i) => i.id === it.id)
-              ? { ...it, status: "error", error: `HTTP ${xhr.status}` }
-              : it
-          )
-        );
-        setIsUploading(false);
-        return;
-      }
+      const raw = xhr.responseText || "";
 
       let json: any = null;
       try {
-        json = JSON.parse(xhr.responseText);
+        json = JSON.parse(raw);
       } catch {
-        // Mark batch items as error
+        json = null;
+      }
+
+      if (!ok || !Array.isArray(json)) {
         setItems((prev) =>
           prev.map((it) =>
             initial.some((i) => i.id === it.id)
@@ -254,25 +245,21 @@ const SectionView: React.FC<SectionViewProps> = ({
         return;
       }
 
-      // Expected array: [{ name, url } | { name, error: true }, ...]
       const byName = new Map<string, { url?: string; error?: boolean }>();
-      if (Array.isArray(json)) {
-        json.forEach((r) => {
-          if (r && typeof r === "object" && r.name) {
-            byName.set(r.name, { url: r.url, error: r.error });
-          }
-        });
-      }
+      json.forEach((r: any) => {
+        if (r && typeof r === "object" && typeof r.name === "string") {
+          byName.set(r.name, { url: r.url, error: !!r.error });
+        }
+      });
 
       setItems((prev) =>
         prev.map((it) => {
           if (!initial.some((i) => i.id === it.id)) return it;
-          // Server responds with safeName; map using local safe transform
-          const safe = toSafeName(it.name);
+          const safe = it.name.replace(/[^A-Za-z0-9._-]/g, "_");
           const r = byName.get(safe);
+
           if (!r) {
-            // If missing, mark as error to avoid ghost items
-            return { ...it, status: "error", error: "File not returned by server" };
+            return { ...it, status: "error", error: "File missing" };
           }
           if (r.error) {
             return { ...it, status: "error", error: "Upload failed" };
@@ -300,31 +287,20 @@ const SectionView: React.FC<SectionViewProps> = ({
     xhr.send(formData);
   };
 
-  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length) uploadFiles(files);
-    // Reset input to allow re-selecting same files
-    e.currentTarget.value = "";
-  };
-
   const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    const dtFiles = Array.from(e.dataTransfer.files || []);
-    if (dtFiles.length) uploadFiles(dtFiles);
+    const list = e.dataTransfer?.files;
+    const files = list && list.length ? Array.from(list) : [];
+    if (files.length) uploadFiles(files);
   };
 
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!dragActive) setDragActive(true);
-  };
-
-  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const list = e.target?.files;
+    const files = list && list.length ? Array.from(list) : [];
+    if (files.length) uploadFiles(files);
+    if (e.currentTarget) e.currentTarget.value = "";
   };
 
   const removeItem = (id: string) => {
@@ -337,7 +313,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   const fileUrls = items
     .filter((it) => it.status === "uploaded" && it.url)
-    .map((it) => it.url!) ;
+    .map((it) => it.url!);
 
   // ============================
   // Submit Enquiry (URLs only)
@@ -655,7 +631,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                         />
                       </div>
 
-                      {/* Modernized Uploader (Drag & Drop) */}
+                      {/* Attachments */}
                       <div>
                         <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">
                           Attachments
@@ -663,35 +639,41 @@ const SectionView: React.FC<SectionViewProps> = ({
 
                         <div
                           className={[
-                            "rounded-xl border-2 border-dashed",
+                            "rounded-xl border-2 border-dashed cursor-pointer",
                             dragActive
                               ? "border-red-500 bg-red-500/10"
                               : "border-white/20 bg-neutral-700/40",
-                            "p-6 md:p-8 transition-colors cursor-pointer",
+                            "p-6 md:p-8 transition-colors",
                           ].join(" ")}
-                          onDragOver={onDragOver}
-                          onDragLeave={onDragLeave}
-                          onDrop={onDropFiles}
                           onClick={() => !isSending && fileInputRef.current?.click()}
-                          role="button"
-                          aria-label="Zone to upload files"
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(true);
+                          }}
+                          onDragLeave={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(false);
+                          }}
+                          onDrop={onDropFiles}
                         >
                           <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
                             <div className="p-3 rounded-full bg-white/10 border border-white/10">
                               <Upload className="w-6 h-6 text-white/80" />
                             </div>
+
                             <div className="text-sm">
-                              <span className="text-white">
-                                Drag &amp; drop files here
-                              </span>{" "}
+                              <span className="text-white">Drag &amp; drop files here</span>{" "}
                               <span className="text-white/60">or</span>{" "}
                               <span className="text-red-400 underline">click to browse</span>
                             </div>
+
                             <div className="text-xs text-white/50">
                               Blueprints, PDFs, images… Large files supported.
                             </div>
-                            {(isUploading ||
-                              items.some((it) => it.status === "uploading")) && (
+
+                            {(isUploading || items.some((it) => it.status === "uploading")) && (
                               <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">
                                 Uploading…
                               </div>
@@ -708,7 +690,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                           />
                         </div>
 
-                        {/* Files list with progress / state */}
                         {items.length > 0 && (
                           <div className="mt-5 space-y-3">
                             {items.map((it) => (
@@ -737,7 +718,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                                       </div>
                                     </div>
 
-                                    {/* Progress / State */}
                                     {it.status === "uploading" && (
                                       <div className="mt-2">
                                         <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
@@ -784,7 +764,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                                     )}
                                   </div>
 
-                                  {/* Remove */}
                                   <button
                                     type="button"
                                     onClick={() => removeItem(it.id)}
@@ -975,4 +954,3 @@ const SectionView: React.FC<SectionViewProps> = ({
 };
 
 export default SectionView;
-``
