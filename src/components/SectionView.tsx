@@ -490,13 +490,14 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
 
         {/* Section Description */}
-        {displayedCategory.description &&
-          !isHomeSection &&
-          !isDesignSection &&
-          !isEnquiry &&
-          !isProjectSupportSection &&
-          !isStructureSection &&
-          !isBehindDBSection && (
+       {displayedCategory.description &&
+       !isHomeSection &&
+       !isDesignSection &&
+       !isEnquiry &&
+       !isProjectSupportSection &&
+       !isStructureSection &&
+       !isBehindDBSection &&
+       !isArchitectureSection && (
             <div
               className={`transition-all ease-out overflow-hidden flex-1 ${
                 stage === "gallery"
