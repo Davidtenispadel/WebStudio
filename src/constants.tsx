@@ -57,8 +57,6 @@ export const designPhilosophy = `
   </p>
 </div>`;
 
-
-export const architectureDescription = `
 export const introNarrative = `
 <div class="text-black leading-tight text-center space-y-4">
   <p class="text-lg md:text-xl font-light">
@@ -88,6 +86,9 @@ export const introNarrative = `
   <p class="text-lg md:text-xl font-light font-semibold">
     Stop overthinking. Start imagining with us. Your ideal project begins here.
   </p>
+</div>`;
+
+export const architectureDescription = `
 </div>`;<div class="text-black leading-tight">
   <p class="text-lg md:text-xl font-light">
     DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.
