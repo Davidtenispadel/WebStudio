@@ -54,7 +54,7 @@ const App: React.FC = () => {
     const index = CATEGORIES.findIndex(cat => cat.name === sectionName);
     if (index !== -1) {
       setCurrentCategoryIndex(index);
-      setSelectedProject(null); // evitar modales residuales
+      setSelectedProject(null);
     }
   }, []);
 
@@ -68,6 +68,11 @@ const App: React.FC = () => {
       setSelectedProject(project);
     }
   }, [activeCategory.name]);
+
+  // Determinar si el fondo es oscuro para ajustar el header
+  const isDarkBackground = 
+    activeCategory.name === StudioSection.ENQUIRY || 
+    activeCategory.name === StudioSection.HOME;
 
   return (
     <div
@@ -88,7 +93,11 @@ const App: React.FC = () => {
       )}
 
       <div className="relative z-10">
-        <Header onNavClick={handleNavClick} onGoHomeClick={handleGoHome} />
+        <Header 
+          onNavClick={handleNavClick} 
+          onGoHomeClick={handleGoHome}
+          isDarkBackground={isDarkBackground}
+        />
 
         <SectionView
           category={activeCategory}
