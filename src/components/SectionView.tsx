@@ -19,10 +19,12 @@ import {
   File as FileIcon,
   AlertCircle,
 } from "lucide-react";
+
 import {
   urbanMasterplanningHeaderDescription,
   isoContent,
 } from "../constants";
+
 import { introNarrative, architectureDescription } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 
@@ -36,9 +38,9 @@ interface UploadedItem {
   name: string;
   size: number;
   type?: string;
-  progress: number; // 0..100 (batch progress reflected per item)
+  progress: number;
   status: UploadStatus;
-  url?: string; // set when uploaded
+  url?: string;
   error?: string;
 }
 
@@ -61,12 +63,14 @@ const formatBytes = (bytes: number) => {
   return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
 };
 
-// Local safeName (to map server response names)
+// Local safeName
 const toSafeName = (name: string) => name.replace(/[^A-Za-z0-9._-]/g, "_");
 
-// Generate simple id for UI items
+// Generate simple id
 const fileId = (f: File) =>
-  `${f.name}-${f.size}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`;
+  `${f.name}-${f.size}-${f.lastModified}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
 
 const SectionView: React.FC<SectionViewProps> = ({
   category,
@@ -109,7 +113,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================
-  // Animation Logic (Aesthetic A)
+  // Animation Logic
   // ============================
   const resetSequence = () => {
     setShowDB(false);
@@ -117,7 +121,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     setShowName(false);
     setShowDesc(false);
     setShowGalleryItems(false);
-
     setStage("intro");
     setEnquiryStep(1);
   };
@@ -189,9 +192,8 @@ const SectionView: React.FC<SectionViewProps> = ({
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Uploader Logic (A2 — batch upload, files[])
+  // Uploader Logic
   // ============================
-
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
     setIsUploading(true);
@@ -317,57 +319,30 @@ const SectionView: React.FC<SectionViewProps> = ({
     .map((it) => it.url!);
 
   // ============================
-  // Submit Enquiry (URLs only)
+  // Submit Enquiry
   // ============================
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isUploading) return; // avoid submit while uploading
+    if (isUploading) return;
     setIsSending(true);
 
     const success = await sendProjectEnquiry({
       name: formData.name,
       email: formData.email,
       message: formData.message,
-      fileUrls, // only URLs
+      fileUrls,
     });
 
     if (success) {
       setEnquiryStep(4);
       setTimeout(() => {
         setFormData({ name: "", email: "", message: "" });
-        // Optional: clear uploaded items as well
-        // setItems([]);
       }, 2000);
     }
 
     setIsSending(false);
   };
-  
-/* ============================
-   ARCHITECTURE — INTRO TEXT
-============================ */
-{isArchitectureSection && showDesc && (
-  <div
-    className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
-    dangerouslySetInnerHTML={{ __html: introNarrative }}
-  />
-)}
-
-/* ============================
-   MAIN DESCRIPTION (ALL SECTIONS)
-============================ */
-{showDesc && (
-  <div
-    className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
-    dangerouslySetInnerHTML={{
-      __html: isArchitectureSection
-        ? architectureDescription
-        : displayedCategory.description,
-    }}
-  />
-)}
-  
-  // ============================
+    // ============================
   // RENDER
   // ============================
   return (
@@ -490,14 +465,14 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
 
         {/* Section Description */}
-       {displayedCategory.description &&
-       !isHomeSection &&
-       !isDesignSection &&
-       !isEnquiry &&
-       !isProjectSupportSection &&
-       !isStructureSection &&
-       !isBehindDBSection &&
-       !isArchitectureSection && (
+        {displayedCategory.description &&
+          !isHomeSection &&
+          !isDesignSection &&
+          !isEnquiry &&
+          !isProjectSupportSection &&
+          !isStructureSection &&
+          !isBehindDBSection &&
+          !isArchitectureSection && (
             <div
               className={`transition-all ease-out overflow-hidden flex-1 ${
                 stage === "gallery"
@@ -513,11 +488,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     : "translateX(-40px)",
               }}
             >
-              {isArchitectureSection ? (
-                <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">
-                  Portfolio of selected projects
-                </span>
-              ) : isUrbanSection ? (
+              {isUrbanSection ? (
                 <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">
                   {urbanMasterplanningHeaderDescription}
                 </span>
@@ -543,39 +514,38 @@ const SectionView: React.FC<SectionViewProps> = ({
         style={{ paddingTop: "340px" }}
       >
         <div className="max-w-7xl mx-auto">
-          
-     {/* ============================
-         ARCHITECTURE — INTRO TEXT
-     ============================ */}
-     {isArchitectureSection && showDesc && (
-     <div
-     className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
-     dangerouslySetInnerHTML={{ __html: introNarrative }}
-      />
-     )}
 
-     {/* ============================
-      MAIN DESCRIPTION (ALL SECTIONS)
-     ============================ */}
-     {showDesc && (
-     <div
-    className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
-    dangerouslySetInnerHTML={{
-      __html: isArchitectureSection
-        ? architectureDescription
-        : displayedCategory.description,
-     }}
-     />
-     )}
-
-          
           {/* ============================
+              ARCHITECTURE — INTRO TEXT
+          ============================ */}
+          {isArchitectureSection && showDesc && (
+            <div
+              className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
+              dangerouslySetInnerHTML={{ __html: introNarrative }}
+            />
+          )}
+
+          {/* ============================
+              MAIN DESCRIPTION (ALL SECTIONS)
+          ============================ */}
+          {showDesc && (
+            <div
+              className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
+              dangerouslySetInnerHTML={{
+                __html: isArchitectureSection
+                  ? architectureDescription
+                  : displayedCategory.description,
+              }}
+            />
+          )}
+                    {/* ============================
               ENQUIRY SECTION
           ============================ */}
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50]">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+
                   {/* Left Column */}
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
                     <h3 className="text-3xl md:text-4xl font-light leading-tight">
@@ -620,6 +590,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {/* Right Column (Form) */}
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
                     <form onSubmit={handleEnquirySubmit} className="space-y-6">
+
                       {/* Name + Email */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -725,7 +696,8 @@ const SectionView: React.FC<SectionViewProps> = ({
                               Blueprints, PDFs, images… Large files supported.
                             </div>
 
-                            {(isUploading || items.some((it) => it.status === "uploading")) && (
+                            {(isUploading ||
+                              items.some((it) => it.status === "uploading")) && (
                               <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">
                                 Uploading…
                               </div>
@@ -938,9 +910,12 @@ const SectionView: React.FC<SectionViewProps> = ({
               {(isUrbanSection ||
                 isStructureSection ||
                 isDesignSection ||
-                isProjectSupportSection ||
-                isArchitectureSection) && (
-                <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
+                isProjectSupportSection) && (
+                <div
+                  className={`flex flex-col gap-12 ${
+                    isDesignSection ? "mb-8" : "mb-24"
+                  }`}
+                >
                   <div className="w-full max-w-5xl">
                     <div
                       className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg"
