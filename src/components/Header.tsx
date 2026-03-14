@@ -1,23 +1,23 @@
-
 import React, { useState, useEffect } from 'react';
 import { StudioSection } from '../types';
 import { X, Menu } from 'lucide-react';
-import { CATEGORIES } from '../constants'; // Import CATEGORIES to get section names
+import { CATEGORIES } from '../constants';
 
 interface HeaderProps {
   onNavClick: (section: string) => void;
-  onGoHomeClick: () => void; // Prop for going to Home
+  onGoHomeClick: () => void;
+  isDarkBackground: boolean; // Nueva prop para indicar si el fondo es oscuro
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
+const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackground }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); // Tailwind's 'md' breakpoint is 768px
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const handleResize = () => {
       const currentIsMobile = window.innerWidth < 768;
       setIsMobile(currentIsMobile);
-      if (!currentIsMobile && isMenuOpen) { // Close menu if resized to desktop
+      if (!currentIsMobile && isMenuOpen) {
         setIsMenuOpen(false);
       }
     };
@@ -27,38 +27,45 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
 
   const handleMenuItemClick = (section: string) => {
     onNavClick(section);
-    setIsMenuOpen(false); // Close menu after selection
+    setIsMenuOpen(false);
   };
 
   const handleDbPlusLogoClick = () => {
-    // On mobile, clicking the DB+ logo should go to the Home section now
-    onGoHomeClick(); 
+    onGoHomeClick();
     if (isMobile) {
-      setIsMenuOpen(false); // Ensure menu is closed if it was open
+      setIsMenuOpen(false);
     }
   };
 
+  // Clases condicionales para el texto del header según el fondo
+  const textColorClass = isDarkBackground ? 'text-white' : 'text-black';
+  const navLinkColorClass = isDarkBackground ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-red-600';
+  const menuIconColorClass = isDarkBackground ? 'text-white' : 'text-black';
+
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]">
+      <header className={`fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]`}>
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
           <div 
             className="flex items-center gap-1 cursor-pointer group"
-            onClick={handleDbPlusLogoClick} // Dynamic click handler for DB+ logo
+            onClick={handleDbPlusLogoClick}
             aria-label={isMobile ? "Go to Home page" : "Go to home page"}
           >
-            <span className="text-3xl font-light tracking-tighter transition-all group-hover:tracking-normal text-black">DB</span>
-            <span className="text-2xl font-thin text-gray-400 transition-all duration-300 group-hover:scale-125 group-hover:text-red-600">+</span>
+            <span className={`text-3xl font-light tracking-tighter transition-all group-hover:tracking-normal ${textColorClass}`}>
+              DB
+            </span>
+            <span className="text-2xl font-thin text-gray-400 transition-all duration-300 group-hover:scale-125 group-hover:text-red-600">
+              +
+            </span>
           </div>
           
-          <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light text-gray-500">
+          <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
             {Object.values(StudioSection).map((section) => (
-              // Exclude 'Home' from desktop nav as it's handled by DB+ logo
               section !== StudioSection.HOME && (
                 <button 
                   key={section}
                   onClick={() => onNavClick(section)}
-                  className="hover:text-red-600 transition-all hover:scale-105 active:text-red-700"
+                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
                   aria-label={`View ${section} projects`}
                 >
                   {section}
@@ -69,10 +76,10 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
 
           <button 
             className="md:hidden flex flex-col gap-1.5 p-2" 
-            onClick={() => setIsMenuOpen(!isMenuOpen)} // Toggle menu on mobile button click (hamburguer icon)
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6 text-black" />
+            <Menu className={`w-6 h-6 ${menuIconColorClass}`} />
           </button>
         </div>
       </header>
@@ -82,13 +89,11 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
         className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden`}
         style={{ 
           zIndex: 70, 
-          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)' // Maneja la transformación directamente en style
+          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)'
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
-          <div 
-            className="flex items-center gap-1 group" // No click handler on the menu header DB+
-          >
+          <div className="flex items-center gap-1 group">
             <span className="text-4xl font-light tracking-tighter text-black">DB</span>
             <span className="text-3xl font-thin text-gray-400">+</span>
           </div>
@@ -97,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick }) => {
           </button>
         </div>
         <nav className="flex flex-col p-10 pt-6 gap-4">
-          {CATEGORIES.map((category) => ( // Use CATEGORIES to include Home and About Us
+          {CATEGORIES.map((category) => (
             <button 
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
