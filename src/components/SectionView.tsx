@@ -341,7 +341,31 @@ const SectionView: React.FC<SectionViewProps> = ({
 
     setIsSending(false);
   };
+  
+/* ============================
+   ARCHITECTURE — INTRO TEXT
+============================ */
+{isArchitectureSection && showDesc && (
+  <div
+    className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
+    dangerouslySetInnerHTML={{ __html: introNarrative }}
+  />
+)}
 
+/* ============================
+   MAIN DESCRIPTION (ALL SECTIONS)
+============================ */
+{showDesc && (
+  <div
+    className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
+    dangerouslySetInnerHTML={{
+      __html: isArchitectureSection
+        ? architectureDescription
+        : displayedCategory.description,
+    }}
+  />
+)}
+  
   // ============================
   // RENDER
   // ============================
