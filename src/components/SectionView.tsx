@@ -4,6 +4,7 @@
  * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
  * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
+ * - FIX: Forced showName fallback to ensure Architecture title appears
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -134,6 +135,18 @@ const SectionView: React.FC<SectionViewProps> = ({
     const t5 = setTimeout(() => setShowGalleryItems(true), 1600);
     return [t1, t2, t3, t4, t5];
   };
+
+  // Fallback: si después de 2 segundos showName sigue falso, forzarlo (especialmente para Architecture)
+  useEffect(() => {
+    if (!isActive || isTransitioning) return;
+    const timer = setTimeout(() => {
+      if (!showName) {
+        // console.log('Fallback: forcing showName true');
+        setShowName(true);
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [isActive, isTransitioning, showName]);
 
   useEffect(() => {
     if (isActive && isFirstRender.current) {
@@ -342,7 +355,8 @@ const SectionView: React.FC<SectionViewProps> = ({
 
     setIsSending(false);
   };
-    // ============================
+
+  // ============================
   // RENDER
   // ============================
   return (
@@ -538,7 +552,8 @@ const SectionView: React.FC<SectionViewProps> = ({
               }}
             />
           )}
-                    {/* ============================
+
+          {/* ============================
               ENQUIRY SECTION
           ============================ */}
           {isEnquiry ? (
