@@ -4,7 +4,7 @@
 import { Project, CategoryGroup, StudioSection } from './types';
 
 /* =========================
-   Rich Text Content Blocks
+    Rich Text Content Blocks
    ========================= */
 
 export const isoContent = `
@@ -40,7 +40,6 @@ export const isoContent = `
     ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure, efficiency, and a stronger collaborative culture across all stakeholders.
   </p>
 </div>`;
-
 
 export const designPhilosophy = `
 <div class="text-black leading-tight">
@@ -89,7 +88,7 @@ export const introNarrative = `
 </div>`;
 
 export const architectureDescription = `
-</div>`;<div class="text-black leading-tight">
+<div class="text-black leading-tight">
   <p class="text-lg md:text-xl font-light">
     DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.
   </p>
@@ -114,17 +113,15 @@ export const architectureDescription = `
   </div>
 </div>`;
 
-
 /* =========================
-   Short Section Descriptors
+    Short Section Descriptors
    ========================= */
 
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
 export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
 
-
 /* =========================
-   Categories & Projects
+    Categories & Projects
    ========================= */
 
 export const CATEGORIES: CategoryGroup[] = [
@@ -289,7 +286,6 @@ export const CATEGORIES: CategoryGroup[] = [
     <li>• <span class="font-bold">Sustainability &amp; Community</span> – Integrating environmental, social, and functional considerations</li>
   </ul>
 </div>`,
-    imageUrl: undefined,
     projects: [
       {
         id: 'u3',
@@ -623,4 +619,3 @@ export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(
       StudioSection.BEHIND_DB,
     ].includes(cat.name as StudioSection)
 );
-``
