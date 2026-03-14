@@ -59,7 +59,36 @@ export const designPhilosophy = `
 
 
 export const architectureDescription = `
-<div class="text-black leading-tight">
+export const introNarrative = `
+<div class="text-black leading-tight text-center space-y-4">
+  <p class="text-lg md:text-xl font-light">
+    You know what you want: a new home, an extension, or the perfect building for your business.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    You have ideas, images, references… but the more you look, the more doubts appear.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    What would your ideal space really look like? How would it feel to live or work in it?
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    It’s completely normal. The perfect design doesn’t appear out of nowhere — it’s discovered.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    That’s where we come in.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    Tell us your needs, your tastes, your lifestyle. We’ll turn all of that into a clear, solid concept tailored just for you.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    Because the beginning is the most critical stage: when the idea is well‑defined, everything else flows naturally.
+  </p>
+  <p class="text-lg md:text-xl font-light">
+    From that point on, bringing it to life is almost effortless.
+  </p>
+  <p class="text-lg md:text-xl font-light font-semibold">
+    Stop overthinking. Start imagining with us. Your ideal project begins here.
+  </p>
+</div>`;<div class="text-black leading-tight">
   <p class="text-lg md:text-xl font-light">
     DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.
   </p>
