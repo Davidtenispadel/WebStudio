@@ -23,6 +23,7 @@ import {
   urbanMasterplanningHeaderDescription,
   isoContent,
 } from "../constants";
+import { introNarrative, architectureDescription } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
