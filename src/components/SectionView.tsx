@@ -542,6 +542,32 @@ const SectionView: React.FC<SectionViewProps> = ({
         style={{ paddingTop: "340px" }}
       >
         <div className="max-w-7xl mx-auto">
+          
+     {/* ============================
+         ARCHITECTURE — INTRO TEXT
+     ============================ */}
+     {isArchitectureSection && showDesc && (
+     <div
+     className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
+     dangerouslySetInnerHTML={{ __html: introNarrative }}
+      />
+     )}
+
+     {/* ============================
+      MAIN DESCRIPTION (ALL SECTIONS)
+     ============================ */}
+     {showDesc && (
+     <div
+    className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
+    dangerouslySetInnerHTML={{
+      __html: isArchitectureSection
+        ? architectureDescription
+        : displayedCategory.description,
+     }}
+     />
+     )}
+
+          
           {/* ============================
               ENQUIRY SECTION
           ============================ */}
