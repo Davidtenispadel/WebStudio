@@ -1,5 +1,6 @@
 // constants.ts
 // Clean, deduplicated, English-only content. Ready for production.
+// Updated: added explicit light background and dark text to all HTML content blocks.
 
 import { Project, CategoryGroup, StudioSection } from './types';
 
@@ -8,7 +9,7 @@ import { Project, CategoryGroup, StudioSection } from './types';
    ========================= */
 
 export const isoContent = `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <div>
     <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
     <p class="text-lg md:text-xl font-light pt-6">
@@ -42,7 +43,7 @@ export const isoContent = `
 </div>`;
 
 export const designPhilosophy = `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">
     At DB+ Design &amp; Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process. Every project is developed with coherence, functionality, and quality from concept to completion.
   </p>
@@ -57,7 +58,7 @@ export const designPhilosophy = `
 </div>`;
 
 export const introNarrative = `
-<div class="text-black leading-tight text-center space-y-4">
+<div class="bg-white text-gray-900 leading-tight text-center space-y-4">
   <p class="text-lg md:text-xl font-light">
     You know what you want: a new home, an extension, or the perfect building for your business.
   </p>
@@ -88,7 +89,7 @@ export const introNarrative = `
 </div>`;
 
 export const architectureDescription = `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">
     DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.
   </p>
@@ -274,7 +275,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'urban',
     name: StudioSection.URBANISM,
     description: `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs.</p>
 
   <p class="text-xl font-bold pt-6">Our approach:</p>
@@ -336,7 +337,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'struct',
     name: StudioSection.STRUCTURE,
     description: `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations.</p>
 
   <p class="text-xl font-bold pt-6">Our approach:</p>
@@ -446,7 +447,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'support',
     name: StudioSection.PROJECT_SUPPORT,
     description: `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">Through companies such as Sir Robert McAlpine (Logistics &amp; Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio.</p>
   <p class="text-lg md:text-xl font-light pt-6">We specify mobile and fixed cranes for material delivery, site goods and personnel hoists, and prepare all necessary project documentation for windows and curtain wall systems.</p>
 </div>`,
@@ -591,7 +592,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
     description: `
-<div class="text-black leading-tight">
+<div class="bg-white text-gray-900 leading-tight">
   <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio, where architectural clarity meets technical excellence.</p>
   <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla combines design expertise with advanced technical training to guide DB+ from concept to execution. He is qualified as an Architect at Master’s level (EQF 7 / RQF 7), is registered with ARB and RIBA, and holds a UK Master’s in BIM Management from Middlesex University.</p>
   <p class="text-lg md:text-xl font-light pt-6">His training also qualifies him to develop all required MEP systems for any type of building, produce structural calculations used for structural pre‑design, and provide specialised input in urban planning. This multidisciplinary foundation enables him to deliver clear, efficient and well‑coordinated solutions that align design intent with technical performance and client goals.</p>
