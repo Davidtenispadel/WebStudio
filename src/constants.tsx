@@ -58,6 +58,7 @@ export const architectureDescription = `<div class="text-black leading-tight">
   <p class="text-lg md:text-xl font-light">
     Tell us your needs, your tastes, your lifestyle.<br/>
     We’ll turn all of that into <span class="font-bold">a clear, solid concept tailored just for you</span>.
+  </p>
 
   <p class="text-lg md:text-xl font-light pt-6">
     Because the beginning is the most critical stage:<br/>
@@ -76,20 +77,20 @@ export const architectureDescription = `<div class="text-black leading-tight">
 
   <p class="text-xl font-bold pt-6">What we offer</p>
   
-  <div class="pt-6">
-    <div class="pb-6">
+  <div class="pt-6 space-y-6">
+    <div>
       <p class="text-lg font-bold">• Extensions & Renovations</p>
-      <p class="text-base font-light">Enhance comfort, improve spatial flow, and elevate aesthetics through partial or full refurbishments.</p>
+      <p class="text-lg md:text-xl font-light">Enhance comfort, improve spatial flow, and elevate aesthetics through partial or full refurbishments.</p>
     </div>
 
-    <div class="pb-6">
+    <div>
       <p class="text-lg font-bold">• New Build Projects</p>
-      <p class="text-base font-light">From single‑family homes to multi‑unit developments, we design efficient, contemporary, and future‑ready residential buildings.</p>
+      <p class="text-lg md:text-xl font-light">From single‑family homes to multi‑unit developments, we design efficient, contemporary, and future‑ready residential buildings.</p>
     </div>
 
     <div>
       <p class="text-lg font-bold">• All Building Types</p>
-      <p class="text-base font-light">We provide tailored architectural solutions for any building, ensuring full compliance, optimal performance, and long‑term durability.</p>
+      <p class="text-lg md:text-xl font-light">We provide tailored architectural solutions for any building, ensuring full compliance, optimal performance, and long‑term durability.</p>
     </div>
   </div>
 </div>`;
@@ -544,5 +545,5 @@ export const CATEGORIES: CategoryGroup[] = [
 ];
 
 export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
-  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
+  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioCategory)
 );
