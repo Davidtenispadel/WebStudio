@@ -4,8 +4,7 @@
  * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
  * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
- * - FIX: Forced showName fallback to ensure Architecture title appears
- * - FIX: Architecture description now shows in a white container (like IA Studio)
+ * - FIX: Title disappears completely in gallery stage for better readability
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -134,7 +133,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     return [t1, t2, t3, t4, t5];
   };
 
-  // Fallback: si después de 2 segundos showName sigue falso, forzarlo (especialmente para Architecture)
+  // Fallback: si después de 2 segundos showName sigue falso, forzarlo
   useEffect(() => {
     if (!isActive || isTransitioning) return;
     const timer = setTimeout(() => {
@@ -377,13 +376,13 @@ const SectionView: React.FC<SectionViewProps> = ({
       )}
 
       {/* ============================
-          HEADER (Aesthetic A)
+          HEADER (Aesthetic A) - disappears completely in gallery stage
       ============================ */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
             ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
-            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none justify-start"
+            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 justify-start"
         }`}
         style={{
           transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
@@ -516,13 +515,13 @@ const SectionView: React.FC<SectionViewProps> = ({
       </div>
 
       {/* ============================
-          MAIN CONTENT
+          MAIN CONTENT - reduced padding top for better visibility
       ============================ */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
-        style={{ paddingTop: "340px" }}
+        style={{ paddingTop: "120px" }}
       >
         <div className="max-w-7xl mx-auto">
           {/* ============================
