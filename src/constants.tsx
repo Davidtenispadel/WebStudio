@@ -77,13 +77,13 @@ export const architectureDescription = `<div class="text-black leading-tight">
 
   <p class="text-xl font-bold pt-6">What we offer</p>
   
-  <div class="pt-6 space-y-6">
-    <div>
+  <div class="pt-6">
+    <div class="pb-6">
       <p class="text-lg font-bold">• Extensions & Renovations</p>
       <p class="text-lg md:text-xl font-light">Enhance comfort, improve spatial flow, and elevate aesthetics through partial or full refurbishments.</p>
     </div>
 
-    <div>
+    <div class="pb-6">
       <p class="text-lg font-bold">• New Build Projects</p>
       <p class="text-lg md:text-xl font-light">From single‑family homes to multi‑unit developments, we design efficient, contemporary, and future‑ready residential buildings.</p>
     </div>
@@ -545,5 +545,5 @@ export const CATEGORIES: CategoryGroup[] = [
 ];
 
 export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
-  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioCategory)
+  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
 );
