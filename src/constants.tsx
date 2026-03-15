@@ -57,7 +57,7 @@ export const architectureDescription = `<div class="text-black leading-tight">
 
   <p class="text-lg md:text-xl font-light">
     Tell us your needs, your tastes, your lifestyle.<br/>
-    We’ll turn all of that into a clear, solid concept tailored just for you.
+    We’ll turn all of that into <span class="font-bold">a clear, solid concept tailored just for you</span>.
   </p>
 
   <p class="text-lg md:text-xl font-light pt-6">
