@@ -4,7 +4,8 @@
  * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
  * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
- * - FIX: Title disappears completely in gallery stage for better readability
+ * - FIX: Title disappears completely in gallery stage (invisible + opacity-0)
+ * - FIX: Main content has higher z-index to avoid overlap
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -382,7 +383,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
             ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
-            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 justify-start"
+            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 invisible justify-start"
         }`}
         style={{
           transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
@@ -515,10 +516,10 @@ const SectionView: React.FC<SectionViewProps> = ({
       </div>
 
       {/* ============================
-          MAIN CONTENT - reduced padding top for better visibility
+          MAIN CONTENT - with higher z-index to avoid overlap
       ============================ */}
       <div
-        className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
+        className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 relative z-50 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "120px" }}
