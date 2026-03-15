@@ -5,6 +5,7 @@
  * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
  * - Sends fileUrls in sendProjectEnquiry
  * - FIX: Forced showName fallback to ensure Architecture title appears
+ * - FIX: Architecture description now shows in a white container (like IA Studio)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -26,7 +27,7 @@ import {
   isoContent,
 } from "../constants";
 
-import { introNarrative, architectureDescription } from "../constants";
+import { architectureDescription } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
@@ -63,9 +64,6 @@ const formatBytes = (bytes: number) => {
   const val = bytes / Math.pow(1024, i);
   return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
 };
-
-// Local safeName
-const toSafeName = (name: string) => name.replace(/[^A-Za-z0-9._-]/g, "_");
 
 // Generate simple id
 const fileId = (f: File) =>
@@ -141,7 +139,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     if (!isActive || isTransitioning) return;
     const timer = setTimeout(() => {
       if (!showName) {
-        // console.log('Fallback: forcing showName true');
         setShowName(true);
       }
     }, 2000);
@@ -528,31 +525,6 @@ const SectionView: React.FC<SectionViewProps> = ({
         style={{ paddingTop: "340px" }}
       >
         <div className="max-w-7xl mx-auto">
-
-          {/* ============================
-              ARCHITECTURE — INTRO TEXT
-          ============================ */}
-          {isArchitectureSection && showDesc && (
-            <div
-              className="max-w-3xl mx-auto mb-12 opacity-0 animate-fadeInSlow"
-              dangerouslySetInnerHTML={{ __html: introNarrative }}
-            />
-          )}
-
-          {/* ============================
-              MAIN DESCRIPTION (ALL SECTIONS)
-          ============================ */}
-          {showDesc && (
-            <div
-              className="max-w-3xl mx-auto opacity-0 animate-fadeInSlow"
-              dangerouslySetInnerHTML={{
-                __html: isArchitectureSection
-                  ? architectureDescription
-                  : displayedCategory.description,
-              }}
-            />
-          )}
-
           {/* ============================
               ENQUIRY SECTION
           ============================ */}
@@ -922,18 +894,20 @@ const SectionView: React.FC<SectionViewProps> = ({
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
+              {/* Description block for all relevant sections (including Architecture) */}
               {(isUrbanSection ||
                 isStructureSection ||
                 isDesignSection ||
-                isProjectSupportSection) && (
+                isProjectSupportSection ||
+                isArchitectureSection) && (
                 <div
                   className={`flex flex-col gap-12 ${
                     isDesignSection ? "mb-8" : "mb-24"
                   }`}
                 >
-                  <div className="w-full max-w-5xl">
+                  <div className="w-full max-w-5xl p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
                     <div
-                      className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg"
+                      className="text-black font-normal text-lg md:text-xl leading-tight"
                       dangerouslySetInnerHTML={{
                         __html: displayedCategory.description,
                       }}
