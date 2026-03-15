@@ -79,17 +79,17 @@ export const architectureDescription = `<div class="text-black leading-tight">
   
   <div class="pt-6">
     <div class="pb-6">
-      <p class="text-lg font-bold">• Extensions & Renovations</p>
+      <p class="text-xl font-bold">• Extensions & Renovations</p>
       <p class="text-lg md:text-xl font-light">Enhance comfort, improve spatial flow, and elevate aesthetics through partial or full refurbishments.</p>
     </div>
 
     <div class="pb-6">
-      <p class="text-lg font-bold">• New Build Projects</p>
+      <p class="text-xl font-bold">• New Build Projects</p>
       <p class="text-lg md:text-xl font-light">From single‑family homes to multi‑unit developments, we design efficient, contemporary, and future‑ready residential buildings.</p>
     </div>
 
     <div>
-      <p class="text-lg font-bold">• All Building Types</p>
+      <p class="text-xl font-bold">• All Building Types</p>
       <p class="text-lg md:text-xl font-light">We provide tailored architectural solutions for any building, ensuring full compliance, optimal performance, and long‑term durability.</p>
     </div>
   </div>
