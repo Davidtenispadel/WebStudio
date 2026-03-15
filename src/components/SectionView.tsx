@@ -127,9 +127,9 @@ const SectionView: React.FC<SectionViewProps> = ({
     setShowDB(true);
     const t1 = setTimeout(() => setShowPlus(true), 400);
     const t2 = setTimeout(() => setShowName(true), 700);
-    const t3 = setTimeout(() => setStage("gallery"), 8000);
-    const t4 = setTimeout(() => setShowDesc(true), 8300);
-    const t5 = setTimeout(() => setShowGalleryItems(true), 8600);
+    const t3 = setTimeout(() => setStage("gallery"), 3000);
+    const t4 = setTimeout(() => setShowDesc(true), 3300);
+    const t5 = setTimeout(() => setShowGalleryItems(true), 3600);
     return [t1, t2, t3, t4, t5];
   };
 
