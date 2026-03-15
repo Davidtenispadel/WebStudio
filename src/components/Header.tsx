@@ -6,7 +6,7 @@ import { CATEGORIES } from '../constants';
 interface HeaderProps {
   onNavClick: (section: string) => void;
   onGoHomeClick: () => void;
-  isDarkBackground: boolean; // Nueva prop para indicar si el fondo es oscuro
+  isDarkBackground: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackground }) => {
@@ -40,7 +40,8 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
   // Clases condicionales para el texto del header según el fondo
   const textColorClass = isDarkBackground ? 'text-white' : 'text-black';
   const navLinkColorClass = isDarkBackground ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-red-600';
-  const menuIconColorClass = isDarkBackground ? 'text-white' : 'text-black';
+  // El icono del menú siempre será negro para contrastar con el fondo claro del header en móvil
+  const menuIconColorClass = 'text-black';
 
   return (
     <>
@@ -84,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
         </div>
       </header>
 
-      {/* Mobile/Side Menu (hidden on desktop) */}
+      {/* Mobile/Side Menu */}
       <div 
         className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden`}
         style={{ 
@@ -115,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
         </nav>
       </div>
 
-      {/* Overlay (hidden on desktop) */}
+      {/* Overlay */}
       <div 
         className={`fixed inset-0 bg-black/50 transition-opacity duration-500 md:hidden
           ${isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
