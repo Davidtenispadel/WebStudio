@@ -52,7 +52,7 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
+const UPLOAD_ENDPOINT = "https://www.dbsdesigner.com/api/upload.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
