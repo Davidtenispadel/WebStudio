@@ -17,7 +17,8 @@ Options -ExecCGI
   Require all denied
 </FilesMatch>
 
-# CORS para servir archivos a tu web
-<IfModule mod_headers.c>
-  Header set Access-Control-Allow-Origin "https://dbsdesigner.com"
-</IfModule>
+# (Opcional) Si quieres mantener CORS por si alguien accede directamente, puedes añadir:
+# <IfModule mod_headers.c>
+#   Header set Access-Control-Allow-Origin "https://www.dbsdesigner.com"
+# </IfModule>
+# Pero no es necesario porque PHP ya lo envía.
