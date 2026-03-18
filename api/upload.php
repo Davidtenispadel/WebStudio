@@ -23,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================
 //   Carpeta uploads
 // ============================
-
 $uploadDir = __DIR__ . "/uploads/";
 
 if (!file_exists($uploadDir)) {
@@ -33,7 +32,6 @@ if (!file_exists($uploadDir)) {
 // ============================
 //   Validación inicial
 // ============================
-
 $response = [];
 
 if (!isset($_FILES['files']) || !is_array($_FILES['files']['tmp_name'])) {
@@ -44,7 +42,6 @@ if (!isset($_FILES['files']) || !is_array($_FILES['files']['tmp_name'])) {
 // ============================
 //   Procesado de ficheros
 // ============================
-
 foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
 
     $originalName = basename($_FILES['files']['name'][$key] ?? "file");
@@ -70,10 +67,15 @@ foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
 
     // Mover archivo
     if (move_uploaded_file($tmpName, $target)) {
+        // Construir URL dinámica con el mismo protocolo y host de la petición
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST']; // Ej: www.dbsdesigner.com o dbsdesigner.com
+        $fileUrl = $protocol . $host . "/api/uploads/" . $uniqueName;
+
         $response[] = [
             "name"  => $safeName,
             "saved" => $uniqueName,
-            "url"   => "https://dbsdesigner.com/api/uploads/" . $uniqueName
+            "url"   => $fileUrl
         ];
     } else {
         $response[] = [
