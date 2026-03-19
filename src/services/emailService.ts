@@ -8,31 +8,21 @@ export interface EnquiryData {
   name: string;
   email: string;
   message: string;
-  files: { name: string; data: string; type: string }[]; // data base64 sin prefijo
+  fileUrls: string[]; // Ahora recibimos las URLs de los archivos subidos
 }
-
-export const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve((reader.result as string).split(',')[1] ?? '');
-    reader.onerror = reject;
-  });
 
 export const sendProjectEnquiry = async (data: EnquiryData): Promise<boolean> => {
   try {
-    const attachments = data.files.map(file => ({
-      name: file.name,
-      data: file.data,
-      type: file.type,
-    }));
+    // Construir un texto con los enlaces a los archivos
+    const fileLinks = data.fileUrls.length > 0
+      ? `\n\nArchivos adjuntos:\n${data.fileUrls.join('\n')}`
+      : '';
 
     const templateParams = {
       from_name: data.name,
       from_email: data.email,
-      message: data.message,
+      message: data.message + fileLinks,
       to_email: 'db@dbsdesigner.com', // destinatario fijo
-      attachments: attachments,
     };
 
     const response = await emailjs.send(
