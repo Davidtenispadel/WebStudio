@@ -2,7 +2,7 @@
  * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader compatible with upload.php)
  * - Aesthetic A applied to all sections (unchanged)
  * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
- * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
+ * - No Base64; uploads go to Cloudflare Worker endpoint (replace URL below)
  * - Sends fileUrls in sendProjectEnquiry
  * - FIX: Title disappears completely in gallery stage for better readability
  */
@@ -52,7 +52,10 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-const UPLOAD_ENDPOINT = "https://www.dbsdesigner.com/api/upload.php";
+// ============================
+// CLOUDFLARE ENDPOINT (replace with your actual worker URL)
+// ============================
+const UPLOAD_ENDPOINT = "https://your-worker.workers.dev/upload";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
@@ -201,7 +204,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Uploader Logic
+  // Uploader Logic (direct to Cloudflare)
   // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
