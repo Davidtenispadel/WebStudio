@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Cambia * por tu dominio en producción
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -8,18 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Incluir PHPMailer (ajusta la ruta)
-require_once __DIR__ . '/../vendor/PHPMailer/src/Exception.php';
-require_once __DIR__ . '/../vendor/PHPMailer/src/PHPMailer.php';
-require_once __DIR__ . '/../vendor/PHPMailer/src/SMTP.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 $response = ['success' => false, 'error' => ''];
 
 try {
-    // Validar campos requeridos
     $name    = trim($_POST['name'] ?? '');
     $email   = trim($_POST['email'] ?? '');
     $message = trim($_POST['message'] ?? '');
@@ -32,41 +23,51 @@ try {
         throw new Exception('El email no es válido.');
     }
 
-    // Configurar PHPMailer con SMTP de one.com
-    $mail = new PHPMailer(true);
-    $mail->isSMTP();
-    $mail->Host       = 'smtp.one.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = 'tu_correo@tudominio.com'; // Cambia por tu email real
-    $mail->Password   = 'tu_contraseña';           // Cambia por la contraseña
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
+    $to = 'db@dbsdesigner.com';
+    $subject = 'Nuevo proyecto desde db+';
+    $body = "Nombre: $name\nEmail: $email\n\nMensaje:\n$message";
 
-    // Remitente y destinatario
-    $mail->setFrom($email, $name);
-    $mail->addAddress('db@dbsdesigner.com');
-    $mail->addReplyTo($email, $name);
+    // Boundary para adjuntos
+    $boundary = md5(uniqid(rand(), true));
+    $headers = "From: $email\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\r\n";
 
-    $mail->Subject = 'Nuevo proyecto desde db+';
-    $mail->Body    = "Nombre: $name\nEmail: $email\n\nMensaje:\n$message";
+    $mailBody = "--$boundary\r\n";
+    $mailBody .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $mailBody .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
+    $mailBody .= $body . "\r\n";
 
     // Adjuntar archivos
     if (!empty($_FILES['files']['tmp_name'][0])) {
-        $fileCount = count($_FILES['files']['tmp_name']);
+        $files = $_FILES['files'];
+        $fileCount = count($files['tmp_name']);
         for ($i = 0; $i < $fileCount; $i++) {
-            if ($_FILES['files']['error'][$i] === UPLOAD_ERR_OK) {
-                $tmpName = $_FILES['files']['tmp_name'][$i];
-                $fileName = $_FILES['files']['name'][$i];
-                $mail->addAttachment($tmpName, $fileName);
+            if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                $fileName = $files['name'][$i];
+                $fileTmp = $files['tmp_name'][$i];
+                $fileType = $files['type'][$i];
+                $fileContent = chunk_split(base64_encode(file_get_contents($fileTmp)));
+
+                $mailBody .= "--$boundary\r\n";
+                $mailBody .= "Content-Type: $fileType; name=\"$fileName\"\r\n";
+                $mailBody .= "Content-Transfer-Encoding: base64\r\n";
+                $mailBody .= "Content-Disposition: attachment; filename=\"$fileName\"\r\n\r\n";
+                $mailBody .= $fileContent . "\r\n";
             } else {
-                throw new Exception("Error al subir el archivo: " . $_FILES['files']['name'][$i]);
+                throw new Exception("Error al subir el archivo: " . $files['name'][$i]);
             }
         }
     }
 
-    $mail->send();
-    $response['success'] = true;
-    $response['message'] = 'Correo enviado correctamente.';
+    $mailBody .= "--$boundary--";
+
+    if (mail($to, $subject, $mailBody, $headers)) {
+        $response['success'] = true;
+        $response['message'] = 'Correo enviado correctamente.';
+    } else {
+        throw new Exception('El servidor no pudo enviar el correo.');
+    }
 
 } catch (Exception $e) {
     $response['error'] = $e->getMessage();
