@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Ajusta al dominio de tu app si es necesario
+header('Access-Control-Allow-Origin: *'); // Cambia * por tu dominio en producción
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -8,52 +8,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Configuración del correo
-$to = 'db@dbsdesigner.com';
-$from = $_POST['email'] ?? 'no-reply@tudominio.com';
-$subject = 'Nuevo proyecto desde db+';
-$message = "Nombre: " . ($_POST['name'] ?? '') . "\n\n";
-$message .= "Email: " . ($_POST['email'] ?? '') . "\n\n";
-$message .= "Mensaje:\n" . ($_POST['message'] ?? '');
+// Incluir PHPMailer (ajusta la ruta)
+require_once __DIR__ . '/../vendor/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../vendor/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../vendor/PHPMailer/src/SMTP.php';
 
-// Preparar el email con adjuntos
-$boundary = md5(uniqid(rand(), true));
-$headers = "From: $from\r\n";
-$headers .= "MIME-Version: 1.0\r\n";
-$headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\r\n";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-$body = "--$boundary\r\n";
-$body .= "Content-Type: text/plain; charset=UTF-8\r\n";
-$body .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
-$body .= $message . "\r\n";
+$response = ['success' => false, 'error' => ''];
 
-// Adjuntar archivos
-if (!empty($_FILES['files']['tmp_name'][0])) {
-    $files = $_FILES['files'];
-    for ($i = 0; $i < count($files['name']); $i++) {
-        $fileName = $files['name'][$i];
-        $fileTmp = $files['tmp_name'][$i];
-        $fileType = $files['type'][$i];
+try {
+    // Validar campos requeridos
+    $name    = trim($_POST['name'] ?? '');
+    $email   = trim($_POST['email'] ?? '');
+    $message = trim($_POST['message'] ?? '');
 
-        if (is_uploaded_file($fileTmp)) {
-            $fileContent = chunk_split(base64_encode(file_get_contents($fileTmp)));
-            $body .= "--$boundary\r\n";
-            $body .= "Content-Type: $fileType; name=\"$fileName\"\r\n";
-            $body .= "Content-Transfer-Encoding: base64\r\n";
-            $body .= "Content-Disposition: attachment; filename=\"$fileName\"\r\n\r\n";
-            $body .= $fileContent . "\r\n";
+    if (empty($name) || empty($email) || empty($message)) {
+        throw new Exception('Todos los campos son obligatorios.');
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('El email no es válido.');
+    }
+
+    // Configurar PHPMailer con SMTP de one.com
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.one.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'tu_correo@tudominio.com'; // Cambia por tu email real
+    $mail->Password   = 'tu_contraseña';           // Cambia por la contraseña
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    // Remitente y destinatario
+    $mail->setFrom($email, $name);
+    $mail->addAddress('db@dbsdesigner.com');
+    $mail->addReplyTo($email, $name);
+
+    $mail->Subject = 'Nuevo proyecto desde db+';
+    $mail->Body    = "Nombre: $name\nEmail: $email\n\nMensaje:\n$message";
+
+    // Adjuntar archivos
+    if (!empty($_FILES['files']['tmp_name'][0])) {
+        $fileCount = count($_FILES['files']['tmp_name']);
+        for ($i = 0; $i < $fileCount; $i++) {
+            if ($_FILES['files']['error'][$i] === UPLOAD_ERR_OK) {
+                $tmpName = $_FILES['files']['tmp_name'][$i];
+                $fileName = $_FILES['files']['name'][$i];
+                $mail->addAttachment($tmpName, $fileName);
+            } else {
+                throw new Exception("Error al subir el archivo: " . $_FILES['files']['name'][$i]);
+            }
         }
     }
-}
 
-$body .= "--$boundary--";
+    $mail->send();
+    $response['success'] = true;
+    $response['message'] = 'Correo enviado correctamente.';
 
-// Enviar el correo
-$success = mail($to, $subject, $body, $headers);
-
-if ($success) {
-    echo json_encode(['success' => true, 'message' => 'Email enviado con éxito']);
-} else {
+} catch (Exception $e) {
+    $response['error'] = $e->getMessage();
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Error al enviar el correo']);
 }
+
+echo json_encode($response);
