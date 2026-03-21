@@ -16,15 +16,12 @@ import {
   X as CloseIcon,
   Loader2,
   File as FileIcon,
-  AlertCircle,
 } from "lucide-react";
 
 import {
   urbanMasterplanningHeaderDescription,
   isoContent,
 } from "../constants";
-
-import { sendProjectEnquiry } from "../services/emailService"; // no longer used, but kept for potential fallback; can be removed later
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -33,8 +30,8 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-// PHP endpoint on one.com (adjust to your actual domain)
-const ENQUIRY_ENDPOINT = "https://www.tudominio.com/api/send-enquiry.php";
+// PHP endpoint on one.com – adjust if your domain uses www
+const ENQUIRY_ENDPOINT = "https://dbsdesigner.com/api/send-enquiry.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
@@ -289,7 +286,8 @@ const SectionView: React.FC<SectionViewProps> = ({
           style={{
             transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
             transitionDuration: "1000ms",
-            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transform:
+              stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -298,7 +296,11 @@ const SectionView: React.FC<SectionViewProps> = ({
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
                 isEnquiry ? "text-white" : "text-black"
-              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
+              } ${
+                showDB
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-20"
+              }`}
               style={{
                 fontSize:
                   typeof window !== "undefined" && window.innerWidth >= 768
@@ -314,7 +316,11 @@ const SectionView: React.FC<SectionViewProps> = ({
             <span
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
-              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
+              } ${
+                showPlus
+                  ? "opacity-100 scale-100 rotate-0"
+                  : "opacity-0 scale-0 rotate-45"
+              }`}
               style={{ transitionDuration: "700ms" }}
             >
               +
@@ -411,7 +417,9 @@ const SectionView: React.FC<SectionViewProps> = ({
       {/* MAIN CONTENT */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
+          stage === "gallery"
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "120px" }}
       >
@@ -542,7 +550,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                               : "border-white/20 bg-neutral-700/40",
                             "p-6 md:p-8 transition-colors",
                           ].join(" ")}
-                          onClick={() => !isSending && fileInputRef.current?.click()}
+                          onClick={() =>
+                            !isSending && fileInputRef.current?.click()
+                          }
                           onDragOver={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -561,9 +571,13 @@ const SectionView: React.FC<SectionViewProps> = ({
                             </div>
 
                             <div className="text-sm">
-                              <span className="text-white">Drag &amp; drop files here</span>{" "}
+                              <span className="text-white">
+                                Drag &amp; drop files here
+                              </span>{" "}
                               <span className="text-white/60">or</span>{" "}
-                              <span className="text-red-400 underline">click to browse</span>
+                              <span className="text-red-400 underline">
+                                click to browse
+                              </span>
                             </div>
 
                             <div className="text-xs text-white/50">
