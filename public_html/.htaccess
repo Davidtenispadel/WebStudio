@@ -1,7 +1,4 @@
 RewriteEngine On
-# No redirigir las peticiones a /api/
 RewriteCond %{REQUEST_URI} !^/api/
-# No redirigir si el archivo existe (imágenes, css, js, etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
-# Redirigir todo lo demás a index.html
 RewriteRule ^(.*)$ index.html [L]
