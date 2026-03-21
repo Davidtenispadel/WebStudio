@@ -30,8 +30,8 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-// PHP endpoint on one.com – adjust if your domain uses www
-const ENQUIRY_ENDPOINT = "https://dbsdesigner.com/api/send-enquiry.php";
+// PHP endpoint on one.com – using www to match your site's domain
+const ENQUIRY_ENDPOINT = "https://www.dbsdesigner.com/api/send-enquiry.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
