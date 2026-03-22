@@ -31,7 +31,7 @@ interface SectionViewProps {
 }
 
 // PHP endpoint on one.com – using www to match your site's domain
-const ENQUIRY_ENDPOINT = "https://www.dbsdesigner.com/api/send-enquiry.php";
+const ENQUIRY_ENDPOINT = "/api/send-enquiry";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
