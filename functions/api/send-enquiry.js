@@ -1,4 +1,3 @@
-// functions/api/send-enquiry.js
 export async function onRequestPost(context) {
   try {
     const body = await context.request.json().catch(() => null);
@@ -9,14 +8,15 @@ export async function onRequestPost(context) {
       return json({ error: "Missing required fields (name, email, message)" }, 400);
     }
 
-    // Defensive limits
+    // No limit on file size — only limit count for safety
     const safeFiles = Array.isArray(files) ? files.slice(0, 10) : [];
+
     const attachments = safeFiles
       .map((file) => {
         if (!file?.data || !file?.name) return null;
         return {
           filename: file.name,
-          content: file.data, // base64 (no 'data:...;base64,')
+          content: file.data, // full base64, no trimming
           type: file.type || "application/octet-stream",
         };
       })
@@ -36,7 +36,7 @@ export async function onRequestPost(context) {
         <p><strong>Message:</strong><br/>${nl2br(escapeHtml(message))}</p>
         <p><strong>Attachments:</strong> ${attachments.length}</p>
       `,
-      attachments, // [{ filename, content(base64), type }]
+      attachments,
     };
 
     const res = await fetch("https://api.resend.com/emails", {
@@ -65,9 +65,15 @@ export async function onRequestPost(context) {
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "https://dbsdesigner.com",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
   });
 }
+
 function escapeHtml(str = "") {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -76,6 +82,7 @@ function escapeHtml(str = "") {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
 function nl2br(str = "") {
   return String(str).replace(/\n/g, "<br/>");
 }
