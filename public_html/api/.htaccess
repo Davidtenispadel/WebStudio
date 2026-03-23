@@ -1,0 +1,48 @@
+###############################################
+# 1. PROTECT API DIRECTORY
+###############################################
+
+# Disable directory listing
+Options -Indexes
+
+# Block access to everything except PHP files
+<FilesMatch "\.(php)$">
+  Require all granted
+</FilesMatch>
+
+# Deny access to any other file type
+<FilesMatch ".*">
+  Require all denied
+</FilesMatch>
+
+###############################################
+# 2. LIMIT ALLOWED METHODS (security)
+###############################################
+<LimitExcept GET POST OPTIONS>
+  Require all denied
+</LimitExcept>
+
+###############################################
+# 3. BLOCK DIRECT ACCESS TO SENSITIVE FILES
+###############################################
+<FilesMatch "\.(env|json|lock|md|gitignore|htaccess)$">
+  Require all denied
+</FilesMatch>
+
+###############################################
+# 4. SECURITY HEADERS
+###############################################
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+###############################################
+# 5. PREVENT SCRIPT EXECUTION (extra hardening)
+###############################################
+RemoveHandler .php5 .php7 .php8 .phtml .cgi .pl .py .sh
+RemoveType .php5 .php7 .php8 .phtml .cgi .pl .py .sh
+Options -ExecCGI
