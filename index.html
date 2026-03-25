@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" style="background: transparent;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DB+ Architecture Practice</title>
+
+    <!-- ICONOS CORRECTOS -->
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-512.png" />
+    <link rel="shortcut icon" href="/icon-192.png" />
+
+    <!-- MANIFEST -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ESTILOS -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        font-family: Arial, Helvetica, sans-serif;
+        overflow-x: hidden;
+        cursor: none;
+      }
+
+      /* VIDEO FULLSCREEN */
+      #hero-video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: -1;
+      }
+
+      /* PANEL DINÁMICO */
+      #info-panel {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.9);
+        padding: 12px 18px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        font-size: 14px;
+        z-index: 9999;
+      }
+
+      /* CURSOR */
+      #custom-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        background-color: #333;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transition: transform 0.1s ease-out, opacity 0.3s ease;
+        transform: translate(-50%, -50%);
+      }
+
+      #custom-cursor.active {
+        background-color: #ff0000;
+        transform: translate(-50%, -50%) scale(3);
+      }
+
+      @media (hover: none) and (pointer: coarse) {
+        body { cursor: auto; }
+        #custom-cursor { display: none; }
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- VIDEO HERO -->
+    <video id="hero-video" autoplay muted loop playsinline>
+      <source src="TU_VIDEO.mp4" type="video/mp4" />
+    </video>
+
+    <!-- PANEL DINÁMICO -->
+    <div id="info-panel">Cargando datos…</div>
+
+    <!-- CURSOR -->
+    <div id="custom-cursor"></div>
+
+    <!-- SCRIPTS -->
+    <script>
+      /* CURSOR */
+      const cursor = document.getElementById("custom-cursor");
+      window.addEventListener("mousemove", (e) => {
+        cursor.style.top = e.clientY + "px";
+        cursor.style.left = e.clientX + "px";
+      });
+
+      /* PANEL DINÁMICO: METEO */
+      async function loadWeather() {
+        try {
+          const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=52.49&longitude=-0.69&current_weather=true");
+          const data = await res.json();
+          const w = data.current_weather;
+
+          document.getElementById("info-panel").innerHTML =
+            `🌤️ ${w.temperature}°C · 💨 ${w.windspeed} km/h`;
+        } catch {
+          document.getElementById("info-panel").innerHTML = "Información no disponible";
+        }
+      }
+
+      loadWeather();
+    </script>
+
+  </body>
+</html>
