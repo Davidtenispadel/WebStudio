@@ -4,116 +4,159 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>DB+ Architecture Practice</title>
+    <!-- SEO TITLE -->
+    <title>Architect in Corby | DB+ Architecture Practice</title>
 
-    <!-- ICONOS CORRECTOS -->
-    <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-512.png" />
-    <link rel="shortcut icon" href="/icon-192.png" />
+    <!-- META DESCRIPTION -->
+    <meta
+      name="description"
+      content="Architectural practice in Corby specialising in extensions, planning applications, new builds and BIM-led design. Serving Kettering, Market Harborough, Stamford, Oundle, Uppingham, Gretton, Weldon and over 60 surrounding villages."
+    />
 
-    <!-- MANIFEST -->
+    <!-- META KEYWORDS -->
+    <meta
+      name="keywords"
+      content="
+      architect, architect near me, architect Corby, architect Northamptonshire, architectural services, architectural design, architectural plans, architectural drawings, architectural consultant, RIBA architect, ARB registered architect, BIM architect, BIM coordination, Revit modelling, CAD drawings, technical detailing, specification writing, tender documentation,
+      house extension architect, home extension design, loft conversion architect, garage conversion plans, rear extension design, side extension design, kitchen extension architect, bungalow extension, two-storey extension, renovation architect, refurbishment architect, new build architect, self-build architect, custom home design,
+      planning permission drawings, planning application architect, planning consultant, building regulations drawings, building control drawings, permitted development, feasibility study architect, structural pre-design, party wall drawings, site plan, block plan, location plan, construction drawings, technical drawings,
+      commercial architect, office design architect, retail architect, industrial building design, warehouse design, mixed-use development, space planning, interior architecture,
+      need an architect, architect for extension, architect for planning permission, architect for new build, architect for loft conversion, extension plans cost, drawings for council approval, architect for small projects
+      "
+    />
+
+    <!-- OPEN GRAPH -->
+    <meta property="og:title" content="DB+ Architecture Practice" />
+    <meta property="og:description" content="Architectural practice delivering planning drawings, extensions, new builds and BIM-led design across Corby, Kettering, Stamford, Oundle and surrounding areas." />
+    <meta property="og:url" content="https://dbsdesigner.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:locale" content="en_GB" />
+
+    <!-- TWITTER -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DB+ Architecture Practice" />
+    <meta name="twitter:description" content="Architectural practice delivering planning drawings, extensions, new builds and BIM-led design." />
+
+    <!-- FAVICON & MOBILE ICON (PNG CORRECTO) -->
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dwealmbfi/image/upload/v1774379556/movil_circle_oyayvr.png" />
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dwealmbfi/image/upload/v1774379556/movil_circle_oyayvr.png" />
+    <link rel="shortcut icon" href="https://res.cloudinary.com/dwealmbfi/image/upload/v1774379556/movil_circle_oyayvr.png" />
+
+    <!-- WEB APP MANIFEST -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- ESTILOS -->
+    <!-- JSON-LD: ARCHITECTURAL SERVICE -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ArchitecturalService",
+      "name": "DB+ Design & Management",
+      "url": "https://dbsdesigner.com",
+      "telephone": "+44 7955 018937",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "108 Kestrel Road",
+        "addressLocality": "Corby",
+        "addressRegion": "Northamptonshire",
+        "postalCode": "NN18",
+        "addressCountry": "GB"
+      },
+      "areaServed": [
+        "Corby","Weldon","Little Stanion","Great Oakley","Oakley Vale","Priors Hall","Gretton","Rockingham","Cottingham","Middleton","East Carlton","Stanion","Deene","Deenethorpe","Brigstock",
+        "Kettering","Rothwell","Desborough","Burton Latimer","Barton Seagrave","Geddington","Weekley","Warkton","Cranford St Andrew","Cranford St John","Broughton","Pytchley","Loddington","Mawsley","Thorpe Malsor","Thorpe Underwood","Harrington","Braybrooke",
+        "Thrapston","Oundle","Warmington","Barnwell","Polebrook","Titchmarsh","Aldwincle","Lowick","Slipton","Islip","Ringstead","Raunds","Irthlingborough","Higham Ferrers","Finedon","Chelveston","Stanwick",
+        "Uppingham","Caldecott","Lyddington","Morcott","Barrowden","Harringworth","Seaton","Belton-in-Rutland","Glaston","Wing",
+        "Stamford","Ketton","Tinwell","Easton on the Hill","Collyweston","Wothorpe","Great Casterton","Little Casterton","Ryhall",
+        "Market Harborough","Great Bowden","Little Bowden","Lubenham","Foxton","Kibworth Harcourt","Kibworth Beauchamp","East Farndon","Dingley","Great Easton","Medbourne","Ashley"
+      ],
+      "description": "Architectural practice specialising in extensions, planning applications, new builds, technical drawings, BIM-led design and residential architecture across Northamptonshire, Rutland and South Lincolnshire.",
+      "serviceType": [
+        "Architectural design",
+        "Planning permission drawings",
+        "Building regulations drawings",
+        "House extensions",
+        "Loft conversions",
+        "Garage conversions",
+        "New build design",
+        "Residential architecture",
+        "Commercial architecture",
+        "Technical drawings",
+        "BIM coordination",
+        "Revit modelling",
+        "CAD drafting",
+        "Interior architecture",
+        "Space planning"
+      ]
+    }
+    </script>
+
+    <!-- CRITICAL STYLES -->
     <style>
       html, body {
         margin: 0;
         padding: 0;
-        background: #ffffff;
+        background: transparent !important;
         font-family: Arial, Helvetica, sans-serif;
+        color: #000000;
         overflow-x: hidden;
         cursor: none;
       }
-
-      /* VIDEO FULLSCREEN */
-      #hero-video {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        z-index: -1;
+      a, button, input, select, textarea, [role="button"], .cursor-pointer {
+        cursor: none !important;
       }
-
-      /* PANEL DINÁMICO */
-      #info-panel {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: rgba(255,255,255,0.9);
-        padding: 12px 18px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        font-size: 14px;
-        z-index: 9999;
-      }
-
-      /* CURSOR */
       #custom-cursor {
         position: fixed;
         top: 0;
         left: 0;
         width: 10px;
         height: 10px;
-        background-color: #333;
+        background-color: #333333;
         border-radius: 50%;
         pointer-events: none;
         z-index: 9999;
-        transition: transform 0.1s ease-out, opacity 0.3s ease;
+        transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
         transform: translate(-50%, -50%);
+        will-change: transform, top, left;
       }
-
       #custom-cursor.active {
         background-color: #ff0000;
         transform: translate(-50%, -50%) scale(3);
       }
-
       @media (hover: none) and (pointer: coarse) {
-        body { cursor: auto; }
+        body { cursor: auto; background-color: #ffffff !important; }
+        a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
         #custom-cursor { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #custom-cursor { transition: none; }
       }
     </style>
   </head>
 
   <body>
-
-    <!-- VIDEO HERO -->
-    <video id="hero-video" autoplay muted loop playsinline>
-      <source src="TU_VIDEO.mp4" type="video/mp4" />
-    </video>
-
-    <!-- PANEL DINÁMICO -->
-    <div id="info-panel">Cargando datos…</div>
-
-    <!-- CURSOR -->
+    <div id="root"></div>
     <div id="custom-cursor"></div>
 
-    <!-- SCRIPTS -->
+    <!-- CUSTOM CURSOR SCRIPT -->
     <script>
-      /* CURSOR */
       const cursor = document.getElementById("custom-cursor");
-      window.addEventListener("mousemove", (e) => {
-        cursor.style.top = e.clientY + "px";
-        cursor.style.left = e.clientX + "px";
-      });
-
-      /* PANEL DINÁMICO: METEO */
-      async function loadWeather() {
-        try {
-          const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=52.49&longitude=-0.69&current_weather=true");
-          const data = await res.json();
-          const w = data.current_weather;
-
-          document.getElementById("info-panel").innerHTML =
-            `🌤️ ${w.temperature}°C · 💨 ${w.windspeed} km/h`;
-        } catch {
-          document.getElementById("info-panel").innerHTML = "Información no disponible";
-        }
+      if (cursor) {
+        window.addEventListener("mousemove", (e) => {
+          cursor.style.top = e.clientY + "px";
+          cursor.style.left = e.clientX + "px";
+          const target = e.target;
+          const isInteractive = target.closest('button, a, input, textarea, select, .cursor-pointer');
+          cursor.classList.toggle('active', !!isInteractive);
+        });
+        window.addEventListener("mousedown", () => cursor.classList.add("active"));
+        window.addEventListener("mouseup", () => cursor.classList.remove("active"));
+        window.addEventListener("mouseleave", () => { cursor.style.opacity = "0"; });
+        window.addEventListener("mouseenter", () => { cursor.style.opacity = "1"; });
       }
-
-      loadWeather();
     </script>
 
+    <!-- VITE ENTRY -->
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
