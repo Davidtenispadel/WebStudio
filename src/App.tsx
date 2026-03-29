@@ -3,6 +3,7 @@ import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
+import Hero from './components/Hero'; // ⬅️ NUEVO HERO AÑADIDO
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 
@@ -69,9 +70,8 @@ const App: React.FC = () => {
     }
   }, [activeCategory.name]);
 
-  // Determinar si el fondo es oscuro para ajustar el header
-  const isDarkBackground = 
-    activeCategory.name === StudioSection.ENQUIRY || 
+  const isDarkBackground =
+    activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
 
   return (
@@ -89,7 +89,12 @@ const App: React.FC = () => {
       </h1>
 
       {isHome && (
-        <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
+        <>
+          <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
+
+          {/* ⬇️ NUEVA SECCIÓN HERO DB+ ARCHITECTURE */}
+          <Hero />
+        </>
       )}
 
       <div className="relative z-10">
