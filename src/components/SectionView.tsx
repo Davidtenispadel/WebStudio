@@ -1,8 +1,8 @@
 /* 
- * SECTIONVIEW.TSX — Unified Version (MODIFIED FOR ARCHITECTURE HERO)
+ * SECTIONVIEW.TSX — Unified Version (MODIFIED FOR ARCHITECTURE HERO + DESCRIPTION)
  * - Aesthetic A preserved
- * - Architecture section now shows <Hero /> instead of text
- * - No other sections affected
+ * - Architecture section now shows <Hero /> above the original descriptive block
+ * - Other sections unaffected
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -22,7 +22,7 @@ import {
   isoContent,
 } from "../constants";
 
-import Hero from "./Hero";   // ⬅️ ADDED
+import Hero from "./Hero";
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -235,7 +235,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       )}
 
       {/* HEADER (Aesthetic A) */}
-      ...  // ⬅️ OMITTED FOR BREVITY — NO CHANGES HERE
+      {/* ... (the header code is unchanged; omitted for brevity) ... */}
 
       {/* MAIN CONTENT */}
       <div
@@ -248,14 +248,11 @@ const SectionView: React.FC<SectionViewProps> = ({
       >
         <div className="max-w-7xl mx-auto">
 
-          {/* ARCHITECTURE SECTION — CUSTOM HERO */}
+          {/* ARCHITECTURE SECTION: HERO + DESCRIPTION */}
           {isArchitectureSection ? (
-            <div className="w-full h-full">
+            <div className="w-full">
               <Hero />
-            </div>
-          ) : (
-            <>
-              {/* DEFAULT CONTENT FOR OTHER SECTIONS */}
+              {/* Descriptive block (same as other sections) */}
               <div
                 className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
                   showGalleryItems ? "opacity-100" : "opacity-0"
@@ -270,7 +267,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                       }}
                     />
                   </div>
-
                   <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
                     <img
                       src={displayedCategory.imageUrl}
@@ -281,26 +277,85 @@ const SectionView: React.FC<SectionViewProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+          ) : (
+            // DEFAULT CONTENT FOR OTHER SECTIONS (same descriptive block as above, plus other elements)
+            <>
+              {!(isEnquiry || isBehindDBSection) && (
+                <div
+                  className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
+                    showGalleryItems ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                    <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl">
+                      <div
+                        className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify"
+                        dangerouslySetInnerHTML={{
+                          __html: displayedCategory.description,
+                        }}
+                      />
+                    </div>
+                    <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
+                      <img
+                        src={displayedCategory.imageUrl}
+                        alt={displayedCategory.name}
+                        className="w-full h-auto object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PROJECT GRID (for sections other than Architecture, Enquiry, Behind DB) */}
+              {!isArchitectureSection && !isEnquiry && !isBehindDBSection && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+                  {displayedCategory.projects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={onProjectClick}
+                      currentSectionName={currentSectionName}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* SPECIAL BLOCKS for Design and Urbanism */}
+              {isDesignSection && (
+                <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto">
+                  <div className="p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
+                    <div
+                      className="text-black leading-tight"
+                      dangerouslySetInnerHTML={{ __html: isoContent }}
+                    />
+                  </div>
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                    <img
+                      src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
+                      alt="Design & Management Vision"
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {isUrbanSection && (
+                <div className="mt-32 mb-16 max-w-5xl mx-auto">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                    <img
+                      src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png"
+                      alt="Urban Masterplanning Drawing"
+                      className="w-full h-auto object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              )}
             </>
           )}
-
-          {/* PROJECT GRID */}
-          {!isArchitectureSection && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-              {displayedCategory.projects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onClick={onProjectClick}
-                  currentSectionName={currentSectionName}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* SPECIAL BLOCKS */}
-          ... // ⬅️ REMAINS UNCHANGED
-
         </div>
       </div>
     </div>
