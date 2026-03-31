@@ -1,70 +1,129 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './components/Header';
+import ProjectModal from './components/ProjectModal';
+import SectionView from './components/SectionView';
+import VideoBackground from './components/VideoBackground';
+import Hero from './components/Hero';
+import { CATEGORIES } from './constants';
+import { Project, CategoryGroup, StudioSection } from './types';
 
-const Hero = () => {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'], // scroll from top of hero to bottom of hero
-  });
+const App: React.FC = () => {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
+  const [videoUrl, setVideoUrl] = useState<string | null>(
+    "https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
+  );
 
-  // Image moves upward as you scroll
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const isHome = activeCategory.name === StudioSection.HOME;
+  const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
 
-  // Main text fades out while scrolling
-  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  // Debug: muestra qué categoría está activa
+  useEffect(() => {
+    console.log('activeCategory.name:', activeCategory.name);
+  }, [activeCategory]);
 
-  // Secondary text fades in after scrolling a bit
-  const secondTextOpacity = useTransform(scrollYProgress, [0.6, 0.8], [0, 1]);
+  useEffect(() => {
+    setActiveCategory(CATEGORIES[currentCategoryIndex]);
+  }, [currentCategoryIndex]);
+
+  // Efecto del cursor personalizado (igual que antes)
+  useEffect(() => {
+    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouchDevice) return;
+
+    const cursor = document.getElementById('custom-cursor');
+    if (!cursor) return;
+
+    const moveCursor = (e: MouseEvent) => {
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('.cursor-pointer');
+
+      if (isInteractive) {
+        cursor.classList.add('active');
+      } else {
+        cursor.classList.remove('active');
+      }
+    };
+
+    window.addEventListener('mousemove', moveCursor, { passive: true });
+    return () => window.removeEventListener('mousemove', moveCursor);
+  }, []);
+
+  const handleNavClick = useCallback((sectionName: string) => {
+    const index = CATEGORIES.findIndex(cat => cat.name === sectionName);
+    if (index !== -1) {
+      setCurrentCategoryIndex(index);
+      setSelectedProject(null);
+    }
+  }, []);
+
+  const handleGoHome = useCallback(() => {
+    setCurrentCategoryIndex(0);
+    setSelectedProject(null);
+  }, []);
+
+  const handleProjectCardClick = useCallback((project: Project) => {
+    if (activeCategory.name !== StudioSection.STRUCTURE) {
+      setSelectedProject(project);
+    }
+  }, [activeCategory.name]);
+
+  const isDarkBackground =
+    activeCategory.name === StudioSection.ENQUIRY ||
+    activeCategory.name === StudioSection.HOME;
 
   return (
-    <section ref={ref} className="relative h-screen overflow-hidden">
-      {/* Parallax image */}
-      <motion.div className="absolute inset-0" style={{ y }}>
-        <img
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1774772535/Family_rh8tui.png"
-          alt="Family at sunrise"
-          className="w-full h-full object-cover"
+    <div
+      className={`min-h-screen w-screen transition-colors duration-700 
+      ${activeCategory.name === StudioSection.ENQUIRY 
+        ? 'bg-black' 
+        : isHome 
+          ? 'bg-transparent' 
+          : 'bg-white'}
+      text-black overflow-hidden relative z-0`}
+    >
+      <h1 className="sr-only">
+        DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17
+      </h1>
+
+      {/* VideoBackground solo en Home */}
+      {isHome && (
+        <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
+      )}
+
+      {/* Hero solo en Architecture */}
+      {isArchitecture && <Hero />}
+
+      <div className="relative z-10">
+        <Header 
+          onNavClick={handleNavClick} 
+          onGoHomeClick={handleGoHome}
+          isDarkBackground={isDarkBackground}
         />
-      </motion.div>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/35" />
+        <SectionView
+          category={activeCategory}
+          onProjectClick={handleProjectCardClick}
+          isActive={true}
+          currentSectionName={activeCategory.name}
+        />
 
-      {/* Main text (fades out) */}
-      <motion.div
-        className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6"
-        style={{ opacity: textOpacity }}
-      >
-        <h1 className="text-4xl md:text-5xl font-semibold">
-          Architecture begins with you
-        </h1>
-        <p className="mt-4 text-lg md:text-xl leading-relaxed">
-          Not with drawings. Not with plans.
-          <br />
-          With your life, your needs, your history.
-        </p>
-        <a href="#contact-form">
-          <button className="mt-8 px-8 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition">
-            Start your project
-          </button>
-        </a>
-      </motion.div>
-
-      {/* Secondary text (fades in) */}
-      <motion.div
-        className="absolute bottom-20 left-0 right-0 z-20 text-white text-center px-6"
-        style={{ opacity: secondTextOpacity }}
-      >
-        <h2 className="text-2xl md:text-3xl font-light">
-          Discover more about our process
-        </h2>
-        <p className="mt-2 text-md">
-          Design, BIM and planning tailored to you
-        </p>
-      </motion.div>
-    </section>
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      </div>
+    </div>
   );
 };
 
-export default Hero;
+export default App;
