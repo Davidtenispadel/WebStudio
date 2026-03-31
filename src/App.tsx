@@ -18,7 +18,6 @@ const App: React.FC = () => {
   const isHome = activeCategory.name === StudioSection.HOME;
   const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
 
-  // Debug
   useEffect(() => {
     console.log('activeCategory.name:', activeCategory.name);
   }, [activeCategory]);
@@ -27,7 +26,7 @@ const App: React.FC = () => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
   }, [currentCategoryIndex]);
 
-  // Cursor personalizado (sin cambios)
+  // Custom cursor effect (unchanged)
   useEffect(() => {
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (isTouchDevice) return;
@@ -101,7 +100,7 @@ const App: React.FC = () => {
       )}
 
       {/* Hero solo en Architecture */}
-      {isArchitecture && <Hero />}
+      {isArchitecture && <Hero data-testid="hero-from-app" />}
 
       <div className="relative z-10">
         <Header 
