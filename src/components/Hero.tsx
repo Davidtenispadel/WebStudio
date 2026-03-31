@@ -1,12 +1,9 @@
 import { motion } from 'framer-motion';
 
 const Hero = () => {
-  // Muestra en consola el stack trace para identificar el origen
   console.log('Hero renderizado desde:', new Error().stack);
-
   return (
     <section className="relative h-screen overflow-hidden">
-      {/* Imagen de fondo con animación de escala */}
       <motion.div
         className="absolute inset-0"
         initial={{ scale: 1.1 }}
@@ -19,11 +16,7 @@ const Hero = () => {
           className="w-full h-full object-cover"
         />
       </motion.div>
-
-      {/* Overlay oscuro */}
       <div className="absolute inset-0 bg-black/35" />
-
-      {/* Contenido textual con animación de entrada */}
       <motion.div
         className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6"
         initial={{ opacity: 0, y: 30 }}
