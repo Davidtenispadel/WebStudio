@@ -15,10 +15,11 @@ const App: React.FC = () => {
     "https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
   );
 
+  // Determinar secciones
   const isHome = activeCategory.name === StudioSection.HOME;
   const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
 
-  // Debug: muestra la categoría activa
+  // Debug: muestra la categoría activa en la consola
   useEffect(() => {
     console.log('activeCategory.name:', activeCategory.name);
   }, [activeCategory]);
@@ -27,7 +28,7 @@ const App: React.FC = () => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
   }, [currentCategoryIndex]);
 
-  // Cursor personalizado (sin cambios)
+  // Efecto cursor personalizado (sin cambios)
   useEffect(() => {
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (isTouchDevice) return;
