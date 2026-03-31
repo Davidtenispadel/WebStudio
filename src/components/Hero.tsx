@@ -1,129 +1,51 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Header from './components/Header';
-import ProjectModal from './components/ProjectModal';
-import SectionView from './components/SectionView';
-import VideoBackground from './components/VideoBackground';
-import Hero from './components/Hero';
-import { CATEGORIES } from './constants';
-import { Project, CategoryGroup, StudioSection } from './types';
+import { motion } from 'framer-motion';
 
-const App: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
-  const [videoUrl, setVideoUrl] = useState<string | null>(
-    "https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
-  );
-
-  const isHome = activeCategory.name === StudioSection.HOME;
-  const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
-
-  // Debug: muestra qué categoría está activa
-  useEffect(() => {
-    console.log('activeCategory.name:', activeCategory.name);
-  }, [activeCategory]);
-
-  useEffect(() => {
-    setActiveCategory(CATEGORIES[currentCategoryIndex]);
-  }, [currentCategoryIndex]);
-
-  // Efecto del cursor personalizado (igual que antes)
-  useEffect(() => {
-    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    if (isTouchDevice) return;
-
-    const cursor = document.getElementById('custom-cursor');
-    if (!cursor) return;
-
-    const moveCursor = (e: MouseEvent) => {
-      cursor.style.left = `${e.clientX}px`;
-      cursor.style.top = `${e.clientY}px`;
-
-      const target = e.target as HTMLElement;
-      const isInteractive = target.closest('button') ||
-        target.closest('a') ||
-        target.closest('input') ||
-        target.closest('textarea') ||
-        target.closest('select') ||
-        target.closest('.cursor-pointer');
-
-      if (isInteractive) {
-        cursor.classList.add('active');
-      } else {
-        cursor.classList.remove('active');
-      }
-    };
-
-    window.addEventListener('mousemove', moveCursor, { passive: true });
-    return () => window.removeEventListener('mousemove', moveCursor);
-  }, []);
-
-  const handleNavClick = useCallback((sectionName: string) => {
-    const index = CATEGORIES.findIndex(cat => cat.name === sectionName);
-    if (index !== -1) {
-      setCurrentCategoryIndex(index);
-      setSelectedProject(null);
-    }
-  }, []);
-
-  const handleGoHome = useCallback(() => {
-    setCurrentCategoryIndex(0);
-    setSelectedProject(null);
-  }, []);
-
-  const handleProjectCardClick = useCallback((project: Project) => {
-    if (activeCategory.name !== StudioSection.STRUCTURE) {
-      setSelectedProject(project);
-    }
-  }, [activeCategory.name]);
-
-  const isDarkBackground =
-    activeCategory.name === StudioSection.ENQUIRY ||
-    activeCategory.name === StudioSection.HOME;
+const Hero = () => {
+  // Muestra en consola el stack trace para identificar el origen
+  console.log('Hero renderizado desde:', new Error().stack);
 
   return (
-    <div
-      className={`min-h-screen w-screen transition-colors duration-700 
-      ${activeCategory.name === StudioSection.ENQUIRY 
-        ? 'bg-black' 
-        : isHome 
-          ? 'bg-transparent' 
-          : 'bg-white'}
-      text-black overflow-hidden relative z-0`}
-    >
-      <h1 className="sr-only">
-        DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17
-      </h1>
-
-      {/* VideoBackground solo en Home */}
-      {isHome && (
-        <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
-      )}
-
-      {/* Hero solo en Architecture */}
-      {isArchitecture && <Hero />}
-
-      <div className="relative z-10">
-        <Header 
-          onNavClick={handleNavClick} 
-          onGoHomeClick={handleGoHome}
-          isDarkBackground={isDarkBackground}
+    <section className="relative h-screen overflow-hidden">
+      {/* Imagen de fondo con animación de escala */}
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
+      >
+        <img
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1774772535/Family_rh8tui.png"
+          alt="Family at sunrise"
+          className="w-full h-full object-cover"
         />
+      </motion.div>
 
-        <SectionView
-          category={activeCategory}
-          onProjectClick={handleProjectCardClick}
-          isActive={true}
-          currentSectionName={activeCategory.name}
-        />
+      {/* Overlay oscuro */}
+      <div className="absolute inset-0 bg-black/35" />
 
-        <ProjectModal
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-        />
-      </div>
-    </div>
+      {/* Contenido textual con animación de entrada */}
+      <motion.div
+        className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.3 }}
+      >
+        <h1 className="text-4xl md:text-5xl font-semibold">
+          Architecture begins with you
+        </h1>
+        <p className="mt-4 text-lg md:text-xl leading-relaxed">
+          Not with drawings. Not with plans.
+          <br />
+          With your life, your needs, your history.
+        </p>
+        <a href="#contact-form">
+          <button className="mt-8 px-8 py-3 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition">
+            Start your project
+          </button>
+        </a>
+      </motion.div>
+    </section>
   );
 };
 
-export default App;
+export default Hero;
