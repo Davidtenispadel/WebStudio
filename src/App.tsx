@@ -3,7 +3,7 @@ import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
-import Hero from './components/Hero'; // ⬅️ NUEVO HERO AÑADIDO
+import Hero from './components/Hero';
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 
@@ -74,6 +74,9 @@ const App: React.FC = () => {
     activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
 
+  // Mostrar Hero en Home y Architecture
+  const showHero = activeCategory.name === StudioSection.HOME || activeCategory.name === StudioSection.ARCHITECTURE;
+
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
@@ -88,11 +91,11 @@ const App: React.FC = () => {
         DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17
       </h1>
 
-      {isHome && (
+      {showHero && (
         <>
-          <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
-
-          {/* ⬇️ NUEVA SECCIÓN HERO DB+ ARCHITECTURE */}
+          {activeCategory.name === StudioSection.HOME && (
+            <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
+          )}
           <Hero />
         </>
       )}
