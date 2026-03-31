@@ -5,21 +5,21 @@ const Hero = () => {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end start'], // el scroll empieza cuando el hero entra y termina cuando sale
+    offset: ['start start', 'end start'], // scroll from top of hero to bottom of hero
   });
 
-  // La imagen se mueve hacia arriba un 50% de su altura mientras scrolleamos
+  // Image moves upward as you scroll
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
 
-  // Controlamos la opacidad del texto inicial (se desvanece al hacer scroll)
+  // Main text fades out while scrolling
   const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
-  // Controlamos la aparición del segundo texto (aparece después del 60% del scroll)
+  // Secondary text fades in after scrolling a bit
   const secondTextOpacity = useTransform(scrollYProgress, [0.6, 0.8], [0, 1]);
 
   return (
     <section ref={ref} className="relative h-screen overflow-hidden">
-      {/* Imagen con efecto parallax */}
+      {/* Parallax image */}
       <motion.div className="absolute inset-0" style={{ y }}>
         <img
           src="https://res.cloudinary.com/dwealmbfi/image/upload/v1774772535/Family_rh8tui.png"
@@ -28,10 +28,10 @@ const Hero = () => {
         />
       </motion.div>
 
-      {/* Overlay oscuro */}
+      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/35" />
 
-      {/* Contenido principal que se desvanece al hacer scroll */}
+      {/* Main text (fades out) */}
       <motion.div
         className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6"
         style={{ opacity: textOpacity }}
@@ -51,13 +51,17 @@ const Hero = () => {
         </a>
       </motion.div>
 
-      {/* Segundo texto que aparece al hacer scroll */}
+      {/* Secondary text (fades in) */}
       <motion.div
         className="absolute bottom-20 left-0 right-0 z-20 text-white text-center px-6"
         style={{ opacity: secondTextOpacity }}
       >
-        <h2 className="text-2xl md:text-3xl font-light">Descubre más sobre nuestro proceso</h2>
-        <p className="mt-2 text-md">Diseño, BIM y planificación a tu medida</p>
+        <h2 className="text-2xl md:text-3xl font-light">
+          Discover more about our process
+        </h2>
+        <p className="mt-2 text-md">
+          Design, BIM and planning tailored to you
+        </p>
       </motion.div>
     </section>
   );
