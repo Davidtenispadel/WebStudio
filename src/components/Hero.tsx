@@ -1,25 +1,12 @@
-import { motion } from "framer-motion";
-
 const Hero = () => (
-  <section className="relative h-screen overflow-hidden">
-    <div className="absolute inset-0">
-      <motion.img
-        src="https://res.cloudinary.com/dwealmbfi/image/upload/v1774772535/Family_rh8tui.png"
-        alt="Family at sunrise"
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.2 }}
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-black/35" />
-    </div>
-
-    <motion.div
-      className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1 }}
-    >
+  <section className="relative h-screen overflow-hidden bg-gray-800">
+    <img
+      src="https://picsum.photos/id/104/1920/1080"
+      alt="test"
+      className="absolute inset-0 w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-black/35" />
+    <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6">
       <h1 className="text-4xl md:text-5xl font-semibold">Architecture begins with you</h1>
       <p className="mt-4 text-lg md:text-xl leading-relaxed">
         Not with drawings. Not with plans.
@@ -31,8 +18,6 @@ const Hero = () => (
           Start your project
         </button>
       </a>
-    </motion.div>
+    </div>
   </section>
 );
-
-export default Hero;
