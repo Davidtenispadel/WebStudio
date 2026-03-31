@@ -16,6 +16,7 @@ const App: React.FC = () => {
   );
 
   const isHome = activeCategory.name === StudioSection.HOME;
+  const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE; // Nueva variable
 
   useEffect(() => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
@@ -74,9 +75,6 @@ const App: React.FC = () => {
     activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
 
-  // Mostrar Hero en Home y Architecture
-  const showHero = activeCategory.name === StudioSection.HOME || activeCategory.name === StudioSection.ARCHITECTURE;
-
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
@@ -91,14 +89,13 @@ const App: React.FC = () => {
         DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17
       </h1>
 
-      {showHero && (
-        <>
-          {activeCategory.name === StudioSection.HOME && (
-            <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
-          )}
-          <Hero />
-        </>
+      {/* VideoBackground solo en Home */}
+      {isHome && (
+        <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
       )}
+
+      {/* Hero solo en Architecture */}
+      {isArchitecture && <Hero />}
 
       <div className="relative z-10">
         <Header 
