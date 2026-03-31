@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const isHome = activeCategory.name === StudioSection.HOME;
   const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
 
+  // Debug: muestra la categoría activa
   useEffect(() => {
     console.log('activeCategory.name:', activeCategory.name);
   }, [activeCategory]);
@@ -26,7 +27,7 @@ const App: React.FC = () => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
   }, [currentCategoryIndex]);
 
-  // Custom cursor effect (unchanged)
+  // Cursor personalizado (sin cambios)
   useEffect(() => {
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (isTouchDevice) return;
