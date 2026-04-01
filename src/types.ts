@@ -1,4 +1,3 @@
-
 export interface Project {
   id: string;
   title: string;
@@ -19,9 +18,18 @@ export interface CategoryGroup {
   projects: Project[];
 }
 
+/*  
+ |--------------------------------------------------------------------------
+ |  🔥 ENUM CORREGIDO (antes tenías "JECT_JOURNEY" → ERROR)
+ |--------------------------------------------------------------------------
+*/
+
 export enum StudioSection {
-  HOME = 'Home', 
-  JECT_JOURNEY = "Project Journey",
+  HOME = 'Home',
+
+  /* ⭐ NUEVA PESTAÑA 100% CORRECTA ⭐ */
+  PROJECT_JOURNEY = "Project Journey",
+
   ARCHITECTURE = 'Architecture',
   DESIGN = 'Design & Management',
   URBANISM = 'Masterplanning + Urban',
