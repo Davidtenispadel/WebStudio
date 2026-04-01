@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StudioSection } from '../types';
 import { X, Menu } from 'lucide-react';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES } from '../constants';   // ← AHORA CATEGORIES manda
 
 interface HeaderProps {
   onNavClick: (section: string) => void;
@@ -37,17 +36,22 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
     }
   };
 
-  // Clases condicionales para el texto del header según el fondo
+  // colours
   const textColorClass = isDarkBackground ? 'text-white' : 'text-black';
-  const navLinkColorClass = isDarkBackground ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-red-600';
-  // El icono del menú siempre será negro para contrastar con el fondo claro del header en móvil
+  const navLinkColorClass = isDarkBackground
+    ? 'text-white/70 hover:text-white'
+    : 'text-gray-500 hover:text-red-600';
+
   const menuIconColorClass = 'text-black';
 
   return (
     <>
+      {/* TOP HEADER */}
       <header className={`fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]`}>
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
-          <div 
+
+          {/* LOGO */}
+          <div
             className="flex items-center gap-1 cursor-pointer group"
             onClick={handleDbPlusLogoClick}
             aria-label={isMobile ? "Go to Home page" : "Go to home page"}
@@ -59,24 +63,26 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
               +
             </span>
           </div>
-          
+
+          {/* DESKTOP NAV — AHORA USA CATEGORIES */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {Object.values(StudioSection).map((section) => (
-              section !== StudioSection.HOME && (
-                <button 
-                  key={section}
-                  onClick={() => onNavClick(section)}
+            {CATEGORIES.map((category) =>
+              category.name !== "Home" && (
+                <button
+                  key={category.id}
+                  onClick={() => onNavClick(category.name)}
                   className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                  aria-label={`View ${section} projects`}
+                  aria-label={`View ${category.name}`}
                 >
-                  {section}
+                  {category.name}
                 </button>
               )
-            ))}
+            )}
           </nav>
 
-          <button 
-            className="md:hidden flex flex-col gap-1.5 p-2" 
+          {/* MOBILE MENU BUTTON */}
+          <button
+            className="md:hidden flex flex-col gap-1.5 p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Open menu"
           >
@@ -85,12 +91,12 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
         </div>
       </header>
 
-      {/* Mobile/Side Menu */}
-      <div 
+      {/* MOBILE SIDE MENU */}
+      <div
         className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden`}
-        style={{ 
-          zIndex: 70, 
-          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)'
+        style={{
+          zIndex: 70,
+          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
@@ -98,17 +104,23 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
             <span className="text-4xl font-light tracking-tighter text-black">DB</span>
             <span className="text-3xl font-thin text-gray-400">+</span>
           </div>
-          <button onClick={() => setIsMenuOpen(false)} className="text-black p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label="Close menu">
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="text-black p-2 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Close menu"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
+
+        {/* MOBILE NAV */}
         <nav className="flex flex-col p-10 pt-6 gap-4">
           {CATEGORIES.map((category) => (
-            <button 
+            <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
               className="block text-left text-xl font-normal tracking-[0.08em] py-3 px-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors text-black"
-              aria-label={`View ${category.name} page`}
+              aria-label={`View ${category.name}`}
             >
               {category.name}
             </button>
@@ -116,15 +128,14 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
         </nav>
       </div>
 
-      {/* Overlay */}
-      <div 
+      {/* MOBILE OVERLAY */}
+      <div
         className={`fixed inset-0 bg-black/50 transition-opacity duration-500 md:hidden
-          ${isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}
+          ${isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         style={{ zIndex: 60 }}
         onClick={() => setIsMenuOpen(false)}
         aria-hidden={!isMenuOpen}
-      ></div>
+      />
     </>
   );
 };
