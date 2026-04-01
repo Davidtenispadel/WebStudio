@@ -14,27 +14,21 @@ export interface CategoryGroup {
   id: string;
   name: string;
   description: string;
-  imageUrl?: string; 
+  imageUrl?: string;
   projects: Project[];
 }
 
-/*  
- |--------------------------------------------------------------------------
- |  🔥 ENUM CORREGIDO (antes tenías "JECT_JOURNEY" → ERROR)
- |--------------------------------------------------------------------------
-*/
-
 export enum StudioSection {
-  HOME = 'Home',
+  HOME = "Home",
 
-  /* ⭐ NUEVA PESTAÑA 100% CORRECTA ⭐ */
+  /* ⭐ TOTALMENTE CORRECTO ⭐ */
   PROJECT_JOURNEY = "Project Journey",
 
-  ARCHITECTURE = 'Architecture',
-  DESIGN = 'Design & Management',
-  URBANISM = 'Masterplanning + Urban',
-  STRUCTURE = 'MEP & Structure',
-  PROJECT_SUPPORT = 'Project Support',
-  BEHIND_DB = 'Behind DB+', 
-  ENQUIRY = 'Enquiry'
+  ARCHITECTURE = "Architecture",
+  DESIGN = "Design & Management",
+  URBANISM = "Masterplanning + Urban",
+  STRUCTURE = "MEP & Structure",
+  PROJECT_SUPPORT = "Project Support",
+  BEHIND_DB = "Behind DB+",
+  ENQUIRY = "Enquiry"
 }
