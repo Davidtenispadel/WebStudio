@@ -23,7 +23,6 @@ export enum StudioSection {
 
   /* ⭐ TOTALMENTE CORRECTO ⭐ */
   PROJECT_JOURNEY = "Project Journey",
-
   ARCHITECTURE = "Architecture",
   DESIGN = "Design & Management",
   URBANISM = "Masterplanning + Urban",
