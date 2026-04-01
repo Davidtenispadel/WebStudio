@@ -9,24 +9,37 @@ import { Project, CategoryGroup, StudioSection } from './types';
 
 const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+  /*  
+  |------------------------------------------------------------------
+  | CATEGORY MANAGEMENT
+  |------------------------------------------------------------------
+  */
+
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
-  const [videoUrl, setVideoUrl] = useState<string | null>(
-    "https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
-  );
-
-  const isHome = activeCategory.name === StudioSection.HOME;
-  const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
-
-  useEffect(() => {
-    console.log('activeCategory.name:', activeCategory.name);
-  }, [activeCategory]);
 
   useEffect(() => {
     setActiveCategory(CATEGORIES[currentCategoryIndex]);
   }, [currentCategoryIndex]);
 
-  // Cursor personalizado
+  /*  
+  |------------------------------------------------------------------
+  | LOGGING FOR DEBUG (UTIL TO VERIFY CATEGORY SWITCHING)
+  |------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+    console.log('ACTIVE CATEGORY:', activeCategory.name);
+    console.log('INDEX:', currentCategoryIndex);
+  }, [activeCategory]);
+
+  /*  
+  |------------------------------------------------------------------
+  | CUSTOM CURSOR
+  |------------------------------------------------------------------
+  */
+
   useEffect(() => {
     const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (isTouchDevice) return;
@@ -39,26 +52,37 @@ const App: React.FC = () => {
       cursor.style.top = `${e.clientY}px`;
 
       const target = e.target as HTMLElement;
-      const isInteractive = target.closest('button') ||
+      const isInteractive =
+        target.closest('button') ||
         target.closest('a') ||
         target.closest('input') ||
         target.closest('textarea') ||
         target.closest('select') ||
         target.closest('.cursor-pointer');
 
-      if (isInteractive) {
-        cursor.classList.add('active');
-      } else {
-        cursor.classList.remove('active');
-      }
+      if (isInteractive) cursor.classList.add('active');
+      else cursor.classList.remove('active');
     };
 
     window.addEventListener('mousemove', moveCursor, { passive: true });
     return () => window.removeEventListener('mousemove', moveCursor);
   }, []);
 
+  /*  
+  |------------------------------------------------------------------
+  | NAVIGATION HANDLERS
+  |------------------------------------------------------------------
+  */
+
   const handleNavClick = useCallback((sectionName: string) => {
-    const index = CATEGORIES.findIndex(cat => cat.name === sectionName);
+    // log para confirmar match exacto
+    console.log("NAV CLICK:", sectionName);
+    console.log("CATEGORIES:", CATEGORIES.map(c => c.name));
+
+    const index = CATEGORIES.findIndex(cat => cat.name.trim() === sectionName.trim());
+
+    console.log("INDEX FOUND:", index);
+
     if (index !== -1) {
       setCurrentCategoryIndex(index);
       setSelectedProject(null);
@@ -70,15 +94,32 @@ const App: React.FC = () => {
     setSelectedProject(null);
   }, []);
 
-  const handleProjectCardClick = useCallback((project: Project) => {
-    if (activeCategory.name !== StudioSection.STRUCTURE) {
-      setSelectedProject(project);
-    }
-  }, [activeCategory.name]);
+  const handleProjectCardClick = useCallback(
+    (project: Project) => {
+      if (activeCategory.name !== StudioSection.STRUCTURE) {
+        setSelectedProject(project);
+      }
+    },
+    [activeCategory.name]
+  );
 
+  /*  
+  |------------------------------------------------------------------
+  | BACKGROUND MODE
+  |------------------------------------------------------------------
+  */
+
+  const isHome = activeCategory.name === StudioSection.HOME;
+  const isArchitecture = activeCategory.name === StudioSection.ARCHITECTURE;
   const isDarkBackground =
     activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
+
+  /*  
+  |------------------------------------------------------------------
+  | RETURN (UI RENDER)
+  |------------------------------------------------------------------
+  */
 
   return (
     <div
@@ -91,20 +132,24 @@ const App: React.FC = () => {
       text-black overflow-hidden relative z-0`}
     >
       <h1 className="sr-only">
-        DB+ Architecture Corby | Expert Design, BIM & Planning Services NN18 NN17
+        DB+ Architecture Corby | Expert Design, BIM & Planning Services
       </h1>
 
-      {/* VideoBackground solo en Home */}
+      {/* HOME VIDEO BACKGROUND */}
       {isHome && (
-        <VideoBackground videoUrl={videoUrl} onVideoLoaded={setVideoUrl} />
+        <VideoBackground
+          videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
+          onVideoLoaded={() => {}}
+        />
       )}
 
-      {/* Hero solo en Architecture */}
+      {/* HERO only in ARCHITECTURE (never in Project Journey) */}
       {isArchitecture && <Hero data-testid="hero-from-app" />}
 
+      {/* MAIN LAYOUT */}
       <div className="relative z-10">
-        <Header 
-          onNavClick={handleNavClick} 
+        <Header
+          onNavClick={handleNavClick}
           onGoHomeClick={handleGoHome}
           isDarkBackground={isDarkBackground}
         />
