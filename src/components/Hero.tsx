@@ -1,51 +1,152 @@
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './components/Header';
+import ProjectModal from './components/ProjectModal';
+import SectionView from './components/SectionView';
+import VideoBackground from './components/VideoBackground';
+import { CATEGORIES } from './constants';
+import { Project, CategoryGroup, StudioSection } from './types';
 
-const SceneOne = () => {
+const App: React.FC = () => {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
+
+  /* ------------------------
+     CATEGORY SYNC
+  ------------------------ */
+  useEffect(() => {
+    setActiveCategory(CATEGORIES[currentCategoryIndex]);
+  }, [currentCategoryIndex]);
+
+  /* ------------------------
+     DEBUG (para confirmar problema real)
+  ------------------------ */
+  useEffect(() => {
+    console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
+    console.log("ACTIVE CATEGORY:", activeCategory.name);
+  }, [activeCategory]);
+
+  /* ------------------------
+     CUSTOM CURSOR
+  ------------------------ */
+  useEffect(() => {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch) return;
+
+    const cursor = document.getElementById('custom-cursor');
+    if (!cursor) return;
+
+    const move = (e: MouseEvent) => {
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+
+      const target = e.target as HTMLElement;
+      const interactive =
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('.cursor-pointer');
+
+      cursor.classList.toggle('active', Boolean(interactive));
+    };
+
+    window.addEventListener('mousemove', move, { passive: true });
+    return () => window.removeEventListener('mousemove', move);
+  }, []);
+
+  /* ------------------------
+     NAVIGATION HANDLERS
+  ------------------------ */
+  const handleNavClick = useCallback((sectionName: string) => {
+    console.log("NAV CLICK:", sectionName);
+    console.log("MATCHING:", CATEGORIES.map(c => c.name));
+
+    const index = CATEGORIES.findIndex(
+      cat => cat.name.trim().toLowerCase() === sectionName.trim().toLowerCase()
+    );
+
+    console.log("FOUND INDEX:", index);
+
+    if (index !== -1) {
+      setCurrentCategoryIndex(index);
+      setSelectedProject(null);
+    }
+  }, []);
+
+  const handleGoHome = useCallback(() => {
+    setCurrentCategoryIndex(0);
+    setSelectedProject(null);
+  }, []);
+
+  const handleProjectCardClick = useCallback(
+    (project: Project) => {
+      if (activeCategory.name !== StudioSection.STRUCTURE) {
+        setSelectedProject(project);
+      }
+    },
+    [activeCategory.name]
+  );
+
+  /* ------------------------
+     BACKGROUNDS
+  ------------------------ */
+  const isHome = activeCategory.name === StudioSection.HOME;
+  const isDarkBackground =
+    activeCategory.name === StudioSection.ENQUIRY ||
+    activeCategory.name === StudioSection.HOME;
+
+  /* ------------------------
+     UI
+  ------------------------ */
+
   return (
-    <section className="relative h-screen w-full overflow-hidden">
-      
-      {/* Background image */}
-      <motion.div
-        className="absolute inset-0"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-      >
-        <img
-          src="TU_IMAGEN_ESCENA_1.jpg"
-          alt="Ideas and references on a design table"
-          className="w-full h-full object-cover"
+    <div
+      className={`min-h-screen w-screen transition-colors duration-700 
+        ${activeCategory.name === StudioSection.ENQUIRY 
+          ? 'bg-black' 
+          : isHome 
+            ? 'bg-transparent' 
+            : 'bg-white'}
+        text-black overflow-hidden relative z-0`}
+    >
+
+      {/* SEO TITLE */}
+      <h1 className="sr-only">
+        DB+ Architecture | Expert Design, BIM & Planning Services
+      </h1>
+
+      {/* ⛔ HERO REMOVED  
+          ⭐ ONLY VIDEO BACKGROUND FOR HOME */}
+      {isHome && (
+        <VideoBackground
+          videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
+          onVideoLoaded={() => {}}
         />
-      </motion.div>
+      )}
 
-      {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="relative z-10">
+        <Header 
+          onNavClick={handleNavClick}
+          onGoHomeClick={handleGoHome}
+          isDarkBackground={isDarkBackground}
+        />
 
-      {/* Text */}
-      <motion.div
-        className="relative z-10 flex flex-col h-full justify-center items-center text-center px-6 text-white"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.4 }}
-      >
-        <h1 className="text-4xl md:text-5xl font-semibold mb-4">
-          You know what you want.
-        </h1>
+        <SectionView
+          category={activeCategory}
+          onProjectClick={handleProjectCardClick}
+          isActive={true}
+          currentSectionName={activeCategory.name}
+        />
 
-        <p className="text-lg md:text-xl leading-relaxed max-w-2xl">
-          A new home, an extension, or the right space for your business.
-          <br />
-          You have ideas, images, references… but the more you explore,
-          the more doubts appear.
-          <br /><br />
-          <span className="opacity-80">
-            That feeling is normal. Every great project starts right here.
-          </span>
-        </p>
-      </motion.div>
-    </section>
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      </div>
+    </div>
   );
 };
 
-export default SceneOne;
-``
+export default App;
