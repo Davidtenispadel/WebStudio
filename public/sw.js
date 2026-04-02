@@ -1,4 +1,4 @@
-// ✅ sw.js — Anti‑Service Worker FINAL
+// ✅ sw.js — elimina cualquier service worker antiguo
 self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", event => {
@@ -11,5 +11,5 @@ self.addEventListener("activate", event => {
   );
 });
 
-// ✅ No interceptamos nada
+// ✅ No interceptamos nada, no cacheamos nada
 self.addEventListener("fetch", () => {});
