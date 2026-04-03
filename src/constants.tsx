@@ -87,25 +87,21 @@ export const architectureDescription = `
 
 /* ──────────────────────────────────────────────────────────────── */
 /*  CATEGORY LIST                                                   */
-/*  (Project Journey inserted correctly after HOME)                */
+/*  (Project Journey inserted after HOME)                         */
 /* ──────────────────────────────────────────────────────────────── */
 
 export const CATEGORIES: CategoryGroup[] = [
 
-  /* ──────────────────────────────── */
-  /*  HOME                            */
-  /* ──────────────────────────────── */
+  /* HOME */
   {
     id: 'home',
     name: StudioSection.HOME,
     description: `Turning ideas into reality, your vision is our purpose...`,
-    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769428801/Polcie_Station_o79qbe.png',
+    imageUrl: '',   // ← vacío para evitar imagen no deseada
     projects: [],
   },
 
-  /* ──────────────────────────────── */
-  /*  PROJECT JOURNEY (NEW)          */
-  /* ──────────────────────────────── */
+  /* PROJECT JOURNEY (NUEVA) */
   {
     id: 'project_journey',
     name: StudioSection.PROJECT_JOURNEY,
@@ -114,13 +110,12 @@ export const CATEGORIES: CategoryGroup[] = [
     projects: []
   },
 
-  /* ──────────────────────────────── */
-  /*  ARCHITECTURE                    */
-  /* ──────────────────────────────── */
+  /* ARCHITECTURE */
   {
     id: 'arch',
     name: StudioSection.ARCHITECTURE,
     description: architectureDescription,
+    // sin imageUrl para evitar imagen duplicada
     projects: [
       {
         id: 'a8',
@@ -135,7 +130,6 @@ export const CATEGORIES: CategoryGroup[] = [
           'https://res.cloudinary.com/.../Proposal_3d.jpg'
         ]
       },
-
       {
         id: 'a4',
         title: 'Detached & Semidetached Houses',
@@ -148,7 +142,6 @@ export const CATEGORIES: CategoryGroup[] = [
           'https://res.cloudinary.com/.../Adosadas.png'
         ]
       },
-
       {
         id: 'a9',
         title: 'Residential Apartment Block',
@@ -159,7 +152,6 @@ export const CATEGORIES: CategoryGroup[] = [
         description: 'Un bloque residencial optimizado para densidad urbana...',
         additionalImages: ['https://res.cloudinary.com/.../Apartment_Block_2.png']
       },
-
       {
         id: 'a1',
         title: 'Police Station',
@@ -167,13 +159,11 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/.../Police_Station.png',
         category: StudioSection.ARCHITECTURE,
-        description:
-          'Una instalación de seguridad contemporánea con rigor funcional...',
+        description: 'Una instalación de seguridad contemporánea con rigor funcional...',
         additionalImages: [
           'https://res.cloudinary.com/.../Police_Station_4.png'
         ],
       },
-
       {
         id: 'a11',
         title: 'Community Centre',
@@ -181,12 +171,10 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/.../Community_Centre.png',
         category: StudioSection.ARCHITECTURE,
-        description:
-          'Centro comunitario con espacios flexibles y diseño contemporáneo.',
+        description: 'Centro comunitario con espacios flexibles y diseño contemporáneo.',
         useAiInsight: false,
         additionalImages: ['https://res.cloudinary.com/.../centro_civico.png']
       },
-
       {
         id: 'a10',
         title: 'Office Building',
@@ -197,7 +185,6 @@ export const CATEGORIES: CategoryGroup[] = [
         description:'Edificio de oficinas moderno con diseño limpio...',
         additionalImages:['https://res.cloudinary.com/.../Office_Building_2.png']
       },
-
       {
         id: 'a5',
         title: 'Nursery',
@@ -211,9 +198,7 @@ export const CATEGORIES: CategoryGroup[] = [
     ]
   },
 
-  /* ──────────────────────────────── */
-  /*  DESIGN & MANAGEMENT             */
-  /* ──────────────────────────────── */
+  /* DESIGN & MANAGEMENT */
   {
     id: 'design',
     name: StudioSection.DESIGN,
@@ -246,9 +231,7 @@ export const CATEGORIES: CategoryGroup[] = [
     ]
   },
 
-  /* ──────────────────────────────── */
-  /*  URBANISM                        */
-  /* ──────────────────────────────── */
+  /* URBANISM */
   {
     id: 'urban',
     name: StudioSection.URBANISM,
@@ -300,9 +283,7 @@ export const CATEGORIES: CategoryGroup[] = [
     ]
   },
 
-  /* ──────────────────────────────── */
-  /*  MEP & STRUCTURE                 */
-  /* ──────────────────────────────── */
+  /* MEP & STRUCTURE */
   {
     id: 'struct',
     name: StudioSection.STRUCTURE,
@@ -326,9 +307,7 @@ export const CATEGORIES: CategoryGroup[] = [
     ]
   },
 
-  /* ──────────────────────────────── */
-  /*  PROJECT SUPPORT                 */
-  /* ──────────────────────────────── */
+  /* PROJECT SUPPORT */
   {
     id: 'support',
     name: StudioSection.PROJECT_SUPPORT,
@@ -355,9 +334,7 @@ export const CATEGORIES: CategoryGroup[] = [
     ]
   },
 
-  /* ──────────────────────────────── */
-  /*  BEHIND DB                       */
-  /* ──────────────────────────────── */
+  /* BEHIND DB */
   {
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
@@ -370,9 +347,7 @@ export const CATEGORIES: CategoryGroup[] = [
     projects: []
   },
 
-  /* ──────────────────────────────── */
-  /*  ENQUIRY                         */
-  /* ──────────────────────────────── */
+  /* ENQUIRY */
   {
     id: 'enquiry',
     name: StudioSection.ENQUIRY,
