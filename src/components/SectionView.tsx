@@ -1,395 +1,787 @@
-/import { Project, CategoryGroup, StudioSection } from './types';
+/*
+ * SECTIONVIEW.TSX — Unified Version
+ * - Project Journey section shows only <Hero />
+ * - Other sections show description + projects (image optional)
+ */
 
-/* ──────────────────────────────────────────────────────────────── */
-/*  TEXT BLOCKS                                                     */
-/* ──────────────────────────────────────────────────────────────── */
+import React, { useEffect, useRef, useState } from "react";
+import { CategoryGroup, Project, StudioSection } from "../types";
+import ProjectCard from "./ProjectCard";
+import {
+  ChevronRight,
+  CheckCircle,
+  Upload,
+  X as CloseIcon,
+  Loader2,
+  File as FileIcon,
+} from "lucide-react";
 
-export const isoContent = `
-<div class="text-black leading-tight">
+import {
+  urbanMasterplanningHeaderDescription,
+  isoContent,
+} from "../constants";
 
-  <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
+import Hero from "./Hero";
 
-  <p class="text-lg md:text-xl font-light pt-6">
-    We apply the principles of ISO 19650, the international standard developed in the UK for managing information in BIM‑based projects.<br/>
-    For experienced clients, ISO 19650 is familiar territory. But for those who are not aware of it, the benefits are simple and tangible:
-  </p>
+interface SectionViewProps {
+  category: CategoryGroup;
+  onProjectClick: (project: Project) => void;
+  isActive: boolean;
+  currentSectionName: string;
+}
 
-  <ul class="space-y-1 text-lg md:text-xl font-light pt-6">
-    <li>• <span class="font-bold">Everyone works in unison:</span> all teams share the same organised and up‑to‑date information, eliminating misunderstandings.</li>
-    <li>• <span class="font-bold">Fewer errors and last‑minute changes:</span> issues are detected early, before construction.</li>
-    <li>• <span class="font-bold">Reduced unexpected costs:</span> avoiding mistakes and rework minimises budget deviations.</li>
-    <li>• <span class="font-bold">Clear communication and full transparency:</span> clients always know what is happening and why.</li>
-    <li>• <span class="font-bold">Better coordination:</span> architects, engineers and contractors collaborate under a unified framework.</li>
-  </ul>
+const ENQUIRY_ENDPOINT = "/api/send-enquiry";
 
-  <p class="text-lg md:text-xl font-light italic pt-6">
-    ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure and efficiency to all stakeholders.
-  </p>
-</div>
-`;
+const formatBytes = (bytes: number) => {
+  if (!bytes && bytes !== 0) return "";
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 B";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
+  return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
+};
 
-export const designPhilosophy = `
-<div class="text-black leading-tight">
+const SectionView: React.FC<SectionViewProps> = ({
+  category,
+  onProjectClick,
+  isActive,
+  currentSectionName,
+}) => {
+  // ============================
+  // Aesthetic A Animation State
+  // ============================
+  const [displayedCategory, setDisplayedCategory] =
+    useState<CategoryGroup>(category);
 
-  <p class="text-lg md:text-xl font-light">
-    At DB+ Design & Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process.
-  </p>
+  const [showDB, setShowDB] = useState(false);
+  const [showPlus, setShowPlus] = useState(false);
+  const [showName, setShowName] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
+  const [showGalleryItems, setShowGalleryItems] = useState(false);
 
-  <p class="text-lg md:text-xl font-light pt-6">
-    We listen carefully, translate real needs into precise design solutions, and maintain continuous dialogue to ensure alignment with client goals and project context.
-  </p>
+  const [stage, setStage] = useState<"intro" | "gallery">("intro");
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  <p class="text-lg md:text-xl font-light pt-6">
-    Our workflow covers concept development, design refinement, technical coordination, permit documentation, construction detailing, and on‑site support.
-  </p>
+  const isFirstRender = useRef(true);
 
-</div>
-`;
+  // ============================
+  // ENQUIRY Form State
+  // ============================
+  const [enquiryStep, setEnquiryStep] = useState(1);
+  const [isSending, setIsSending] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
 
-export const architectureDescription = `
-<div class="text-black leading-tight">
+  // Uploader state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  <p class="text-lg md:text-xl font-light">
-    You know what you want: a new home, an extension, or the perfect building for your business.<br/><br/>
-    You have ideas, images, references… but the more you explore, the more doubts appear.<br/><br/>
-    What would your ideal space really look like?<br/>
-    How would it feel to live or work in it?<br/><br/>
-    It’s completely normal.<br/><br/>
-    The perfect design doesn’t appear out of nowhere — <span class="font-bold">it’s discovered.</span>
-  </p>
+  // ============================
+  // Animation Logic
+  // ============================
+  const resetSequence = () => {
+    setShowDB(false);
+    setShowPlus(false);
+    setShowName(false);
+    setShowDesc(false);
+    setShowGalleryItems(false);
+    setStage("intro");
+    setEnquiryStep(1);
+  };
 
-  <p class="text-xl md:text-2xl font-bold pt-10 text-center">
-    That’s where we come in
-  </p><br/>
+  const startSequence = () => {
+    setShowDB(true);
+    const t1 = setTimeout(() => setShowPlus(true), 400);
+    const t2 = setTimeout(() => setShowName(true), 700);
+    const t3 = setTimeout(() => setStage("gallery"), 3000);
+    const t4 = setTimeout(() => setShowDesc(true), 2300);
+    const t5 = setTimeout(() => setShowGalleryItems(true), 2600);
+    return [t1, t2, t3, t4, t5];
+  };
 
-  <p class="text-lg md:text-xl font-light">
-    Tell us your needs, your tastes, your lifestyle.<br/>
-    We turn all of that into <span class="font-bold">a clear, solid concept tailored just for you.</span>
-  </p>
-
-  <p class="text-lg md:text-xl font-light pt-6">
-    When the idea is well‑defined, everything else flows naturally.<br/>
-    From that moment, bringing it to life becomes almost effortless.
-  </p>
-
-  <p class="text-xl md:text-2xl font-bold pt-10 text-center">
-    Stop overthinking.<br/>
-    Start imagining with us.<br/>
-    Your ideal project begins here.
-  </p>
-
-  <p class="text-lg md:text-xl font-light pt-10">
-    DB+ is a full‑service architecture practice delivering projects from initial concept to full realisation through BIM technology.
-  </p>
-
-</div>
-`;
-
-/* ──────────────────────────────────────────────────────────────── */
-/*  CATEGORY LIST                                                   */
-/*  (Project Journey inserted correctly after HOME)                */
-/* ──────────────────────────────────────────────────────────────── */
-
-export const CATEGORIES: CategoryGroup[] = [
-
-  /* ──────────────────────────────── */
-  /*  HOME                            */
-  /* ──────────────────────────────── */
-  {
-    id: 'home',
-    name: StudioSection.HOME,
-    description: `Turning ideas into reality, your vision is our purpose...`,
-    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769428801/Polcie_Station_o79qbe.png',
-    projects: [],
-  },
-
-  /* ──────────────────────────────── */
-  /*  PROJECT JOURNEY (NEW)          */
-  /* ──────────────────────────────── */
-  {
-    id: 'project_journey',
-    name: StudioSection.PROJECT_JOURNEY,
-    description: "",
-    imageUrl: "",
-    projects: []
-  },
-
-  /* ──────────────────────────────── */
-  /*  ARCHITECTURE                    */
-  /* ──────────────────────────────── */
-  {
-    id: 'arch',
-    name: StudioSection.ARCHITECTURE,
-    description: architectureDescription,
-    projects: [
-      {
-        id: 'a8',
-        title: 'House Extension',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'Una extensión de vivienda que envuelve la estructura existente...',
-        additionalImages: [
-          'https://res.cloudinary.com/.../Proposal_Section_1.jpg',
-          'https://res.cloudinary.com/.../Proposal_3d.jpg'
-        ]
-      },
-
-      {
-        id: 'a4',
-        title: 'Detached & Semidetached Houses',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Semi-detached_house.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'Proyectos residenciales enfocados en viviendas unifamiliares...',
-        additionalImages: [
-          'https://res.cloudinary.com/.../Adosadas.png'
-        ]
-      },
-
-      {
-        id: 'a9',
-        title: 'Residential Apartment Block',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/.../Apartment_Block.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'Un bloque residencial optimizado para densidad urbana...',
-        additionalImages: ['https://res.cloudinary.com/.../Apartment_Block_2.png']
-      },
-
-      {
-        id: 'a1',
-        title: 'Police Station',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/.../Police_Station.png',
-        category: StudioSection.ARCHITECTURE,
-        description:
-          'Una instalación de seguridad contemporánea con rigor funcional...',
-        additionalImages: [
-          'https://res.cloudinary.com/.../Police_Station_4.png'
-        ],
-      },
-
-      {
-        id: 'a11',
-        title: 'Community Centre',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/.../Community_Centre.png',
-        category: StudioSection.ARCHITECTURE,
-        description:
-          'Centro comunitario con espacios flexibles y diseño contemporáneo.',
-        useAiInsight: false,
-        additionalImages: ['https://res.cloudinary.com/.../centro_civico.png']
-      },
-
-      {
-        id: 'a10',
-        title: 'Office Building',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Office_Building.png',
-        category: StudioSection.ARCHITECTURE,
-        description:'Edificio de oficinas moderno con diseño limpio...',
-        additionalImages:['https://res.cloudinary.com/.../Office_Building_2.png']
-      },
-
-      {
-        id: 'a5',
-        title: 'Nursery',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Nursery.png',
-        category: StudioSection.ARCHITECTURE,
-        description:'Guardería con luz natural y espacios adaptables.',
-        additionalImages:['https://res.cloudinary.com/.../Interior_nursery.png']
-      },
-    ]
-  },
-
-  /* ──────────────────────────────── */
-  /*  DESIGN & MANAGEMENT             */
-  /* ──────────────────────────────── */
-  {
-    id: 'design',
-    name: StudioSection.DESIGN,
-    description: designPhilosophy,
-    projects: [
-      {
-        id: 'd1',
-        title: '',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Irsham.png',
-        category: StudioSection.DESIGN
-      },
-      {
-        id: 'd2',
-        title: 'Modern Architectural Vision',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Vision.png',
-        category: StudioSection.DESIGN
-      },
-      {
-        id: 'd4',
-        title: '',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Police_Station_2.png',
-        category: StudioSection.DESIGN
+  // Fallback: si después de 2 segundos showName sigue falso, forzarlo
+  useEffect(() => {
+    if (!isActive || isTransitioning) return;
+    const timer = setTimeout(() => {
+      if (!showName) {
+        setShowName(true);
       }
-    ]
-  },
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [isActive, isTransitioning, showName]);
 
-  /* ──────────────────────────────── */
-  /*  URBANISM                        */
-  /* ──────────────────────────────── */
-  {
-    id: 'urban',
-    name: StudioSection.URBANISM,
-    description: `
-      <div class="text-black leading-tight">
-        <p class="text-lg md:text-xl font-light">
-          We shape urban spaces with strategic planning and design...
-        </p>
-      </div>
-    `,
-    projects: [
-      {
-        id: 'u3',
-        title: 'Urbanisation Project A',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../Urbanisation3.png',
-        category: StudioSection.URBANISM,
-        description:'Planificación y desarrollo urbano integral...',
-        additionalImages:[
-          'https://res.cloudinary.com/.../Urbanisation02.png',
-          'https://res.cloudinary.com/.../Paviment.png'
-        ]
-      },
-      {
-        id: 'u6',
-        title: 'Transformer Substation & Urban Park',
-        location: '',
-        year: '',
-        imageUrl:'https://res.cloudinary.com/.../transformer.png',
-        category: StudioSection.URBANISM,
-        description:'Integración paisajística de subestación eléctrica...',
-        additionalImages:[
-          'https://res.cloudinary.com/.../Gemini_Park.png'
-        ]
-      },
-      {
-        id: 'u8',
-        title:'Urbanisation Project C & Sanitation Profiles',
-        location:'',
-        year:'',
-        imageUrl:'https://res.cloudinary.com/.../Urbanisation01.png',
-        category:StudioSection.URBANISM,
-        description:'Diseño urbano centrado en estética y funcionalidad...',
-        additionalImages:[
-          'https://res.cloudinary.com/.../sanitation_1.jpg'
-        ]
+  useEffect(() => {
+    if (isActive && isFirstRender.current) {
+      isFirstRender.current = false;
+      const timers = startSequence();
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    if (isFirstRender.current) return;
+
+    if (category.id !== displayedCategory.id) {
+      setIsTransitioning(true);
+
+      const tOut = setTimeout(() => {
+        resetSequence();
+        setDisplayedCategory(category);
+        setIsTransitioning(false);
+
+        setTimeout(() => {
+          startSequence();
+        }, 100);
+      }, 500);
+
+      return () => clearTimeout(tOut);
+    }
+  }, [category, displayedCategory.id]);
+
+  // Force gallery stage in ENQUIRY
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.ENQUIRY) {
+      setStage("gallery");
+    }
+  }, [displayedCategory.name]);
+
+  if (!isActive) return null;
+
+  // ============================
+  // Section Flags
+  // ============================
+  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
+  const isHomeSection = displayedCategory.name === StudioSection.HOME;
+  const isUrbanSection = displayedCategory.name === StudioSection.URBANISM;
+  const isDesignSection = displayedCategory.name === StudioSection.DESIGN;
+  const isArchitectureSection =
+    displayedCategory.name === StudioSection.ARCHITECTURE;
+  const isProjectSupportSection =
+    displayedCategory.name === StudioSection.PROJECT_SUPPORT;
+  const isStructureSection =
+    displayedCategory.name === StudioSection.STRUCTURE;
+  const isBehindDBSection =
+    displayedCategory.name === StudioSection.BEHIND_DB;
+  const isProjectJourney =
+    displayedCategory.name === StudioSection.PROJECT_JOURNEY;
+
+  const scaleTarget =
+    typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
+
+  // ============================
+  // Uploader Logic
+  // ============================
+  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length) setSelectedFiles((prev) => [...prev, ...files]);
+    if (e.currentTarget) e.currentTarget.value = "";
+  };
+
+  const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const files = e.dataTransfer?.files ? Array.from(e.dataTransfer.files) : [];
+    if (files.length) setSelectedFiles((prev) => [...prev, ...files]);
+  };
+
+  const removeFile = (indexToRemove: number) => {
+    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const clearAllFiles = () => setSelectedFiles([]);
+
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSending(true);
+
+    const fd = new FormData();
+    fd.append("name", formData.name);
+    fd.append("email", formData.email);
+    fd.append("message", formData.message);
+    selectedFiles.forEach((file) => fd.append("files[]", file));
+
+    try {
+      const response = await fetch(ENQUIRY_ENDPOINT, {
+        method: "POST",
+        body: fd,
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setEnquiryStep(4);
+        setTimeout(() => {
+          setFormData({ name: "", email: "", message: "" });
+          setSelectedFiles([]);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        }, 2000);
+      } else {
+        alert(result.error || "Server error.");
       }
-    ]
-  },
+    } catch {
+      alert("Network error.");
+    } finally {
+      setIsSending(false);
+    }
+  };
 
-  /* ──────────────────────────────── */
-  /*  MEP & STRUCTURE                 */
-  /* ──────────────────────────────── */
-  {
-    id: 'struct',
-    name: StudioSection.STRUCTURE,
-    description: `
-      <div class="text-black leading-tight">
-        <p class="text-lg md:text-xl font-light">
-          Delivering building systems through the calculation and design of all required installations.
-        </p>
+  // ============================
+  // RENDER
+  // ============================
+  return (
+    <div
+      className={`fixed inset-0 w-full transition-opacity duration-500 ${
+        isTransitioning ? "opacity-0" : "opacity-100"
+      } bg-transparent`}
+    >
+      {/* ============================
+          ENQUIRY BACKGROUND
+      ============================ */}
+      {isEnquiry && (
+        <div className="absolute inset-0 z-20 overflow-hidden">
+          <img
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769967857/make_the_background_2_xwqmiu.png"
+            alt="Enquiry Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+      )}
+
+      {/* ============================
+          HEADER (Aesthetic A)
+      ============================ */}
+      <div
+        className={`fixed z-[40] flex items-center transition-all ${
+          stage === "intro"
+            ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
+            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 justify-start"
+        }`}
+        style={{
+          transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+          transitionDuration: "1000ms",
+          width: stage === "intro" ? "100%" : "calc(100% - 80px)",
+        }}
+      >
+        <div
+          className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
+          style={{
+            transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+            transitionDuration: "1000ms",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transformOrigin: "left",
+          }}
+        >
+          {/* DB+ */}
+          <div className="flex items-center gap-3 shrink-0">
+            <h2
+              className={`text-9xl font-light tracking-tighter transition-all ${
+                isEnquiry ? "text-white" : "text-black"
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
+              style={{
+                fontSize:
+                  typeof window !== "undefined" && window.innerWidth >= 768
+                    ? "12rem"
+                    : "9rem",
+                transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
+                transitionDuration: "1000ms",
+              }}
+            >
+              DB
+            </h2>
+
+            <span
+              className={`text-6xl md:text-8xl font-thin transition-all ${
+                isEnquiry ? "text-gray-300" : "text-gray-400"
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
+              style={{ transitionDuration: "700ms" }}
+            >
+              +
+            </span>
+          </div>
+
+          {/* Section Names */}
+          <div
+            className="transition-all ease-out overflow-hidden flex-1"
+            style={{
+              transitionDuration: "700ms",
+              transform: showName ? "translateX(0)" : "translateX(-48px)",
+              opacity: showName ? 1 : 0,
+            }}
+          >
+            {isUrbanSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span
+                  className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${
+                    isEnquiry ? "text-white" : "text-black"
+                  }`}
+                >
+                  Masterplanning +
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  Urban
+                </span>
+              </div>
+            ) : isDesignSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span
+                  className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${
+                    isEnquiry ? "text-white" : "text-black"
+                  }`}
+                >
+                  Design
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  &amp; Management
+                </span>
+              </div>
+            ) : (
+              <span
+                className={`text-4xl md:text-6xl tracking-[0.15em] font-light block leading-none ${
+                  isEnquiry ? "text-white" : "text-black"
+                }`}
+              >
+                {isHomeSection ? "" : displayedCategory.name}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Section Description */}
+        {displayedCategory.description &&
+          !isHomeSection &&
+          !isDesignSection &&
+          !isEnquiry &&
+          !isProjectSupportSection &&
+          !isStructureSection &&
+          !isBehindDBSection &&
+          !isArchitectureSection && (
+            <div
+              className={`transition-all ease-out overflow-hidden flex-1 ${
+                stage === "gallery"
+                  ? "ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl"
+                  : "pointer-events-none w-0 h-0"
+              }`}
+              style={{
+                transitionDuration: "1000ms",
+                opacity: stage === "gallery" && showDesc ? 1 : 0,
+                transform:
+                  stage === "gallery" && showDesc
+                    ? "translateX(0)"
+                    : "translateX(-40px)",
+              }}
+            >
+              {isUrbanSection ? (
+                <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">
+                  {urbanMasterplanningHeaderDescription}
+                </span>
+              ) : (
+                <div
+                  className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: displayedCategory.description,
+                  }}
+                />
+              )}
+            </div>
+          )}
       </div>
-    `,
-    projects: [
-      { id: 's4', title:'Solar thermal panels', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Designer_2.png', category: StudioSection.STRUCTURE },
-      { id: 's6', title:'Water supply calculation', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Water.png', category: StudioSection.STRUCTURE },
-      { id: 's7', title:'Foul drainage system', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Foul_Drainage.png', category: StudioSection.STRUCTURE },
-      { id: 's8', title:'HVAC', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../HVAC.png', category: StudioSection.STRUCTURE },
-      { id: 's9', title:'PV Systems', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Electricity.png', category: StudioSection.STRUCTURE },
-      { id: 's10', title:'Thermal Load', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../thermal_load.png', category: StudioSection.STRUCTURE },
-      { id: 's11', title:'Fire Safety Systems', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Fire_safe.png', category: StudioSection.STRUCTURE },
-      { id: 's12', title:'Sound Insulation Analysis', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../sound_insulation.png', category: StudioSection.STRUCTURE },
-      { id: 's5', title:'Complete Structural Calculations', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Structure.png', category: StudioSection.STRUCTURE }
-    ]
-  },
 
-  /* ──────────────────────────────── */
-  /*  PROJECT SUPPORT                 */
-  /* ──────────────────────────────── */
-  {
-    id: 'support',
-    name: StudioSection.PROJECT_SUPPORT,
-    description: `
-      <div class="text-black leading-tight">
-        <p class="text-lg md:text-xl font-light">
-          Through companies such as Sir Robert McAlpine, Astraseal and Littleman Contracts...
-        </p>
+      {/* ============================
+          MAIN CONTENT
+      ============================ */}
+      <div
+        className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
+          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        style={{ paddingTop: "120px" }}
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* ============================
+              PROJECT JOURNEY (solo Hero)
+          ============================ */}
+          {isProjectJourney && (
+            <div className="w-full">
+              <Hero />
+            </div>
+          )}
+
+          {/* ============================
+              RESTO DE SECCIONES
+          ============================ */}
+          {!isProjectJourney && (
+            <>
+              {isEnquiry ? (
+                <div className="max-w-7xl mx-auto relative z-[50]">
+                  <div className="relative z-[60]">
+                    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+                      {/* Left Column */}
+                      <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
+                        <h3 className="text-3xl md:text-4xl font-light leading-tight">
+                          Contact
+                          <br />
+                          Information
+                        </h3>
+
+                        <div className="mt-8 space-y-6 text-white/80">
+                          <div>
+                            <div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">
+                              Office
+                            </div>
+                            <div className="mt-2 text-base leading-6">
+                              108 Kestrel Road, Corby,
+                              <br />
+                              Northamptonshire, England
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">
+                              Telephone
+                            </div>
+                            <div className="mt-2 text-base">+44 07955018937</div>
+                          </div>
+
+                          <div>
+                            <div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">
+                              Email
+                            </div>
+                            <a
+                              href="mailto:db@dbsdesigner.com"
+                              className="mt-2 block text-base text-red-400 hover:text-red-300"
+                            >
+                              db@dbsdesigner.com
+                            </a>
+                          </div>
+                        </div>
+                      </aside>
+
+                      {/* Right Column (Form) */}
+                      <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
+                        <form onSubmit={handleEnquirySubmit} className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">
+                                Full Name
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="John Doe"
+                                className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
+                                value={formData.name}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    name: e.target.value,
+                                  })
+                                }
+                                disabled={isSending}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">
+                                Email Address
+                              </label>
+                              <input
+                                type="email"
+                                required
+                                placeholder="john@example.com"
+                                className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
+                                value={formData.email}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    email: e.target.value,
+                                  })
+                                }
+                                disabled={isSending}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">
+                              Project Brief
+                            </label>
+                            <textarea
+                              required
+                              placeholder="Tell us about your architectural vision..."
+                              className="w-full h-44 bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
+                              value={formData.message}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  message: e.target.value,
+                                })
+                              }
+                              disabled={isSending}
+                            />
+                          </div>
+
+                          {/* Attachments */}
+                          <div>
+                            <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">
+                              Attachments
+                            </label>
+
+                            <div
+                              className={[
+                                "rounded-xl border-2 border-dashed cursor-pointer",
+                                dragActive
+                                  ? "border-red-500 bg-red-500/10"
+                                  : "border-white/20 bg-neutral-700/40",
+                                "p-6 md:p-8 transition-colors",
+                              ].join(" ")}
+                              onClick={() =>
+                                !isSending && fileInputRef.current?.click()
+                              }
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDragActive(true);
+                              }}
+                              onDragLeave={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setDragActive(false);
+                              }}
+                              onDrop={onDropFiles}
+                            >
+                              <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
+                                <div className="p-3 rounded-full bg-white/10 border border-white/10">
+                                  <Upload className="w-6 h-6 text-white/80" />
+                                </div>
+
+                                <div className="text-sm">
+                                  <span className="text-white">Drag &amp; drop files here</span>{" "}
+                                  <span className="text-white/60">or</span>{" "}
+                                  <span className="text-red-400 underline">click to browse</span>
+                                </div>
+
+                                <div className="text-xs text-white/50">
+                                  Blueprints, PDFs, images… Large files supported.
+                                </div>
+                              </div>
+
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                className="hidden"
+                                multiple
+                                onChange={onSelectFiles}
+                                disabled={isSending}
+                              />
+                            </div>
+
+                            {selectedFiles.length > 0 && (
+                              <div className="mt-5 space-y-3">
+                                {selectedFiles.map((file, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      <div className="mt-0.5">
+                                        <FileIcon className="w-4 h-4 text-white/70" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <div className="text-sm text-white/90 truncate">
+                                            {file.name}
+                                          </div>
+                                          <div className="text-[11px] text-white/50">
+                                            · {formatBytes(file.size)}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeFile(idx)}
+                                        className="text-white/40 hover:text-red-400 transition-colors"
+                                        title="Remove from list"
+                                      >
+                                        <CloseIcon className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                                {selectedFiles.length > 0 && (
+                                  <div className="pt-1">
+                                    <button
+                                      type="button"
+                                      onClick={clearAllFiles}
+                                      className="text-xs text-white/60 hover:text-white underline"
+                                    >
+                                      Clear all files
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={isSending}
+                            className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <span className="text-xs font-bold tracking-[0.4em] uppercase">
+                              {isSending ? "Transmitting..." : "Submit to db+"}
+                            </span>
+                            {isSending ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5" />
+                            )}
+                          </button>
+
+                          {enquiryStep >= 4 && (
+                            <div className="py-16 flex flex-col items-center text-center space-y-6">
+                              <div className="p-5 bg-white rounded-full">
+                                <CheckCircle className="w-14 h-14 text-red-600" />
+                              </div>
+                              <div>
+                                <h4 className="text-2xl font-light text-white">
+                                  Vision Received
+                                </h4>
+                                <p className="text-white/70 mt-2 leading-tight max-w-md">
+                                  Your project details and documents have been
+                                  submitted to{" "}
+                                  <span className="text-red-400">
+                                    db@dbsdesigner.com
+                                  </span>
+                                  . We will review your vision and contact you
+                                  shortly.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </form>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+              ) : isBehindDBSection ? (
+                <div
+                  className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
+                    showGalleryItems ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                    <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl">
+                      <div
+                        className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify"
+                        dangerouslySetInnerHTML={{
+                          __html: displayedCategory.description,
+                        }}
+                      />
+                    </div>
+                    <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
+                      <img
+                        src={displayedCategory.imageUrl}
+                        alt={displayedCategory.name}
+                        className="w-full h-auto object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Bloque descriptivo para secciones con descripción */}
+                  {(isUrbanSection ||
+                    isStructureSection ||
+                    isDesignSection ||
+                    isProjectSupportSection ||
+                    isArchitectureSection) && (
+                    <div
+                      className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
+                        showGalleryItems ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                        <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl">
+                          <div
+                            className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify"
+                            dangerouslySetInnerHTML={{
+                              __html: displayedCategory.description,
+                            }}
+                          />
+                        </div>
+                        {displayedCategory.imageUrl && (
+                          <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
+                            <img
+                              src={displayedCategory.imageUrl}
+                              alt={displayedCategory.name}
+                              className="w-full h-auto object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project Grid */}
+                  {!isHomeSection && !isEnquiry && !isBehindDBSection && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+                      {displayedCategory.projects.map((project) => (
+                        <ProjectCard
+                          key={project.id}
+                          project={project}
+                          onClick={onProjectClick}
+                          currentSectionName={currentSectionName}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Special Blocks */}
+                  {isDesignSection && (
+                    <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto">
+                      <div className="p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
+                        <div
+                          className="text-black leading-tight"
+                          dangerouslySetInnerHTML={{ __html: isoContent }}
+                        />
+                      </div>
+                      <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                        <img
+                          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
+                          alt="Design & Management Vision"
+                          className="w-full h-auto object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {isUrbanSection && (
+                    <div className="mt-32 mb-16 max-w-5xl mx-auto">
+                      <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                        <img
+                          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png"
+                          alt="Urban Masterplanning Drawing"
+                          className="w-full h-auto object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    `,
-    projects: [
-      { id:'ps1', title:'Elizabeth Tower', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Elizabeth_Tower.jpg', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps4', title:'U.S. Embassy London', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Embassy.jpg', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps5', title:'Battersea Power Station', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Battersea.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps6', title:'Bloomberg Building', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Bloomberg.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps7', title:'Victoria Gate', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Victoria_Gate.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps8', title:"Chetham's Concert Hall", location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Chetham.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps9', title:'London Fruit & Wool Exchange', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Fruit_Wool.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps10', title:'110 Liverpool Square', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Liverpool_Square.jpg', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps11', title:'Chasse Farm Hospital', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Chase_Farm.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps12', title:'Victoria Square', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Victoria_Square.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps3', title:'Wimbledon Court No.1', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Wimbledon_1.png', category: StudioSection.PROJECT_SUPPORT },
-      { id:'ps2', title:'University of Cambridge', location:'', year:'', imageUrl:'https://res.cloudinary.com/.../Cambridge.png', category: StudioSection.PROJECT_SUPPORT }
-    ]
-  },
+    </div>
+  );
+};
 
-  /* ──────────────────────────────── */
-  /*  BEHIND DB                       */
-  /* ──────────────────────────────── */
-  {
-    id: 'behinddb',
-    name: StudioSection.BEHIND_DB,
-    description: `
-      <div class="text-black leading-tight">
-        <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio.</p>
-      </div>
-    `,
-    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
-    projects: []
-  },
-
-  /* ──────────────────────────────── */
-  /*  ENQUIRY                         */
-  /* ──────────────────────────────── */
-  {
-    id: 'enquiry',
-    name: StudioSection.ENQUIRY,
-    description: "",
-    projects: []
-  }
-];
-
-/* ──────────────────────────────────────────────────────────────── */
-/*  FILTERED SERVICES LIST                                          */
-/* ──────────────────────────────────────────────────────────────── */
-
-export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(
-  cat =>
-    ![
-      StudioSection.HOME,
-      StudioSection.ENQUIRY,
-      StudioSection.BEHIND_DB
-    ].includes(cat.name as StudioSection)
-);
+export default SectionView;
