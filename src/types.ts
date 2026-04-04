@@ -23,9 +23,9 @@ export enum StudioSection {
   PROJECT_JOURNEY = "Project Journey",
   ARCHITECTURE = "Architecture",
   DESIGN = "Design & Management",
-  URBANISM = "Urbanism",
+  URBANISM = "Masterplanning + Urban",
   STRUCTURE = "MEP & Structure",
   PROJECT_SUPPORT = "Project Support",
-  BEHIND_DB = "Behind DB",
-  ENQUIRY = "Enquiry",
+  BEHIND_DB = "Behind DB+",
+  ENQUIRY = "Enquiry"
 }
