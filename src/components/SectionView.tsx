@@ -65,13 +65,14 @@ const SectionView: React.FC<SectionViewProps> = ({
     setEnquiryStep(1);
   };
 
+  // ANIMACIÓN MÁS RÁPIDA: tiempos reducidos a la mitad
   const startSequence = () => {
     setShowDB(true);
-    const t1 = setTimeout(() => setShowPlus(true), 400);
-    const t2 = setTimeout(() => setShowName(true), 700);
-    const t3 = setTimeout(() => setStage("gallery"), 3000);
-    const t4 = setTimeout(() => setShowDesc(true), 2300);
-    const t5 = setTimeout(() => setShowGalleryItems(true), 2600);
+    const t1 = setTimeout(() => setShowPlus(true), 200);    // antes 400
+    const t2 = setTimeout(() => setShowName(true), 400);    // antes 700
+    const t3 = setTimeout(() => setStage("gallery"), 1500); // antes 3000
+    const t4 = setTimeout(() => setShowDesc(true), 1200);   // antes 2300
+    const t5 = setTimeout(() => setShowGalleryItems(true), 1400); // antes 2600
     return [t1, t2, t3, t4, t5];
   };
 
@@ -79,7 +80,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     if (!isActive || isTransitioning) return;
     const timer = setTimeout(() => {
       if (!showName) setShowName(true);
-    }, 2000);
+    }, 1000); // antes 2000
     return () => clearTimeout(timer);
   }, [isActive, isTransitioning, showName]);
 
@@ -100,7 +101,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         setDisplayedCategory(category);
         setIsTransitioning(false);
         setTimeout(() => startSequence(), 100);
-      }, 500);
+      }, 300); // antes 500
       return () => clearTimeout(tOut);
     }
   }, [category, displayedCategory.id]);
@@ -179,7 +180,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER ANIMADO COMPLETO */}
+      {/* HEADER ANIMADO COMPLETO (con tiempos reducidos) */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -188,7 +189,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         }`}
         style={{
           transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
-          transitionDuration: "1000ms",
+          transitionDuration: "800ms", // antes 1000ms
           width: stage === "intro" ? "100%" : "calc(100% - 80px)",
         }}
       >
@@ -196,7 +197,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
           style={{
             transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
-            transitionDuration: "1000ms",
+            transitionDuration: "800ms",
             transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
@@ -209,7 +210,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               style={{
                 fontSize: typeof window !== "undefined" && window.innerWidth >= 768 ? "12rem" : "9rem",
                 transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
-                transitionDuration: "1000ms",
+                transitionDuration: "800ms",
               }}
             >
               DB
@@ -218,7 +219,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
               } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
-              style={{ transitionDuration: "700ms" }}
+              style={{ transitionDuration: "500ms" }}
             >
               +
             </span>
@@ -227,7 +228,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           <div
             className="transition-all ease-out overflow-hidden flex-1"
             style={{
-              transitionDuration: "700ms",
+              transitionDuration: "500ms",
               transform: showName ? "translateX(0)" : "translateX(-48px)",
               opacity: showName ? 1 : 0,
             }}
@@ -273,7 +274,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   : "pointer-events-none w-0 h-0"
               }`}
               style={{
-                transitionDuration: "1000ms",
+                transitionDuration: "800ms",
                 opacity: stage === "gallery" && showDesc ? 1 : 0,
                 transform: stage === "gallery" && showDesc ? "translateX(0)" : "translateX(-40px)",
               }}
@@ -293,7 +294,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       </div>
 
       {/* MAIN CONTENT */}
-      <div className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ paddingTop: "120px" }}>
+      <div className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-800 ${stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ paddingTop: "120px" }}>
         <div className="max-w-7xl mx-auto">
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50]">
@@ -355,7 +356,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
-            <div className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+            <div className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-800 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
                 <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl"><div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} /></div>
                 <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20"><img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" loading="lazy" /></div>
@@ -363,7 +364,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <>
-              <div className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+              <div className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-800 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
                   <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl"><div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} /></div>
                   {displayedCategory.imageUrl && (<div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20"><img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" loading="lazy" /></div>)}
