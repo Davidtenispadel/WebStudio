@@ -179,9 +179,117 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* Header animado (simplificado para evitar errores) */}
-      <div className="fixed z-[40] flex items-center top-24 left-10 justify-start opacity-0 pointer-events-none">
-        {/* Contenido del header omitido para simplificar, pero puedes restaurarlo después */}
+      {/* HEADER ANIMADO COMPLETO */}
+      <div
+        className={`fixed z-[40] flex items-center transition-all ${
+          stage === "intro"
+            ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
+            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 justify-start"
+        }`}
+        style={{
+          transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+          transitionDuration: "1000ms",
+          width: stage === "intro" ? "100%" : "calc(100% - 80px)",
+        }}
+      >
+        <div
+          className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
+          style={{
+            transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+            transitionDuration: "1000ms",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transformOrigin: "left",
+          }}
+        >
+          <div className="flex items-center gap-3 shrink-0">
+            <h2
+              className={`text-9xl font-light tracking-tighter transition-all ${
+                isEnquiry ? "text-white" : "text-black"
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
+              style={{
+                fontSize: typeof window !== "undefined" && window.innerWidth >= 768 ? "12rem" : "9rem",
+                transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
+                transitionDuration: "1000ms",
+              }}
+            >
+              DB
+            </h2>
+            <span
+              className={`text-6xl md:text-8xl font-thin transition-all ${
+                isEnquiry ? "text-gray-300" : "text-gray-400"
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
+              style={{ transitionDuration: "700ms" }}
+            >
+              +
+            </span>
+          </div>
+
+          <div
+            className="transition-all ease-out overflow-hidden flex-1"
+            style={{
+              transitionDuration: "700ms",
+              transform: showName ? "translateX(0)" : "translateX(-48px)",
+              opacity: showName ? 1 : 0,
+            }}
+          >
+            {isUrbanSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
+                  Masterplanning +
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  Urban
+                </span>
+              </div>
+            ) : isDesignSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
+                  Design
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  &amp; Management
+                </span>
+              </div>
+            ) : (
+              <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light block leading-none ${isEnquiry ? "text-white" : "text-black"}`}>
+                {isHomeSection ? "" : displayedCategory.name}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {displayedCategory.description &&
+          !isHomeSection &&
+          !isDesignSection &&
+          !isEnquiry &&
+          !isProjectSupportSection &&
+          !isStructureSection &&
+          !isBehindDBSection &&
+          !isArchitectureSection && (
+            <div
+              className={`transition-all ease-out overflow-hidden flex-1 ${
+                stage === "gallery"
+                  ? "ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl"
+                  : "pointer-events-none w-0 h-0"
+              }`}
+              style={{
+                transitionDuration: "1000ms",
+                opacity: stage === "gallery" && showDesc ? 1 : 0,
+                transform: stage === "gallery" && showDesc ? "translateX(0)" : "translateX(-40px)",
+              }}
+            >
+              {isUrbanSection ? (
+                <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">
+                  {urbanMasterplanningHeaderDescription}
+                </span>
+              ) : (
+                <div
+                  className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
+                />
+              )}
+            </div>
+          )}
       </div>
 
       {/* MAIN CONTENT */}
