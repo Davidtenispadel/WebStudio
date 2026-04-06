@@ -1,9 +1,9 @@
-    /** SECTIONVIEW.TSX — Unified Version
+  /** SECTIONVIEW.TSX — Unified Version
  * - Aesthetic A applied to all sections (unchanged)
  * - ENQUIRY: Direct form submission with file attachments to PHP endpoint (one.com)
  * - No Netlify dependency; all data sent via multipart/form-data
  * - Sends file attachments together with form fields in one request
- * - IMAGE REPRESENTATION FIXED: no white borders, dark backgrounds
+ * - IMAGE STYLES FIXED: dark backgrounds, no white borders (DB+ animation unchanged)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -50,7 +50,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
 }) => {
   // ============================
-  // Aesthetic A Animation State
+  // Aesthetic A Animation State (TIEMPOS ORIGINALES, SIN CAMBIOS)
   // ============================
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
@@ -685,7 +685,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
-            // BEHIND DB SECTION - with dark background and no white borders
+            // BEHIND DB SECTION - IMAGE STYLES FIXED (dark background, no white borders)
             <div
               className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
@@ -718,7 +718,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : (
-            // REMAINING SECTIONS - with dark backgrounds and no white borders
+            // REMAINING SECTIONS - IMAGE STYLES FIXED (dark backgrounds, no white borders)
             <div
               className={`transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
