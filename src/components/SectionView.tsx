@@ -1,4 +1,4 @@
-  /** SECTIONVIEW.TSX — Unified Version
+/** SECTIONVIEW.TSX — Unified Version
  * - Aesthetic A applied to all sections (unchanged)
  * - ENQUIRY: Direct form submission with file attachments to PHP endpoint (one.com)
  * - No Netlify dependency; all data sent via multipart/form-data
