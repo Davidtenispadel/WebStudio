@@ -1,9 +1,10 @@
 /*
- * SECTIONVIEW.TSX — Unified Version
+ * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader compatible with upload.php)
  * - Aesthetic A applied to all sections (unchanged)
- * - ENQUIRY: Direct form submission with file attachments to PHP endpoint (one.com)
- * - No Netlify dependency; all data sent via multipart/form-data
- * - Sends file attachments together with form fields in one request
+ * - ENQUIRY: Drag & drop uploader (batch upload -> URLs -> email)
+ * - No Base64; uploads go to https://dbsdesigner.com/api/upload.php (expects files[])
+ * - Sends fileUrls in sendProjectEnquiry
+ * - IMAGE STYLES FIXED: dark backgrounds, no white borders (from working config)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -15,6 +16,7 @@ import {
   Upload,
   X as CloseIcon,
   Loader2,
+  Link2,
   File as FileIcon,
   AlertCircle,
 } from "lucide-react";
@@ -24,7 +26,24 @@ import {
   isoContent,
 } from "../constants";
 
-import { sendProjectEnquiry } from "../services/emailService"; // no longer used, but kept for potential fallback; can be removed later
+import { architectureDescription } from "../constants";
+import { sendProjectEnquiry } from "../services/emailService";
+
+// ============================
+// Types for modern uploader
+// ============================
+type UploadStatus = "uploading" | "uploaded" | "error";
+
+interface UploadedItem {
+  id: string;
+  name: string;
+  size: number;
+  type?: string;
+  progress: number;
+  status: UploadStatus;
+  url?: string;
+  error?: string;
+}
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -33,8 +52,7 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-// PHP endpoint on one.com (adjust to your actual domain)
-const ENQUIRY_ENDPOINT = "https://www.tudominio.com/api/send-enquiry.php";
+const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
@@ -45,6 +63,12 @@ const formatBytes = (bytes: number) => {
   const val = bytes / Math.pow(1024, i);
   return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
 };
+
+// Generate simple id
+const fileId = (f: File) =>
+  `${f.name}-${f.size}-${f.lastModified}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
 
 const SectionView: React.FC<SectionViewProps> = ({
   category,
@@ -80,9 +104,10 @@ const SectionView: React.FC<SectionViewProps> = ({
     message: "",
   });
 
-  // File handling
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  // Modern Uploader (A2)
+  const [items, setItems] = useState<UploadedItem[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================
@@ -176,78 +201,155 @@ const SectionView: React.FC<SectionViewProps> = ({
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // File handlers
+  // Uploader Logic
   // ============================
-  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length) {
-      setSelectedFiles((prev) => [...prev, ...files]);
-    }
-    // Reset input to allow re-selecting same files later
-    if (e.currentTarget) e.currentTarget.value = "";
+  const uploadFiles = (files: File[]) => {
+    if (!files?.length) return;
+    setIsUploading(true);
+
+    const initial: UploadedItem[] = files.map((f) => ({
+      id: fileId(f),
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      progress: 0,
+      status: "uploading",
+    }));
+
+    setItems((prev) => [...prev, ...initial]);
+
+    const xhr = new XMLHttpRequest();
+    const fd = new FormData();
+    files.forEach((f) => fd.append("files[]", f));
+
+    xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, progress: pct }
+            : it
+        )
+      );
+    };
+
+    xhr.onload = () => {
+      const ok = xhr.status >= 200 && xhr.status < 300;
+      const raw = xhr.responseText || "";
+
+      let json: any = null;
+      try {
+        json = JSON.parse(raw);
+      } catch {
+        json = null;
+      }
+
+      if (!ok || !Array.isArray(json)) {
+        setItems((prev) =>
+          prev.map((it) =>
+            initial.some((i) => i.id === it.id)
+              ? { ...it, status: "error", error: "Invalid server response" }
+              : it
+          )
+        );
+        setIsUploading(false);
+        return;
+      }
+
+      const byName = new Map<string, { url?: string; error?: boolean }>();
+      json.forEach((r: any) => {
+        if (r && typeof r === "object" && typeof r.name === "string") {
+          byName.set(r.name, { url: r.url, error: !!r.error });
+        }
+      });
+
+      setItems((prev) =>
+        prev.map((it) => {
+          if (!initial.some((i) => i.id === it.id)) return it;
+          const safe = it.name.replace(/[^A-Za-z0-9._-]/g, "_");
+          const r = byName.get(safe);
+
+          if (!r) {
+            return { ...it, status: "error", error: "File missing" };
+          }
+          if (r.error) {
+            return { ...it, status: "error", error: "Upload failed" };
+          }
+          return { ...it, status: "uploaded", progress: 100, url: r.url };
+        })
+      );
+
+      setIsUploading(false);
+    };
+
+    xhr.onerror = () => {
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, status: "error", error: "Network error" }
+            : it
+        )
+      );
+      setIsUploading(false);
+    };
+
+    xhr.open("POST", UPLOAD_ENDPOINT, true);
+    xhr.withCredentials = false;
+    xhr.send(fd);
   };
 
   const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    const files = e.dataTransfer?.files ? Array.from(e.dataTransfer.files) : [];
-    if (files.length) {
-      setSelectedFiles((prev) => [...prev, ...files]);
-    }
+    const list = e.dataTransfer?.files;
+    const files = list && list.length ? Array.from(list) : [];
+    if (files.length) uploadFiles(files);
   };
 
-  const removeFile = (indexToRemove: number) => {
-    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const list = e.target?.files;
+    const files = list && list.length ? Array.from(list) : [];
+    if (files.length) uploadFiles(files);
+    if (e.currentTarget) e.currentTarget.value = "";
   };
 
-  const clearAllFiles = () => {
-    setSelectedFiles([]);
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((it) => it.id !== id));
   };
+
+  const clearErrored = () => {
+    setItems((prev) => prev.filter((it) => it.status !== "error"));
+  };
+
+  const fileUrls = items
+    .filter((it) => it.status === "uploaded" && it.url)
+    .map((it) => it.url!);
 
   // ============================
-  // Submit Enquiry (with files)
+  // Submit Enquiry
   // ============================
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isUploading) return;
     setIsSending(true);
 
-    const fd = new FormData();
-    fd.append("name", formData.name);
-    fd.append("email", formData.email);
-    fd.append("message", formData.message);
-    selectedFiles.forEach((file) => {
-      fd.append("files[]", file);
+    const success = await sendProjectEnquiry({
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+      fileUrls,
     });
 
-    try {
-      const response = await fetch(ENQUIRY_ENDPOINT, {
-        method: "POST",
-        body: fd,
-      });
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setEnquiryStep(4);
-        // Clear form after success
-        setTimeout(() => {
-          setFormData({ name: "", email: "", message: "" });
-          setSelectedFiles([]);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-        }, 2000);
-      } else {
-        console.error("Server error:", result.error);
-        alert(
-          result.error ||
-            "An error occurred. Please try again or contact us directly."
-        );
-      }
-    } catch (error) {
-      console.error("Network error:", error);
-      alert("Network error. Please check your connection and try again.");
-    } finally {
-      setIsSending(false);
+    if (success) {
+      setEnquiryStep(4);
+      setTimeout(() => {
+        setFormData({ name: "", email: "", message: "" });
+      }, 2000);
     }
+
+    setIsSending(false);
   };
 
   // ============================
@@ -289,7 +391,8 @@ const SectionView: React.FC<SectionViewProps> = ({
           style={{
             transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
             transitionDuration: "1000ms",
-            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transform:
+              stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -298,7 +401,11 @@ const SectionView: React.FC<SectionViewProps> = ({
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
                 isEnquiry ? "text-white" : "text-black"
-              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
+              } ${
+                showDB
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-20"
+              }`}
               style={{
                 fontSize:
                   typeof window !== "undefined" && window.innerWidth >= 768
@@ -314,7 +421,11 @@ const SectionView: React.FC<SectionViewProps> = ({
             <span
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
-              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
+              } ${
+                showPlus
+                  ? "opacity-100 scale-100 rotate-0"
+                  : "opacity-0 scale-0 rotate-45"
+              }`}
               style={{ transitionDuration: "700ms" }}
             >
               +
@@ -411,16 +522,20 @@ const SectionView: React.FC<SectionViewProps> = ({
       {/* MAIN CONTENT */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
+          stage === "gallery"
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "120px" }}
       >
         <div className="max-w-7xl mx-auto">
+
           {/* ENQUIRY SECTION */}
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50]">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+
                   {/* Left Column - Contact Info */}
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
                     <h3 className="text-3xl md:text-4xl font-light leading-tight">
@@ -465,6 +580,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {/* Right Column - Form */}
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
                     <form onSubmit={handleEnquirySubmit} className="space-y-6">
+
                       {/* Name + Email */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -478,10 +594,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                             className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
                             value={formData.name}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                name: e.target.value,
-                              })
+                              setFormData({ ...formData, name: e.target.value })
                             }
                             disabled={isSending}
                           />
@@ -498,10 +611,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                             className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
                             value={formData.email}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                email: e.target.value,
-                              })
+                              setFormData({ ...formData, email: e.target.value })
                             }
                             disabled={isSending}
                           />
@@ -519,10 +629,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                           className="w-full h-44 bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20"
                           value={formData.message}
                           onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              message: e.target.value,
-                            })
+                            setFormData({ ...formData, message: e.target.value })
                           }
                           disabled={isSending}
                         />
@@ -569,6 +676,13 @@ const SectionView: React.FC<SectionViewProps> = ({
                             <div className="text-xs text-white/50">
                               Blueprints, PDFs, images… Large files supported.
                             </div>
+
+                            {(isUploading ||
+                              items.some((it) => it.status === "uploading")) && (
+                              <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">
+                                Uploading…
+                              </div>
+                            )}
                           </div>
 
                           <input
@@ -581,48 +695,104 @@ const SectionView: React.FC<SectionViewProps> = ({
                           />
                         </div>
 
-                        {/* Selected files list */}
-                        {selectedFiles.length > 0 && (
+                        {/* File list */}
+                        {items.length > 0 && (
                           <div className="mt-5 space-y-3">
-                            {selectedFiles.map((file, idx) => (
+                            {items.map((it) => (
                               <div
-                                key={idx}
+                                key={it.id}
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3"
                               >
                                 <div className="flex items-start gap-3">
                                   <div className="mt-0.5">
-                                    <FileIcon className="w-4 h-4 text-white/70" />
+                                    {it.status === "uploaded" ? (
+                                      <CheckCircle className="w-4 h-4 text-green-400" />
+                                    ) : it.status === "error" ? (
+                                      <AlertCircle className="w-4 h-4 text-red-400" />
+                                    ) : (
+                                      <FileIcon className="w-4 h-4 text-white/70" />
+                                    )}
                                   </div>
+
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                       <div className="text-sm text-white/90 truncate">
-                                        {file.name}
+                                        {it.name}
                                       </div>
                                       <div className="text-[11px] text-white/50">
-                                        · {formatBytes(file.size)}
+                                        · {formatBytes(it.size)}
                                       </div>
                                     </div>
+
+                                    {it.status === "uploading" && (
+                                      <div className="mt-2">
+                                        <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                          <div
+                                            className="h-2 bg-red-500 transition-all"
+                                            style={{ width: `${it.progress}%` }}
+                                          />
+                                        </div>
+                                        <div className="text-[11px] text-white/60 mt-1">
+                                          {it.progress}%
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {it.status === "error" && (
+                                      <div className="text-xs text-red-400 mt-2">
+                                        {it.error || "Upload failed"}
+                                      </div>
+                                    )}
+
+                                    {it.status === "uploaded" && it.url && (
+                                      <div className="mt-2 flex items-center gap-3">
+                                        <a
+                                          href={it.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1.5 text-xs text-red-300 hover:text-red-200 underline"
+                                        >
+                                          <Link2 className="w-3.5 h-3.5" />
+                                          Open file
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={async () => {
+                                            try {
+                                              await navigator.clipboard.writeText(it.url!);
+                                            } catch {}
+                                          }}
+                                          className="text-xs text-white/60 hover:text-white"
+                                        >
+                                          Copy URL
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
+
                                   <button
                                     type="button"
-                                    onClick={() => removeFile(idx)}
+                                    onClick={() => removeItem(it.id)}
                                     className="text-white/40 hover:text-red-400 transition-colors"
-                                    title="Remove file"
+                                    title="Remove from list"
                                   >
                                     <CloseIcon className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>
                             ))}
-                            <div className="flex justify-end">
-                              <button
-                                type="button"
-                                onClick={clearAllFiles}
-                                className="text-xs text-white/60 hover:text-white underline"
-                              >
-                                Clear all
-                              </button>
-                            </div>
+
+                            {items.some((x) => x.status === "error") && (
+                              <div className="pt-1">
+                                <button
+                                  type="button"
+                                  onClick={clearErrored}
+                                  className="text-xs text-white/60 hover:text-white underline"
+                                >
+                                  Clear failed uploads
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -630,13 +800,17 @@ const SectionView: React.FC<SectionViewProps> = ({
                       {/* Submit Button */}
                       <button
                         type="submit"
-                        disabled={isSending}
+                        disabled={isSending || isUploading}
                         className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span className="text-xs font-bold tracking-[0.4em] uppercase">
-                          {isSending ? "Sending..." : "Submit to db+"}
+                          {isSending
+                            ? "Transmitting..."
+                            : isUploading
+                            ? "Uploading…"
+                            : "Submit to db+"}
                         </span>
-                        {isSending ? (
+                        {isSending || isUploading ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                           <ChevronRight className="w-5 h-5" />
@@ -670,15 +844,16 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               </div>
             </div>
+
           ) : isBehindDBSection ? (
-            // BEHIND DB SECTION
+            // BEHIND DB — dark background, no white borders (doc1 style)
             <div
-              className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
+              className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
-                <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl">
+                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
                   <div
                     className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify"
                     dangerouslySetInnerHTML={{
@@ -687,7 +862,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   />
                 </div>
 
-                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10">
                   <img
                     src={displayedCategory.imageUrl}
                     alt={displayedCategory.name}
@@ -703,14 +878,15 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               </div>
             </div>
+
           ) : (
-            // REMAINING SECTIONS
+            // REMAINING SECTIONS — dark backgrounds, no white borders (doc1 style)
             <div
               className={`transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
-              {/* Description block for all relevant sections */}
+              {/* Description block */}
               {(isUrbanSection ||
                 isStructureSection ||
                 isDesignSection ||
@@ -721,9 +897,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                     isDesignSection ? "mb-8" : "mb-24"
                   }`}
                 >
-                  <div className="w-full max-w-5xl p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
+                  <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
                     <div
-                      className="text-black font-normal text-lg md:text-xl leading-tight"
+                      className="text-white font-normal text-lg md:text-xl leading-tight"
                       dangerouslySetInnerHTML={{
                         __html: displayedCategory.description,
                       }}
@@ -747,14 +923,14 @@ const SectionView: React.FC<SectionViewProps> = ({
               {/* Special Blocks */}
               {isDesignSection && (
                 <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto">
-                  <div className="p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
+                  <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
                     <div
-                      className="text-black leading-tight"
+                      className="text-white leading-tight"
                       dangerouslySetInnerHTML={{ __html: isoContent }}
                     />
                   </div>
 
-                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
                       alt="Design & Management Vision"
@@ -767,7 +943,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
               {isUrbanSection && (
                 <div className="mt-32 mb-16 max-w-5xl mx-auto">
-                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png"
                       alt="Urban Masterplanning Drawing"
