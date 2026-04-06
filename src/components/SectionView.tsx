@@ -1,9 +1,9 @@
-/** SECTIONVIEW.TSX — Unified Version
+/*
+ * SECTIONVIEW.TSX — Unified Version
  * - Aesthetic A applied to all sections (unchanged)
  * - ENQUIRY: Direct form submission with file attachments to PHP endpoint (one.com)
  * - No Netlify dependency; all data sent via multipart/form-data
  * - Sends file attachments together with form fields in one request
- * - IMAGE STYLES FIXED: dark backgrounds, no white borders (DB+ animation unchanged)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -16,12 +16,15 @@ import {
   X as CloseIcon,
   Loader2,
   File as FileIcon,
+  AlertCircle,
 } from "lucide-react";
 
 import {
   urbanMasterplanningHeaderDescription,
   isoContent,
 } from "../constants";
+
+import { sendProjectEnquiry } from "../services/emailService"; // no longer used, but kept for potential fallback; can be removed later
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -30,8 +33,8 @@ interface SectionViewProps {
   currentSectionName: string;
 }
 
-// PHP endpoint on one.com – using www to match your site's domain
-const ENQUIRY_ENDPOINT = "/api/send-enquiry";
+// PHP endpoint on one.com (adjust to your actual domain)
+const ENQUIRY_ENDPOINT = "https://www.tudominio.com/api/send-enquiry.php";
 
 // Format bytes utility
 const formatBytes = (bytes: number) => {
@@ -50,7 +53,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
 }) => {
   // ============================
-  // Aesthetic A Animation State (TIEMPOS ORIGINALES, SIN CAMBIOS)
+  // Aesthetic A Animation State
   // ============================
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
@@ -83,7 +86,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================
-  // Animation Logic (TIEMPOS ORIGINALES, SIN CAMBIOS)
+  // Animation Logic
   // ============================
   const resetSequence = () => {
     setShowDB(false);
@@ -286,8 +289,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           style={{
             transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
             transitionDuration: "1000ms",
-            transform:
-              stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -296,11 +298,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
                 isEnquiry ? "text-white" : "text-black"
-              } ${
-                showDB
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-20"
-              }`}
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
               style={{
                 fontSize:
                   typeof window !== "undefined" && window.innerWidth >= 768
@@ -316,11 +314,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             <span
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
-              } ${
-                showPlus
-                  ? "opacity-100 scale-100 rotate-0"
-                  : "opacity-0 scale-0 rotate-45"
-              }`}
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
               style={{ transitionDuration: "700ms" }}
             >
               +
@@ -417,9 +411,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       {/* MAIN CONTENT */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === "gallery"
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
+          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "120px" }}
       >
@@ -550,9 +542,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                               : "border-white/20 bg-neutral-700/40",
                             "p-6 md:p-8 transition-colors",
                           ].join(" ")}
-                          onClick={() =>
-                            !isSending && fileInputRef.current?.click()
-                          }
+                          onClick={() => !isSending && fileInputRef.current?.click()}
                           onDragOver={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -571,13 +561,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                             </div>
 
                             <div className="text-sm">
-                              <span className="text-white">
-                                Drag &amp; drop files here
-                              </span>{" "}
+                              <span className="text-white">Drag &amp; drop files here</span>{" "}
                               <span className="text-white/60">or</span>{" "}
-                              <span className="text-red-400 underline">
-                                click to browse
-                              </span>
+                              <span className="text-red-400 underline">click to browse</span>
                             </div>
 
                             <div className="text-xs text-white/50">
@@ -685,14 +671,14 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
-            // BEHIND DB SECTION - IMAGE STYLES FIXED (dark background, no white borders)
+            // BEHIND DB SECTION
             <div
-              className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 ${
+              className={`max-w-6xl mx-auto relative z-10 text-black pt-20 transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
-                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                <div className="md:col-span-1 p-8 bg-white/50 backdrop-blur-md rounded-2xl border border-white/60 shadow-xl">
                   <div
                     className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify"
                     dangerouslySetInnerHTML={{
@@ -701,7 +687,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   />
                 </div>
 
-                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10">
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/20">
                   <img
                     src={displayedCategory.imageUrl}
                     alt={displayedCategory.name}
@@ -718,7 +704,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : (
-            // REMAINING SECTIONS - IMAGE STYLES FIXED (dark backgrounds, no white borders)
+            // REMAINING SECTIONS
             <div
               className={`transition-opacity duration-1000 ${
                 showGalleryItems ? "opacity-100" : "opacity-0"
@@ -735,9 +721,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                     isDesignSection ? "mb-8" : "mb-24"
                   }`}
                 >
-                  <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div className="w-full max-w-5xl p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
                     <div
-                      className="text-white font-normal text-lg md:text-xl leading-tight"
+                      className="text-black font-normal text-lg md:text-xl leading-tight"
                       dangerouslySetInnerHTML={{
                         __html: displayedCategory.description,
                       }}
@@ -761,14 +747,14 @@ const SectionView: React.FC<SectionViewProps> = ({
               {/* Special Blocks */}
               {isDesignSection && (
                 <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto">
-                  <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div className="p-10 bg-white/60 backdrop-blur-md rounded-2xl border border-white/50 shadow-xl">
                     <div
-                      className="text-white leading-tight"
+                      className="text-black leading-tight"
                       dangerouslySetInnerHTML={{ __html: isoContent }}
                     />
                   </div>
 
-                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png"
                       alt="Design & Management Vision"
@@ -781,7 +767,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
               {isUrbanSection && (
                 <div className="mt-32 mb-16 max-w-5xl mx-auto">
-                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/20 bg-white">
                     <img
                       src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png"
                       alt="Urban Masterplanning Drawing"
