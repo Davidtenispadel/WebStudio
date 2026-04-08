@@ -1,11 +1,8 @@
-/* SECTIONVIEW.TSX — STABILITY FIX
- * - DB+ is decorative only and never overlaps content
- * - Section text always renders correctly
- * - Enquiry is excluded from generic section layout
- * - No pointer-events or opacity traps
+/* SECTIONVIEW.TSX — FINAL STRUCTURAL FIX
+ * Handles Architecture / Behind DB / Project Journey / Enquiry correctly
  */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import { isoContent } from "../constants";
@@ -23,98 +20,79 @@ const SectionView: React.FC<SectionViewProps> = ({
   isActive,
   currentSectionName,
 }) => {
-  const [displayedCategory, setDisplayedCategory] =
-    useState<CategoryGroup>(category);
-
-  // DB+ decorative animation only
-  const [showDB, setShowDB] = useState(false);
-  const [showPlus, setShowPlus] = useState(false);
-
-  useEffect(() => {
-    if (!isActive) return;
-
-    setShowDB(false);
-    setShowPlus(false);
-
-    const t1 = setTimeout(() => setShowDB(true), 200);
-    const t2 = setTimeout(() => setShowPlus(true), 350);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [isActive, category.id]);
-
-  useEffect(() => {
-    setDisplayedCategory(category);
-  }, [category]);
-
   if (!isActive) return null;
 
-  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
+  /* ============================
+     SECTION TYPES
+     ============================ */
+
+  const isEnquiry = category.name === StudioSection.ENQUIRY;
+  const isBehindDB = category.name === StudioSection.BEHIND_DB;
+  const isProjectJourney = category.name === StudioSection.PROJECT_JOURNEY;
+
+  /* ============================
+     ENQUIRY — DO NOT RENDER HERE
+     ============================ */
+  if (isEnquiry) {
+    return null; // Enquiry is handled by its own component
+  }
 
   return (
-    <>
-      {/* DB+ FLOAT — PURELY DECORATIVE */}
-      {!isEnquiry && (
-        <div
-          className="fixed top-24 left-10 z-20 select-none pointer-events-none"
-        >
-          <div className="flex items-center">
-            <h2
-              className="font-light tracking-tighter text-black"
-              style={{
-                fontSize: "5.5rem",
-                opacity: showDB ? 1 : 0,
-                transform: showDB
-                  ? "translateY(0)"
-                  : "translateY(12px)",
-                transition: "all 600ms ease",
-              }}
-            >
-              DB
+    <div className="relative w-full px-10 pt-36 pb-48">
+      <div className="max-w-7xl mx-auto">
+
+        {/* ============================
+            PROJECT JOURNEY (CUSTOM)
+           ============================ */}
+        {isProjectJourney && (
+          <section className="w-full min-h-screen flex items-center justify-center">
+            <h2 className="text-4xl font-light tracking-tight text-gray-400">
+              Project Journey content goes here
             </h2>
+          </section>
+        )}
 
-            <span
-              className="font-thin text-black"
-              style={{
-                fontSize: "4rem",
-                marginLeft: "-0.4rem",
-                opacity: showPlus ? 1 : 0,
-                transition: "all 600ms ease",
-              }}
-            >
-              +
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* MAIN CONTENT — CLEAN, NO GLOBAL EFFECTS */}
-      <div
-        className="relative w-full overflow-y-auto px-10 pb-48"
-        style={{ paddingTop: "140px" }}
-      >
-        <div className="max-w-7xl mx-auto">
-
-          {/* SECTION DESCRIPTION */}
-          {!isEnquiry && displayedCategory.description && (
-            <div className="mb-24">
-              <div className="w-full max-w-5xl p-12 bg-white rounded-2xl shadow-xl mx-auto">
-                <div
-                  className="text-black text-lg md:text-xl leading-relaxed text-center"
-                  dangerouslySetInnerHTML={{
-                    __html: displayedCategory.description,
-                  }}
-                />
-              </div>
+        {/* ============================
+            BEHIND DB — IMAGE + TEXT
+           ============================ */}
+        {isBehindDB && (
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div>
+              <img
+                src={category.imageUrl}
+                alt="Behind DB"
+                className="w-full rounded-xl shadow-xl"
+              />
             </div>
-          )}
+            <div
+              className="text-black text-lg md:text-xl leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: category.description }}
+            />
+          </section>
+        )}
 
-          {/* PROJECT GRID */}
-          {!isEnquiry && (
+        {/* ============================
+            STANDARD SECTIONS
+           ============================ */}
+        {!isBehindDB && !isProjectJourney && (
+          <>
+            {/* DESCRIPTION */}
+            {category.description && (
+              <div className="mb-24">
+                <div className="w-full max-w-5xl p-12 bg-white rounded-2xl shadow-xl mx-auto">
+                  <div
+                    className="text-black text-lg md:text-xl leading-relaxed text-center"
+                    dangerouslySetInnerHTML={{
+                      __html: category.description,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* PROJECT GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-              {displayedCategory.projects.map((project) => (
+              {category.projects.map((project: Project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
@@ -123,31 +101,23 @@ const SectionView: React.FC<SectionViewProps> = ({
                 />
               ))}
             </div>
-          )}
 
-          {/* DESIGN EXTRA */}
-          {displayedCategory.name === StudioSection.DESIGN && (
-            <div className="mt-32 max-w-5xl mx-auto">
-              <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-                <div
-                  className="text-white leading-tight"
-                  dangerouslySetInnerHTML={{ __html: isoContent }}
-                />
+            {/* DESIGN EXTRA */}
+            {category.name === StudioSection.DESIGN && (
+              <div className="mt-32 max-w-5xl mx-auto">
+                <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div
+                    className="text-white leading-tight"
+                    dangerouslySetInnerHTML={{ __html: isoContent }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* ENQUIRY — LEFT UNTOUCHED */}
-          {isEnquiry && (
-            <div className="w-full">
-              {/* Enquiry form renders exactly as defined elsewhere */}
-            </div>
-          )}
-        </div>
+            )}
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
 export default SectionView;
-``
