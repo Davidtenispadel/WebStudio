@@ -22,7 +22,9 @@ const Header: React.FC<HeaderProps> = ({
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (!mobile && isMenuOpen) setIsMenuOpen(false);
+      if (!mobile && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -132,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* MOBILE OVERLAY — ✅ FIXED STRING */}
+      {/* MOBILE OVERLAY — ✅ FIXED */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
           isMenuOpen && isMobile
