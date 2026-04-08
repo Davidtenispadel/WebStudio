@@ -45,17 +45,14 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* HEADER — FORCE TOP LAYER */}
+      {/* HEADER */}
       <header
         className="fixed top-0 left-0 w-full bg-white/40 backdrop-blur-md border-b border-black/[0.05]"
-        style={{
-          zIndex: 9999,
-          pointerEvents: 'auto',
-        }}
+        style={{ zIndex: 9999 }}
       >
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
 
-          {/* LOGO — CANNOT BE HIDDEN */}
+          {/* LOGO */}
           <div
             className="flex items-center gap-1 cursor-pointer select-none"
             onClick={handleDbPlusLogoClick}
@@ -99,7 +96,9 @@ const Header: React.FC<HeaderProps> = ({
         className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
-          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
+          transform: isMenuOpen && isMobile
+            ? 'translateX(0)'
+            : 'translateX(-100%)',
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
@@ -109,6 +108,7 @@ const Header: React.FC<HeaderProps> = ({
             </span>
             <span className="text-3xl font-thin text-gray-400">+</span>
           </div>
+
           <button
             onClick={() => setIsMenuOpen(false)}
             className="p-2 rounded-full hover:bg-gray-100"
@@ -132,6 +132,19 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* MOBILE OVERLAY — ✅ FIXED STRING */}
       <div
-        className={`fixed inset-0 bg-black/50 transition-opacity md:hidden
+        className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
+          isMenuOpen && isMobile
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ zIndex: 9000 }}
+        onClick={() => setIsMenuOpen(false)}
+        aria-hidden={!isMenuOpen}
+      />
+    </>
+  );
+};
+
+export default Header;
