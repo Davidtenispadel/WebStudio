@@ -14,15 +14,15 @@ const Header: React.FC<HeaderProps> = ({
   isDarkBackground,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (!mobile && isMenuOpen) {
-        setIsMenuOpen(false);
-      }
+      if (!mobile && isMenuOpen) setIsMenuOpen(false);
     };
 
     window.addEventListener('resize', handleResize);
@@ -39,29 +39,32 @@ const Header: React.FC<HeaderProps> = ({
     if (isMobile) setIsMenuOpen(false);
   };
 
-  // Navigation colors (logo excluded on purpose)
   const navLinkColorClass = isDarkBackground
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
   return (
     <>
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]">
+      {/* HEADER — FORCE TOP LAYER */}
+      <header
+        className="fixed top-0 left-0 w-full bg-white/40 backdrop-blur-md border-b border-black/[0.05]"
+        style={{
+          zIndex: 9999,
+          pointerEvents: 'auto',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
 
-          {/* LOGO — ALWAYS VISIBLE */}
+          {/* LOGO — CANNOT BE HIDDEN */}
           <div
-            className="flex items-center gap-1 cursor-pointer group"
+            className="flex items-center gap-1 cursor-pointer select-none"
             onClick={handleDbPlusLogoClick}
             aria-label="Go to home page"
           >
-            <span className="text-3xl font-light tracking-tighter text-black transition-all group-hover:tracking-normal">
+            <span className="text-3xl font-light tracking-tighter text-black">
               DB
             </span>
-            <span className="text-2xl font-thin text-gray-400 transition-all duration-300 group-hover:scale-125 group-hover:text-red-600">
-              +
-            </span>
+            <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
           {/* DESKTOP NAV */}
@@ -73,7 +76,6 @@ const Header: React.FC<HeaderProps> = ({
                     key={category.id}
                     onClick={() => onNavClick(category.name)}
                     className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                    aria-label={`View ${category.name}`}
                   >
                     {category.name}
                   </button>
@@ -83,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* MOBILE MENU BUTTON */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="md:hidden p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Open menu"
           >
@@ -94,9 +96,9 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* MOBILE SIDE MENU */}
       <div
-        className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden"
+        className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
-          zIndex: 70,
+          zIndex: 10000,
           transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
@@ -109,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
           </div>
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="text-black p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100"
             aria-label="Close menu"
           >
             <X className="w-6 h-6" />
@@ -122,8 +124,7 @@ const Header: React.FC<HeaderProps> = ({
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className="block text-left text-xl font-normal tracking-[0.08em] py-3 px-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors text-black"
-              aria-label={`View ${category.name}`}
+              className="text-left text-xl tracking-[0.08em] py-3 px-2 hover:text-red-600"
             >
               {category.name}
             </button>
@@ -133,15 +134,4 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* MOBILE OVERLAY */}
       <div
-        className={`fixed inset-0 bg-black/50 transition-opacity duration-500 md:hidden
-          ${isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        style={{ zIndex: 60 }}
-        onClick={() => setIsMenuOpen(false)}
-        aria-hidden={!isMenuOpen}
-      />
-    </>
-  );
-};
-
-export default Header;
-``
+        className={`fixed inset-0 bg-black/50 transition-opacity md:hidden
