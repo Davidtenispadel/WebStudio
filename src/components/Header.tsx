@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Menu } from 'lucide-react';
-import { CATEGORIES } from '../constants';   // ← AHORA CATEGORIES manda
+import { CATEGORIES } from '../constants';
 
 interface HeaderProps {
   onNavClick: (section: string) => void;
@@ -8,18 +8,23 @@ interface HeaderProps {
   isDarkBackground: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackground }) => {
+const Header: React.FC<HeaderProps> = ({
+  onNavClick,
+  onGoHomeClick,
+  isDarkBackground,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     const handleResize = () => {
-      const currentIsMobile = window.innerWidth < 768;
-      setIsMobile(currentIsMobile);
-      if (!currentIsMobile && isMenuOpen) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile && isMenuOpen) {
         setIsMenuOpen(false);
       }
     };
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
@@ -31,32 +36,27 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
 
   const handleDbPlusLogoClick = () => {
     onGoHomeClick();
-    if (isMobile) {
-      setIsMenuOpen(false);
-    }
+    if (isMobile) setIsMenuOpen(false);
   };
 
-  // colours
-  const textColorClass = isDarkBackground ? 'text-white' : 'text-black';
+  // Navigation colors (logo excluded on purpose)
   const navLinkColorClass = isDarkBackground
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  const menuIconColorClass = 'text-black';
-
   return (
     <>
-      {/* TOP HEADER */}
-      <header className={`fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]`}>
+      {/* HEADER */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/40 backdrop-blur-md border-b border-black/[0.05]">
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
 
-          {/* LOGO */}
+          {/* LOGO — ALWAYS VISIBLE */}
           <div
             className="flex items-center gap-1 cursor-pointer group"
             onClick={handleDbPlusLogoClick}
-            aria-label={isMobile ? "Go to Home page" : "Go to home page"}
+            aria-label="Go to home page"
           >
-            <span className={`text-3xl font-light tracking-tighter transition-all group-hover:tracking-normal ${textColorClass}`}>
+            <span className="text-3xl font-light tracking-tighter text-black transition-all group-hover:tracking-normal">
               DB
             </span>
             <span className="text-2xl font-thin text-gray-400 transition-all duration-300 group-hover:scale-125 group-hover:text-red-600">
@@ -64,19 +64,20 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
             </span>
           </div>
 
-          {/* DESKTOP NAV — AHORA USA CATEGORIES */}
+          {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {CATEGORIES.map((category) =>
-              category.name !== "Home" && (
-                <button
-                  key={category.id}
-                  onClick={() => onNavClick(category.name)}
-                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                  aria-label={`View ${category.name}`}
-                >
-                  {category.name}
-                </button>
-              )
+            {CATEGORIES.map(
+              (category) =>
+                category.name !== 'Home' && (
+                  <button
+                    key={category.id}
+                    onClick={() => onNavClick(category.name)}
+                    className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+                    aria-label={`View ${category.name}`}
+                  >
+                    {category.name}
+                  </button>
+                )
             )}
           </nav>
 
@@ -86,22 +87,24 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Open menu"
           >
-            <Menu className={`w-6 h-6 ${menuIconColorClass}`} />
+            <Menu className="w-6 h-6 text-black" />
           </button>
         </div>
       </header>
 
       {/* MOBILE SIDE MENU */}
       <div
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden`}
+        className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 70,
           transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
-          <div className="flex items-center gap-1 group">
-            <span className="text-4xl font-light tracking-tighter text-black">DB</span>
+          <div className="flex items-center gap-1">
+            <span className="text-4xl font-light tracking-tighter text-black">
+              DB
+            </span>
             <span className="text-3xl font-thin text-gray-400">+</span>
           </div>
           <button
@@ -141,3 +144,4 @@ const Header: React.FC<HeaderProps> = ({ onNavClick, onGoHomeClick, isDarkBackgr
 };
 
 export default Header;
+``
