@@ -1,9 +1,8 @@
-/* SECTIONVIEW.TSX — STABLE FIX
- * - Section text now ALWAYS renders
- * - DB+ animation no longer blocks content
- * - DB+ plus sign is visually closer
- * - Header is never blocked
- * - No hidden pointer-events or opacity traps
+/* SECTIONVIEW.TSX — STABILITY FIX
+ * - DB+ is decorative only and never overlaps content
+ * - Section text always renders correctly
+ * - Enquiry is excluded from generic section layout
+ * - No pointer-events or opacity traps
  */
 
 import React, { useEffect, useState } from "react";
@@ -27,7 +26,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
 
-  // DB+ animation state (visual only)
+  // DB+ decorative animation only
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
 
@@ -37,8 +36,8 @@ const SectionView: React.FC<SectionViewProps> = ({
     setShowDB(false);
     setShowPlus(false);
 
-    const t1 = setTimeout(() => setShowDB(true), 150);
-    const t2 = setTimeout(() => setShowPlus(true), 300);
+    const t1 = setTimeout(() => setShowDB(true), 200);
+    const t2 = setTimeout(() => setShowPlus(true), 350);
 
     return () => {
       clearTimeout(t1);
@@ -46,67 +45,60 @@ const SectionView: React.FC<SectionViewProps> = ({
     };
   }, [isActive, category.id]);
 
+  useEffect(() => {
+    setDisplayedCategory(category);
+  }, [category]);
+
   if (!isActive) return null;
 
+  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
+
   return (
-    <div
-      className="fixed inset-0 w-full bg-transparent"
-      style={{
-        zIndex: 1,
-        pointerEvents: "none",
-      }}
-    >
-      {/* DB+ FLOAT (VISUAL ONLY) */}
-      <div
-        className="fixed top-24 left-10 z-20 flex items-center"
-        style={{
-          pointerEvents: "none",
-        }}
-      >
-        <div className="flex items-center">
-          <h2
-            className="font-light tracking-tighter"
-            style={{
-              fontSize:
-                typeof window !== "undefined" && window.innerWidth >= 768
-                  ? "6rem"
-                  : "4.5rem",
-              opacity: showDB ? 1 : 0,
-              transform: showDB
-                ? "translateY(0)"
-                : "translateY(10px)",
-              transition: "all 600ms ease",
-            }}
-          >
-            DB
-          </h2>
+    <>
+      {/* DB+ FLOAT — PURELY DECORATIVE */}
+      {!isEnquiry && (
+        <div
+          className="fixed top-24 left-10 z-20 select-none pointer-events-none"
+        >
+          <div className="flex items-center">
+            <h2
+              className="font-light tracking-tighter text-black"
+              style={{
+                fontSize: "5.5rem",
+                opacity: showDB ? 1 : 0,
+                transform: showDB
+                  ? "translateY(0)"
+                  : "translateY(12px)",
+                transition: "all 600ms ease",
+              }}
+            >
+              DB
+            </h2>
 
-          <span
-            className="font-thin"
-            style={{
-              fontSize: "4rem",
-              marginLeft: "-0.35rem", // ✅ Plus is now clearly closer
-              opacity: showPlus ? 1 : 0,
-              transition: "all 600ms ease",
-            }}
-          >
-            +
-          </span>
+            <span
+              className="font-thin text-black"
+              style={{
+                fontSize: "4rem",
+                marginLeft: "-0.4rem",
+                opacity: showPlus ? 1 : 0,
+                transition: "all 600ms ease",
+              }}
+            >
+              +
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* MAIN CONTENT — ALWAYS VISIBLE */}
+      {/* MAIN CONTENT — CLEAN, NO GLOBAL EFFECTS */}
       <div
-        className="absolute inset-0 w-full overflow-y-auto px-10 pb-48"
-        style={{
-          paddingTop: "140px",
-          pointerEvents: "auto",
-        }}
+        className="relative w-full overflow-y-auto px-10 pb-48"
+        style={{ paddingTop: "140px" }}
       >
         <div className="max-w-7xl mx-auto">
 
-          {/* SECTION DESCRIPTION — ALWAYS RENDERED */}
-          {displayedCategory.description && (
+          {/* SECTION DESCRIPTION */}
+          {!isEnquiry && displayedCategory.description && (
             <div className="mb-24">
               <div className="w-full max-w-5xl p-12 bg-white rounded-2xl shadow-xl mx-auto">
                 <div
@@ -120,16 +112,18 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
 
           {/* PROJECT GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-            {displayedCategory.projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={onProjectClick}
-                currentSectionName={currentSectionName}
-              />
-            ))}
-          </div>
+          {!isEnquiry && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
+              {displayedCategory.projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onClick={onProjectClick}
+                  currentSectionName={currentSectionName}
+                />
+              ))}
+            </div>
+          )}
 
           {/* DESIGN EXTRA */}
           {displayedCategory.name === StudioSection.DESIGN && (
@@ -142,9 +136,16 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           )}
+
+          {/* ENQUIRY — LEFT UNTOUCHED */}
+          {isEnquiry && (
+            <div className="w-full">
+              {/* Enquiry form renders exactly as defined elsewhere */}
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
