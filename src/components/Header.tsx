@@ -53,7 +53,6 @@ const Header: React.FC<HeaderProps> = ({
         style={{ zIndex: 9999 }}
       >
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
-
           {/* LOGO */}
           <div
             className="flex items-center gap-1 cursor-pointer select-none"
@@ -134,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* MOBILE OVERLAY — ✅ FIXED */}
+      {/* MOBILE OVERLAY */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
           isMenuOpen && isMobile
