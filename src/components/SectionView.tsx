@@ -1,20 +1,14 @@
 /* SECTIONVIEW.TSX — FIXED
- * - Header is no longer covered
- * - DB+ floating spacing refined
- * - Intro timing shortened
- * - No other systems modified
+ * - DB+ plus sign pulled closer to DB
+ * - Section text restored (no longer tied to intro animation)
+ * - Header no longer blocked
+ * - Original behaviour preserved
  */
 
 import React, { useEffect, useRef, useState } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
-import {
-  X as CloseIcon,
-} from "lucide-react";
-
-import {
-  isoContent,
-} from "../constants";
+import { isoContent } from "../constants";
 
 interface SectionViewProps {
   category: CategoryGroup;
@@ -34,8 +28,6 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
-  const [showDesc, setShowDesc] = useState(false);
-  const [showGalleryItems, setShowGalleryItems] = useState(false);
   const [stage, setStage] = useState<"intro" | "gallery">("intro");
 
   const isFirstRender = useRef(true);
@@ -47,17 +39,13 @@ const SectionView: React.FC<SectionViewProps> = ({
   const resetSequence = () => {
     setShowDB(false);
     setShowPlus(false);
-    setShowDesc(false);
-    setShowGalleryItems(false);
     setStage("intro");
   };
 
   const startSequence = () => {
     setShowDB(true);
-    setTimeout(() => setShowPlus(true), 300);
-    setTimeout(() => setShowDesc(true), 1400);
-    setTimeout(() => setShowGalleryItems(true), 1700);
-    setTimeout(() => setStage("gallery"), 2200); // ⬅ shorter static pause
+    setTimeout(() => setShowPlus(true), 280);
+    setTimeout(() => setStage("gallery"), 2000); // shorter pause
   };
 
   useEffect(() => {
@@ -90,11 +78,11 @@ const SectionView: React.FC<SectionViewProps> = ({
     <div
       className="fixed inset-0 w-full bg-transparent"
       style={{
-        zIndex: 1,               // ✅ below Header
-        pointerEvents: "none",   // ✅ does not block header
+        zIndex: 1,
+        pointerEvents: "none", // allows header interaction
       }}
     >
-      {/* DB+ INTRO / FLOATING */}
+      {/* DB+ INTRO / FLOAT */}
       <div
         className={`fixed z-[20] flex items-center transition-all ${
           stage === "intro"
@@ -102,19 +90,17 @@ const SectionView: React.FC<SectionViewProps> = ({
             : "top-24 left-10 opacity-0 pointer-events-none"
         }`}
         style={{
-          width: stage === "intro" ? "100%" : "auto",
           transitionDuration: "1200ms",
           transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
         }}
       >
         <div
-          className={`flex items-center transition-all ${
-            stage === "gallery" ? "gap-6" : "gap-24"
-          }`}
+          className="flex items-center"
           style={{
+            gap: stage === "gallery" ? "0.5rem" : "6rem",
             transform:
               stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
-            transitionDuration: "1200ms",
+            transition: "all 1200ms cubic-bezier(0.77, 0, 0.175, 1)",
           }}
         >
           <h2
@@ -136,6 +122,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             className="font-thin"
             style={{
               fontSize: "6.5rem",
+              marginLeft: stage === "gallery" ? "-0.3rem" : "0",
               opacity: showPlus ? 1 : 0,
               transform: showPlus ? "scale(1)" : "scale(0.8)",
               transition: "all 700ms ease",
@@ -148,7 +135,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
       {/* MAIN CONTENT */}
       <div
-        className={`absolute inset-0 w-full overflow-y-auto px-10 pb-48 transition-opacity duration-700 ${
+        className={`absolute inset-0 w-full overflow-y-auto px-10 pb-48 transition-opacity duration-600 ${
           stage === "gallery" ? "opacity-100" : "opacity-0"
         }`}
         style={{
@@ -157,19 +144,18 @@ const SectionView: React.FC<SectionViewProps> = ({
         }}
       >
         <div className="max-w-7xl mx-auto">
-          {/* DESCRIPTION */}
-          {showDesc && (
-            <div className="mb-24">
-              <div className="w-full max-w-5xl p-12 bg-white rounded-2xl shadow-xl mx-auto">
-                <div
-                  className="text-black text-lg md:text-xl leading-relaxed text-center"
-                  dangerouslySetInnerHTML={{
-                    __html: displayedCategory.description,
-                  }}
-                />
-              </div>
+
+          {/* DESCRIPTION — ALWAYS VISIBLE WHEN SECTION IS ACTIVE */}
+          <div className="mb-24">
+            <div className="w-full max-w-5xl p-12 bg-white rounded-2xl shadow-xl mx-auto">
+              <div
+                className="text-black text-lg md:text-xl leading-relaxed text-center"
+                dangerouslySetInnerHTML={{
+                  __html: displayedCategory.description,
+                }}
+              />
             </div>
-          )}
+          </div>
 
           {/* PROJECT GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
@@ -201,3 +187,4 @@ const SectionView: React.FC<SectionViewProps> = ({
 };
 
 export default SectionView;
+``
