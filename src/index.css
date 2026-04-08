@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-/* Estilos base */
+/* ===============================
+   ESTILOS BASE
+   =============================== */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -8,15 +11,18 @@ html, body {
   font-family: Arial, Helvetica, sans-serif;
   color: #000000;
   overflow-x: hidden;
-  cursor: none; /* Solo para escritorio, se desactiva en móviles */
+  cursor: none; /* Solo escritorio */
 }
 
-/* Override de cursor para elementos interactivos en desktop */
+/* Override de cursor para elementos interactivos */
 a, button, input, select, textarea, [role="button"], .cursor-pointer {
   cursor: none !important;
 }
 
-/* Tipografía especial para títulos */
+/* ===============================
+   TIPOGRAFÍA
+   =============================== */
+
 .cinematic-text {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
@@ -24,7 +30,10 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   will-change: transform, opacity;
 }
 
-/* Animaciones */
+/* ===============================
+   ANIMACIONES
+   =============================== */
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -44,19 +53,27 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-/* Scroll personalizado */
+/* ===============================
+   SCROLL PERSONALIZADO
+   =============================== */
+
 .custom-scroll::-webkit-scrollbar {
   width: 3px;
 }
+
 .custom-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scroll::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
 }
 
-/* Cursor personalizado (solo desktop) */
+/* ===============================
+   CURSOR PERSONALIZADO
+   =============================== */
+
 #custom-cursor {
   position: fixed;
   top: 0;
@@ -77,27 +94,119 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   transform: translate(-50%, -50%) scale(3);
 }
 
-/* Efectos hover para las tarjetas de proyecto */
+/* ===============================
+   EFECTOS IMAGENES PROYECTOS
+   =============================== */
+
 .project-card-image-effects {
   filter: grayscale(100%);
   transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1), filter 0.8s ease;
   will-change: transform, filter;
 }
+
 .group:hover .project-card-image-effects {
   filter: grayscale(0%) brightness(1.1);
   transform: scale(1.15);
 }
 
-/* Desactivar cursor personalizado en dispositivos táctiles */
+/* =================================================
+   PROJECT JOURNEY — SCROLL EDITORIAL (SIN VIDEO)
+   ================================================= */
+
+.project-journey {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Cada escena ocupa una pantalla */
+.journey-scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+}
+
+/* Contenedor de texto */
+.journey-text {
+  max-width: 540px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 48px;
+  color: #111;
+}
+
+/* Posiciones */
+.journey-text.top {
+  margin: 8vh 0 0 8vw;
+  align-self: flex-start;
+}
+
+.journey-text.bottom {
+  margin: auto 0 8vh 8vw;
+  align-self: flex-end;
+}
+
+/* Tipografía editorial */
+.journey-text h1,
+.journey-text h2 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: -0.04em;
+  margin-bottom: 16px;
+}
+
+.journey-text p {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+/* CTA */
+.journey-cta {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 12px 28px;
+  border: 1px solid #111;
+  text-decoration: none;
+  color: #111;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.journey-cta:hover {
+  background: #111;
+  color: #ffffff;
+}
+
+/* ===============================
+   MOBILE / TOUCH DEVICES
+   =============================== */
+
 @media (hover: none) and (pointer: coarse) {
   body {
     cursor: auto;
     background-color: #ffffff !important;
   }
+
   a, button, input, select, textarea, [role="button"], .cursor-pointer {
     cursor: pointer !important;
   }
+
   #custom-cursor {
     display: none;
   }
+
+  .journey-text {
+    padding: 32px;
+    max-width: 90%;
+  }
+
+  .journey-text h1,
+  .journey-text h2 {
+    font-size: 1.8rem;
+  }
 }
+``
