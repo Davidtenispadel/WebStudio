@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ===============================
-   ESTILOS BASE
+   BASE SYSTEM
    =============================== */
 
 html, body {
@@ -11,33 +11,48 @@ html, body {
   font-family: Arial, Helvetica, sans-serif;
   color: #000000;
   overflow-x: hidden;
-  cursor: none; /* Solo escritorio */
+  cursor: none;
 }
 
-/* Override de cursor para elementos interactivos */
 a, button, input, select, textarea, [role="button"], .cursor-pointer {
   cursor: none !important;
 }
 
 /* ===============================
-   TIPOGRAFÍA
+   TYPOGRAPHY (APPLE STYLE)
    =============================== */
 
 .cinematic-text {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.06em;
   will-change: transform, opacity;
 }
 
 /* ===============================
-   ANIMACIONES
+   APPLE TEXT REVEAL SYSTEM
+   =============================== */
+
+.reveal-line {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.reveal-line.active {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+/* ===============================
+   ANIMATIONS CORE
    =============================== */
 
 @keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -46,15 +61,11 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 }
 
 .animate-fade-in {
-  animation: fade-in-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.transition-all-slow {
-  transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+  animation: fade-in-up 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 /* ===============================
-   SCROLL PERSONALIZADO
+   SCROLL SYSTEM (SMOOTH PREMIUM)
    =============================== */
 
 .custom-scroll::-webkit-scrollbar {
@@ -71,7 +82,7 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 }
 
 /* ===============================
-   CURSOR PERSONALIZADO
+   CURSOR SYSTEM
    =============================== */
 
 #custom-cursor {
@@ -84,8 +95,8 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
   transform: translate(-50%, -50%);
+  transition: transform 0.12s ease, background-color 0.3s ease;
   will-change: transform, top, left;
 }
 
@@ -95,22 +106,23 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 }
 
 /* ===============================
-   EFECTOS IMAGENES PROYECTOS
+   PROJECT IMAGE SYSTEM (PREMIUM)
    =============================== */
 
 .project-card-image-effects {
-  filter: grayscale(100%);
-  transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1), filter 0.8s ease;
+  filter: grayscale(100%) contrast(1.05);
+  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+              filter 0.9s ease;
   will-change: transform, filter;
 }
 
 .group:hover .project-card-image-effects {
-  filter: grayscale(0%) brightness(1.1);
-  transform: scale(1.15);
+  filter: grayscale(0%) brightness(1.08);
+  transform: scale(1.12);
 }
 
 /* =================================================
-   PROJECT JOURNEY — SCROLL EDITORIAL (SIN VIDEO)
+   PROJECT JOURNEY — APPLE VISION PRO MODE
    ================================================= */
 
 .project-journey {
@@ -118,7 +130,7 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   overflow-x: hidden;
 }
 
-/* Cada escena ocupa una pantalla */
+/* SCENE (FULL IMMERSION) */
 .journey-scene {
   position: relative;
   width: 100%;
@@ -127,17 +139,43 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
 }
 
-/* Contenedor de texto */
+/* BACKGROUND LAYER (DEPTH FEEL) */
+.journey-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter 1s ease;
+}
+
+.journey-scene.active::before {
+  backdrop-filter: blur(2px);
+}
+
+/* TEXT CONTAINER (APPLE FLOATING PANEL) */
 .journey-text {
-  max-width: 540px;
-  background: rgba(255, 255, 255, 0.88);
+  max-width: 520px;
+  background: rgba(255, 255, 255, 0.9);
   padding: 48px;
   color: #111;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Posiciones */
+/* ACTIVE STATE (FOCUS MODE) */
+.journey-scene.active .journey-text {
+  transform: translateY(0px);
+  opacity: 1;
+}
+
+/* POSITIONING VARIANTS */
 .journey-text.top {
   margin: 8vh 0 0 8vw;
   align-self: flex-start;
@@ -148,20 +186,19 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   align-self: flex-end;
 }
 
-/* Tipografía editorial */
+/* TYPOGRAPHY */
 .journey-text h1,
 .journey-text h2 {
-  font-family: Arial, Helvetica, sans-serif;
   font-weight: 900;
   font-size: 2.4rem;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
   margin-bottom: 16px;
 }
 
 .journey-text p {
-  font-family: Arial, Helvetica, sans-serif;
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.7;
+  opacity: 0.9;
 }
 
 /* CTA */
@@ -173,16 +210,16 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   text-decoration: none;
   color: #111;
   font-size: 0.9rem;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .journey-cta:hover {
   background: #111;
-  color: #ffffff;
+  color: #fff;
 }
 
 /* ===============================
-   MOBILE / TOUCH DEVICES
+   MOBILE OPTIMIZATION
    =============================== */
 
 @media (hover: none) and (pointer: coarse) {
@@ -200,8 +237,8 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   }
 
   .journey-text {
-    padding: 32px;
-    max-width: 90%;
+    padding: 28px;
+    max-width: 92%;
   }
 
   .journey-text h1,
@@ -209,4 +246,3 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
     font-size: 1.8rem;
   }
 }
-``
