@@ -1,33 +1,31 @@
-import { useEffect } from "react";
+import React from "react";
+import { splitIntoSentences } from "../utils/textEngine";
 
-export const useTextReveal = (selector: string) => {
-  useEffect(() => {
-    const elements = document.querySelectorAll(selector);
+interface Props {
+  text: string;
+  className?: string;
+}
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const el = entry.target as HTMLElement;
+const TextReveal: React.FC<Props> = ({ text, className }) => {
+  const sentences = splitIntoSentences(text);
 
-          if (entry.isIntersecting) {
-            const children = Array.from(el.children);
-
-            children.forEach((child, index) => {
-              const htmlEl = child as HTMLElement;
-
-              setTimeout(() => {
-                htmlEl.style.opacity = "1";
-                htmlEl.style.transform = "translateY(0px)";
-              }, index * 180); // 👈 ritmo Apple (suave, elegante)
-            });
-          }
-        });
-      },
-      { threshold: 0.6 }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [selector]);
+  return (
+    <div className={className}>
+      {sentences.map((sentence, i) => (
+        <p
+          key={i}
+          className="reveal-line"
+          style={{
+            opacity: 0,
+            transform: "translateY(20px)",
+            transition: "all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1)",
+          }}
+        >
+          {sentence}
+        </p>
+      ))}
+    </div>
+  );
 };
+
+export default TextReveal;
