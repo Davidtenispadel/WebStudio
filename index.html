@@ -6,68 +6,53 @@
 
     <title>Architect in Corby | DB+ Architecture Practice</title>
 
-    <meta name="description" content="Architectural practice in Corby specialising in extensions, planning applications, new builds and BIM-led design. Serving Kettering, Market Harborough, Stamford, Oundle, Uppingham, Gretton, Weldon and over 60 surrounding villages." />
+    <meta name="description" content="Architectural practice in Corby specialising in extensions, planning applications, new builds and BIM-led design." />
 
     <meta property="og:title" content="DB+ Architecture Practice" />
-    <meta property="og:description" content="Architectural practice delivering planning drawings, extensions, new builds and BIM-led design across Corby, Kettering, Stamford, Oundle and surrounding areas." />
+    <meta property="og:description" content="Architectural practice delivering planning drawings, extensions, new builds and BIM-led design." />
     <meta property="og:url" content="https://dbsdesigner.com" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/og-image.jpg" />
-    <meta property="og:locale" content="en_GB" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DB+ Architecture Practice" />
-    <meta name="twitter:description" content="Architectural practice delivering planning drawings, extensions, new builds and BIM-led design." />
 
     <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-512.png" />
-    <link rel="shortcut icon" href="/icon-192.png" />
-
-    <link rel="manifest" href="/manifest.json" />
 
     <style>
       html, body {
         margin: 0;
         padding: 0;
-        background: transparent !important;
         font-family: Arial, Helvetica, sans-serif;
-        color: #000000;
+        background: transparent;
         overflow-x: hidden;
         cursor: none;
       }
 
-      a, button, input, select, textarea, [role="button"], .cursor-pointer {
-        cursor: none !important;
-      }
-
-      #custom-cursor {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 10px;
-        height: 10px;
-        background-color: #333333;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9999;
-        transition: transform 0.1s ease-out, opacity 0.3s ease, background-color 0.3s ease;
-        transform: translate(-50%, -50%);
-        will-change: transform, top, left;
-      }
-
-      #custom-cursor.active {
-        background-color: #ff0000;
-        transform: translate(-50%, -50%) scale(3);
-      }
-
-      @media (hover: none) and (pointer: coarse) {
-        body { cursor: auto; background-color: #ffffff !important; }
-        a, button, input, select, textarea, [role="button"], .cursor-pointer { cursor: pointer !important; }
-        #custom-cursor { display: none; }
+      #root {
+        position: relative;
+        z-index: 1;
       }
 
       /* =========================
-         🔥 HERO PROJECT JOURNEY (PREMIUM)
+         CURSOR
+      ========================== */
+      #custom-cursor {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #333;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.1s ease, background 0.3s ease;
+      }
+
+      #custom-cursor.active {
+        background: #ff0000;
+        transform: translate(-50%, -50%) scale(3);
+      }
+
+      /* =========================
+         HERO APPLE SYSTEM
       ========================== */
 
       .hero-journey {
@@ -85,30 +70,44 @@
       }
 
       .slide img {
-        width: 100%;
-        height: 100%;
+        position: absolute;
+        width: 110%;
+        height: 110%;
+        top: -5%;
+        left: -5%;
         object-fit: cover;
-        transform: scale(1.08);
-        transition: transform 1.2s ease;
+        transform: scale(1.1);
+        will-change: transform;
       }
 
-      .slide::after {
-        content: "";
+      .overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.42);
+        background: rgba(0,0,0,0.45);
       }
 
       .content {
         position: absolute;
         top: 50%;
         right: 6%;
-        transform: translateY(-50%) translateX(40px);
-        max-width: 440px;
-        color: #ffffff;
+        transform: translateY(-50%) translateX(60px);
+        max-width: 460px;
+        color: white;
         opacity: 0;
-        transition: all 1s ease;
-        z-index: 2;
+        transition: all 0.8s ease;
+        will-change: transform, opacity;
+      }
+
+      .content h2 {
+        font-size: 2.4rem;
+        letter-spacing: -0.5px;
+        margin-bottom: 1rem;
+      }
+
+      .content p {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        opacity: 0.9;
       }
 
       .content.active {
@@ -116,37 +115,19 @@
         transform: translateY(-50%) translateX(0);
       }
 
-      .content h2 {
-        font-size: 2.4rem;
-        margin-bottom: 1rem;
-        letter-spacing: -0.5px;
-      }
-
-      .content p {
-        font-size: 1.05rem;
-        line-height: 1.6;
-        opacity: 0.95;
-      }
-
       .cta {
         display: inline-block;
         margin-top: 1.5rem;
         padding: 12px 22px;
-        background: #ffffff;
-        color: #000000;
+        background: white;
+        color: black;
         font-weight: 600;
         text-decoration: none;
-        transition: all 0.3s ease;
       }
 
       .cta:hover {
-        background: #000000;
-        color: #ffffff;
-      }
-
-      /* Scroll reveal support */
-      .slide.active img {
-        transform: scale(1);
+        background: black;
+        color: white;
       }
     </style>
   </head>
@@ -156,37 +137,61 @@
     <div id="custom-cursor"></div>
 
     <script>
+      /* =========================
+         CURSOR
+      ========================== */
       const cursor = document.getElementById("custom-cursor");
 
-      if (cursor) {
-        window.addEventListener("mousemove", (e) => {
-          cursor.style.top = e.clientY + "px";
-          cursor.style.left = e.clientX + "px";
+      window.addEventListener("mousemove", (e) => {
+        cursor.style.left = e.clientX + "px";
+        cursor.style.top = e.clientY + "px";
 
-          const target = e.target;
-          const isInteractive = target.closest('button, a, input, textarea, select, .cursor-pointer');
+        const interactive = e.target.closest(
+          "a, button, input, textarea, select, .cursor-pointer"
+        );
 
-          if (isInteractive) {
-            cursor.classList.add('active');
-          } else {
-            cursor.classList.remove('active');
-          }
-        });
+        cursor.classList.toggle("active", !!interactive);
+      });
 
-        window.addEventListener("mousedown", () => cursor.classList.add("active"));
-        window.addEventListener("mouseup", () => cursor.classList.remove("active"));
+      /* =========================
+         APPLE SCROLL ENGINE
+      ========================== */
 
-        window.addEventListener("mouseleave", () => {
-          cursor.style.opacity = "0";
-        });
+      const slides = document.querySelectorAll(".slide");
 
-        window.addEventListener("mouseenter", () => {
-          cursor.style.opacity = "1";
-        });
-      }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const content = entry.target.querySelector(".content");
+            const img = entry.target.querySelector("img");
+
+            if (entry.isIntersecting) {
+              entry.target.classList.add("active");
+
+              if (content) content.classList.add("active");
+
+              if (img) {
+                img.style.transform = "scale(1)";
+              }
+            } else {
+              entry.target.classList.remove("active");
+
+              if (content) content.classList.remove("active");
+
+              if (img) {
+                img.style.transform = "scale(1.1)";
+              }
+            }
+          });
+        },
+        {
+          threshold: 0.6
+        }
+      );
+
+      slides.forEach((s) => observer.observe(s));
     </script>
 
-    <!-- VITE ENTRY -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
