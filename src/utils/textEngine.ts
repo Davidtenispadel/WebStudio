@@ -1,6 +1,13 @@
-export const splitIntoSentences = (text: string): string[] => {
+export const splitIntoLines = (text: string) => {
   return text
-    .replace(/\n/g, " ")
-    .split(/(?<=[.!?])\s+/)
+    .split(".")
+    .map(t => t.trim())
+    .filter(Boolean);
+};
+
+export const splitIntoWords = (text: string) => {
+  return text
+    .split(" ")
+    .map(t => t.trim())
     .filter(Boolean);
 };
