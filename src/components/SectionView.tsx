@@ -29,6 +29,9 @@ import {
 import { architectureDescription } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 
+// Import Hero component - adjust path if needed
+import Hero from "./Hero"; // <-- AGREGADO
+
 // ============================
 // Types for modern uploader
 // ============================
@@ -179,6 +182,14 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
+  // FORCE VISIBILITY FOR PROJECT JOURNEY (evita depender de la animación)
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.PROJECT_JOURNEY) {
+      setShowGalleryItems(true);
+      setStage("gallery");
+    }
+  }, [displayedCategory.name]);
+
   if (!isActive) return null;
 
   // ============================
@@ -196,9 +207,8 @@ const SectionView: React.FC<SectionViewProps> = ({
     displayedCategory.name === StudioSection.STRUCTURE;
   const isBehindDBSection =
     displayedCategory.name === StudioSection.BEHIND_DB;
-const isProjectJourney =
-  displayedCategory.name === StudioSection.PROJECT_JOURNEY;
-
+  const isProjectJourney =
+    displayedCategory.name === StudioSection.PROJECT_JOURNEY;
 
   const scaleTarget =
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
