@@ -1,16 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
-import { sendProjectEnquiry } from "../services/emailService";
-
-type UploadStatus = "uploading" | "uploaded" | "error";
 
 interface UploadedItem {
   id: string;
   name: string;
   size: number;
   progress: number;
-  status: UploadStatus;
+  status: "uploading" | "uploaded" | "error";
   url?: string;
 }
 
@@ -30,11 +27,10 @@ const SectionView: React.FC<Props> = ({
   category,
   onProjectClick,
   isActive,
-  currentSectionName,
 }) => {
-  // ======================
+  // =============================
   // STATE
-  // ======================
+  // =============================
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
 
@@ -52,7 +48,14 @@ const SectionView: React.FC<Props> = ({
     timers.current = [];
   };
 
-  const startSequence = () => {
+  // =============================
+  // SAFE CATEGORY SYNC (FIX CLAVE)
+  // =============================
+  useEffect(() => {
+    if (!category) return;
+
+    setDisplayedCategory(category);
+
     clearTimers();
 
     setStage("intro");
@@ -61,54 +64,41 @@ const SectionView: React.FC<Props> = ({
     setShowName(false);
     setShowGallery(false);
 
-    timers.current.push(setTimeout(() => setShowDB(true), 100));
-    timers.current.push(setTimeout(() => setShowPlus(true), 300));
-    timers.current.push(setTimeout(() => setShowName(true), 600));
-    timers.current.push(setTimeout(() => setShowGallery(true), 900));
-    timers.current.push(setTimeout(() => setStage("gallery"), 1100));
-  };
+    const t1 = setTimeout(() => setShowDB(true), 100);
+    const t2 = setTimeout(() => setShowPlus(true), 300);
+    const t3 = setTimeout(() => setShowName(true), 600);
+    const t4 = setTimeout(() => setShowGallery(true), 900);
+    const t5 = setTimeout(() => setStage("gallery"), 1100);
 
-  // ======================
-  // FIX: INIT + SYNC CATEGORY (CRITICAL)
-  // ======================
+    timers.current.push(t1, t2, t3, t4, t5);
+
+    return clearTimers;
+  }, [category?.id]);
+
   useEffect(() => {
     if (!isActive) return;
-    startSequence();
   }, [isActive]);
 
-  useEffect(() => {
-    if (!category) return;
+  // =============================
+  // SAFE PROJECTS (CRITICAL FIX)
+  // =============================
+  const safeProjects: Project[] = Array.isArray(
+    displayedCategory?.projects
+  )
+    ? displayedCategory.projects
+    : [];
 
-    setDisplayedCategory(category);
+  // =============================
+  // DETECT SECTIONS (ROBUST)
+  // =============================
+  const name = displayedCategory?.name || "";
 
-    const t = setTimeout(() => {
-      startSequence();
-    }, 50);
+  const isEnquiry = name.toLowerCase().includes("enquiry");
+  const isBehindDB = name.toLowerCase().includes("behind");
 
-    return () => clearTimeout(t);
-  }, [category]);
-
-  // ======================
-  // FIX: SAFE PROJECTS ACCESS
-  // ======================
-  const projects: Project[] = displayedCategory?.projects ?? [];
-
-  // ======================
-  // FIX: ENQUIRY DETECTION (ROBUST)
-  // ======================
-  const isEnquiry =
-    displayedCategory?.name?.toLowerCase?.() ===
-    StudioSection.ENQUIRY.toLowerCase();
-
-  const isBehindDB =
-    displayedCategory?.name?.toLowerCase?.().includes("behind");
-
-  // safety
-  if (!displayedCategory) return null;
-
-  // ======================
-  // UPLOADER (unchanged minimal safe)
-  // ======================
+  // =============================
+  // UPLOADER (BASIC SAFE)
+  // =============================
   const [items, setItems] = useState<UploadedItem[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -118,7 +108,7 @@ const SectionView: React.FC<Props> = ({
       name: f.name,
       size: f.size,
       progress: 0,
-      status: "uploading" as UploadStatus,
+      status: "uploading" as const,
     }));
 
     setItems((p) => [...p, ...initial]);
@@ -161,9 +151,11 @@ const SectionView: React.FC<Props> = ({
     xhr.send(fd);
   };
 
-  // ======================
-  // RENDER
-  // ======================
+  // =============================
+  // RENDER SAFETY
+  // =============================
+  if (!displayedCategory) return null;
+
   return (
     <div
       className={`fixed inset-0 transition-opacity duration-500 ${
@@ -171,13 +163,15 @@ const SectionView: React.FC<Props> = ({
       }`}
     >
       {/* HEADER */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8 z-40">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-6 z-40">
         <h1 className={`text-7xl ${showDB ? "opacity-100" : "opacity-0"}`}>
           DB
         </h1>
-        <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>+</span>
+        <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>
+          +
+        </span>
         <span className={`${showName ? "opacity-100" : "opacity-0"}`}>
-          {displayedCategory?.name}
+          {name}
         </span>
       </div>
 
@@ -187,7 +181,7 @@ const SectionView: React.FC<Props> = ({
           showGallery ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* ================= ENQUIRY FIX ================= */}
+        {/* ================= ENQUIRY ================= */}
         {isEnquiry ? (
           <div className="p-10 text-white">
             <h2 className="text-3xl mb-6">Enquiry</h2>
@@ -218,31 +212,29 @@ const SectionView: React.FC<Props> = ({
             </div>
           </div>
         ) : isBehindDB ? (
-          /* ================= BEHIND DB FIX ================= */
-          <div className="p-10 text-white">
-            <div className="max-w-3xl">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: displayedCategory?.description || "",
-                }}
-              />
-            </div>
+          /* ================= BEHIND DB ================= */
+          <div className="p-10 text-white max-w-3xl">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: displayedCategory?.description || "",
+              }}
+            />
           </div>
         ) : (
           /* ================= PROJECTS ================= */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-10">
-            {projects.length > 0 ? (
-              projects.map((p) => (
+            {safeProjects.length > 0 ? (
+              safeProjects.map((p) => (
                 <ProjectCard
                   key={p.id}
                   project={p}
                   onClick={onProjectClick}
-                  currentSectionName={displayedCategory.name}
+                  currentSectionName={name}
                 />
               ))
             ) : (
-              <div className="text-white opacity-50">
-                No projects in this section
+              <div className="text-white opacity-40">
+                No projects found in this category
               </div>
             )}
           </div>
