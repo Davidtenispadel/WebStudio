@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CategoryGroup, Project, StudioSection } from "../types";
+import { CategoryGroup, Project } from "../types";
 import ProjectCard from "./ProjectCard";
-import { sendProjectEnquiry } from "../services/emailService";
 
 type UploadStatus = "uploading" | "uploaded" | "error";
 
@@ -30,10 +29,9 @@ const SectionView: React.FC<Props> = ({
   category,
   onProjectClick,
   isActive,
-  currentSectionName,
 }) => {
   // ======================
-  // CORE STATE (FIXED)
+  // STATE CORE
   // ======================
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
@@ -53,7 +51,7 @@ const SectionView: React.FC<Props> = ({
   };
 
   // ======================
-  // SEQUENCE (FIXED)
+  // ANIMATION SEQUENCE
   // ======================
   const startSequence = () => {
     clearTimers();
@@ -72,19 +70,19 @@ const SectionView: React.FC<Props> = ({
   };
 
   // ======================
-  // INIT / CATEGORY CHANGE (FIXED CRITICAL BUG)
+  // INIT
   // ======================
   useEffect(() => {
     if (!isActive) return;
-
     startSequence();
   }, [isActive]);
 
+  // ======================
+  // CATEGORY CHANGE (FIX CRÍTICO)
+  // ======================
   useEffect(() => {
     if (!category) return;
 
-    // IMPORTANT FIX:
-    // Always update category FIRST, then restart animation
     setDisplayedCategory(category);
 
     const t = setTimeout(() => {
@@ -95,16 +93,24 @@ const SectionView: React.FC<Props> = ({
   }, [category]);
 
   // ======================
-  // ENQUIRY CHECK
+  // SAFE DETECTION (FIX ENQUIRY REAL)
   // ======================
-  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
+  const categoryName =
+    displayedCategory?.name?.toLowerCase().trim() || "";
 
-  // IMPORTANT FIX:
-  // prevent empty render crash
+  const isEnquiry = categoryName === "enquiry";
+
+  // ======================
+  // SAFETY GUARD
+  // ======================
+  const projects = Array.isArray(displayedCategory?.projects)
+    ? displayedCategory.projects
+    : [];
+
   if (!displayedCategory) return null;
 
   // ======================
-  // UPLOADER (SAFE BASIC)
+  // UPLOADER
   // ======================
   const [items, setItems] = useState<UploadedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -127,6 +133,7 @@ const SectionView: React.FC<Props> = ({
 
     xhr.upload.onprogress = (e) => {
       if (!e.lengthComputable) return;
+
       const pct = Math.round((e.loaded / e.total) * 100);
 
       setItems((prev) =>
@@ -159,10 +166,8 @@ const SectionView: React.FC<Props> = ({
   };
 
   // ======================
-  // RENDER SAFE GRID (CRITICAL FIX)
+  // RENDER
   // ======================
-  const projects = displayedCategory?.projects ?? [];
-
   return (
     <div
       className={`fixed inset-0 transition-opacity duration-500 ${
@@ -170,13 +175,9 @@ const SectionView: React.FC<Props> = ({
       }`}
     >
       {/* HEADER */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8 z-40">
-        <h1 className={`text-7xl ${showDB ? "opacity-100" : "opacity-0"}`}>
-          DB
-        </h1>
-
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-8 z-40">
+        <h1 className={`${showDB ? "opacity-100" : "opacity-0"}`}>DB</h1>
         <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>+</span>
-
         <span className={`${showName ? "opacity-100" : "opacity-0"}`}>
           {displayedCategory?.name}
         </span>
@@ -188,7 +189,7 @@ const SectionView: React.FC<Props> = ({
           showGallery ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* ENQUIRY */}
+        {/* ENQUIRY FIXED */}
         {isEnquiry ? (
           <div className="p-10 text-white">
             <h2 className="text-3xl mb-6">Enquiry</h2>
@@ -219,9 +220,9 @@ const SectionView: React.FC<Props> = ({
             </div>
           </div>
         ) : (
-          // 🔥 CRITICAL FIX: ALWAYS RENDER PROJECTS SAFELY
+          // PROJECTS FIXED
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-10">
-            {projects.length > 0 ? (
+            {projects.length ? (
               projects.map((p) => (
                 <ProjectCard
                   key={p.id}
