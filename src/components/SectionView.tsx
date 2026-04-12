@@ -196,6 +196,9 @@ const SectionView: React.FC<SectionViewProps> = ({
     displayedCategory.name === StudioSection.STRUCTURE;
   const isBehindDBSection =
     displayedCategory.name === StudioSection.BEHIND_DB;
+const isProjectJourney =
+  displayedCategory.name === StudioSection.PROJECT_JOURNEY;
+
 
   const scaleTarget =
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
