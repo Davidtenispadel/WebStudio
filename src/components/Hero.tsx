@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 const slides = [
   {
@@ -6,30 +7,39 @@ const slides = [
       "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
     title: "Architecture begins with you",
     text: "Not with drawings, not with plans. With your life, your needs, your history.",
+    cta: false,
   },
   {
     image:
       "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
     title: "You're searching for the right space",
     text: "A new home, an extension, a workspace that finally feels right.",
+    cta: false,
   },
   {
     image:
       "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
     title: "Doubt is the beginning",
     text: "Great architecture starts with the right questions.",
+    cta: false,
   },
   {
     image:
       "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
     title: "Your ideal project begins here",
     text: "Stop overthinking. Start imagining with us.",
+    cta: true, // ⭐ ESTA SLIDE TIENE EL BOTÓN
   },
 ];
 
 const Hero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
+  const router = useRouter();
+
+  const goToEnquiry = () => {
+    router.push("/?section=Enquiry");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,6 +89,15 @@ const Hero: React.FC = () => {
           <div className="content">
             <h2>{slide.title}</h2>
             <p>{slide.text}</p>
+
+            {slide.cta && (
+              <button
+                onClick={goToEnquiry}
+                className="mt-6 px-10 py-4 bg-black text-white rounded-full text-xs tracking-[0.3em] uppercase hover:bg-red-600 transition-all"
+              >
+                Start your project
+              </button>
+            )}
           </div>
         </div>
       ))}
