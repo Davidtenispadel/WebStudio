@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CategoryGroup, Project } from "../types";
+import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
+import { sendProjectEnquiry } from "../services/emailService";
 
 type UploadStatus = "uploading" | "uploaded" | "error";
 
@@ -29,9 +30,10 @@ const SectionView: React.FC<Props> = ({
   category,
   onProjectClick,
   isActive,
+  currentSectionName,
 }) => {
   // ======================
-  // STATE CORE
+  // STATE
   // ======================
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(category);
@@ -50,9 +52,6 @@ const SectionView: React.FC<Props> = ({
     timers.current = [];
   };
 
-  // ======================
-  // ANIMATION SEQUENCE
-  // ======================
   const startSequence = () => {
     clearTimers();
 
@@ -70,16 +69,13 @@ const SectionView: React.FC<Props> = ({
   };
 
   // ======================
-  // INIT
+  // FIX: INIT + SYNC CATEGORY (CRITICAL)
   // ======================
   useEffect(() => {
     if (!isActive) return;
     startSequence();
   }, [isActive]);
 
-  // ======================
-  // CATEGORY CHANGE (FIX CRÍTICO)
-  // ======================
   useEffect(() => {
     if (!category) return;
 
@@ -93,27 +89,28 @@ const SectionView: React.FC<Props> = ({
   }, [category]);
 
   // ======================
-  // SAFE DETECTION (FIX ENQUIRY REAL)
+  // FIX: SAFE PROJECTS ACCESS
   // ======================
-  const categoryName =
-    displayedCategory?.name?.toLowerCase().trim() || "";
-
-  const isEnquiry = categoryName === "enquiry";
+  const projects: Project[] = displayedCategory?.projects ?? [];
 
   // ======================
-  // SAFETY GUARD
+  // FIX: ENQUIRY DETECTION (ROBUST)
   // ======================
-  const projects = Array.isArray(displayedCategory?.projects)
-    ? displayedCategory.projects
-    : [];
+  const isEnquiry =
+    displayedCategory?.name?.toLowerCase?.() ===
+    StudioSection.ENQUIRY.toLowerCase();
 
+  const isBehindDB =
+    displayedCategory?.name?.toLowerCase?.().includes("behind");
+
+  // safety
   if (!displayedCategory) return null;
 
   // ======================
-  // UPLOADER
+  // UPLOADER (unchanged minimal safe)
   // ======================
   const [items, setItems] = useState<UploadedItem[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const uploadFiles = (files: File[]) => {
     const initial = files.map((f) => ({
@@ -133,7 +130,6 @@ const SectionView: React.FC<Props> = ({
 
     xhr.upload.onprogress = (e) => {
       if (!e.lengthComputable) return;
-
       const pct = Math.round((e.loaded / e.total) * 100);
 
       setItems((prev) =>
@@ -175,8 +171,10 @@ const SectionView: React.FC<Props> = ({
       }`}
     >
       {/* HEADER */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-8 z-40">
-        <h1 className={`${showDB ? "opacity-100" : "opacity-0"}`}>DB</h1>
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8 z-40">
+        <h1 className={`text-7xl ${showDB ? "opacity-100" : "opacity-0"}`}>
+          DB
+        </h1>
         <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>+</span>
         <span className={`${showName ? "opacity-100" : "opacity-0"}`}>
           {displayedCategory?.name}
@@ -189,7 +187,7 @@ const SectionView: React.FC<Props> = ({
           showGallery ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* ENQUIRY FIXED */}
+        {/* ================= ENQUIRY FIX ================= */}
         {isEnquiry ? (
           <div className="p-10 text-white">
             <h2 className="text-3xl mb-6">Enquiry</h2>
@@ -219,10 +217,21 @@ const SectionView: React.FC<Props> = ({
               ))}
             </div>
           </div>
+        ) : isBehindDB ? (
+          /* ================= BEHIND DB FIX ================= */
+          <div className="p-10 text-white">
+            <div className="max-w-3xl">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: displayedCategory?.description || "",
+                }}
+              />
+            </div>
+          </div>
         ) : (
-          // PROJECTS FIXED
+          /* ================= PROJECTS ================= */
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-10">
-            {projects.length ? (
+            {projects.length > 0 ? (
               projects.map((p) => (
                 <ProjectCard
                   key={p.id}
