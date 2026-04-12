@@ -889,28 +889,46 @@ const isProjectJourney =
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
-              {/* Description block for all relevant sections */}
-              {(isUrbanSection ||
-                isStructureSection ||
-                isDesignSection ||
-                isProjectSupportSection ||
-                isArchitectureSection) && (
-                <div
-                  className={`flex flex-col gap-12 ${
-                    isDesignSection ? "mb-8" : "mb-24"
-                  }`}
-                >
-                  <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-                    <div
-                      className="text-white font-normal text-lg md:text-xl leading-tight"
-                      dangerouslySetInnerHTML={{
-                        __html: displayedCategory.description,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+             {/* Description block for all relevant sections */}
+{(isUrbanSection ||
+  isStructureSection ||
+  isDesignSection ||
+  isProjectSupportSection ||
+  isArchitectureSection ||
+  isProjectJourney) && (
+  <div className="flex flex-col gap-12">
+    
+    {/* Architecture special block */}
+    {isArchitectureSection && (
+      <div
+        className={`flex flex-col gap-12 ${
+          isDesignSection ? "mb-8" : "mb-24"
+        }`}
+      >
+        <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+          <div>
+            {/* contenido de Architecture */}
+          </div>
+        </div>
+      </div>
+    )}
 
+    {/* Project Journey HERO */}
+    {isProjectJourney && (
+      <div className="w-full">
+        <Hero />
+      </div>
+    )}
+
+    {/* Description */}
+    <div
+      className="text-white font-normal text-lg md:text-xl leading-tight"
+      dangerouslySetInnerHTML={{
+        __html: displayedCategory.description,
+      }}
+    />
+  </div>
+)}
               {/* Project Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
                 {displayedCategory.projects.map((project) => (
