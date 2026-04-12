@@ -42,8 +42,21 @@ const SectionView: React.FC<Props> = ({
   onProjectClick,
   isActive,
 }) => {
-  const [displayedCategory, setDisplayedCategory] = useState(category);
+  // =========================
+  // SAFE CATEGORY (CRITICAL FIX)
+  // =========================
+  const safeCategory = category || {
+    id: "fallback",
+    name: "",
+    projects: [],
+  };
 
+  const [displayedCategory, setDisplayedCategory] =
+    useState<CategoryGroup>(safeCategory);
+
+  // =========================
+  // ANIMATION STATE (SIMPLIFIED)
+  // =========================
   const [stage, setStage] = useState<"intro" | "gallery">("intro");
 
   const [showDB, setShowDB] = useState(false);
@@ -51,7 +64,7 @@ const SectionView: React.FC<Props> = ({
   const [showName, setShowName] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
 
-  const timers = useRef<any[]>([]);
+  const timers = useRef<NodeJS.Timeout[]>([]);
 
   const clearTimers = () => {
     timers.current.forEach(clearTimeout);
@@ -63,22 +76,31 @@ const SectionView: React.FC<Props> = ({
 
     setShowDB(true);
 
-    timers.current.push(setTimeout(() => setShowPlus(true), 300));
-    timers.current.push(setTimeout(() => setShowName(true), 600));
-    timers.current.push(setTimeout(() => setShowGallery(true), 1200));
-    timers.current.push(setTimeout(() => setStage("gallery"), 1600));
+    timers.current.push(setTimeout(() => setShowPlus(true), 250));
+    timers.current.push(setTimeout(() => setShowName(true), 500));
+    timers.current.push(setTimeout(() => setShowGallery(true), 900));
+    timers.current.push(setTimeout(() => setStage("gallery"), 1200));
   };
 
+  // =========================
+  // INIT / ACTIVATE
+  // =========================
   useEffect(() => {
     if (!isActive) return;
 
+    setStage("intro");
     startSequence();
 
     return clearTimers;
   }, [isActive]);
 
+  // =========================
+  // CATEGORY CHANGE SAFE RESET
+  // =========================
   useEffect(() => {
-    if (!displayedCategory || category.id !== displayedCategory.id) {
+    if (!category) return;
+
+    if (category.id !== displayedCategory.id) {
       clearTimers();
 
       setStage("intro");
@@ -87,21 +109,24 @@ const SectionView: React.FC<Props> = ({
       setShowName(false);
       setShowGallery(false);
 
-      setTimeout(() => {
+      const t = setTimeout(() => {
         setDisplayedCategory(category);
         startSequence();
       }, 100);
+
+      return () => clearTimeout(t);
     }
   }, [category]);
 
-  // ======================
+  // =========================
   // UPLOADER
-  // ======================
-
+  // =========================
   const [items, setItems] = useState<UploadedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFiles = (files: File[]) => {
+    if (!files?.length) return;
+
     const initial = files.map((f) => ({
       id: fileId(f),
       name: f.name,
@@ -118,6 +143,8 @@ const SectionView: React.FC<Props> = ({
     files.forEach((f) => fd.append("files[]", f));
 
     xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+
       const pct = Math.round((e.loaded / e.total) * 100);
 
       setItems((prev) =>
@@ -131,38 +158,62 @@ const SectionView: React.FC<Props> = ({
 
     xhr.onload = () => {
       try {
-        const res = JSON.parse(xhr.responseText);
+        const res = JSON.parse(xhr.responseText || "[]");
 
         setItems((prev) =>
           prev.map((it) => {
-            const match = res.find((r: any) => r.name === it.name);
+            const match = res.find(
+              (r: any) => r?.name === it.name
+            );
+
             if (!match) return it;
-            return { ...it, status: "uploaded", url: match.url };
+
+            return {
+              ...it,
+              status: "uploaded",
+              progress: 100,
+              url: match.url,
+            };
           })
         );
-      } catch {
-        console.error("Upload error");
+      } catch (e) {
+        console.error("Upload parse error", e);
       }
+    };
+
+    xhr.onerror = () => {
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, status: "error" }
+            : it
+        )
+      );
     };
 
     xhr.open("POST", UPLOAD_ENDPOINT);
     xhr.send(fd);
   };
 
-  // ======================
+  // =========================
+  // SAFETY RENDER GUARD (CRITICAL FIX)
+  // =========================
+  if (!isActive) {
+    return (
+      <div className="fixed inset-0 opacity-0 pointer-events-none" />
+    );
+  }
+
+  const isEnquiry =
+    displayedCategory?.name === StudioSection.ENQUIRY;
+
+  const projects = displayedCategory?.projects || [];
+
+  // =========================
   // RENDER
-  // ======================
-
-  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
-
+  // =========================
   return (
-    <div
-      className={`fixed inset-0 transition-opacity duration-500 ${
-        isActive
-          ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none"
-      }`}
-    >
+    <div className="fixed inset-0 transition-opacity duration-500 opacity-100">
       {/* HEADER */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex items-center gap-10">
         <h1
@@ -183,26 +234,31 @@ const SectionView: React.FC<Props> = ({
 
         <span
           className={`text-4xl transition-all ${
-            showName ? "opacity-100" : "opacity-0 translate-x-10"
+            showName
+              ? "opacity-100"
+              : "opacity-0 translate-x-10"
           }`}
         >
-          {displayedCategory.name}
+          {displayedCategory?.name}
         </span>
       </div>
 
       {/* CONTENT */}
       <div
-        className={`h-full overflow-y-auto pt-40 transition-all ${
-          showGallery ? "opacity-100" : "opacity-0"
+        className={`h-full overflow-y-auto pt-40 transition-opacity duration-500 ${
+          showGallery ? "opacity-100" : "opacity-100"
         }`}
       >
+        {/* ENQUIRY */}
         {isEnquiry ? (
           <div className="p-10 text-white">
             <h2 className="text-3xl mb-6">Send files</h2>
 
             <div
               className="border p-10 cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() =>
+                fileInputRef.current?.click()
+              }
             >
               Upload files
             </div>
@@ -213,7 +269,9 @@ const SectionView: React.FC<Props> = ({
               multiple
               className="hidden"
               onChange={(e) =>
-                uploadFiles(Array.from(e.target.files || []))
+                uploadFiles(
+                  Array.from(e.target.files || [])
+                )
               }
             />
 
@@ -226,15 +284,23 @@ const SectionView: React.FC<Props> = ({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-10 p-10">
-            {displayedCategory.projects.map((p) => (
-              <ProjectCard
-                key={p.id}
-                project={p}
-                onClick={onProjectClick}
-                currentSectionName={displayedCategory.name}
-              />
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 p-10">
+            {projects.length > 0 ? (
+              projects.map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  onClick={onProjectClick}
+                  currentSectionName={
+                    displayedCategory.name
+                  }
+                />
+              ))
+            ) : (
+              <div className="text-white/60">
+                No projects available
+              </div>
+            )}
           </div>
         )}
       </div>
