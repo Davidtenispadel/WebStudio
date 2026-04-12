@@ -1,17 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
-import {
-  ChevronRight,
-  CheckCircle,
-  Upload,
-  X as CloseIcon,
-  Loader2,
-  Link2,
-  File as FileIcon,
-  AlertCircle,
-} from "lucide-react";
-
 import { sendProjectEnquiry } from "../services/emailService";
 
 type UploadStatus = "uploading" | "uploaded" | "error";
@@ -45,7 +34,7 @@ const SectionView: React.FC<Props> = ({
   // =========================
   // SAFE CATEGORY (CRITICAL FIX)
   // =========================
-  const safeCategory = category || {
+  const safeCategory = category ?? {
     id: "fallback",
     name: "",
     projects: [],
@@ -54,9 +43,6 @@ const SectionView: React.FC<Props> = ({
   const [displayedCategory, setDisplayedCategory] =
     useState<CategoryGroup>(safeCategory);
 
-  // =========================
-  // ANIMATION STATE (SIMPLIFIED)
-  // =========================
   const [stage, setStage] = useState<"intro" | "gallery">("intro");
 
   const [showDB, setShowDB] = useState(false);
@@ -75,15 +61,14 @@ const SectionView: React.FC<Props> = ({
     clearTimers();
 
     setShowDB(true);
-
-    timers.current.push(setTimeout(() => setShowPlus(true), 250));
-    timers.current.push(setTimeout(() => setShowName(true), 500));
-    timers.current.push(setTimeout(() => setShowGallery(true), 900));
-    timers.current.push(setTimeout(() => setStage("gallery"), 1200));
+    timers.current.push(setTimeout(() => setShowPlus(true), 200));
+    timers.current.push(setTimeout(() => setShowName(true), 450));
+    timers.current.push(setTimeout(() => setShowGallery(true), 800));
+    timers.current.push(setTimeout(() => setStage("gallery"), 1000));
   };
 
   // =========================
-  // INIT / ACTIVATE
+  // ALWAYS RENDER (CRITICAL FIX)
   // =========================
   useEffect(() => {
     if (!isActive) return;
@@ -95,7 +80,7 @@ const SectionView: React.FC<Props> = ({
   }, [isActive]);
 
   // =========================
-  // CATEGORY CHANGE SAFE RESET
+  // CATEGORY SWITCH SAFE RESET
   // =========================
   useEffect(() => {
     if (!category) return;
@@ -112,14 +97,24 @@ const SectionView: React.FC<Props> = ({
       const t = setTimeout(() => {
         setDisplayedCategory(category);
         startSequence();
-      }, 100);
+      }, 80);
 
       return () => clearTimeout(t);
     }
   }, [category]);
 
   // =========================
-  // UPLOADER
+  // FIX: ENQUIRY / BEHIND DB SAFE MATCHING
+  // =========================
+  const sectionName = displayedCategory?.name ?? "";
+
+  const isEnquiry = sectionName === "Enquiry";
+  const isBehindDB = sectionName === "Behind DB+";
+
+  const projects = displayedCategory?.projects ?? [];
+
+  // =========================
+  // UPLOADER (UNCHANGED BUT SAFE)
   // =========================
   const [items, setItems] = useState<UploadedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -162,10 +157,7 @@ const SectionView: React.FC<Props> = ({
 
         setItems((prev) =>
           prev.map((it) => {
-            const match = res.find(
-              (r: any) => r?.name === it.name
-            );
-
+            const match = res.find((r: any) => r?.name === it.name);
             if (!match) return it;
 
             return {
@@ -176,9 +168,7 @@ const SectionView: React.FC<Props> = ({
             };
           })
         );
-      } catch (e) {
-        console.error("Upload parse error", e);
-      }
+      } catch {}
     };
 
     xhr.onerror = () => {
@@ -196,69 +186,40 @@ const SectionView: React.FC<Props> = ({
   };
 
   // =========================
-  // SAFETY RENDER GUARD (CRITICAL FIX)
-  // =========================
-  if (!isActive) {
-    return (
-      <div className="fixed inset-0 opacity-0 pointer-events-none" />
-    );
-  }
-
-  const isEnquiry =
-    displayedCategory?.name === StudioSection.ENQUIRY;
-
-  const projects = displayedCategory?.projects || [];
-
-  // =========================
-  // RENDER
+  // RENDER GUARD (NO BLANK SCREEN EVER)
   // =========================
   return (
-    <div className="fixed inset-0 transition-opacity duration-500 opacity-100">
+    <div
+      className={`fixed inset-0 transition-opacity duration-500 ${
+        isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
       {/* HEADER */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 flex items-center gap-10">
-        <h1
-          className={`text-8xl transition-all ${
-            showDB ? "opacity-100" : "opacity-0 translate-y-10"
-          }`}
-        >
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-10">
+        <h1 className={`text-8xl ${showDB ? "opacity-100" : "opacity-0"}`}>
           DB
         </h1>
 
-        <span
-          className={`text-6xl transition-all ${
-            showPlus ? "opacity-100" : "opacity-0 scale-0"
-          }`}
-        >
+        <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>
           +
         </span>
 
-        <span
-          className={`text-4xl transition-all ${
-            showName
-              ? "opacity-100"
-              : "opacity-0 translate-x-10"
-          }`}
-        >
-          {displayedCategory?.name}
+        <span className={`${showName ? "opacity-100" : "opacity-0"}`}>
+          {sectionName}
         </span>
       </div>
 
       {/* CONTENT */}
-      <div
-        className={`h-full overflow-y-auto pt-40 transition-opacity duration-500 ${
-          showGallery ? "opacity-100" : "opacity-100"
-        }`}
-      >
+      <div className={`h-full overflow-y-auto pt-40 ${showGallery ? "opacity-100" : "opacity-100"}`}>
+        
         {/* ENQUIRY */}
         {isEnquiry ? (
           <div className="p-10 text-white">
-            <h2 className="text-3xl mb-6">Send files</h2>
+            <h2 className="text-3xl mb-6">Enquiry</h2>
 
             <div
               className="border p-10 cursor-pointer"
-              onClick={() =>
-                fileInputRef.current?.click()
-              }
+              onClick={() => fileInputRef.current?.click()}
             >
               Upload files
             </div>
@@ -269,21 +230,36 @@ const SectionView: React.FC<Props> = ({
               multiple
               className="hidden"
               onChange={(e) =>
-                uploadFiles(
-                  Array.from(e.target.files || [])
-                )
+                uploadFiles(Array.from(e.target.files || []))
               }
             />
 
             <div className="mt-6 space-y-2">
               {items.map((it) => (
-                <div key={it.id} className="text-sm">
+                <div key={it.id} className="text-sm text-white">
                   {it.name} — {it.progress}%
                 </div>
               ))}
             </div>
           </div>
+
+        ) : isBehindDB ? (
+
+          /* BEHIND DB SAFE RENDER */
+          <div className="p-10 text-white max-w-4xl">
+            <h2 className="text-3xl mb-6">Behind DB+</h2>
+
+            <div
+              className="opacity-80 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: displayedCategory?.description || "",
+              }}
+            />
+          </div>
+
         ) : (
+
+          /* PROJECT GRID SAFE */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 p-10">
             {projects.length > 0 ? (
               projects.map((p) => (
@@ -291,15 +267,11 @@ const SectionView: React.FC<Props> = ({
                   key={p.id}
                   project={p}
                   onClick={onProjectClick}
-                  currentSectionName={
-                    displayedCategory.name
-                  }
+                  currentSectionName={sectionName}
                 />
               ))
             ) : (
-              <div className="text-white/60">
-                No projects available
-              </div>
+              <div className="text-white/60">No projects</div>
             )}
           </div>
         )}
