@@ -1,8 +1,9 @@
 /*
- * SECTIONVIEW.TSX — Versión profesional con Project Journey estilo Apple
- * - Full-screen slides con scroll snapping vertical
- * - Efecto parallax suave en imágenes
- * - Botón "Start your Project" que navega a Enquiry
+ * SECTIONVIEW.TSX — Versión final con Project Journey:
+ * - Franja blanca superior para texto negro.
+ * - Imagen panorámica a ancho completo debajo.
+ * - Scroll snapping vertical.
+ * - Botón "Start your Project" que navega a Enquiry.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -27,7 +28,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (Apple-style)
+// COMPONENTE PROJECT JOURNEY SLIDES (franja blanca + imagen panorámica)
 // ============================
 interface ProjectJourneySlidesProps {
   onStartProject: () => void;
@@ -58,66 +59,41 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     },
   ];
 
-  // Refs para efecto parallax en cada imagen
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current?.parentElement?.parentElement; // el div con scroll
-    if (!container) return;
-
-    const handleScroll = () => {
-      const scrollTop = container.scrollTop;
-      imageRefs.current.forEach((ref, idx) => {
-        if (ref) {
-          const speed = 0.2;
-          const yPos = scrollTop * speed;
-          ref.style.transform = `translateY(${yPos}px)`;
-        }
-      });
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div ref={containerRef} className="relative w-full h-full">
-      {slides.map((slide, index) => (
+    <div className="relative w-full h-full">
+      {slides.map((slide) => (
         <section
           key={slide.id}
-          className="relative w-full h-screen snap-start flex items-center justify-center overflow-hidden"
+          className="relative w-full h-screen snap-start flex flex-col"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Contenedor de imagen con parallax */}
-          <div
-            ref={(el) => (imageRefs.current[index] = el)}
-            className="absolute inset-0 z-0 will-change-transform"
-          >
+          {/* Franja blanca superior (40% altura) para el texto */}
+          <div className="flex-1 bg-white flex items-center justify-center px-6 md:px-12">
+            <div className="max-w-3xl text-center">
+              <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+                {slide.text}
+              </p>
+              {slide.isLast && (
+                <div className="mt-12">
+                  <button
+                    onClick={onStartProject}
+                    className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                  >
+                    Start your Project
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Imagen panorámica (60% altura restante) */}
+          <div className="h-[60vh] w-full overflow-hidden">
             <img
               src={slide.image}
               alt={`Journey ${slide.id}`}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/30" /> {/* Overlay sutil */}
-          </div>
-
-          {/* Texto centrado */}
-          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center text-white">
-            <p className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-wide drop-shadow-lg">
-              {slide.text}
-            </p>
-            {slide.isLast && (
-              <div className="mt-12">
-                <button
-                  onClick={onStartProject}
-                  className="group inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
-                >
-                  Start your Project
-                  <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </button>
-              </div>
-            )}
           </div>
         </section>
       ))}
@@ -126,7 +102,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
 };
 
 // ============================
-// TIPOS Y CONSTANTES (sin cambios)
+// TIPOS Y CONSTANTES (sin cambios relevantes)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -144,7 +120,7 @@ interface SectionViewProps {
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
-  onNavigateToEnquiry?: () => void; // Obligatorio para que el botón funcione
+  onNavigateToEnquiry?: () => void; // Función para cambiar a la sección Enquiry
 }
 
 const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
@@ -419,7 +395,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) - sin cambios */}
+      {/* HEADER (Aesthetic A) */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -544,7 +520,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
-              {/* Aquí va el formulario Enquiry (lo mismo que antes) */}
+              {/* FORMULARIO ENQUIRY (completo, igual que antes) */}
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
