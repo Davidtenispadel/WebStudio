@@ -1,8 +1,8 @@
 /*
- * SECTIONVIEW.TSX — Versión final con Project Journey en pantalla completa
- * - Cada diapositiva ocupa el 100% del ancho y alto de la ventana.
- * - Scroll snapping vertical.
- * - Botón "Start your Project" sobre la última imagen.
+ * SECTIONVIEW.TSX — Versión profesional con Project Journey estilo Apple
+ * - Full-screen slides con scroll snapping vertical
+ * - Efecto parallax suave en imágenes
+ * - Botón "Start your Project" que navega a Enquiry
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -27,7 +27,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (PANORÁMICO FULLSCREEN)
+// COMPONENTE PROJECT JOURNEY SLIDES (Apple-style)
 // ============================
 interface ProjectJourneySlidesProps {
   onStartProject: () => void;
@@ -58,36 +58,60 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     },
   ];
 
+  // Refs para efecto parallax en cada imagen
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current?.parentElement?.parentElement; // el div con scroll
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollTop = container.scrollTop;
+      imageRefs.current.forEach((ref, idx) => {
+        if (ref) {
+          const speed = 0.2;
+          const yPos = scrollTop * speed;
+          ref.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="relative w-full h-full">
-      {slides.map((slide) => (
+    <div ref={containerRef} className="relative w-full h-full">
+      {slides.map((slide, index) => (
         <section
           key={slide.id}
           className="relative w-full h-screen snap-start flex items-center justify-center overflow-hidden"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Imagen de fondo panorámica */}
-          <div className="absolute inset-0 z-0">
+          {/* Contenedor de imagen con parallax */}
+          <div
+            ref={(el) => (imageRefs.current[index] = el)}
+            className="absolute inset-0 z-0 will-change-transform"
+          >
             <img
               src={slide.image}
               alt={`Journey ${slide.id}`}
               className="w-full h-full object-cover"
             />
-            {/* Overlay oscuro para mejorar legibilidad del texto */}
-            <div className="absolute inset-0 bg-black/40" />
+            <div className="absolute inset-0 bg-black/30" /> {/* Overlay sutil */}
           </div>
 
-          {/* Contenido textual centrado */}
-          <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">
-            <p className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide drop-shadow-lg">
+          {/* Texto centrado */}
+          <div className="relative z-10 max-w-3xl mx-auto px-6 text-center text-white">
+            <p className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed tracking-wide drop-shadow-lg">
               {slide.text}
             </p>
-
             {slide.isLast && (
               <div className="mt-12">
                 <button
                   onClick={onStartProject}
-                  className="group relative inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                  className="group inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
                 >
                   Start your Project
                   <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -102,7 +126,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
 };
 
 // ============================
-// RESTO DE TIPOS Y CONSTANTES
+// TIPOS Y CONSTANTES (sin cambios)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -120,7 +144,7 @@ interface SectionViewProps {
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
-  onNavigateToEnquiry?: () => void;
+  onNavigateToEnquiry?: () => void; // Obligatorio para que el botón funcione
 }
 
 const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
@@ -160,8 +184,6 @@ const SectionView: React.FC<SectionViewProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Referencia para el contenedor de scroll
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // ============================
@@ -359,6 +381,23 @@ const SectionView: React.FC<SectionViewProps> = ({
     setIsSending(false);
   };
 
+  // Función para navegar a Enquiry (con fallback)
+  const navigateToEnquiry = () => {
+    if (onNavigateToEnquiry) {
+      onNavigateToEnquiry();
+    } else {
+      // Fallback: intentar encontrar el elemento del menú "Enquiry" y hacer clic
+      const enquiryNavItem = Array.from(document.querySelectorAll('nav a, [data-nav]')).find(
+        (el) => el.textContent?.trim() === "Enquiry"
+      ) as HTMLElement;
+      if (enquiryNavItem) {
+        enquiryNavItem.click();
+      } else {
+        console.warn("No se pudo navegar a Enquiry: proporciona onNavigateToEnquiry al SectionView");
+      }
+    }
+  };
+
   // ============================
   // RENDER PRINCIPAL
   // ============================
@@ -380,7 +419,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) */}
+      {/* HEADER (Aesthetic A) - sin cambios */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -402,7 +441,6 @@ const SectionView: React.FC<SectionViewProps> = ({
             transformOrigin: "left",
           }}
         >
-          {/* DB+ */}
           <div className="flex items-center gap-3 shrink-0">
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
@@ -425,8 +463,6 @@ const SectionView: React.FC<SectionViewProps> = ({
               +
             </span>
           </div>
-
-          {/* Nombre de sección */}
           <div
             className="transition-all ease-out overflow-hidden flex-1"
             style={{
@@ -460,8 +496,6 @@ const SectionView: React.FC<SectionViewProps> = ({
             )}
           </div>
         </div>
-
-        {/* Descripción de sección (excepto para ciertas secciones) */}
         {displayedCategory.description &&
           !isHomeSection &&
           !isDesignSection &&
@@ -496,21 +530,21 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
       </div>
 
-      {/* CONTENEDOR DE SCROLL (con scroll snapping condicional) */}
+      {/* CONTENEDOR DE SCROLL */}
       <div
         ref={scrollContainerRef}
-        className={`h-full w-full overflow-y-auto custom-scroll px-0 pb-0 transition-opacity duration-1000 ${
+        className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{
-          paddingTop: "0px",
           scrollSnapType: isProjectJourney ? "y mandatory" : "auto",
+          scrollBehavior: "smooth",
         }}
       >
-        <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto"}>
+        <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
           {isEnquiry ? (
-            // FORMULARIO ENQUIRY (completo, igual que antes)
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
+              {/* Aquí va el formulario Enquiry (lo mismo que antes) */}
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
@@ -592,19 +626,16 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {isArchitectureSection && (
                     <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
                       <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-                        <div>{/* contenido de Architecture */}</div>
+                        <div>{/* Architecture content */}</div>
                       </div>
                     </div>
                   )}
                   {isProjectJourney && (
-                    <ProjectJourneySlides
-                      onStartProject={() => {
-                        if (onNavigateToEnquiry) onNavigateToEnquiry();
-                        else console.warn("onNavigateToEnquiry no proporcionada");
-                      }}
-                    />
+                    <ProjectJourneySlides onStartProject={navigateToEnquiry} />
                   )}
-                  <div className="text-white font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  {!isProjectJourney && (
+                    <div className="text-white font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  )}
                 </div>
               )}
               {!isProjectJourney && (
