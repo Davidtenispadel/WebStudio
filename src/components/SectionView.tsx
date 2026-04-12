@@ -1,6 +1,6 @@
 /*
- * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader compatible with upload.php)
- * - Incluye componente Hero interno para evitar errores de importación.
+ * SECTIONVIEW.TSX — Unified Version (A2: Modernized Uploader)
+ * - Incluye componente ProjectJourneySlides con scroll vertical, parallax y botón a Enquiry.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -25,32 +25,103 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE HERO (definido aquí mismo)
+// COMPONENTE PROJECT JOURNEY SLIDES (con parallax y botón a Enquiry)
 // ============================
-const Hero: React.FC = () => {
+interface ProjectJourneySlidesProps {
+  onStartProject: () => void; // función para navegar a la sección Enquiry
+}
+
+const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProject }) => {
+  const slides = [
+    {
+      id: 1,
+      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
+      text: "Architecture begins with you — not with drawings, not with plans. With your life, your needs, your history. Start your project.",
+    },
+    {
+      id: 2,
+      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
+      text: "You're searching for the right space. A new home, an extension, a workspace that finally feels right. You've collected ideas, references, screenshots... But the more you look, the more doubts appear. Is it the right style? Will it fit my life? How will it feel to live or work there?",
+    },
+    {
+      id: 3,
+      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
+      text: "Doubt is not a problem — it's the beginning. Great architecture doesn't start with answers. It starts with the right questions. Your routines, your taste, your ambitions, your way of living. We listen, we translate, we shape a concept that feels unmistakably yours.",
+    },
+    {
+      id: 4,
+      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
+      text: "Your ideal project begins here. Stop overthinking, start imagining with us. Tell us what you need, what you love, how you live. We'll turn it into a space that feels right from day one.",
+      isLast: true,
+    },
+  ];
+
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Efecto parallax: mueve la imagen suavemente al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      imageRefs.current.forEach((ref, idx) => {
+        if (ref) {
+          const scrollY = window.scrollY;
+          const offset = ref.offsetTop;
+          const speed = 0.25; // velocidad del parallax (menor = más lento)
+          const yPos = -(scrollY - offset) * speed;
+          ref.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="w-full text-white">
-      <div className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
-        <img
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769967857/make_the_background_2_xwqmiu.png"
-          alt="Hero Background"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 md:p-12">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight mb-4">
-            Project Journey
-          </h1>
-          <p className="text-base md:text-lg lg:text-xl max-w-2xl text-white/80">
-            Discover the creative process behind DB+ — from first sketch to final build.
-          </p>
-        </div>
-      </div>
+    <div className="relative w-full" style={{ scrollSnapType: "y mandatory" }}>
+      {slides.map((slide, index) => (
+        <section
+          key={slide.id}
+          className="relative min-h-screen w-full snap-start flex flex-col md:flex-row items-center justify-center px-6 md:px-12 py-20 overflow-hidden"
+          style={{ scrollSnapAlign: "start" }}
+        >
+          {/* Contenedor de imagen con parallax */}
+          <div
+            ref={(el) => (imageRefs.current[index] = el)}
+            className="w-full md:w-1/2 h-64 md:h-[80vh] rounded-2xl overflow-hidden shadow-2xl will-change-transform"
+          >
+            <img
+              src={slide.image}
+              alt={`Journey ${slide.id}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Texto lateral derecho */}
+          <div className="w-full md:w-1/2 mt-10 md:mt-0 md:pl-12 lg:pl-20 text-white">
+            <p className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+              {slide.text}
+            </p>
+
+            {slide.isLast && (
+              <div className="mt-12">
+                <button
+                  onClick={onStartProject}
+                  className="group relative inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                >
+                  Start your Project
+                  <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      ))}
     </div>
   );
 };
 
 // ============================
-// Types for modern uploader
+// TIPOS PARA EL UPLOADER
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 
@@ -70,11 +141,12 @@ interface SectionViewProps {
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
+  // Prop opcional para navegar a Enquiry desde Project Journey
+  onNavigateToEnquiry?: () => void;
 }
 
 const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
 
-// Format bytes utility
 const formatBytes = (bytes: number) => {
   if (!bytes && bytes !== 0) return "";
   const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -84,54 +156,38 @@ const formatBytes = (bytes: number) => {
   return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
 };
 
-// Generate simple id
 const fileId = (f: File) =>
-  `${f.name}-${f.size}-${f.lastModified}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
+  `${f.name}-${f.size}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`;
 
 const SectionView: React.FC<SectionViewProps> = ({
   category,
   onProjectClick,
   isActive,
   currentSectionName,
+  onNavigateToEnquiry,
 }) => {
-  // ============================
-  // Aesthetic A Animation State
-  // ============================
-  const [displayedCategory, setDisplayedCategory] =
-    useState<CategoryGroup>(category);
-
+  // Estados de animación
+  const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
   const [showName, setShowName] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [showGalleryItems, setShowGalleryItems] = useState(false);
-
   const [stage, setStage] = useState<"intro" | "gallery">("intro");
   const [isTransitioning, setIsTransitioning] = useState(false);
-
   const isFirstRender = useRef(true);
 
-  // ============================
-  // ENQUIRY Form State
-  // ============================
+  // Estado del formulario Enquiry
   const [enquiryStep, setEnquiryStep] = useState(1);
   const [isSending, setIsSending] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-
-  // Modern Uploader (A2)
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [items, setItems] = useState<UploadedItem[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ============================
-  // Animation Logic
+  // Lógica de animación (Aesthetic A)
   // ============================
   const resetSequence = () => {
     setShowDB(false);
@@ -153,13 +209,10 @@ const SectionView: React.FC<SectionViewProps> = ({
     return [t1, t2, t3, t4, t5];
   };
 
-  // Fallback: if showName is still false after 2 seconds, force it
   useEffect(() => {
     if (!isActive || isTransitioning) return;
     const timer = setTimeout(() => {
-      if (!showName) {
-        setShowName(true);
-      }
+      if (!showName) setShowName(true);
     }, 2000);
     return () => clearTimeout(timer);
   }, [isActive, isTransitioning, showName]);
@@ -174,32 +227,22 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   useEffect(() => {
     if (isFirstRender.current) return;
-
     if (category.id !== displayedCategory.id) {
       setIsTransitioning(true);
-
       const tOut = setTimeout(() => {
         resetSequence();
         setDisplayedCategory(category);
         setIsTransitioning(false);
-
-        setTimeout(() => {
-          startSequence();
-        }, 100);
+        setTimeout(() => startSequence(), 100);
       }, 500);
-
       return () => clearTimeout(tOut);
     }
   }, [category, displayedCategory.id]);
 
-  // Force gallery stage in ENQUIRY
   useEffect(() => {
-    if (displayedCategory.name === StudioSection.ENQUIRY) {
-      setStage("gallery");
-    }
+    if (displayedCategory.name === StudioSection.ENQUIRY) setStage("gallery");
   }, [displayedCategory.name]);
 
-  // FORCE VISIBILITY FOR PROJECT JOURNEY
   useEffect(() => {
     if (displayedCategory.name === StudioSection.PROJECT_JOURNEY) {
       setShowGalleryItems(true);
@@ -209,34 +252,25 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   if (!isActive) return null;
 
-  // ============================
-  // Section Flags
-  // ============================
+  // Flags de sección
   const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
   const isHomeSection = displayedCategory.name === StudioSection.HOME;
   const isUrbanSection = displayedCategory.name === StudioSection.URBANISM;
   const isDesignSection = displayedCategory.name === StudioSection.DESIGN;
-  const isArchitectureSection =
-    displayedCategory.name === StudioSection.ARCHITECTURE;
-  const isProjectSupportSection =
-    displayedCategory.name === StudioSection.PROJECT_SUPPORT;
-  const isStructureSection =
-    displayedCategory.name === StudioSection.STRUCTURE;
-  const isBehindDBSection =
-    displayedCategory.name === StudioSection.BEHIND_DB;
-  const isProjectJourney =
-    displayedCategory.name === StudioSection.PROJECT_JOURNEY;
+  const isArchitectureSection = displayedCategory.name === StudioSection.ARCHITECTURE;
+  const isProjectSupportSection = displayedCategory.name === StudioSection.PROJECT_SUPPORT;
+  const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE;
+  const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
+  const isProjectJourney = displayedCategory.name === StudioSection.PROJECT_JOURNEY;
 
-  const scaleTarget =
-    typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
+  const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Uploader Logic
+  // Lógica de subida de archivos
   // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
     setIsUploading(true);
-
     const initial: UploadedItem[] = files.map((f) => ({
       id: fileId(f),
       name: f.name,
@@ -245,7 +279,6 @@ const SectionView: React.FC<SectionViewProps> = ({
       progress: 0,
       status: "uploading",
     }));
-
     setItems((prev) => [...prev, ...initial]);
 
     const xhr = new XMLHttpRequest();
@@ -257,9 +290,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       const pct = Math.round((e.loaded / e.total) * 100);
       setItems((prev) =>
         prev.map((it) =>
-          initial.some((i) => i.id === it.id)
-            ? { ...it, progress: pct }
-            : it
+          initial.some((i) => i.id === it.id) ? { ...it, progress: pct } : it
         )
       );
     };
@@ -267,14 +298,8 @@ const SectionView: React.FC<SectionViewProps> = ({
     xhr.onload = () => {
       const ok = xhr.status >= 200 && xhr.status < 300;
       const raw = xhr.responseText || "";
-
       let json: any = null;
-      try {
-        json = JSON.parse(raw);
-      } catch {
-        json = null;
-      }
-
+      try { json = JSON.parse(raw); } catch { json = null; }
       if (!ok || !Array.isArray(json)) {
         setItems((prev) =>
           prev.map((it) =>
@@ -286,30 +311,22 @@ const SectionView: React.FC<SectionViewProps> = ({
         setIsUploading(false);
         return;
       }
-
       const byName = new Map<string, { url?: string; error?: boolean }>();
       json.forEach((r: any) => {
         if (r && typeof r === "object" && typeof r.name === "string") {
           byName.set(r.name, { url: r.url, error: !!r.error });
         }
       });
-
       setItems((prev) =>
         prev.map((it) => {
           if (!initial.some((i) => i.id === it.id)) return it;
           const safe = it.name.replace(/[^A-Za-z0-9._-]/g, "_");
           const r = byName.get(safe);
-
-          if (!r) {
-            return { ...it, status: "error", error: "File missing" };
-          }
-          if (r.error) {
-            return { ...it, status: "error", error: "Upload failed" };
-          }
+          if (!r) return { ...it, status: "error", error: "File missing" };
+          if (r.error) return { ...it, status: "error", error: "Upload failed" };
           return { ...it, status: "uploaded", progress: 100, url: r.url };
         })
       );
-
       setIsUploading(false);
     };
 
@@ -333,52 +350,34 @@ const SectionView: React.FC<SectionViewProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    const list = e.dataTransfer?.files;
-    const files = list && list.length ? Array.from(list) : [];
+    const files = e.dataTransfer?.files ? Array.from(e.dataTransfer.files) : [];
     if (files.length) uploadFiles(files);
   };
 
   const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = e.target?.files;
-    const files = list && list.length ? Array.from(list) : [];
+    const files = e.target?.files ? Array.from(e.target.files) : [];
     if (files.length) uploadFiles(files);
     if (e.currentTarget) e.currentTarget.value = "";
   };
 
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((it) => it.id !== id));
-  };
+  const removeItem = (id: string) => setItems((prev) => prev.filter((it) => it.id !== id));
+  const clearErrored = () => setItems((prev) => prev.filter((it) => it.status !== "error"));
+  const fileUrls = items.filter((it) => it.status === "uploaded" && it.url).map((it) => it.url!);
 
-  const clearErrored = () => {
-    setItems((prev) => prev.filter((it) => it.status !== "error"));
-  };
-
-  const fileUrls = items
-    .filter((it) => it.status === "uploaded" && it.url)
-    .map((it) => it.url!);
-
-  // ============================
-  // Submit Enquiry
-  // ============================
   const handleEnquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isUploading) return;
     setIsSending(true);
-
     const success = await sendProjectEnquiry({
       name: formData.name,
       email: formData.email,
       message: formData.message,
       fileUrls,
     });
-
     if (success) {
       setEnquiryStep(4);
-      setTimeout(() => {
-        setFormData({ name: "", email: "", message: "" });
-      }, 2000);
+      setTimeout(() => setFormData({ name: "", email: "", message: "" }), 2000);
     }
-
     setIsSending(false);
   };
 
@@ -391,7 +390,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         isTransitioning ? "opacity-0" : "opacity-100"
       } bg-transparent`}
     >
-      {/* ENQUIRY BACKGROUND */}
+      {/* Fondo para ENQUIRY */}
       {isEnquiry && (
         <div className="absolute inset-0 z-20 overflow-hidden">
           <img
@@ -421,8 +420,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           style={{
             transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
             transitionDuration: "1000ms",
-            transform:
-              stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
             transformOrigin: "left",
           }}
         >
@@ -431,38 +429,26 @@ const SectionView: React.FC<SectionViewProps> = ({
             <h2
               className={`text-9xl font-light tracking-tighter transition-all ${
                 isEnquiry ? "text-white" : "text-black"
-              } ${
-                showDB
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-20"
-              }`}
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
               style={{
-                fontSize:
-                  typeof window !== "undefined" && window.innerWidth >= 768
-                    ? "12rem"
-                    : "9rem",
+                fontSize: typeof window !== "undefined" && window.innerWidth >= 768 ? "12rem" : "9rem",
                 transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
                 transitionDuration: "1000ms",
               }}
             >
               DB
             </h2>
-
             <span
               className={`text-6xl md:text-8xl font-thin transition-all ${
                 isEnquiry ? "text-gray-300" : "text-gray-400"
-              } ${
-                showPlus
-                  ? "opacity-100 scale-100 rotate-0"
-                  : "opacity-0 scale-0 rotate-45"
-              }`}
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
               style={{ transitionDuration: "700ms" }}
             >
               +
             </span>
           </div>
 
-          {/* Section Names */}
+          {/* Nombre de la sección */}
           <div
             className="transition-all ease-out overflow-hidden flex-1"
             style={{
@@ -473,11 +459,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           >
             {isUrbanSection ? (
               <div className="flex flex-col items-start justify-center">
-                <span
-                  className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${
-                    isEnquiry ? "text-white" : "text-black"
-                  }`}
-                >
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
                   Masterplanning +
                 </span>
                 <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
@@ -486,11 +468,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             ) : isDesignSection ? (
               <div className="flex flex-col items-start justify-center">
-                <span
-                  className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${
-                    isEnquiry ? "text-white" : "text-black"
-                  }`}
-                >
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
                   Design
                 </span>
                 <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
@@ -498,18 +476,14 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </span>
               </div>
             ) : (
-              <span
-                className={`text-4xl md:text-6xl tracking-[0.15em] font-light block leading-none ${
-                  isEnquiry ? "text-white" : "text-black"
-                }`}
-              >
+              <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light block leading-none ${isEnquiry ? "text-white" : "text-black"}`}>
                 {isHomeSection ? "" : displayedCategory.name}
               </span>
             )}
           </div>
         </div>
 
-        {/* Section Description */}
+        {/* Descripción de la sección (excepto para ciertas secciones) */}
         {displayedCategory.description &&
           !isHomeSection &&
           !isDesignSection &&
@@ -527,10 +501,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               style={{
                 transitionDuration: "1000ms",
                 opacity: stage === "gallery" && showDesc ? 1 : 0,
-                transform:
-                  stage === "gallery" && showDesc
-                    ? "translateX(0)"
-                    : "translateX(-40px)",
+                transform: stage === "gallery" && showDesc ? "translateX(0)" : "translateX(-40px)",
               }}
             >
               {isUrbanSection ? (
@@ -540,37 +511,29 @@ const SectionView: React.FC<SectionViewProps> = ({
               ) : (
                 <div
                   className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line"
-                  dangerouslySetInnerHTML={{
-                    __html: displayedCategory.description,
-                  }}
+                  dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                 />
               )}
             </div>
           )}
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* CONTENIDO PRINCIPAL */}
       <div
         className={`h-full w-full overflow-y-auto custom-scroll px-10 pb-48 transition-opacity duration-1000 ${
-          stage === "gallery"
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
+          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{ paddingTop: "120px" }}
       >
         <div className="max-w-7xl mx-auto">
-
-          {/* ENQUIRY SECTION */}
           {isEnquiry ? (
+            // SECCIÓN ENQUIRY (formulario, uploader, etc.)
             <div className="max-w-7xl mx-auto relative z-[50]">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
-                  {/* Left Column - Contact Info */}
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
                     <h3 className="text-3xl md:text-4xl font-light leading-tight">
-                      Contact
-                      <br />
-                      Information
+                      Contact<br />Information
                     </h3>
                     <div className="mt-8 space-y-6 text-white/80">
                       <div>
@@ -587,8 +550,6 @@ const SectionView: React.FC<SectionViewProps> = ({
                       </div>
                     </div>
                   </aside>
-
-                  {/* Right Column - Form */}
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
                     <form onSubmit={handleEnquirySubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -607,7 +568,17 @@ const SectionView: React.FC<SectionViewProps> = ({
                       </div>
                       <div>
                         <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">Attachments</label>
-                        <div className={["rounded-xl border-2 border-dashed cursor-pointer", dragActive ? "border-red-500 bg-red-500/10" : "border-white/20 bg-neutral-700/40", "p-6 md:p-8 transition-colors"].join(" ")} onClick={() => !isSending && fileInputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }} onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }} onDrop={onDropFiles}>
+                        <div
+                          className={[
+                            "rounded-xl border-2 border-dashed cursor-pointer",
+                            dragActive ? "border-red-500 bg-red-500/10" : "border-white/20 bg-neutral-700/40",
+                            "p-6 md:p-8 transition-colors",
+                          ].join(" ")}
+                          onClick={() => !isSending && fileInputRef.current?.click()}
+                          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
+                          onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
+                          onDrop={onDropFiles}
+                        >
                           <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
                             <div className="p-3 rounded-full bg-white/10 border border-white/10"><Upload className="w-6 h-6 text-white/80" /></div>
                             <div className="text-sm"><span className="text-white">Drag &amp; drop files here</span> <span className="text-white/60">or</span> <span className="text-red-400 underline">click to browse</span></div>
@@ -621,7 +592,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                             {items.map((it) => (
                               <div key={it.id} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3">
                                 <div className="flex items-start gap-3">
-                                  <div className="mt-0.5">{it.status === "uploaded" ? <CheckCircle className="w-4 h-4 text-green-400" /> : it.status === "error" ? <AlertCircle className="w-4 h-4 text-red-400" /> : <FileIcon className="w-4 h-4 text-white/70" />}</div>
+                                  <div className="mt-0.5">
+                                    {it.status === "uploaded" ? <CheckCircle className="w-4 h-4 text-green-400" /> : it.status === "error" ? <AlertCircle className="w-4 h-4 text-red-400" /> : <FileIcon className="w-4 h-4 text-white/70" />}
+                                  </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2"><div className="text-sm text-white/90 truncate">{it.name}</div><div className="text-[11px] text-white/50">· {formatBytes(it.size)}</div></div>
                                     {it.status === "uploading" && (<div className="mt-2"><div className="w-full bg-white/10 rounded-full h-2 overflow-hidden"><div className="h-2 bg-red-500 transition-all" style={{ width: `${it.progress}%` }} /></div><div className="text-[11px] text-white/60 mt-1">{it.progress}%</div></div>)}
@@ -640,7 +613,12 @@ const SectionView: React.FC<SectionViewProps> = ({
                         <span className="text-xs font-bold tracking-[0.4em] uppercase">{isSending ? "Transmitting..." : isUploading ? "Uploading…" : "Submit to db+"}</span>
                         {isSending || isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
                       </button>
-                      {enquiryStep >= 4 && (<div className="py-16 flex flex-col items-center text-center space-y-6"><div className="p-5 bg-white rounded-full"><CheckCircle className="w-14 h-14 text-red-600" /></div><div><h4 className="text-2xl font-light text-white">Vision Received</h4><p className="text-white/70 mt-2 leading-tight max-w-md">Your project details and documents have been submitted to <span className="text-red-400">db@dbsdesigner.com</span>. We will review your vision and contact you shortly.</p></div></div>)}
+                      {enquiryStep >= 4 && (
+                        <div className="py-16 flex flex-col items-center text-center space-y-6">
+                          <div className="p-5 bg-white rounded-full"><CheckCircle className="w-14 h-14 text-red-600" /></div>
+                          <div><h4 className="text-2xl font-light text-white">Vision Received</h4><p className="text-white/70 mt-2 leading-tight max-w-md">Your project details and documents have been submitted to <span className="text-red-400">db@dbsdesigner.com</span>. We will review your vision and contact you shortly.</p></div>
+                        </div>
+                      )}
                     </form>
                   </section>
                 </div>
@@ -649,24 +627,65 @@ const SectionView: React.FC<SectionViewProps> = ({
           ) : isBehindDBSection ? (
             <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
-                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl"><div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} /></div>
-                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10"><img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" style={{ aspectRatio: typeof window !== "undefined" && window.innerWidth < 768 ? "1/1" : "unset" }} loading="lazy" /></div>
+                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                </div>
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10">
+                  <img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" style={{ aspectRatio: typeof window !== "undefined" && window.innerWidth < 768 ? "1/1" : "unset" }} loading="lazy" />
+                </div>
               </div>
             </div>
           ) : (
+            // SECCIONES NORMALES (con proyectos, etc.)
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
-                  {isArchitectureSection && (<div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}><div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl"><div>{/* architecture content */}</div></div></div>)}
-                  {isProjectJourney && (<div className="w-full"><Hero /></div>)}
+                  {isArchitectureSection && (
+                    <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
+                      <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                        <div>{/* contenido de Architecture */}</div>
+                      </div>
+                    </div>
+                  )}
+                  {isProjectJourney && (
+                    <ProjectJourneySlides
+                      onStartProject={() => {
+                        if (onNavigateToEnquiry) {
+                          onNavigateToEnquiry();
+                        } else {
+                          // Fallback: intentar encontrar el botón de navegación o sección Enquiry
+                          const enquiryNav = document.querySelector('[data-nav="Enquiry"]') as HTMLElement;
+                          if (enquiryNav) enquiryNav.click();
+                          else console.warn("No se pudo navegar a Enquiry: proporciona onNavigateToEnquiry");
+                        }
+                      }}
+                    />
+                  )}
                   <div className="text-white font-normal text-lg md:text-xl leading-tight" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-                {displayedCategory.projects.map((project) => (<ProjectCard key={project.id} project={project} onClick={onProjectClick} currentSectionName={currentSectionName} />))}
+                {displayedCategory.projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} onClick={onProjectClick} currentSectionName={currentSectionName} />
+                ))}
               </div>
-              {isDesignSection && (<div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto"><div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl"><div className="text-white leading-tight" dangerouslySetInnerHTML={{ __html: isoContent }} /></div><div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10"><img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png" alt="Design & Management Vision" className="w-full h-auto object-cover" loading="lazy" /></div></div>)}
-              {isUrbanSection && (<div className="mt-32 mb-16 max-w-5xl mx-auto"><div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10"><img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png" alt="Urban Masterplanning Drawing" className="w-full h-auto object-cover" loading="lazy" /></div></div>)}
+              {isDesignSection && (
+                <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto">
+                  <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                    <div className="text-white leading-tight" dangerouslySetInnerHTML={{ __html: isoContent }} />
+                  </div>
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                    <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png" alt="Design & Management Vision" className="w-full h-auto object-cover" loading="lazy" />
+                  </div>
+                </div>
+              )}
+              {isUrbanSection && (
+                <div className="mt-32 mb-16 max-w-5xl mx-auto">
+                  <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                    <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png" alt="Urban Masterplanning Drawing" className="w-full h-auto object-cover" loading="lazy" />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
