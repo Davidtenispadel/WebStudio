@@ -1,10 +1,12 @@
+import React from 'react';
+
 const Hero = () => {
   return (
-    <div className="w-full text-white">
-      <h1 className="text-4xl">Project Journey</h1>
-      <img src="/path/to/image.jpg" alt="Hero" className="w-full h-auto" />
-      <p>Some description...</p>
+    <div style={{ background: 'red', padding: '2rem', color: 'white', textAlign: 'center' }}>
+      <h1>HERO MINIMO FUNCIONA</h1>
+      <img src="https://via.placeholder.com/600x300" alt="test" style={{ width: '100%' }} />
     </div>
   );
 };
+
 export default Hero;
