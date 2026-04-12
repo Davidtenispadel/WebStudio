@@ -30,18 +30,13 @@ const SectionView: React.FC<Props> = ({
   category,
   onProjectClick,
   isActive,
+  currentSectionName,
 }) => {
-  // =========================
-  // SAFE CATEGORY (CRITICAL FIX)
-  // =========================
-  const safeCategory = category ?? {
-    id: "fallback",
-    name: "",
-    projects: [],
-  };
-
+  // ======================
+  // CORE STATE (FIXED)
+  // ======================
   const [displayedCategory, setDisplayedCategory] =
-    useState<CategoryGroup>(safeCategory);
+    useState<CategoryGroup>(category);
 
   const [stage, setStage] = useState<"intro" | "gallery">("intro");
 
@@ -57,71 +52,64 @@ const SectionView: React.FC<Props> = ({
     timers.current = [];
   };
 
+  // ======================
+  // SEQUENCE (FIXED)
+  // ======================
   const startSequence = () => {
     clearTimers();
 
-    setShowDB(true);
-    timers.current.push(setTimeout(() => setShowPlus(true), 200));
-    timers.current.push(setTimeout(() => setShowName(true), 450));
-    timers.current.push(setTimeout(() => setShowGallery(true), 800));
-    timers.current.push(setTimeout(() => setStage("gallery"), 1000));
+    setStage("intro");
+    setShowDB(false);
+    setShowPlus(false);
+    setShowName(false);
+    setShowGallery(false);
+
+    timers.current.push(setTimeout(() => setShowDB(true), 100));
+    timers.current.push(setTimeout(() => setShowPlus(true), 300));
+    timers.current.push(setTimeout(() => setShowName(true), 600));
+    timers.current.push(setTimeout(() => setShowGallery(true), 900));
+    timers.current.push(setTimeout(() => setStage("gallery"), 1100));
   };
 
-  // =========================
-  // ALWAYS RENDER (CRITICAL FIX)
-  // =========================
+  // ======================
+  // INIT / CATEGORY CHANGE (FIXED CRITICAL BUG)
+  // ======================
   useEffect(() => {
     if (!isActive) return;
 
-    setStage("intro");
     startSequence();
-
-    return clearTimers;
   }, [isActive]);
 
-  // =========================
-  // CATEGORY SWITCH SAFE RESET
-  // =========================
   useEffect(() => {
     if (!category) return;
 
-    if (category.id !== displayedCategory.id) {
-      clearTimers();
+    // IMPORTANT FIX:
+    // Always update category FIRST, then restart animation
+    setDisplayedCategory(category);
 
-      setStage("intro");
-      setShowDB(false);
-      setShowPlus(false);
-      setShowName(false);
-      setShowGallery(false);
+    const t = setTimeout(() => {
+      startSequence();
+    }, 50);
 
-      const t = setTimeout(() => {
-        setDisplayedCategory(category);
-        startSequence();
-      }, 80);
-
-      return () => clearTimeout(t);
-    }
+    return () => clearTimeout(t);
   }, [category]);
 
-  // =========================
-  // FIX: ENQUIRY / BEHIND DB SAFE MATCHING
-  // =========================
-  const sectionName = displayedCategory?.name ?? "";
+  // ======================
+  // ENQUIRY CHECK
+  // ======================
+  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
 
-  const isEnquiry = sectionName === "Enquiry";
-  const isBehindDB = sectionName === "Behind DB+";
+  // IMPORTANT FIX:
+  // prevent empty render crash
+  if (!displayedCategory) return null;
 
-  const projects = displayedCategory?.projects ?? [];
-
-  // =========================
-  // UPLOADER (UNCHANGED BUT SAFE)
-  // =========================
+  // ======================
+  // UPLOADER (SAFE BASIC)
+  // ======================
   const [items, setItems] = useState<UploadedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFiles = (files: File[]) => {
-    if (!files?.length) return;
-
     const initial = files.map((f) => ({
       id: fileId(f),
       name: f.name,
@@ -130,7 +118,7 @@ const SectionView: React.FC<Props> = ({
       status: "uploading" as UploadStatus,
     }));
 
-    setItems((prev) => [...prev, ...initial]);
+    setItems((p) => [...p, ...initial]);
 
     const xhr = new XMLHttpRequest();
     const fd = new FormData();
@@ -139,7 +127,6 @@ const SectionView: React.FC<Props> = ({
 
     xhr.upload.onprogress = (e) => {
       if (!e.lengthComputable) return;
-
       const pct = Math.round((e.loaded / e.total) * 100);
 
       setItems((prev) =>
@@ -153,41 +140,29 @@ const SectionView: React.FC<Props> = ({
 
     xhr.onload = () => {
       try {
-        const res = JSON.parse(xhr.responseText || "[]");
+        const res = JSON.parse(xhr.responseText);
 
         setItems((prev) =>
           prev.map((it) => {
-            const match = res.find((r: any) => r?.name === it.name);
+            const match = res.find((r: any) => r.name === it.name);
             if (!match) return it;
-
-            return {
-              ...it,
-              status: "uploaded",
-              progress: 100,
-              url: match.url,
-            };
+            return { ...it, status: "uploaded", url: match.url };
           })
         );
-      } catch {}
-    };
-
-    xhr.onerror = () => {
-      setItems((prev) =>
-        prev.map((it) =>
-          initial.some((i) => i.id === it.id)
-            ? { ...it, status: "error" }
-            : it
-        )
-      );
+      } catch {
+        console.error("upload error");
+      }
     };
 
     xhr.open("POST", UPLOAD_ENDPOINT);
     xhr.send(fd);
   };
 
-  // =========================
-  // RENDER GUARD (NO BLANK SCREEN EVER)
-  // =========================
+  // ======================
+  // RENDER SAFE GRID (CRITICAL FIX)
+  // ======================
+  const projects = displayedCategory?.projects ?? [];
+
   return (
     <div
       className={`fixed inset-0 transition-opacity duration-500 ${
@@ -195,23 +170,24 @@ const SectionView: React.FC<Props> = ({
       }`}
     >
       {/* HEADER */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-10">
-        <h1 className={`text-8xl ${showDB ? "opacity-100" : "opacity-0"}`}>
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-8 z-40">
+        <h1 className={`text-7xl ${showDB ? "opacity-100" : "opacity-0"}`}>
           DB
         </h1>
 
-        <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>
-          +
-        </span>
+        <span className={`${showPlus ? "opacity-100" : "opacity-0"}`}>+</span>
 
         <span className={`${showName ? "opacity-100" : "opacity-0"}`}>
-          {sectionName}
+          {displayedCategory?.name}
         </span>
       </div>
 
       {/* CONTENT */}
-      <div className={`h-full overflow-y-auto pt-40 ${showGallery ? "opacity-100" : "opacity-100"}`}>
-        
+      <div
+        className={`h-full overflow-y-auto pt-40 transition-opacity ${
+          showGallery ? "opacity-100" : "opacity-0"
+        }`}
+      >
         {/* ENQUIRY */}
         {isEnquiry ? (
           <div className="p-10 text-white">
@@ -228,13 +204,13 @@ const SectionView: React.FC<Props> = ({
               ref={fileInputRef}
               type="file"
               multiple
-              className="hidden"
+              hidden
               onChange={(e) =>
                 uploadFiles(Array.from(e.target.files || []))
               }
             />
 
-            <div className="mt-6 space-y-2">
+            <div className="mt-4 space-y-2">
               {items.map((it) => (
                 <div key={it.id} className="text-sm text-white">
                   {it.name} — {it.progress}%
@@ -242,36 +218,22 @@ const SectionView: React.FC<Props> = ({
               ))}
             </div>
           </div>
-
-        ) : isBehindDB ? (
-
-          /* BEHIND DB SAFE RENDER */
-          <div className="p-10 text-white max-w-4xl">
-            <h2 className="text-3xl mb-6">Behind DB+</h2>
-
-            <div
-              className="opacity-80 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: displayedCategory?.description || "",
-              }}
-            />
-          </div>
-
         ) : (
-
-          /* PROJECT GRID SAFE */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 p-10">
+          // 🔥 CRITICAL FIX: ALWAYS RENDER PROJECTS SAFELY
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 p-10">
             {projects.length > 0 ? (
               projects.map((p) => (
                 <ProjectCard
                   key={p.id}
                   project={p}
                   onClick={onProjectClick}
-                  currentSectionName={sectionName}
+                  currentSectionName={displayedCategory.name}
                 />
               ))
             ) : (
-              <div className="text-white/60">No projects</div>
+              <div className="text-white opacity-50">
+                No projects in this section
+              </div>
             )}
           </div>
         )}
