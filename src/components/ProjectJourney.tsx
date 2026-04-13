@@ -3,7 +3,7 @@ import { getScrollProgress } from "../utils/scrollEngine";
 import { splitIntoLines } from "../utils/textEngine";
 
 interface ProjectJourneyProps {
-  onNavigateToEnquiry?: () => void; // Función opcional para navegar a Enquiry
+  onNavigateToEnquiry?: () => void;
 }
 
 const slides = [
@@ -46,16 +46,15 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
     if (onNavigateToEnquiry) {
       onNavigateToEnquiry();
     } else {
-      // Fallback: buscar el elemento del menú "Enquiry" y hacer clic
-      const enquiryNav = document.querySelector('nav a, [data-nav]') as HTMLElement;
-      if (enquiryNav?.textContent?.trim() === "Enquiry") {
-        enquiryNav.click();
+      // Fallback: buscar un elemento con id "enquiry" o el menú
+      const enquirySection = document.getElementById("enquiry");
+      if (enquirySection) {
+        enquirySection.scrollIntoView({ behavior: "smooth" });
       } else {
-        // O intentar desplazar a un elemento con id "enquiry"
-        const enquirySection = document.getElementById("enquiry");
-        if (enquirySection) {
-          enquirySection.scrollIntoView({ behavior: "smooth" });
-        }
+        const enquiryNav = Array.from(document.querySelectorAll('button, a')).find(
+          (el) => el.textContent?.trim() === "Enquiry"
+        ) as HTMLElement;
+        if (enquiryNav) enquiryNav.click();
       }
     }
   };
@@ -65,14 +64,13 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
       {slides.map((slide, i) => (
         <section
           key={i}
-          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col justify-start items-center"
+          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col justify-start"
           style={{ backgroundImage: `url(${slide.image})` }}
         >
-          {/* Capa semitransparente para legibilidad */}
           <div className="absolute inset-0 bg-black/30"></div>
 
-          {/* Contenedor del texto: arriba, centrado horizontalmente, con espacio superior */}
-          <div className="relative z-10 w-full max-w-4xl pt-24 md:pt-32 lg:pt-40 px-6 md:px-12 text-center">
+          {/* Contenedor del texto: centrado horizontalmente, con espacio arriba */}
+          <div className="relative z-10 w-full max-w-4xl mx-auto pt-24 md:pt-32 lg:pt-40 px-6 md:px-12 text-center">
             {slide.line1 ? (
               <>
                 <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
@@ -92,7 +90,7 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
               </div>
             )}
             {slide.isLast && (
-              <div className="mt-12 flex justify-center">
+              <div className="mt-12">
                 <button
                   onClick={handleStartProject}
                   className="inline-block bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
