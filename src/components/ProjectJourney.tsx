@@ -5,10 +5,9 @@ import { splitIntoLines } from "../utils/textEngine";
 const slides = [
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-    // Dividimos el texto en dos líneas
     line1: "Architecture begins with you.",
     line2: "Not drawings. Not plans. With your life, your needs, your history.",
-    // Sin botón en este slide
+    // sin botón en este slide
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
@@ -22,7 +21,7 @@ const slides = [
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
     text: "Your ideal project begins here. Stop overthinking. Start imagining with us.",
     isLast: true,
-  }
+  },
 ];
 
 export default function ProjectJourney() {
@@ -40,48 +39,65 @@ export default function ProjectJourney() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const scrollToEnquiry = () => {
+    const enquirySection = document.getElementById("enquiry");
+    if (enquirySection) {
+      enquirySection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // fallback: buscar el elemento del menú "Enquiry" y hacer clic
+      const enquiryNavItem = Array.from(document.querySelectorAll('nav a, [data-nav]')).find(
+        (el) => el.textContent?.trim() === "Enquiry"
+      ) as HTMLElement;
+      if (enquiryNavItem) enquiryNavItem.click();
+    }
+  };
+
   return (
     <div ref={containerRef} className="relative w-full h-full overflow-y-auto snap-y snap-mandatory">
       {slides.map((slide, i) => (
         <section
           key={i}
-          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col justify-start items-start"
+          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col"
           style={{ backgroundImage: `url(${slide.image})` }}
         >
-          {/* Capa semitransparente para mejorar legibilidad del texto */}
+          {/* Capa oscura para legibilidad */}
           <div className="absolute inset-0 bg-black/30"></div>
 
-          {/* Contenedor del texto: arriba, izquierda, con espacio superior */}
-          <div className="relative z-10 w-full max-w-4xl pt-24 md:pt-32 lg:pt-40 px-6 md:px-12 text-left">
-            {slide.line1 ? (
-              <>
-                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
-                  {slide.line1}
-                </p>
-                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight mt-4">
-                  {slide.line2}
-                </p>
-              </>
-            ) : (
-              <div className="space-y-2">
-                {splitIntoLines(slide.text).map((line, idx) => (
-                  <p key={idx} className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
-                    {line}
+          {/* Contenedor del texto: arriba a la izquierda */}
+          <div className="relative z-10 flex-1 flex flex-col justify-start pt-24 md:pt-32 lg:pt-40 px-6 md:px-12">
+            <div className="max-w-4xl text-left">
+              {slide.line1 ? (
+                <>
+                  <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                    {slide.line1}
                   </p>
-                ))}
-              </div>
-            )}
-            {slide.isLast && (
-              <div className="mt-12">
-                <a
-                  href="#enquiry"
-                  className="inline-block bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
-                >
-                  Start your project
-                </a>
-              </div>
-            )}
+                  <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight mt-4">
+                    {slide.line2}
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  {splitIntoLines(slide.text).map((line, idx) => (
+                    <p key={idx} className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Botón centrado en la parte inferior (solo último slide) */}
+          {slide.isLast && (
+            <div className="relative z-10 w-full pb-20 flex justify-center">
+              <button
+                onClick={scrollToEnquiry}
+                className="bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+              >
+                Start your Project
+              </button>
+            </div>
+          )}
         </section>
       ))}
     </div>
