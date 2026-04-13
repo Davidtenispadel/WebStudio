@@ -1,7 +1,7 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Project Journey:
- * - Franja blanca superior para texto negro.
- * - Imagen panorámica a ancho completo debajo.
+ * - Franja blanca superior para texto negro (ya no se usa, ahora el texto va debajo de la imagen)
+ * - Imagen panorámica a ancho completo arriba, texto debajo pegado.
  * - Scroll snapping vertical.
  * - Botón "Start your Project" que navega a Enquiry.
  */
@@ -28,7 +28,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (franja blanca + imagen panorámica)
+// COMPONENTE PROJECT JOURNEY SLIDES (imagen arriba + texto abajo pegado)
 // ============================
 interface ProjectJourneySlidesProps {
   onStartProject: () => void;
@@ -39,12 +39,14 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 1,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-      text: "Architecture begins with you: not with drawings, not with plans. With your life, your needs, your history. Start your project.",
+      // Dividimos el texto en dos líneas
+      line1: "Architecture begins with you:",
+      line2: "not with drawings, not with plans. With your life, your needs, your history. Start your project.",
     },
     {
       id: 2,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
-      text: "You need a space that meets your needs  You’ve gathered ideas and inspiration, but it still doesn’t fit  That doubt marks the moment to design something unmistakably yours",
+      text: "You need a space that meets your needs. You’ve gathered ideas and inspiration, but it still doesn’t fit. That doubt marks the moment to design something unmistakably yours",
     },
     {
       id: 3,
@@ -54,7 +56,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 4,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
-      text: "Your ideal project starts here. Stop overthinking. Start imagining with us. Tell us what you need, what you love, how you live,  and we’ll shape a space that feels right from day one.",
+      text: "Your ideal project starts here. Stop overthinking. Start imagining with us. Tell us what you need, what you love, how you live, and we’ll shape a space that feels right from day one.",
       isLast: true,
     },
   ];
@@ -64,36 +66,49 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
       {slides.map((slide) => (
         <section
           key={slide.id}
-          className="relative w-full h-screen snap-start flex flex-col"
+          className="relative w-full h-screen snap-start flex flex-col justify-end"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Franja blanca superior (40% altura) para el texto */}
-          <div className="flex-1 bg-white flex items-center justify-center px-6 md:px-12">
-            <div className="max-w-3xl text-center">
-              <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
-                {slide.text}
-              </p>
-              {slide.isLast && (
-                <div className="mt-12">
-                  <button
-                    onClick={onStartProject}
-                    className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
-                  >
-                    Start your Project
-                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Espacio flexible superior (empuja el contenido hacia abajo) */}
+          <div className="flex-1"></div>
 
-          {/* Imagen panorámica (60% altura restante) */}
+          {/* Imagen panorámica (ocupará la mayor parte del espacio restante) */}
           <div className="h-[60vh] w-full overflow-hidden">
             <img
               src={slide.image}
               alt={`Journey ${slide.id}`}
               className="w-full h-full object-cover"
             />
+          </div>
+
+          {/* Texto pegado justo debajo de la imagen */}
+          <div className="bg-white py-8 px-6 text-center">
+            {slide.id === 1 ? (
+              // Primer slide: dos líneas separadas
+              <>
+                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+                  {slide.line1}
+                </p>
+                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide mt-2">
+                  {slide.line2}
+                </p>
+              </>
+            ) : (
+              <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+                {slide.text}
+              </p>
+            )}
+            {slide.isLast && (
+              <div className="mt-12">
+                <button
+                  onClick={onStartProject}
+                  className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                >
+                  Start your Project
+                  <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+            )}
           </div>
         </section>
       ))}
@@ -357,20 +372,16 @@ const SectionView: React.FC<SectionViewProps> = ({
     setIsSending(false);
   };
 
-  // Función para navegar a Enquiry (con fallback)
+  // Función para navegar a Enquiry
   const navigateToEnquiry = () => {
     if (onNavigateToEnquiry) {
       onNavigateToEnquiry();
     } else {
-      // Fallback: intentar encontrar el elemento del menú "Enquiry" y hacer clic
       const enquiryNavItem = Array.from(document.querySelectorAll('nav a, [data-nav]')).find(
         (el) => el.textContent?.trim() === "Enquiry"
       ) as HTMLElement;
-      if (enquiryNavItem) {
-        enquiryNavItem.click();
-      } else {
-        console.warn("No se pudo navegar a Enquiry: proporciona onNavigateToEnquiry al SectionView");
-      }
+      if (enquiryNavItem) enquiryNavItem.click();
+      else console.warn("No se pudo navegar a Enquiry");
     }
   };
 
