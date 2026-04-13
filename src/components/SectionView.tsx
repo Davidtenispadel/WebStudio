@@ -49,12 +49,12 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 3,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
-      text: "Doubt is not a problem — it's the beginning. Great architecture doesn't start with answers. It starts with the right questions. Your routines, your taste, your ambitions, your way of living. We listen, we translate, we shape a concept that feels unmistakably yours.",
+      text: "Doubt is not an obstacle; it marks the beginning. Great architecture does not arise from ready answers but from asking the right questions about your routines, tastes, ambitions and way of living",
     },
     {
       id: 4,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
-      text: "Your ideal project begins here. Stop overthinking, start imagining with us. Tell us what you need, what you love, how you live. We'll turn it into a space that feels right from day one.",
+      text: "Your ideal project starts here. Stop overthinking. Start imagining with us. Tell us what you need, what you love, how you live,  and we’ll shape a space that feels right from day one.",
       isLast: true,
     },
   ];
