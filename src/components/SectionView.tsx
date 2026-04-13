@@ -39,7 +39,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 1,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-      text: "Architecture begins with you — not with drawings, not with plans. With your life, your needs, your history. Start your project.",
+      text: "Architecture begins with you: not with drawings, not with plans. With your life, your needs, your history. Start your project.",
     },
     {
       id: 2,
