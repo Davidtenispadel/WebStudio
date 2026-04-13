@@ -1,9 +1,8 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Project Journey:
- * - Franja blanca superior para texto negro (ya no se usa, ahora el texto va debajo de la imagen)
- * - Imagen panorámica a ancho completo arriba, texto debajo pegado.
- * - Scroll snapping vertical.
- * - Botón "Start your Project" que navega a Enquiry.
+ * - Imagen arriba, texto debajo pegado.
+ * - Texto más ancho (poco padding lateral) para reducir saltos de línea.
+ * - Botón "Start your Project" solo en la última diapositiva.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -28,7 +27,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (imagen arriba + texto abajo pegado)
+// COMPONENTE PROJECT JOURNEY SLIDES (imagen arriba + texto abajo muy pegado y ancho)
 // ============================
 interface ProjectJourneySlidesProps {
   onStartProject: () => void;
@@ -39,9 +38,9 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 1,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-      // Dividimos el texto en dos líneas
       line1: "Architecture begins with you:",
-      line2: "not with drawings, not with plans. With your life, your needs, your history. Start your project.",
+      line2: "not with drawings, not with plans. With your life, your needs, your history.",
+      // Nota: no hay botón en este slide
     },
     {
       id: 2,
@@ -72,7 +71,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
           {/* Espacio flexible superior (empuja el contenido hacia abajo) */}
           <div className="flex-1"></div>
 
-          {/* Imagen panorámica (ocupará la mayor parte del espacio restante) */}
+          {/* Imagen panorámica */}
           <div className="h-[60vh] w-full overflow-hidden">
             <img
               src={slide.image}
@@ -81,15 +80,15 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
             />
           </div>
 
-          {/* Texto pegado justo debajo de la imagen */}
-          <div className="bg-white py-8 px-6 text-center">
+          {/* Texto pegado justo debajo de la imagen, con muy poco padding lateral y vertical reducido */}
+          <div className="bg-white py-4 px-2 sm:px-4 text-center">
             {slide.id === 1 ? (
               // Primer slide: dos líneas separadas
               <>
                 <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
                   {slide.line1}
                 </p>
-                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide mt-2">
+                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide mt-1">
                   {slide.line2}
                 </p>
               </>
@@ -99,7 +98,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
               </p>
             )}
             {slide.isLast && (
-              <div className="mt-12">
+              <div className="mt-8">
                 <button
                   onClick={onStartProject}
                   className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
@@ -117,7 +116,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
 };
 
 // ============================
-// TIPOS Y CONSTANTES (sin cambios relevantes)
+// TIPOS Y CONSTANTES (sin cambios)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -135,7 +134,7 @@ interface SectionViewProps {
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
-  onNavigateToEnquiry?: () => void; // Función para cambiar a la sección Enquiry
+  onNavigateToEnquiry?: () => void;
 }
 
 const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
@@ -372,7 +371,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     setIsSending(false);
   };
 
-  // Función para navegar a Enquiry
   const navigateToEnquiry = () => {
     if (onNavigateToEnquiry) {
       onNavigateToEnquiry();
@@ -531,7 +529,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
-              {/* FORMULARIO ENQUIRY (completo, igual que antes) */}
+              {/* FORMULARIO ENQUIRY (completo) */}
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
