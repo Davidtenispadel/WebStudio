@@ -44,7 +44,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
     {
       id: 2,
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
-      text: "You're searching for the right space. A new home, an extension, a workspace that finally feels right. You've collected ideas, references, screenshots... But the more you look, the more doubts appear. Is it the right style? Will it fit my life? How will it feel to live or work there?",
+      text: "You need a space that meets your needs  You’ve gathered ideas and inspiration, but it still doesn’t fit  That doubt marks the moment to design something unmistakably yours",
     },
     {
       id: 3,
