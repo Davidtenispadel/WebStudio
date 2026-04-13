@@ -1,8 +1,8 @@
 /*
- * SECTIONVIEW.TSX — Versión final con Project Journey:
- * - Texto arriba (blanco, alineado a la izquierda, con espacio superior).
- * - Imagen debajo (ocupa el resto).
- * - Botón "Start your Project" solo en la última diapositiva.
+ * SECTIONVIEW.TSX — Versión final con Project Journey
+ * - Project Journey usa componente externo con botón centrado y navegación a Enquiry
+ * - Enquiry: formulario funcional con subida de archivos a upload.php
+ * - Resto de secciones sin cambios
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -25,97 +25,10 @@ import {
 } from "../constants";
 
 import { sendProjectEnquiry } from "../services/emailService";
+import ProjectJourney from "./ProjectJourney"; // ✅ Importamos el componente ProjectJourney
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (texto arriba, imagen abajo)
-// ============================
-interface ProjectJourneySlidesProps {
-  onStartProject: () => void;
-}
-
-const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProject }) => {
-  const slides = [
-    {
-      id: 1,
-      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-      line1: "Architecture begins with you:",
-      line2: "not with drawings, not with plans. With your life, your needs, your history.",
-      // Sin botón en este slide
-    },
-    {
-      id: 2,
-      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
-      text: "You need a space that meets your needs. You’ve gathered ideas and inspiration, but it still doesn’t fit. That doubt marks the moment to design something unmistakably yours",
-    },
-    {
-      id: 3,
-      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
-      text: "Doubt is not an obstacle; it marks the beginning. Great architecture does not arise from ready answers but from asking the right questions about your routines, tastes, ambitions and way of living",
-    },
-    {
-      id: 4,
-      image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
-      text: "Your ideal project starts here. Stop overthinking. Start imagining with us. Tell us what you need, what you love, how you live, and we’ll shape a space that feels right from day one.",
-      isLast: true,
-    },
-  ];
-
-  return (
-    <div className="relative w-full h-full">
-      {slides.map((slide) => (
-        <section
-          key={slide.id}
-          className="relative w-full h-screen snap-start flex flex-col"
-          style={{ scrollSnapAlign: "start" }}
-        >
-          {/* Espacio superior (para separar del borde) */}
-          <div className="pt-16 md:pt-24 lg:pt-32"></div>
-
-          {/* Contenedor del texto: fondo blanco, alineado a la izquierda, con padding horizontal reducido */}
-          <div className="bg-white py-8 px-4 md:px-8 text-left">
-            {slide.id === 1 ? (
-              <>
-                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide">
-                  {slide.line1}
-                </p>
-                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide mt-2">
-                  {slide.line2}
-                </p>
-              </>
-            ) : (
-              <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide">
-                {slide.text}
-              </p>
-            )}
-            {slide.isLast && (
-              <div className="mt-10">
-                <button
-                  onClick={onStartProject}
-                  className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
-                >
-                  Start your Project
-                  <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Imagen debajo, ocupando el resto del espacio disponible */}
-          <div className="flex-1 w-full overflow-hidden">
-            <img
-              src={slide.image}
-              alt={`Journey ${slide.id}`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </section>
-      ))}
-    </div>
-  );
-};
-
-// ============================
-// TIPOS Y CONSTANTES (sin cambios)
+// TIPOS Y CONSTANTES
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -133,7 +46,7 @@ interface SectionViewProps {
   onProjectClick: (project: Project) => void;
   isActive: boolean;
   currentSectionName: string;
-  onNavigateToEnquiry?: () => void;
+  onNavigateToEnquiry?: () => void; // Función para navegar a Enquiry
 }
 
 const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
@@ -370,15 +283,22 @@ const SectionView: React.FC<SectionViewProps> = ({
     setIsSending(false);
   };
 
+  // Función para navegar a Enquiry (se pasa al componente ProjectJourney)
   const navigateToEnquiry = () => {
     if (onNavigateToEnquiry) {
       onNavigateToEnquiry();
     } else {
-      const enquiryNavItem = Array.from(document.querySelectorAll('nav a, [data-nav]')).find(
-        (el) => el.textContent?.trim() === "Enquiry"
-      ) as HTMLElement;
-      if (enquiryNavItem) enquiryNavItem.click();
-      else console.warn("No se pudo navegar a Enquiry");
+      // Fallback: buscar elemento con id "enquiry" o el botón del menú
+      const enquirySection = document.getElementById("enquiry");
+      if (enquirySection) {
+        enquirySection.scrollIntoView({ behavior: "smooth" });
+      } else {
+        const enquiryNav = Array.from(document.querySelectorAll('nav button, a')).find(
+          (el) => el.textContent?.trim() === "Enquiry"
+        ) as HTMLElement;
+        if (enquiryNav) enquiryNav.click();
+        else console.warn("No se pudo navegar a Enquiry");
+      }
     }
   };
 
@@ -528,7 +448,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
-              {/* FORMULARIO ENQUIRY (completo) */}
+              {/* FORMULARIO ENQUIRY COMPLETO */}
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
@@ -615,7 +535,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     </div>
                   )}
                   {isProjectJourney && (
-                    <ProjectJourneySlides onStartProject={navigateToEnquiry} />
+                    <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
                   {!isProjectJourney && (
                     <div className="text-white font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
