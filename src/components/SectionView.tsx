@@ -1,7 +1,7 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Project Journey:
- * - Imagen arriba, texto debajo pegado.
- * - Texto más ancho (poco padding lateral) para reducir saltos de línea.
+ * - Texto arriba (blanco, alineado a la izquierda, con espacio superior).
+ * - Imagen debajo (ocupa el resto).
  * - Botón "Start your Project" solo en la última diapositiva.
  */
 
@@ -27,7 +27,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 
 // ============================
-// COMPONENTE PROJECT JOURNEY SLIDES (imagen arriba + texto abajo muy pegado y ancho)
+// COMPONENTE PROJECT JOURNEY SLIDES (texto arriba, imagen abajo)
 // ============================
 interface ProjectJourneySlidesProps {
   onStartProject: () => void;
@@ -40,7 +40,7 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
       image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
       line1: "Architecture begins with you:",
       line2: "not with drawings, not with plans. With your life, your needs, your history.",
-      // Nota: no hay botón en este slide
+      // Sin botón en este slide
     },
     {
       id: 2,
@@ -65,40 +65,30 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
       {slides.map((slide) => (
         <section
           key={slide.id}
-          className="relative w-full h-screen snap-start flex flex-col justify-end"
+          className="relative w-full h-screen snap-start flex flex-col"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Espacio flexible superior (empuja el contenido hacia abajo) */}
-          <div className="flex-1"></div>
+          {/* Espacio superior (para separar del borde) */}
+          <div className="pt-16 md:pt-24 lg:pt-32"></div>
 
-          {/* Imagen panorámica */}
-          <div className="h-[60vh] w-full overflow-hidden">
-            <img
-              src={slide.image}
-              alt={`Journey ${slide.id}`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Texto pegado justo debajo de la imagen, con muy poco padding lateral y vertical reducido */}
-          <div className="bg-white py-4 px-2 sm:px-4 text-center">
+          {/* Contenedor del texto: fondo blanco, alineado a la izquierda, con padding horizontal reducido */}
+          <div className="bg-white py-8 px-4 md:px-8 text-left">
             {slide.id === 1 ? (
-              // Primer slide: dos líneas separadas
               <>
-                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide">
                   {slide.line1}
                 </p>
-                <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide mt-1">
+                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide mt-2">
                   {slide.line2}
                 </p>
               </>
             ) : (
-              <p className="text-black text-xl md:text-2xl lg:text-3xl font-light leading-relaxed tracking-wide">
+              <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight tracking-wide">
                 {slide.text}
               </p>
             )}
             {slide.isLast && (
-              <div className="mt-8">
+              <div className="mt-10">
                 <button
                   onClick={onStartProject}
                   className="group inline-flex items-center gap-3 bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
@@ -108,6 +98,15 @@ const ProjectJourneySlides: React.FC<ProjectJourneySlidesProps> = ({ onStartProj
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Imagen debajo, ocupando el resto del espacio disponible */}
+          <div className="flex-1 w-full overflow-hidden">
+            <img
+              src={slide.image}
+              alt={`Journey ${slide.id}`}
+              className="w-full h-full object-cover"
+            />
           </div>
         </section>
       ))}
