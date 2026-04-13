@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { getScrollProgress } from "../utils/scrollEngine";
 import { splitIntoLines } from "../utils/textEngine";
 
+interface ProjectJourneyProps {
+  onNavigateToEnquiry?: () => void; // Función opcional para navegar a Enquiry
+}
+
 const slides = [
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
     line1: "Architecture begins with you.",
     line2: "Not drawings. Not plans. With your life, your needs, your history.",
-    // sin botón en este slide
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
@@ -21,10 +24,10 @@ const slides = [
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
     text: "Your ideal project begins here. Stop overthinking. Start imagining with us.",
     isLast: true,
-  },
+  }
 ];
 
-export default function ProjectJourney() {
+export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
 
@@ -39,16 +42,21 @@ export default function ProjectJourney() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollToEnquiry = () => {
-    const enquirySection = document.getElementById("enquiry");
-    if (enquirySection) {
-      enquirySection.scrollIntoView({ behavior: "smooth" });
+  const handleStartProject = () => {
+    if (onNavigateToEnquiry) {
+      onNavigateToEnquiry();
     } else {
-      // fallback: buscar el elemento del menú "Enquiry" y hacer clic
-      const enquiryNavItem = Array.from(document.querySelectorAll('nav a, [data-nav]')).find(
-        (el) => el.textContent?.trim() === "Enquiry"
-      ) as HTMLElement;
-      if (enquiryNavItem) enquiryNavItem.click();
+      // Fallback: buscar el elemento del menú "Enquiry" y hacer clic
+      const enquiryNav = document.querySelector('nav a, [data-nav]') as HTMLElement;
+      if (enquiryNav?.textContent?.trim() === "Enquiry") {
+        enquiryNav.click();
+      } else {
+        // O intentar desplazar a un elemento con id "enquiry"
+        const enquirySection = document.getElementById("enquiry");
+        if (enquirySection) {
+          enquirySection.scrollIntoView({ behavior: "smooth" });
+        }
+      }
     }
   };
 
@@ -57,47 +65,43 @@ export default function ProjectJourney() {
       {slides.map((slide, i) => (
         <section
           key={i}
-          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col"
+          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col justify-start items-center"
           style={{ backgroundImage: `url(${slide.image})` }}
         >
-          {/* Capa oscura para legibilidad */}
+          {/* Capa semitransparente para legibilidad */}
           <div className="absolute inset-0 bg-black/30"></div>
 
-          {/* Contenedor del texto: arriba a la izquierda */}
-          <div className="relative z-10 flex-1 flex flex-col justify-start pt-24 md:pt-32 lg:pt-40 px-6 md:px-12">
-            <div className="max-w-4xl text-left">
-              {slide.line1 ? (
-                <>
-                  <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
-                    {slide.line1}
+          {/* Contenedor del texto: arriba, centrado horizontalmente, con espacio superior */}
+          <div className="relative z-10 w-full max-w-4xl pt-24 md:pt-32 lg:pt-40 px-6 md:px-12 text-center">
+            {slide.line1 ? (
+              <>
+                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                  {slide.line1}
+                </p>
+                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight mt-4">
+                  {slide.line2}
+                </p>
+              </>
+            ) : (
+              <div className="space-y-2">
+                {splitIntoLines(slide.text).map((line, idx) => (
+                  <p key={idx} className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                    {line}
                   </p>
-                  <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight mt-4">
-                    {slide.line2}
-                  </p>
-                </>
-              ) : (
-                <div className="space-y-2">
-                  {splitIntoLines(slide.text).map((line, idx) => (
-                    <p key={idx} className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+            {slide.isLast && (
+              <div className="mt-12 flex justify-center">
+                <button
+                  onClick={handleStartProject}
+                  className="inline-block bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                >
+                  Start your project
+                </button>
+              </div>
+            )}
           </div>
-
-          {/* Botón centrado en la parte inferior (solo último slide) */}
-          {slide.isLast && (
-            <div className="relative z-10 w-full pb-20 flex justify-center">
-              <button
-                onClick={scrollToEnquiry}
-                className="bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
-              >
-                Start your Project
-              </button>
-            </div>
-          )}
         </section>
       ))}
     </div>
