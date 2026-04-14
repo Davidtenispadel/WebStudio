@@ -159,7 +159,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768729189/120_Plurifamiliar_house_p44qfg.png',
         category: StudioSection.ARCHITECTURE,
-        description: 'A residential apartment block designed to optimize urban density and provide modern, functional living spaces.',
+        description: 'City living, thoughtfully designed. This apartment block balances density with comfort, creating homes that feel spacious, work beautifully, and fit their urban context..',
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768731448/120_Plurifamiliar_house_2_ur0hav.png']
       },
       {
@@ -169,7 +169,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769428801/Polcie_Station_o79qbe.png',
         category: StudioSection.ARCHITECTURE,
-        description: 'A contemporary security facility that integrates a vibrant civic presence with functional rigour, characterised by its iconic red facade elements and precise spatial organisation.',
+        description: 'Security with civic pride. A contemporary police station that opens up to the community – defined by its iconic red facade, precise spatial layout, and a design that feels both authoritative and welcoming',
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768642740/Police_Station_4_s0qdrs.png']
       },
       {
@@ -179,7 +179,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769242331/Enhance_the_realism_bsvkpa.png',
         category: StudioSection.ARCHITECTURE,
-        description: 'A modern, multifunctional building with flexible spaces that can adapt to different group sizes and a wide range of activities, designed with good acoustic performance and equipped with the essential services to support community use.',
+        description: 'A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise',
         useAiInsight: false,
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png']
       },
@@ -190,7 +190,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768726361/Edif_Edimar_1_tzg8su.png',
         category: StudioSection.ARCHITECTURE,
-        description: 'A modern office building that stands out for its functional design and spatial efficiency, integrating contemporary workspaces with a distinctive urban presence.',
+        description: 'A modern office building defined by functional design and spatial efficiency - integrating contemporary workspaces with a distinctive urban presence.',
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768726518/Edificio_EDIMAR_45_cooijm.jpg']
       },
       {
@@ -200,7 +200,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768676962/08-07-31_14_vypbmt.jpg',
         category: StudioSection.ARCHITECTURE,
-        description: 'Design for a vibrant nursery, creating nurturing and stimulating environments for early childhood development with a focus on natural light and adaptable spaces.',
+        description: 'A place to grow, play, and discover. This vibrant nursery is built around natural light and adaptable spaces - creating a nurturing environment where early development happens naturally.',
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768724382/Interior_int2_j7x72k.png']
       }
     ]
