@@ -1,6 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { getScrollProgress } from "../utils/scrollEngine";
-import { splitIntoLines } from "../utils/textEngine";
+import React from "react";
 
 interface ProjectJourneyProps {
   onNavigateToEnquiry: () => void;
@@ -28,31 +26,13 @@ const slides = [
 ];
 
 export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (!containerRef.current) return;
-      const progress = getScrollProgress(containerRef.current);
-      const index = Math.min(slides.length - 1, Math.floor(progress * slides.length));
-      setActive(index);
-    };
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-full overflow-y-auto snap-y snap-mandatory scroll-smooth"
-      style={{ scrollSnapType: "y mandatory", scrollBehavior: "smooth" }}
-    >
+    <>
       {slides.map((slide, i) => (
         <section
           key={i}
           className="relative w-full h-screen snap-start flex flex-col justify-between"
-          style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
+          style={{ scrollSnapAlign: "start" }}
         >
           {/* Bloque blanco para el texto */}
           <div className="bg-white px-6 md:px-10 pt-28 md:pt-36 pb-2 md:pb-4 text-left">
@@ -67,11 +47,9 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
               </>
             ) : (
               <div className="space-y-3">
-                {splitIntoLines(slide.text).map((line, idx) => (
-                  <p key={idx} className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
-                    {line}
-                  </p>
-                ))}
+                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
+                  {slide.text}
+                </p>
               </div>
             )}
             {slide.isLast && (
@@ -86,7 +64,7 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Imagen más alta (55vh) y pegada al borde inferior */}
+          {/* Imagen pegada al borde inferior */}
           <div className="h-[55vh] w-full overflow-hidden">
             <img
               src={slide.image}
@@ -96,6 +74,6 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
           </div>
         </section>
       ))}
-    </div>
+    </>
   );
 }
