@@ -436,7 +436,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{
-          scrollSnapType: isProjectJourney ? "y mandatory" : "auto",
+          scrollSnapType: "y mandatory",
           scrollBehavior: "smooth",
         }}
       >
