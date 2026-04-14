@@ -85,8 +85,8 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Imagen con altura fija (40% del viewport) para dar más espacio al texto */}
-          <div className="h-[40vh] w-full overflow-hidden">
+          {/* Imagen con altura fija (45% del viewport) para dar más espacio al texto */}
+          <div className="h-[45vh] w-full overflow-hidden">
             <img
               src={slide.image}
               alt={`Journey ${i + 1}`}
