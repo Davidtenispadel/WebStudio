@@ -1,4 +1,3 @@
-// src/components/ProjectJourney.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { getScrollProgress } from "../utils/scrollEngine";
 import { splitIntoLines } from "../utils/textEngine";
@@ -44,15 +43,18 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-y-auto snap-y snap-mandatory">
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-y-auto snap-y snap-mandatory scroll-smooth"
+    >
       {slides.map((slide, i) => (
         <section
           key={i}
           className="relative w-full h-screen snap-start flex flex-col"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Bloque blanco para el texto (se adapta al contenido) */}
-          <div className="bg-white px-4 md:px-8 py-12 md:py-16 text-left">
+          {/* Bloque blanco para el texto, con padding superior suficiente para evitar el menú fijo */}
+          <div className="bg-white px-6 md:px-10 pt-24 md:pt-32 pb-12 md:pb-16 text-left">
             {slide.line1 ? (
               <>
                 <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
@@ -83,7 +85,7 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Bloque de imagen (ocupa el resto del espacio) */}
+          {/* Imagen debajo, ocupando el resto del espacio */}
           <div className="flex-1 w-full overflow-hidden">
             <img
               src={slide.image}
