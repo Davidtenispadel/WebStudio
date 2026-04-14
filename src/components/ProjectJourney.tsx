@@ -7,20 +7,20 @@ interface ProjectJourneyProps {
 const slides = [
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
-    line1: "Architecture begins with you.",
-    line2: "Not drawings. Not plans. With your life, your needs, your history.",
+    line1: "Architecture begins with you!",
+    line2: "No drawings, No plans, just your life, your needs, your history!",
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
-    text: "You're searching for the right space. A new home, an extension, a workspace that feels right. Doubts appear. We help you clarify.",
+    text: "You're searching for the right space. A new home, an extension, a workspace that feels right. Doubt creeps in. We help you turn it into clarity.",
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
-    text: "Doubt is not a problem. It's the beginning. Great architecture starts with questions, not answers.",
+    text: "Doubt isn't a problem. It's the starting point. Great architecture grows from questions, not ready answers.",
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
-    text: "Your ideal project begins here. Stop overthinking. Start imagining with us.",
+    text: "Your ideal project is closer than you think. Stop overthinking. Start imagining with us.",
     isLast: true,
   },
 ];
