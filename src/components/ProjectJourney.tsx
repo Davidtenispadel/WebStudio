@@ -1,10 +1,9 @@
-// src/components/ProjectJourney.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { getScrollProgress } from "../utils/scrollEngine";
 import { splitIntoLines } from "../utils/textEngine";
 
 interface ProjectJourneyProps {
-  onNavigateToEnquiry: () => void; // Obligatoria: función para ir a Enquiry
+  onNavigateToEnquiry: () => void;
 }
 
 const slides = [
@@ -25,7 +24,7 @@ const slides = [
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929824/4._Panoramic_Livingroom_hi9uhv.png",
     text: "Your ideal project begins here. Stop overthinking. Start imagining with us.",
     isLast: true,
-  }
+  },
 ];
 
 export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyProps) {
@@ -48,42 +47,48 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
       {slides.map((slide, i) => (
         <section
           key={i}
-          className="relative w-full h-screen snap-start bg-cover bg-center flex flex-col justify-center items-center"
-          style={{ backgroundImage: `url(${slide.image})` }}
+          className="relative w-full h-screen snap-start flex flex-col"
+          style={{ scrollSnapAlign: "start" }}
         >
-          {/* Capa oscura para mejorar legibilidad */}
-          <div className="absolute inset-0 bg-black/30"></div>
-
-          {/* Contenedor del texto: centrado horizontal y verticalmente */}
-          <div className="relative z-10 w-full max-w-4xl mx-auto px-6 md:px-12 text-center">
+          {/* Área superior para el texto (40% de la altura) */}
+          <div className="flex-1 flex flex-col justify-center items-center px-4 md:px-8 py-8 text-center bg-white/95">
             {slide.line1 ? (
               <>
-                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
                   {slide.line1}
                 </p>
-                <p className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight mt-4">
+                <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight mt-4">
                   {slide.line2}
                 </p>
               </>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {splitIntoLines(slide.text).map((line, idx) => (
-                  <p key={idx} className="text-white text-3xl md:text-4xl lg:text-5xl font-light leading-tight">
+                  <p key={idx} className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
                     {line}
                   </p>
                 ))}
               </div>
             )}
             {slide.isLast && (
-              <div className="mt-12">
+              <div className="mt-10">
                 <button
                   onClick={onNavigateToEnquiry}
-                  className="inline-block bg-white text-black px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
+                  className="inline-block bg-black text-white px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-wider shadow-xl hover:bg-red-600 hover:text-white transition-all duration-300"
                 >
                   Start your project
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Área inferior para la imagen (60% de la altura) */}
+          <div className="h-[60vh] w-full overflow-hidden">
+            <img
+              src={slide.image}
+              alt={`Journey ${i + 1}`}
+              className="w-full h-full object-cover"
+            />
           </div>
         </section>
       ))}
