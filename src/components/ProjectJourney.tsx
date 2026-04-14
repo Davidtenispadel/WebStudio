@@ -53,8 +53,8 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
           className="relative w-full h-screen snap-start flex flex-col"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Bloque blanco para el texto, con padding superior suficiente para evitar el menú fijo */}
-          <div className="bg-white px-6 md:px-10 pt-24 md:pt-32 pb-12 md:pb-16 text-left">
+          {/* Bloque blanco para el texto, con suficiente padding superior y reducción del padding inferior */}
+          <div className="bg-white px-6 md:px-10 pt-28 md:pt-36 pb-8 md:pb-12 text-left">
             {slide.line1 ? (
               <>
                 <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
@@ -85,8 +85,8 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Imagen debajo, ocupando el resto del espacio */}
-          <div className="flex-1 w-full overflow-hidden">
+          {/* Imagen con altura fija (40% del viewport) para dar más espacio al texto */}
+          <div className="h-[40vh] w-full overflow-hidden">
             <img
               src={slide.image}
               alt={`Journey ${i + 1}`}
