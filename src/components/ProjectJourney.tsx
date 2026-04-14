@@ -50,11 +50,11 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
       {slides.map((slide, i) => (
         <section
           key={i}
-          className="relative w-full h-screen snap-start flex flex-col"
+          className="relative w-full h-screen snap-start flex flex-col justify-between"
           style={{ scrollSnapAlign: "start" }}
         >
-          {/* Bloque blanco para el texto, con suficiente padding superior y reducción del padding inferior */}
-          <div className="bg-white px-6 md:px-10 pt-28 md:pt-36 pb-8 md:pb-12 text-left">
+          {/* Bloque blanco para el texto, con padding superior amplio y mínimo inferior */}
+          <div className="bg-white px-6 md:px-10 pt-28 md:pt-36 pb-2 md:pb-4 text-left">
             {slide.line1 ? (
               <>
                 <p className="text-black text-2xl md:text-3xl lg:text-4xl font-light leading-tight">
@@ -85,7 +85,7 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Imagen con altura fija (45% del viewport) para dar más espacio al texto */}
+          {/* Imagen pegada al borde inferior, sin margen extra */}
           <div className="h-[45vh] w-full overflow-hidden">
             <img
               src={slide.image}
