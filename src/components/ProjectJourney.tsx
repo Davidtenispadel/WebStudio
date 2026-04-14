@@ -46,14 +46,15 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
     <div
       ref={containerRef}
       className="relative w-full h-full overflow-y-auto snap-y snap-mandatory scroll-smooth"
+      style={{ scrollSnapType: "y mandatory", scrollBehavior: "smooth" }}
     >
       {slides.map((slide, i) => (
         <section
           key={i}
           className="relative w-full h-screen snap-start flex flex-col justify-between"
-          style={{ scrollSnapAlign: "start" }}
+          style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
         >
-          {/* Bloque blanco para el texto, con padding superior amplio y mínimo inferior */}
+          {/* Bloque blanco para el texto */}
           <div className="bg-white px-6 md:px-10 pt-28 md:pt-36 pb-2 md:pb-4 text-left">
             {slide.line1 ? (
               <>
@@ -85,8 +86,8 @@ export default function ProjectJourney({ onNavigateToEnquiry }: ProjectJourneyPr
             )}
           </div>
 
-          {/* Imagen pegada al borde inferior, sin margen extra */}
-          <div className="h-[45vh] w-full overflow-hidden">
+          {/* Imagen más alta (55vh) y pegada al borde inferior */}
+          <div className="h-[55vh] w-full overflow-hidden">
             <img
               src={slide.image}
               alt={`Journey ${i + 1}`}
