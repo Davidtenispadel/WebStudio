@@ -333,9 +333,9 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
     description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio, where architectural clarity meets technical excellence.</p>
-      <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla combines design expertise with advanced technical training to guide DB+ from concept to execution. He is qualified as an Architect at Master's level (EQF 7 / RQF 7), is registered with ARB and RIBA, and holds a UK Master's in BIM Management from Middlesex University.</p>
-      <p class="text-lg md:text-xl font-light pt-6">His training also qualifies him to develop all required MEP systems for any type of building, produce structural calculations used for structural pre‑design, and provide specialised input in urban planning. This multidisciplinary foundation enables him to deliver clear, efficient and well‑coordinated solutions that align design intent with technical performance and client goals.</p>
+      <p class="text-lg md:text-xl font-light"Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence. </p>
+      <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla doesn't just design buildings. He bridges the gap between creative vision and technical reality. Qualified as an Architect at Master's level (EQF 7 / RQF 7), registered with ARB and RIBA, and holding a UK Master's in BIM Management from Middlesex University, David brings both depth and breadth to every project.</p>
+      <p class="text-lg md:text-xl font-light pt-6">That multidisciplinary foundation means he can develop MEP systems for any building type, produce structural pre‑design calculations, and offer specialised urban planning input – all in‑house. The result? Clear, efficient, well‑coordinated solutions where design intent, technical performance, and your goals move forward together.</p>
     </div>`,
     imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
     projects: []
