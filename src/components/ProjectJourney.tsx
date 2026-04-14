@@ -8,7 +8,7 @@ const slides = [
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775930330/1._Family_Country_xehkff.png",
     line1: "Architecture begins with you!",
-    line2: "No drawings, No plans, just your life, your needs, your history!",
+    line2: "No drawings, no plans, just your life, your needs, your history!",
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
