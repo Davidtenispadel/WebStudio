@@ -73,20 +73,27 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </p>
   <br/><br/>
 
-  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology. We combine innovation, functionality, and sustainability to create buildings that inspire and endure.</p>
+  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages..</p>
 
   <p class="text-xl font-bold pt-6">What we offer</p>
   
   <div class="pt-6">
     <div class="pb-6">
       <p class="text-lg font-bold">• Extensions & Renovations</p>
-      <p class="text-base font-light">More comfort. Better flow. A home that feels renewed. Whether partial refresh or full refurbishment, we elevate how you live.</p>
+      <p class="text-base font-light">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
     </div>
 
     <div class="pb-6">
+      <p class="text-lg font-bold">• Planning Applications</p>
+      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns./p>
+    </div>
+
+     <div class="pb-6">
       <p class="text-lg font-bold">• New Build Projects</p>
       <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them./p>
     </div>
+
+
 
     <div>
       <p class="text-lg font-bold">• All Building Types</p>
