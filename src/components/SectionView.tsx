@@ -437,7 +437,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         }`}
         style={{
           scrollSnapType: "y mandatory",
-          scrollBehavior: "smooth",
+          scrollBehavior: "100px",
         }}
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
