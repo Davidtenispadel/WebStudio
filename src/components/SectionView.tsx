@@ -429,16 +429,16 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
       </div>
 
-      {/* CONTENEDOR DE SCROLL */}
+      {/* CONTENEDOR DE SCROLL CON PADDING-TOP CORREGIDO */}
       <div
         ref={scrollContainerRef}
         className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{
-           scrollSnapType: "y mandatory",
-           scrollBehavior: "smooth",
-           paddingTop: "100px",
+          scrollSnapType: "y mandatory",
+          scrollBehavior: "smooth",
+          paddingTop: "100px",
         }}
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
