@@ -1,5 +1,8 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Project Journey
+ * - Project Journey usa componente externo con botón centrado y navegación a Enquiry
+ * - Enquiry: formulario funcional con subida de archivos a upload.php
+ * - Resto de secciones sin cambios
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -24,6 +27,9 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
 
+// ============================
+// TIPOS Y CONSTANTES
+// ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
   id: string;
@@ -61,6 +67,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
   onNavigateToEnquiry,
 }) => {
+  // Estados de animación
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
@@ -80,6 +87,9 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // ============================
+  // Animaciones (Aesthetic A)
+  // ============================
   const resetSequence = () => {
     setShowDB(false);
     setShowPlus(false);
@@ -155,6 +165,9 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
+  // ============================
+  // Lógica de subida de archivos (ENQUIRY)
+  // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
     setIsUploading(true);
@@ -285,6 +298,9 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
+  // ============================
+  // RENDER PRINCIPAL
+  // ============================
   return (
     <div
       className={`fixed inset-0 w-full transition-opacity duration-500 ${
@@ -302,6 +318,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
+      {/* HEADER (Aesthetic A) */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -412,6 +429,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
       </div>
 
+      {/* CONTENEDOR DE SCROLL CON PADDING-TOP CORREGIDO */}
       <div
         ref={scrollContainerRef}
         className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
@@ -428,6 +446,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+                  {/* Columna izquierda: información de contacto */}
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
                     <h3 className="text-3xl md:text-4xl font-light leading-tight">
                       Contact<br />Information
@@ -448,6 +467,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     </div>
                   </aside>
 
+                  {/* Columna derecha: formulario */}
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
                     <form onSubmit={handleEnquirySubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -466,6 +486,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                         <textarea required placeholder="Tell us about your architectural vision..." className="w-full h-44 bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} disabled={isSending} />
                       </div>
 
+                      {/* Attachments */}
                       <div>
                         <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">Attachments</label>
                         <div
