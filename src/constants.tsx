@@ -161,7 +161,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769242331/Enhance_the_realism_bsvkpa.png',
         category: StudioSection.ARCHITECTURE,
-        description: "A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise",
+        description: 'A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise',
         useAiInsight: false,
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png']
       },
