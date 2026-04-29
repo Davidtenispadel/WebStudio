@@ -430,7 +430,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       </div>
 
       {/* CONTENEDOR DE SCROLL CON PADDING-TOP CORREGIDO */}
-      <div
+       <div
         ref={scrollContainerRef}
         className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
