@@ -85,15 +85,13 @@ export const architectureDescription = `<div class="text-black leading-tight">
 
     <div class="pb-6">
       <p class="text-lg font-bold">• Planning Applications</p>
-      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns./p>
+      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
     </div>
 
      <div class="pb-6">
       <p class="text-lg font-bold">• New Build Projects</p>
-      <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them./p>
+      <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
     </div>
-
-
 
     <div>
       <p class="text-lg font-bold">• All Building Types</p>
@@ -112,7 +110,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'home',
     name: StudioSection.HOME,
     description: `Turning ideas into reality, your vision is our purpose...`,
-    imageUrl: '',  // ← VACÍO para que no haya imagen
+    imageUrl: '',
     projects: []
   },
 
@@ -130,7 +128,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'arch',
     name: StudioSection.ARCHITECTURE,
     description: architectureDescription,
-    imageUrl: '',  // ← VACÍO para que no haya imagen
+    imageUrl: '',
     projects: [
       {
         id: 'a8',
@@ -186,7 +184,7 @@ export const CATEGORIES: CategoryGroup[] = [
         year: '',
         imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769242331/Enhance_the_realism_bsvkpa.png',
         category: StudioSection.ARCHITECTURE,
-        description: 'A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise',
+        description: "A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise",
         useAiInsight: false,
         additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png']
       },
@@ -340,7 +338,7 @@ export const CATEGORIES: CategoryGroup[] = [
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
     description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light"Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence. </p>
+      <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence.</p>
       <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla doesn't just design buildings. He bridges the gap between creative vision and technical reality. Qualified as an Architect at Master's level (EQF 7 / RQF 7), registered with ARB and RIBA, and holding a UK Master's in BIM Management from Middlesex University, David brings both depth and breadth to every project.</p>
       <p class="text-lg md:text-xl font-light pt-6">That multidisciplinary foundation means he can develop MEP systems for any building type, produce structural pre‑design calculations, and offer specialised urban planning input – all in‑house. The result? Clear, efficient, well‑coordinated solutions where design intent, technical performance, and your goals move forward together.</p>
     </div>`,
