@@ -429,7 +429,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
       </div>
 
-      {/* CONTENEDOR DE SCROLL - CORREGIDO */}
+      {/* CONTENEDOR DE SCROLL CORREGIDO */}
       <div
         ref={scrollContainerRef}
         className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
