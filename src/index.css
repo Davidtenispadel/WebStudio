@@ -248,10 +248,10 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 }
 
 /* ===============================
-   FIX MENÚ MÓVIL EN IPHONE
+   FIX MENÚ MÓVIL EN IPHONE (SCROLL)
    =============================== */
 
-/* Para cualquier menú lateral (hamburguesa) en móvil */
+/* Para cualquier menú lateral en móvil */
 .fixed.right-0,
 .fixed.inset-y-0.right-0,
 .fixed.top-0.h-full,
@@ -262,7 +262,7 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 [role="dialog"] {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  padding-bottom: 100px !important;
+  padding-bottom: 40px !important;
   max-height: 100vh !important;
 }
 
@@ -270,7 +270,7 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 .transform.translate-x-0 {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  padding-bottom: 100px !important;
+  padding-bottom: 40px !important;
 }
 
 /* Fix específico para iOS Safari */
@@ -284,11 +284,61 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
   [class*="sidebar"],
   [role="dialog"] {
     height: -webkit-fill-available !important;
-    padding-bottom: 120px !important;
+    padding-bottom: 50px !important;
   }
   
   .transform.translate-x-0 {
     height: -webkit-fill-available !important;
-    padding-bottom: 120px !important;
+    padding-bottom: 50px !important;
+  }
+}
+
+/* ===============================
+   EFECTO TÁCTIL PARA MENÚ MÓVIL
+   =============================== */
+
+/* Para todos los botones del menú en móvil */
+[class*="Drawer"] button,
+[class*="drawer"] button,
+[role="dialog"] button,
+nav button {
+  transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05) !important;
+}
+
+/* Efecto al presionar agrandar */
+[class*="Drawer"] button:active,
+[class*="drawer"] button:active,
+[role="dialog"] button:active,
+nav button:active {
+  transform: scale(1.05) !important;
+}
+
+/* Efecto específico para botones de cierre y menú hamburguesa - encoger */
+button:active .lucide-menu,
+button:active .lucide-x {
+  transform: scale(0.9) !important;
+}
+
+/* Remarcado suave al tocar */
+[class*="Drawer"] button:active,
+[class*="drawer"] button:active {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Mejor respuesta táctil en iOS */
+@media (hover: none) and (pointer: coarse) {
+  [class*="Drawer"] button,
+  [class*="drawer"] button,
+  [role="dialog"] button,
+  nav button {
+    cursor: pointer;
+  }
+  
+  [class*="Drawer"] button:active,
+  [class*="drawer"] button:active,
+  [role="dialog"] button:active {
+    transform: scale(0.98) !important;
+    opacity: 0.8 !important;
   }
 }
