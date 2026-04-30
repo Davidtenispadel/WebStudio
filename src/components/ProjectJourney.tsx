@@ -14,7 +14,7 @@ const slides = [
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929794/2._table_drawings_mdzbk2.png",
     text:
-      "Design does not begin with form alone. It begins with understanding planning policy, site constraints and regulatory requirements. Early design decisions are shaped to create proposals that are robust, compliant and defendable.",
+      "Design does not start with form alone. It starts with understanding planning policy, site constraints and regulatory requirements. We design with planning in mind from the outset, ensuring that layouts, massing and materials are compliant, defendable and aligned with the expectations of the Planning Officer. This approach reduces risk and avoids unnecessary redesign later in the process.",
   },
   {
     image: "https://res.cloudinary.com/dwealmbfi/image/upload/v1775929804/3._Model_kuhihd.png",
