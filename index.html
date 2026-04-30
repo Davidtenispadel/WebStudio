@@ -52,31 +52,6 @@
       }
 
       /* =========================
-         EFECTOS TÁCTILES (AGrandAR/REMARCAR)
-      ========================== */
-      button, a, .clickable {
-        transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        -webkit-tap-highlight-color: rgba(0,0,0,0.05);
-      }
-
-      button:active, a:active, .clickable:active {
-        transform: scale(1.05);
-      }
-
-      /* Para botones de cierre y menú hamburguesa: encoger ligeramente */
-      .menu-button:active, .close-button:active {
-        transform: scale(0.92) !important;
-      }
-
-      /* En móvil, mantener feedback táctil suave */
-      @media (hover: none) and (pointer: coarse) {
-        button:active, a:active {
-          transform: scale(0.98);
-          opacity: 0.8;
-        }
-      }
-
-      /* =========================
          HERO APPLE SYSTEM
       ========================== */
 
@@ -179,53 +154,12 @@
       });
 
       /* =========================
-         SONIDO CLIC (CLICK SOUND)
-      ========================== */
-      const clickSound = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSound.volume = 0.35; // Volumen suave
-      clickSound.preload = 'auto';
-
-      // Función para reproducir el sonido
-      function playClickSound() {
-        // Clonamos el audio para permitir clics rápidos
-        const soundClone = clickSound.cloneNode();
-        soundClone.volume = 0.35;
-        soundClone.play().catch(e => console.log('Audio play failed:', e));
-      }
-
-      // Aplicar sonido a todos los botones y enlaces clickables
-      function addSoundToButtons() {
-        const clickableElements = document.querySelectorAll('button, a, [role="button"], .cursor-pointer');
-        clickableElements.forEach(el => {
-          // Evitar duplicar eventos
-          if (el.hasAttribute('data-sound-added')) return;
-          el.setAttribute('data-sound-added', 'true');
-          el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            playClickSound();
-          });
-          // Para iOS: reanudar AudioContext solo si es necesario (no es necesario con Audio simple)
-        });
-      }
-
-      // Observar cambios en el DOM para nuevos botones (menú dinámico)
-      const observerButtons = new MutationObserver(() => {
-        addSoundToButtons();
-      });
-      observerButtons.observe(document.body, { childList: true, subtree: true });
-
-      // Aplicar sonido a botones existentes
-      document.addEventListener('DOMContentLoaded', () => {
-        addSoundToButtons();
-      });
-
-      /* =========================
          APPLE SCROLL ENGINE
       ========================== */
 
       const slides = document.querySelectorAll(".slide");
 
-      const observerSlide = new IntersectionObserver(
+      const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             const content = entry.target.querySelector(".content");
@@ -255,7 +189,7 @@
         }
       );
 
-      slides.forEach((s) => observerSlide.observe(s));
+      slides.forEach((s) => observer.observe(s));
     </script>
 
     <script type="module" src="/src/main.tsx"></script>
