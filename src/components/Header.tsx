@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
   const playClickSound = () => {
     if (clickSoundRef.current) {
       const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.005;
+      soundClone.volume = 0.01;
       soundClone.play().catch(() => {});
     }
   };
