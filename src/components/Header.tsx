@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 
@@ -17,6 +17,45 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
+  
+  // Referencia para el sonido click
+  const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Inicializar sonido
+  useEffect(() => {
+    // Crear sonido con Web Audio (más ligero, no requiere archivos)
+    if (typeof window !== 'undefined') {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  const playClickSound = () => {
+    if (!audioContextRef.current) return;
+    
+    // Reanudar AudioContext después de interacción del usuario
+    if (audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    
+    // Crear sonido de click suave
+    const oscillator = audioContextRef.current.createOscillator();
+    const gain = audioContextRef.current.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioContextRef.current.destination);
+    oscillator.frequency.value = 880;
+    gain.gain.value = 0.08;
+    oscillator.type = 'sine';
+    oscillator.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, audioContextRef.current.currentTime + 0.12);
+    oscillator.stop(audioContextRef.current.currentTime + 0.12);
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,11 +71,28 @@ const Header: React.FC<HeaderProps> = ({
   }, [isMenuOpen]);
 
   const handleMenuItemClick = (section: string) => {
+    playClickSound();
     onNavClick(section);
     setIsMenuOpen(false);
   };
 
+  const handleMenuButtonClick = () => {
+    playClickSound();
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleCloseMenuClick = () => {
+    playClickSound();
+    setIsMenuOpen(false);
+  };
+
+  const handleOverlayClick = () => {
+    playClickSound();
+    setIsMenuOpen(false);
+  };
+
   const handleDbPlusLogoClick = () => {
+    playClickSound();
     onGoHomeClick();
     if (isMobile) setIsMenuOpen(false);
   };
@@ -55,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
           {/* LOGO */}
           <div
-            className="flex items-center gap-1 cursor-pointer select-none"
+            className="flex items-center gap-1 cursor-pointer select-none active:scale-95 transition-transform duration-75"
             onClick={handleDbPlusLogoClick}
             aria-label="Go to home page"
           >
@@ -72,7 +128,10 @@ const Header: React.FC<HeaderProps> = ({
                 category.name !== 'Home' && (
                   <button
                     key={category.id}
-                    onClick={() => onNavClick(category.name)}
+                    onClick={() => {
+                      playClickSound();
+                      onNavClick(category.name);
+                    }}
                     className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
                   >
                     {category.name}
@@ -83,8 +142,8 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* MOBILE MENU BUTTON */}
           <button
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 active:scale-90 transition-transform duration-75"
+            onClick={handleMenuButtonClick}
             aria-label="Open menu"
           >
             <Menu className="w-6 h-6 text-black" />
@@ -111,8 +170,8 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           <button
-            onClick={() => setIsMenuOpen(false)}
-            className="p-2 rounded-full hover:bg-gray-100"
+            onClick={handleCloseMenuClick}
+            className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
             aria-label="Close menu"
           >
             <X className="w-6 h-6" />
@@ -125,7 +184,10 @@ const Header: React.FC<HeaderProps> = ({
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className="text-left text-xl tracking-[0.08em] py-3 px-2 hover:text-red-600"
+              className="text-left text-xl tracking-[0.08em] py-3 px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-lg"
+              style={{
+                WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
+              }}
             >
               {category.name}
             </button>
@@ -141,7 +203,7 @@ const Header: React.FC<HeaderProps> = ({
             : 'opacity-0 pointer-events-none'
         }`}
         style={{ zIndex: 9000 }}
-        onClick={() => setIsMenuOpen(false)}
+        onClick={handleOverlayClick}
         aria-hidden={!isMenuOpen}
       />
     </>
