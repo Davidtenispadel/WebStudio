@@ -246,3 +246,49 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
     font-size: 1.8rem;
   }
 }
+
+/* ===============================
+   FIX MENÚ MÓVIL EN IPHONE
+   =============================== */
+
+/* Para cualquier menú lateral (hamburguesa) en móvil */
+.fixed.right-0,
+.fixed.inset-y-0.right-0,
+.fixed.top-0.h-full,
+[class*="Drawer"],
+[class*="drawer"],
+[class*="Sidebar"],
+[class*="sidebar"],
+[role="dialog"] {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 100px !important;
+  max-height: 100vh !important;
+}
+
+/* Para elementos con transformación (slide-in) */
+.transform.translate-x-0 {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 100px !important;
+}
+
+/* Fix específico para iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .fixed.right-0,
+  .fixed.inset-y-0.right-0,
+  .fixed.top-0.h-full,
+  [class*="Drawer"],
+  [class*="drawer"],
+  [class*="Sidebar"],
+  [class*="sidebar"],
+  [role="dialog"] {
+    height: -webkit-fill-available !important;
+    padding-bottom: 120px !important;
+  }
+  
+  .transform.translate-x-0 {
+    height: -webkit-fill-available !important;
+    padding-bottom: 120px !important;
+  }
+}
