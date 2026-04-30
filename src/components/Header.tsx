@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
   const playClickSound = () => {
     if (clickSoundRef.current) {
       const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.02;
+      soundClone.volume = 0.01;
       soundClone.play().catch(() => {});
     }
   };
@@ -124,9 +124,9 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - SIN ALTURA FIJA, SOLO CONTENIDO NATURAL */}
+      {/* MOBILE SIDE MENU - MÁS ESTRECHO Y BOTONES MÁS JUNTOS */}
       <div
-        className="fixed top-0 left-0 w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
+        className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
           transform: isMenuOpen && isMobile
@@ -136,34 +136,35 @@ const Header: React.FC<HeaderProps> = ({
           left: 0,
           right: 'auto',
           bottom: 0,
-          width: '85%',
-          maxWidth: '320px',
+          width: '75%',
+          maxWidth: '280px',
+          minWidth: '240px',
           backgroundColor: 'white',
           overflowY: 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="flex items-center justify-between p-6 border-b border-black/5">
+        <div className="flex items-center justify-between p-4 border-b border-black/5">
           <div className="flex items-center gap-1">
-            <span className="text-3xl font-light tracking-tighter text-black">DB</span>
-            <span className="text-2xl font-thin text-gray-400">+</span>
+            <span className="text-2xl font-light tracking-tighter text-black">DB</span>
+            <span className="text-xl font-thin text-gray-400">+</span>
           </div>
           <button
             onClick={handleCloseMenuClick}
             className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
             aria-label="Close menu"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="flex flex-col p-6 pt-4 gap-2">
+        <nav className="flex flex-col p-4 pt-3 gap-1">
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className="text-left text-lg tracking-[0.08em] py-3 px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-lg"
+              className="text-left text-base tracking-[0.05em] py-2 px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-lg"
               style={{
                 WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
               }}
@@ -171,8 +172,8 @@ const Header: React.FC<HeaderProps> = ({
               {category.name}
             </button>
           ))}
-          {/* Espacio extra para garantizar scroll al final */}
-          <div style={{ height: 80 }} />
+          {/* Espacio extra para scroll */}
+          <div style={{ height: 40 }} />
         </nav>
       </div>
 
