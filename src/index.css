@@ -294,6 +294,85 @@ a, button, input, select, textarea, [role="button"], .cursor-pointer {
 }
 
 /* ===============================
+   LANDSCAPE MENU FIX PARA IPHONE (HORIZONTAL)
+   =============================== */
+
+/* Fuerza que el menú móvil sea scrolleable en landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Menú lateral */
+  .fixed.top-0.left-0.h-full.w-80,
+  [class*="fixed"][class*="left-0"][class*="h-full"],
+  [class*="Drawer"],
+  [class*="drawer"] {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    padding-bottom: 100px !important;
+  }
+  
+  /* Navegación dentro del menú */
+  .fixed.top-0.left-0.h-full.w-80 nav,
+  [class*="fixed"][class*="left-0"][class*="h-full"] nav,
+  [class*="Drawer"] nav,
+  [class*="drawer"] nav {
+    padding-bottom: 80px !important;
+  }
+  
+  /* Cada botón del menú - más compactos en landscape */
+  .fixed.top-0.left-0.h-full.w-80 nav button,
+  [class*="fixed"][class*="left-0"][class*="h-full"] nav button,
+  [class*="Drawer"] nav button,
+  [class*="drawer"] nav button {
+    margin-bottom: 2px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
+
+/* Para landscape con altura muy reducida (iPhone SE, etc.) */
+@media (orientation: landscape) and (max-height: 400px) {
+  .fixed.top-0.left-0.h-full.w-80,
+  [class*="Drawer"],
+  [class*="drawer"] {
+    padding-bottom: 120px !important;
+  }
+  
+  .fixed.top-0.left-0.h-full.w-80 nav,
+  [class*="Drawer"] nav,
+  [class*="drawer"] nav {
+    padding-bottom: 100px !important;
+    gap: 0px !important;
+  }
+  
+  .fixed.top-0.left-0.h-full.w-80 nav button,
+  [class*="Drawer"] nav button,
+  [class*="drawer"] nav button {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Fix específico para Safari iOS en landscape */
+@supports (-webkit-touch-callout: none) {
+  @media (orientation: landscape) and (max-height: 500px) {
+    .fixed.top-0.left-0.h-full.w-80,
+    [class*="Drawer"],
+    [class*="drawer"] {
+      padding-bottom: 80px !important;
+      height: -webkit-fill-available !important;
+    }
+    
+    .fixed.top-0.left-0.h-full.w-80 nav,
+    [class*="Drawer"] nav,
+    [class*="drawer"] nav {
+      padding-bottom: 80px !important;
+    }
+  }
+}
+
+/* ===============================
    EFECTO TÁCTIL PARA MENÚ MÓVIL
    =============================== */
 
