@@ -18,43 +18,24 @@ const Header: React.FC<HeaderProps> = ({
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
   
-  // Referencia para el sonido click
+  // Referencia para el sonido
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Inicializar sonido
   useEffect(() => {
-    // Crear sonido con Web Audio (más ligero, no requiere archivos)
     if (typeof window !== 'undefined') {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
+      clickSoundRef.current.volume = 0.35;
+      clickSoundRef.current.preload = 'auto';
     }
-    
-    return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
   }, []);
 
   const playClickSound = () => {
-    if (!audioContextRef.current) return;
-    
-    // Reanudar AudioContext después de interacción del usuario
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+    if (clickSoundRef.current) {
+      const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
+      soundClone.volume = 0.35;
+      soundClone.play().catch(() => {});
     }
-    
-    // Crear sonido de click suave
-    const oscillator = audioContextRef.current.createOscillator();
-    const gain = audioContextRef.current.createGain();
-    oscillator.connect(gain);
-    gain.connect(audioContextRef.current.destination);
-    oscillator.frequency.value = 880;
-    gain.gain.value = 0.08;
-    oscillator.type = 'sine';
-    oscillator.start();
-    gain.gain.exponentialRampToValueAtTime(0.00001, audioContextRef.current.currentTime + 0.12);
-    oscillator.stop(audioContextRef.current.currentTime + 0.12);
   };
 
   useEffect(() => {
@@ -151,14 +132,17 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU */}
+      {/* MOBILE SIDE MENU - CORREGIDO PARA LANDSCAPE */}
       <div
-        className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
+        className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden overflow-y-auto"
         style={{
           zIndex: 10000,
           transform: isMenuOpen && isMobile
             ? 'translateX(0)'
             : 'translateX(-100%)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 60px)',
+          paddingTop: 'env(safe-area-inset-top, 20px)',
+          maxHeight: '100vh',
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
@@ -178,8 +162,8 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* MOBILE NAV */}
-        <nav className="flex flex-col p-10 pt-6 gap-4">
+        {/* MOBILE NAV - CON PADDING INFERIOR EXTRA */}
+        <nav className="flex flex-col p-10 pt-6 gap-4 pb-32">
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
