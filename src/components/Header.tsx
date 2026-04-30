@@ -1,4 +1,4 @@
-    import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 
@@ -20,11 +20,10 @@ const Header: React.FC<HeaderProps> = ({
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // Inicializar sonido (volumen mínimo)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSoundRef.current.volume = 0.04; // Volumen mínimo (4%)
+      clickSoundRef.current.volume = 0.04;
       clickSoundRef.current.preload = 'auto';
     }
   }, []);
@@ -32,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
   const playClickSound = () => {
     if (clickSoundRef.current) {
       const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.04;
+      soundClone.volume = 0.02;
       soundClone.play().catch(() => {});
     }
   };
@@ -125,7 +124,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - FIX DEFINITIVO PARA LANDSCAPE */}
+      {/* MOBILE SIDE MENU - SIN ALTURA FIJA, SOLO CONTENIDO NATURAL */}
       <div
         className="fixed top-0 left-0 w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
@@ -133,17 +132,16 @@ const Header: React.FC<HeaderProps> = ({
           transform: isMenuOpen && isMobile
             ? 'translateX(0)'
             : 'translateX(-100%)',
-          position: 'fixed',
           top: 0,
           left: 0,
+          right: 'auto',
           bottom: 0,
-          width: '320px',
-          maxWidth: '85%',
+          width: '85%',
+          maxWidth: '320px',
           backgroundColor: 'white',
-          overflowY: 'scroll',
+          overflowY: 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
-          paddingBottom: '200px',
         }}
       >
         <div className="flex items-center justify-between p-6 border-b border-black/5">
@@ -160,7 +158,7 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        <nav className="flex flex-col p-6 pt-4 gap-2" style={{ paddingBottom: '250px' }}>
+        <nav className="flex flex-col p-6 pt-4 gap-2">
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
@@ -173,6 +171,8 @@ const Header: React.FC<HeaderProps> = ({
               {category.name}
             </button>
           ))}
+          {/* Espacio extra para garantizar scroll al final */}
+          <div style={{ height: 80 }} />
         </nav>
       </div>
 
