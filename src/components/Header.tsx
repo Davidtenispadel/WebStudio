@@ -21,11 +21,11 @@ const Header: React.FC<HeaderProps> = ({
   // Referencia para el sonido
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // Inicializar sonido
+  // Inicializar sonido (volumen reducido a la mitad)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSoundRef.current.volume = 0.35;
+      clickSoundRef.current.volume = 0.175; // Mitad del volumen anterior (0.35 / 2)
       clickSoundRef.current.preload = 'auto';
     }
   }, []);
@@ -33,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({
   const playClickSound = () => {
     if (clickSoundRef.current) {
       const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.35;
+      soundClone.volume = 0.175;
       soundClone.play().catch(() => {});
     }
   };
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - CORREGIDO PARA LANDSCAPE */}
+      {/* MOBILE SIDE MENU - CORREGIDO PARA LANDSCAPE Y ENQUIRY VISIBLE */}
       <div
         className="fixed top-0 left-0 h-full w-80 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden overflow-y-auto"
         style={{
@@ -140,9 +140,10 @@ const Header: React.FC<HeaderProps> = ({
           transform: isMenuOpen && isMobile
             ? 'translateX(0)'
             : 'translateX(-100%)',
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 60px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 120px)',
           paddingTop: 'env(safe-area-inset-top, 20px)',
           maxHeight: '100vh',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <div className="flex items-center justify-between p-10 border-b border-black/5">
@@ -162,8 +163,8 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* MOBILE NAV - CON PADDING INFERIOR EXTRA */}
-        <nav className="flex flex-col p-10 pt-6 gap-4 pb-32">
+        {/* MOBILE NAV - CON PADDING INFERIOR MUY AMPLIO */}
+        <nav className="flex flex-col p-10 pt-6 gap-4 pb-52">
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
