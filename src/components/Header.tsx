@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSoundRef.current.volume = 0.04;
+      clickSoundRef.current.volume = 0.01;
       clickSoundRef.current.preload = 'auto';
     }
   }, []);
