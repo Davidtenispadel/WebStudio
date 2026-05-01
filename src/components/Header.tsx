@@ -18,9 +18,10 @@ const Header: React.FC<HeaderProps> = ({
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
   const [isLandscape, setIsLandscape] = useState(false);
+  const [activeButton, setActiveButton] = useState<string | null>(null);
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number; target: string | null }>({ x: 0, y: 0, target: null });
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -64,6 +65,7 @@ const Header: React.FC<HeaderProps> = ({
     playClickSound();
     onNavClick(section);
     setIsMenuOpen(false);
+    setActiveButton(null);
   };
 
   const handleMenuButtonClick = () => {
@@ -87,19 +89,55 @@ const Header: React.FC<HeaderProps> = ({
     if (isMobile) setIsMenuOpen(false);
   };
 
+  const handleTouchStart = (section: string, e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      target: section,
+    };
+    setActiveButton(section);
+  };
+
+  const handleTouchMove = (section: string, e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isInside = touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                     touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+    
+    if (isInside) {
+      setActiveButton(section);
+    } else {
+      setActiveButton(null);
+    }
+  };
+
+  const handleTouchEnd = (section: string, e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isInside = touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                     touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+    
+    if (isInside && activeButton === section) {
+      handleMenuItemClick(section);
+    }
+    setActiveButton(null);
+  };
+
   const navLinkColorClass = isDarkBackground
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  const menuWidth = isLandscape ? '55%' : '75%';
-  const menuMaxWidth = isLandscape ? '240px' : '280px';
-  const buttonPadding = isLandscape ? 'py-1' : 'py-2';
-  const buttonTextSize = isLandscape ? 'text-xs' : 'text-base';
-  const buttonGap = isLandscape ? 'gap-0' : 'gap-1';
-  const logoSize = isLandscape ? 'text-lg' : 'text-2xl';
-  const logoSymbolSize = isLandscape ? 'text-base' : 'text-xl';
-  const containerPadding = isLandscape ? 'p-2' : 'p-4';
-  const navPadding = isLandscape ? 'p-2 pt-1' : 'p-4 pt-3';
+  // Menú: 25% en vertical (1/4), 65% en horizontal
+  const menuWidth = isLandscape ? '65%' : '25%';
+  const menuMaxWidth = isLandscape ? '280px' : '320px';
+  const buttonPadding = isLandscape ? 'py-2' : 'py-2';
+  const buttonTextSize = isLandscape ? 'text-sm' : 'text-sm';
+  const buttonGap = isLandscape ? 'gap-1' : 'gap-1';
+  const logoSize = isLandscape ? 'text-xl' : 'text-base';
+  const logoSymbolSize = isLandscape ? 'text-base' : 'text-xs';
+  const containerPadding = isLandscape ? 'p-3' : 'p-2';
+  const navPadding = isLandscape ? 'p-3 pt-2' : 'p-2 pt-1';
 
   return (
     <>
@@ -145,9 +183,8 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - SCROLL NATURAL */}
+      {/* MOBILE SIDE MENU - 25% WIDTH EN VERTICAL */}
       <div
-        ref={scrollContainerRef}
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
@@ -160,7 +197,7 @@ const Header: React.FC<HeaderProps> = ({
           bottom: 0,
           width: menuWidth,
           maxWidth: menuMaxWidth,
-          minWidth: '200px',
+          minWidth: '180px',
           backgroundColor: 'white',
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -174,10 +211,10 @@ const Header: React.FC<HeaderProps> = ({
           </div>
           <button
             onClick={handleCloseMenuClick}
-            className="p-1.5 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
+            className="p-1 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
             aria-label="Close menu"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3 h-3" />
           </button>
         </div>
 
@@ -186,7 +223,14 @@ const Header: React.FC<HeaderProps> = ({
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 transition-all duration-75 rounded-md`}
+              onTouchStart={(e) => handleTouchStart(category.name, e)}
+              onTouchMove={(e) => handleTouchMove(category.name, e)}
+              onTouchEnd={(e) => handleTouchEnd(category.name, e)}
+              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 transition-all duration-75 rounded-md ${
+                activeButton === category.name
+                  ? 'bg-red-50 text-red-600 scale-105'
+                  : 'bg-transparent'
+              }`}
               style={{
                 WebkitTapHighlightColor: 'rgba(0,0,0,0)',
                 touchAction: 'pan-y',
