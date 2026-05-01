@@ -20,8 +20,8 @@ const Header: React.FC<HeaderProps> = ({
   const [isLandscape, setIsLandscape] = useState(false);
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Detectar orientación
   useEffect(() => {
     const checkOrientation = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
@@ -91,7 +91,6 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  // Estilos según orientación
   const menuWidth = isLandscape ? '55%' : '75%';
   const menuMaxWidth = isLandscape ? '240px' : '280px';
   const buttonPadding = isLandscape ? 'py-1' : 'py-2';
@@ -146,8 +145,9 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - RESPONSIVE A ORIENTACIÓN */}
+      {/* MOBILE SIDE MENU - SCROLL NATURAL */}
       <div
+        ref={scrollContainerRef}
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
@@ -186,9 +186,11 @@ const Header: React.FC<HeaderProps> = ({
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
+              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 transition-all duration-75 rounded-md`}
               style={{
-                WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
+                WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+                touchAction: 'pan-y',
+                userSelect: 'none',
               }}
             >
               {category.name}
