@@ -1,4 +1,4 @@
-i/*
+/*
  * SECTIONVIEW.TSX — Versión final con Project Journey
  * - Project Journey usa componente externo con botón centrado y navegación a Enquiry
  * - Enquiry: formulario funcional con subida de archivos a upload.php
@@ -429,16 +429,14 @@ const SectionView: React.FC<SectionViewProps> = ({
           )}
       </div>
 
-      {/* CONTENEDOR DE SCROLL CON PADDINGTOP CONDICIONAL */}
+      {/* CONTENEDOR DE SCROLL - CORREGIDO */}
       <div
         ref={scrollContainerRef}
         className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
           stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{
-          scrollSnapType: isProjectJourney ? "y mandatory" : "auto",
           scrollBehavior: "smooth",
-          paddingTop: isProjectJourney ? "0px" : "100px",
         }}
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
