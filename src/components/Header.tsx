@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, StudioSection } from '../constants';
 
 interface HeaderProps {
   onNavClick: (section: string) => void;
@@ -21,7 +21,6 @@ const Header: React.FC<HeaderProps> = ({
   const [activeButton, setActiveButton] = useState<string | null>(null);
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number; target: string | null }>({ x: 0, y: 0, target: null });
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -89,36 +88,12 @@ const Header: React.FC<HeaderProps> = ({
     if (isMobile) setIsMenuOpen(false);
   };
 
-  const handleTouchStart = (section: string, e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      target: section,
-    };
+  const handleTouchStart = (section: string) => {
     setActiveButton(section);
   };
 
-  const handleTouchMove = (section: string, e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isInside = touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                     touch.clientY >= rect.top && touch.clientY <= rect.bottom;
-    
-    if (isInside) {
-      setActiveButton(section);
-    } else {
-      setActiveButton(null);
-    }
-  };
-
-  const handleTouchEnd = (section: string, e: React.TouchEvent) => {
-    const touch = e.changedTouches[0];
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isInside = touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                     touch.clientY >= rect.top && touch.clientY <= rect.bottom;
-    
-    if (isInside && activeButton === section) {
+  const handleTouchEnd = (section: string) => {
+    if (activeButton === section) {
       handleMenuItemClick(section);
     }
     setActiveButton(null);
@@ -128,16 +103,17 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  // Menú: 25% en vertical (1/4), 65% en horizontal
-  const menuWidth = isLandscape ? '65%' : '25%';
-  const menuMaxWidth = isLandscape ? '280px' : '320px';
-  const buttonPadding = isLandscape ? 'py-2' : 'py-2';
-  const buttonTextSize = isLandscape ? 'text-sm' : 'text-sm';
-  const buttonGap = isLandscape ? 'gap-1' : 'gap-1';
-  const logoSize = isLandscape ? 'text-xl' : 'text-base';
-  const logoSymbolSize = isLandscape ? 'text-base' : 'text-xs';
-  const containerPadding = isLandscape ? 'p-3' : 'p-2';
-  const navPadding = isLandscape ? 'p-3 pt-2' : 'p-2 pt-1';
+  // Menú estrecho: 35% en vertical, 45% en horizontal
+  const menuWidth = isLandscape ? '45%' : '35%';
+  const menuMaxWidth = isLandscape ? '260px' : '220px';
+  const minWidth = '180px';
+  const buttonPadding = isLandscape ? 'py-1.5' : 'py-2';
+  const buttonTextSize = isLandscape ? 'text-xs' : 'text-sm';
+  const buttonGap = isLandscape ? 'gap-0.5' : 'gap-1';
+  const logoSize = isLandscape ? 'text-base' : 'text-lg';
+  const logoSymbolSize = isLandscape ? 'text-xs' : 'text-sm';
+  const containerPadding = isLandscape ? 'p-2' : 'p-3';
+  const navPadding = isLandscape ? 'p-2 pt-1' : 'p-3 pt-2';
 
   return (
     <>
@@ -155,10 +131,22 @@ const Header: React.FC<HeaderProps> = ({
             <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
+          {/* DESKTOP NAV - Technology al principio */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
+            {/* Technology primero */}
+            <button
+              onClick={() => {
+                playClickSound();
+                onNavClick(StudioSection.HOUSE_TECHNOLOGY);
+              }}
+              className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+            >
+              Technology
+            </button>
+            {/* El resto de categorías */}
             {CATEGORIES.map(
               (category) =>
-                category.name !== 'Home' && (
+                category.name !== 'Home' && category.name !== 'Technology' && (
                   <button
                     key={category.id}
                     onClick={() => {
@@ -183,7 +171,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - 25% WIDTH EN VERTICAL */}
+      {/* MOBILE SIDE MENU */}
       <div
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
@@ -197,7 +185,7 @@ const Header: React.FC<HeaderProps> = ({
           bottom: 0,
           width: menuWidth,
           maxWidth: menuMaxWidth,
-          minWidth: '180px',
+          minWidth: minWidth,
           backgroundColor: 'white',
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -218,18 +206,34 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
+        {/* MOBILE NAV - Technology al principio */}
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
+          {/* Technology primero */}
+          <button
+            onClick={() => handleMenuItemClick(StudioSection.HOUSE_TECHNOLOGY)}
+            onTouchStart={() => handleTouchStart(StudioSection.HOUSE_TECHNOLOGY)}
+            onTouchEnd={() => handleTouchEnd(StudioSection.HOUSE_TECHNOLOGY)}
+            className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 transition-all duration-75 rounded-md bg-white text-black ${
+              activeButton === StudioSection.HOUSE_TECHNOLOGY ? 'scale-105 bg-white' : 'scale-100 bg-white'
+            }`}
+            style={{
+              WebkitTapHighlightColor: 'rgba(0,0,0,0)',
+              touchAction: 'pan-y',
+              userSelect: 'none',
+            }}
+          >
+            Technology
+          </button>
+          
+          {/* El resto de categorías */}
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              onTouchStart={(e) => handleTouchStart(category.name, e)}
-              onTouchMove={(e) => handleTouchMove(category.name, e)}
-              onTouchEnd={(e) => handleTouchEnd(category.name, e)}
-              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 transition-all duration-75 rounded-md ${
-                activeButton === category.name
-                  ? 'bg-red-50 text-red-600 scale-105'
-                  : 'bg-transparent'
+              onTouchStart={() => handleTouchStart(category.name)}
+              onTouchEnd={() => handleTouchEnd(category.name)}
+              className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 transition-all duration-75 rounded-md bg-white text-black ${
+                activeButton === category.name ? 'scale-105 bg-white' : 'scale-100 bg-white'
               }`}
               style={{
                 WebkitTapHighlightColor: 'rgba(0,0,0,0)',
@@ -240,7 +244,7 @@ const Header: React.FC<HeaderProps> = ({
               {category.name}
             </button>
           ))}
-          <div style={{ height: isLandscape ? 15 : 20 }} />
+          <div style={{ height: isLandscape ? 15 : 25 }} />
         </nav>
       </div>
 
