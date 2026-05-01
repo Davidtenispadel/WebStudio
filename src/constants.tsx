@@ -377,4 +377,3 @@ export const CATEGORIES: CategoryGroup[] = [
 export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
   ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
 );
-);
