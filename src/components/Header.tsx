@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
-import { CATEGORIES, StudioSection } from '../constants';
+import { CATEGORIES } from '../constants';
+import { StudioSection } from '../types';
 
 interface HeaderProps {
   onNavClick: (section: string) => void;
