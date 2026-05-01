@@ -70,6 +70,45 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </div>
 </div>`;
 
+export const houseTechnologyDescription = `
+<div class="text-black leading-tight">
+  <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
+  
+  <p class="text-lg md:text-xl font-light mb-6">
+    Una casa contemporánea no es solo un espacio habitable. Es un sistema tecnológico complejo donde convergen la envolvente arquitectónica, los sistemas energéticos, los materiales y la climatización.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-12">
+    Esta sección es un recurso técnico vivo que irá creciendo con el tiempo, basado en mi experiencia como arquitecto, en normativas actualizadas y en evidencia científica.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+    <div class="border-l-4 border-green-500 pl-4 py-2">
+      <h3 class="font-bold text-xl">⚡ Green Energy</h3>
+      <p class="text-sm font-light">Solar, eólica, geotermia, biomasa. Análisis técnico y viabilidad real.</p>
+    </div>
+    <div class="border-l-4 border-gray-500 pl-4 py-2">
+      <h3 class="font-bold text-xl">🧱 Materials & Insulation</h3>
+      <p class="text-sm font-light">Aislantes, maderas técnicas, materiales reciclados y avanzados.</p>
+    </div>
+    <div class="border-l-4 border-red-500 pl-4 py-2">
+      <h3 class="font-bold text-xl">🔥 HVAC Systems</h3>
+      <p class="text-sm font-light">Calefacción, refrigeración, VMC. Eficiencia y confort térmico.</p>
+    </div>
+    <div class="border-l-4 border-purple-500 pl-4 py-2">
+      <h3 class="font-bold text-xl">📐 Structural Systems</h3>
+      <p class="text-sm font-light">Madera, sistemas mixtos, dimensionamiento estructural eficiente.</p>
+    </div>
+  </div>
+
+  <hr class="my-12 border-black/10" />
+
+  <p class="text-center text-sm font-light text-gray-500">
+    Esta sección se actualizará periódicamente con nuevos artículos, análisis de normativa y síntesis de papers científicos.<br/>
+    ¿Quieres que profundice en algún tema específico? <a href="#enquiry" class="text-red-500 hover:underline">Contáctame</a>.
+  </p>
+</div>`;
+
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
 
 export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
@@ -84,7 +123,16 @@ export const CATEGORIES: CategoryGroup[] = [
     projects: []
   },
 
-  // PROJECT JOURNEY (NUEVA)
+  // TECHNOLOGY (NUEVA - al principio)
+  {
+    id: 'technology',
+    name: StudioSection.HOUSE_TECHNOLOGY,
+    description: houseTechnologyDescription,
+    imageUrl: '',
+    projects: []
+  },
+
+  // PROJECT JOURNEY
   {
     id: 'project_journey',
     name: StudioSection.PROJECT_JOURNEY,
