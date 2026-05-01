@@ -70,7 +70,7 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </div>
 </div>`;
 
-export const houseTechnologyDescription = `
+export const technologyDescription = `
 <div class="text-black leading-tight">
   <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
   
@@ -123,11 +123,11 @@ export const CATEGORIES: CategoryGroup[] = [
     projects: []
   },
 
-  // TECHNOLOGY (NUEVA - al principio)
+  // TECHNOLOGY
   {
     id: 'technology',
-    name: StudioSection.HOUSE_TECHNOLOGY,
-    description: houseTechnologyDescription,
+    name: StudioSection.TECHNOLOGY,
+    description: technologyDescription,
     imageUrl: '',
     projects: []
   },
@@ -376,4 +376,5 @@ export const CATEGORIES: CategoryGroup[] = [
 
 export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
   ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
+);
 );
