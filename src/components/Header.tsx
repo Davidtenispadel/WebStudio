@@ -17,13 +17,24 @@ const Header: React.FC<HeaderProps> = ({
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
+  const [isLandscape, setIsLandscape] = useState(false);
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  // Detectar orientación
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSoundRef.current.volume = 0.01;
+      clickSoundRef.current.volume = 0.04;
       clickSoundRef.current.preload = 'auto';
     }
   }, []);
@@ -31,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({
   const playClickSound = () => {
     if (clickSoundRef.current) {
       const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.01;
+      soundClone.volume = 0.04;
       soundClone.play().catch(() => {});
     }
   };
@@ -80,6 +91,17 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
+  // Estilos según orientación
+  const menuWidth = isLandscape ? '55%' : '75%';
+  const menuMaxWidth = isLandscape ? '240px' : '280px';
+  const buttonPadding = isLandscape ? 'py-1' : 'py-2';
+  const buttonTextSize = isLandscape ? 'text-xs' : 'text-base';
+  const buttonGap = isLandscape ? 'gap-0' : 'gap-1';
+  const logoSize = isLandscape ? 'text-lg' : 'text-2xl';
+  const logoSymbolSize = isLandscape ? 'text-base' : 'text-xl';
+  const containerPadding = isLandscape ? 'p-2' : 'p-4';
+  const navPadding = isLandscape ? 'p-2 pt-1' : 'p-4 pt-3';
+
   return (
     <>
       <header
@@ -124,7 +146,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU - BOTONES MÁXIMAMENTE COMPACTOS */}
+      {/* MOBILE SIDE MENU - RESPONSIVE A ORIENTACIÓN */}
       <div
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
@@ -136,19 +158,19 @@ const Header: React.FC<HeaderProps> = ({
           left: 0,
           right: 'auto',
           bottom: 0,
-          width: '70%',
-          maxWidth: '260px',
-          minWidth: '220px',
+          width: menuWidth,
+          maxWidth: menuMaxWidth,
+          minWidth: '200px',
           backgroundColor: 'white',
           overflowY: 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="flex items-center justify-between p-3 border-b border-black/5">
+        <div className={`flex items-center justify-between border-b border-black/5 ${containerPadding}`}>
           <div className="flex items-center gap-1">
-            <span className="text-xl font-light tracking-tighter text-black">DB</span>
-            <span className="text-lg font-thin text-gray-400">+</span>
+            <span className={`${logoSize} font-light tracking-tighter text-black`}>DB</span>
+            <span className={`${logoSymbolSize} font-thin text-gray-400`}>+</span>
           </div>
           <button
             onClick={handleCloseMenuClick}
@@ -159,12 +181,12 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        <nav className="flex flex-col p-3 pt-2 gap-0">
+        <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              className="text-left text-sm tracking-[0.03em] py-1.5 px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md"
+              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
               style={{
                 WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
               }}
@@ -172,8 +194,7 @@ const Header: React.FC<HeaderProps> = ({
               {category.name}
             </button>
           ))}
-          {/* Espacio extra mínimo */}
-          <div style={{ height: 20 }} />
+          <div style={{ height: isLandscape ? 15 : 20 }} />
         </nav>
       </div>
 
