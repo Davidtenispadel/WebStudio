@@ -22,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
 
+  // Detectar orientación
   useEffect(() => {
     const checkOrientation = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
@@ -31,6 +32,7 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
+  // Sonido clic
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
@@ -60,6 +62,7 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
+  // ✅ Función única para manejar el clic en cualquier sección
   const handleMenuItemClick = (section: string) => {
     playClickSound();
     onNavClick(section);
@@ -91,6 +94,7 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
+  // Ajustes responsivos (los mismos que funcionaban ayer)
   const menuWidth = isLandscape ? '55%' : '75%';
   const menuMaxWidth = isLandscape ? '240px' : '280px';
   const buttonPadding = isLandscape ? 'py-1' : 'py-2';
@@ -108,6 +112,7 @@ const Header: React.FC<HeaderProps> = ({
         style={{ zIndex: 9999 }}
       >
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
+          {/* LOGO */}
           <div
             className="flex items-center gap-1 cursor-pointer select-none active:scale-95 transition-transform duration-75"
             onClick={handleDbPlusLogoClick}
@@ -121,32 +126,27 @@ const Header: React.FC<HeaderProps> = ({
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
             {/* Technology - nuevo botón */}
             <button
-              onClick={() => {
-                playClickSound();
-                onNavClick(StudioSection.TECHNOLOGY);
-              }}
+              onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
               className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
             >
               Technology
             </button>
             {/* Resto de categorías (excluyendo Home y Technology) */}
-            {CATEGORIES.map(
-              (category) =>
-                category.name !== 'Home' && category.name !== 'Technology' && (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      playClickSound();
-                      onNavClick(category.name);
-                    }}
-                    className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                  >
-                    {category.name}
-                  </button>
-                )
-            )}
+            {CATEGORIES.map((category) => {
+              if (category.name === 'Home' || category.name === 'Technology') return null;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleMenuItemClick(category.name)}
+                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+                >
+                  {category.name}
+                </button>
+              );
+            })}
           </nav>
 
+          {/* Botón hamburguesa móvil */}
           <button
             className="md:hidden p-2 active:scale-90 transition-transform duration-75"
             onClick={handleMenuButtonClick}
@@ -162,9 +162,7 @@ const Header: React.FC<HeaderProps> = ({
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
-          transform: isMenuOpen && isMobile
-            ? 'translateX(0)'
-            : 'translateX(-100%)',
+          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
           top: 0,
           left: 0,
           right: 'auto',
@@ -220,12 +218,10 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* OVERLAY MÓVIL */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
-          isMenuOpen && isMobile
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
+          isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         style={{ zIndex: 9000 }}
         onClick={handleOverlayClick}
