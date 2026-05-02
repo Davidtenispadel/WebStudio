@@ -1,371 +1,599 @@
-import { Project, CategoryGroup, StudioSection } from '../types';
+/*
+ * SECTIONVIEW.TSX — Versión final con Project Journey
+ * - Incluye todas las secciones: Enquiry, Behind DB, Architecture, etc.
+ * - Integra TechnologyTree para la sección Technology
+ * - Fuerza visibilidad inmediata para Technology
+ * - ✅ Importación de tipos corregida: '../types'
+ */
 
-export const isoContent = `
-<div class="text-black leading-tight">
-  <div>
-    <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
-    <p class="text-lg md:text-xl font-light pt-6">
-      We apply the principles of ISO 19650, the international standard developed in the UK for managing information in BIM‑based projects.<br/>
-      For experienced clients, ISO 19650 is familiar territory. But for those who are not aware of it, the benefits are simple and tangible:
-    </p>
-  </div>
-  
-  <ul class="space-y-1 text-lg md:text-xl font-light pt-6">
-    <li>• <span class="font-bold">Everyone works in unison:</span> all teams share the same organised and up‑to‑date information, eliminating misunderstandings and inconsistencies.</li>
-    <li>• <span class="font-bold">Fewer errors and last‑minute changes:</span> issues are detected early, long before reaching construction.</li>
-    <li>• <span class="font-bold">Reduced unexpected costs:</span> by avoiding mistakes and rework, the project experiences fewer surprises and budget deviations.</li>
-    <li>• <span class="font-bold">Clear communication and full transparency:</span> clients always know what is happening, why, and with what information.</li>
-    <li>• <span class="font-bold">Better coordination across all disciplines:</span> architects, engineers, and contractors collaborate through a unified framework.</li>
-  </ul>
+import React, { useEffect, useRef, useState } from "react";
+import { CategoryGroup, Project, StudioSection } from "../types"; // ✅ Ruta corregida
+import ProjectCard from "./ProjectCard";
+import {
+  ChevronRight,
+  CheckCircle,
+  Upload,
+  X as CloseIcon,
+  Loader2,
+  Link2,
+  File as FileIcon,
+  AlertCircle,
+} from "lucide-react";
 
-  <div>
-    <p class="text-lg md:text-xl font-bold pt-6">This standard promotes:</p>
-    <ul class="space-y-0.5 text-lg md:text-xl font-light pt-2">
-      <li>• Shared responsibility among all project participants</li>
-      <li>• Early detection and resolution of issues</li>
-      <li>• Genuine multidisciplinary coordination</li>
-      <li>• Reduced risks and minimised cost overruns</li>
-      <li>• Transparency and traceability at every stage</li>
-    </ul>
-  </div>
+import {
+  urbanMasterplanningHeaderDescription,
+  isoContent,
+} from "../constants";
 
-  <p class="text-lg md:text-xl font-light italic pt-6">
-    ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure, efficiency, and a stronger collaborative culture across all stakeholders.
-  </p>
-</div>`;
+import { sendProjectEnquiry } from "../services/emailService";
+import ProjectJourney from "./ProjectJourney";
+import TechnologyTree from "./TechnologyTree";
 
-export const designPhilosophy = `<div class="text-black leading-tight">
-  <p class="text-lg md:text-xl font-light">At DB+ Design & Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process. Every project is developed with coherence, functionality, and quality from concept to completion.</p>
+// ============================
+// TIPOS Y CONSTANTES
+// ============================
+type UploadStatus = "uploading" | "uploaded" | "error";
+interface UploadedItem {
+  id: string;
+  name: string;
+  size: number;
+  type?: string;
+  progress: number;
+  status: UploadStatus;
+  url?: string;
+  error?: string;
+}
+interface SectionViewProps {
+  category: CategoryGroup;
+  onProjectClick: (project: Project) => void;
+  isActive: boolean;
+  currentSectionName: string;
+  onNavigateToEnquiry?: () => void;
+}
 
-  <p class="text-lg md:text-xl font-light pt-6">We listen carefully, translate real needs into precise design solutions, and maintain continuous dialogue to ensure that the final outcome reflects both the client's goals and the project's technical and urban context.</p>
+const UPLOAD_ENDPOINT = "https://dbsdesigner.com/api/upload.php";
+const formatBytes = (bytes: number) => {
+  if (!bytes && bytes !== 0) return "";
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  if (bytes === 0) return "0 B";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
+  return `${val.toFixed(val >= 100 || i === 0 ? 0 : 1)} ${sizes[i]}`;
+};
+const fileId = (f: File) => `${f.name}-${f.size}-${f.lastModified}-${Math.random().toString(36).slice(2, 8)}`;
 
-  <p class="text-lg md:text-xl font-light pt-6">Our workflow covers concept development, design refinement, technical coordination, permit documentation, construction detailing, and on‑site support ensuring feasibility and full alignment with the original design intent.</p>
-</div>`;
+const SectionView: React.FC<SectionViewProps> = ({
+  category,
+  onProjectClick,
+  isActive,
+  currentSectionName,
+  onNavigateToEnquiry,
+}) => {
+  // Estados de animación
+  const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
+  const [showDB, setShowDB] = useState(false);
+  const [showPlus, setShowPlus] = useState(false);
+  const [showName, setShowName] = useState(false);
+  const [showDesc, setShowDesc] = useState(false);
+  const [showGalleryItems, setShowGalleryItems] = useState(false);
+  const [stage, setStage] = useState<"intro" | "gallery">("intro");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const isFirstRender = useRef(true);
 
-export const architectureDescription = `<div class="text-black leading-tight">
-  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages.</p>
+  const [enquiryStep, setEnquiryStep] = useState(1);
+  const [isSending, setIsSending] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [items, setItems] = useState<UploadedItem[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  <p class="text-xl font-bold pt-6">What we offer</p>
-  
-  <div class="pt-6">
-    <div class="pb-6">
-      <p class="text-lg font-bold">• Extensions & Renovations</p>
-      <p class="text-base font-light">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
-    </div>
+  // ============================
+  // Animaciones (Aesthetic A)
+  // ============================
+  const resetSequence = () => {
+    setShowDB(false);
+    setShowPlus(false);
+    setShowName(false);
+    setShowDesc(false);
+    setShowGalleryItems(false);
+    setStage("intro");
+    setEnquiryStep(1);
+  };
 
-    <div class="pb-6">
-      <p class="text-lg font-bold">• Planning Applications</p>
-      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
-    </div>
+  const startSequence = () => {
+    setShowDB(true);
+    const t1 = setTimeout(() => setShowPlus(true), 400);
+    const t2 = setTimeout(() => setShowName(true), 700);
+    const t3 = setTimeout(() => setStage("gallery"), 3000);
+    const t4 = setTimeout(() => setShowDesc(true), 2300);
+    const t5 = setTimeout(() => setShowGalleryItems(true), 2600);
+    return [t1, t2, t3, t4, t5];
+  };
 
-     <div class="pb-6">
-      <p class="text-lg font-bold">• New Build Projects</p>
-      <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
-    </div>
+  useEffect(() => {
+    if (!isActive || isTransitioning) return;
+    const timer = setTimeout(() => {
+      if (!showName) setShowName(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [isActive, isTransitioning, showName]);
 
-    <div>
-      <p class="text-lg font-bold">• All Building Types</p>
-      <p class="text-base font-light">Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
-    </div>
-  </div>
-</div>`;
+  useEffect(() => {
+    if (isActive && isFirstRender.current) {
+      isFirstRender.current = false;
+      const timers = startSequence();
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [isActive]);
 
-// TECHNOLOGY SECTION – sin iconos, texto en inglés, enlace a enquiry
-export const technologyDescription = `
-<div class="text-black leading-tight">
-  <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
-  
-  <p class="text-lg md:text-xl font-light mb-6">
-    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control converge.
-  </p>
+  useEffect(() => {
+    if (isFirstRender.current) return;
+    if (category.id !== displayedCategory.id) {
+      setIsTransitioning(true);
+      const tOut = setTimeout(() => {
+        resetSequence();
+        setDisplayedCategory(category);
+        setIsTransitioning(false);
+        setTimeout(() => startSequence(), 100);
+      }, 500);
+      return () => clearTimeout(tOut);
+    }
+  }, [category, displayedCategory.id]);
 
-  <p class="text-lg md:text-xl font-light mb-6">
-    This section is a living technical resource that will grow over time. Here you will find the latest advances, verified by scientific papers and real‑world evidence, along with practical tools to make informed decisions. Whether you need to choose materials, compare photovoltaic systems, or calculate exact savings, you will get clear, data‑driven answers.
-  </p>
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.ENQUIRY) setStage("gallery");
+  }, [displayedCategory.name]);
 
-  <p class="text-lg md:text-xl font-light mb-6">
-    As an architect, I will continuously update this space with new regulations, emerging research, and real‑case insights. My goal is to help you understand not only what works, but exactly how much you can save, and why.
-  </p>
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.PROJECT_JOURNEY) {
+      setShowGalleryItems(true);
+      setStage("gallery");
+    }
+  }, [displayedCategory.name]);
 
-  <p class="text-lg md:text-xl font-light mb-12">
-    Let’s build knowledge together, branch by branch.
-  </p>
+  // Forzar visibilidad inmediata para Technology
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.TECHNOLOGY) {
+      setStage("gallery");
+      setShowGalleryItems(true);
+    }
+  }, [displayedCategory.name]);
 
-  <div class="my-8 p-4 bg-gray-50 rounded-lg text-center">
-    <p class="text-base font-light">
-      This section is regularly updated with new articles, policy analysis, and summaries of scientific papers.
-    </p>
-    <p class="mt-4">
-      <a href="#enquiry" class="inline-block bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Contact us</a>
-    </p>
-  </div>
-</div>`;
+  if (!isActive) return null;
 
-export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
+  const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
+  const isHomeSection = displayedCategory.name === StudioSection.HOME;
+  const isUrbanSection = displayedCategory.name === StudioSection.URBANISM;
+  const isDesignSection = displayedCategory.name === StudioSection.DESIGN;
+  const isArchitectureSection = displayedCategory.name === StudioSection.ARCHITECTURE;
+  const isProjectSupportSection = displayedCategory.name === StudioSection.PROJECT_SUPPORT;
+  const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE;
+  const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
+  const isProjectJourney = displayedCategory.name === StudioSection.PROJECT_JOURNEY;
+  const isTechnology = displayedCategory.name === StudioSection.TECHNOLOGY;
 
-export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
+  const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
-export const CATEGORIES: CategoryGroup[] = [
-  // HOME
-  {
-    id: 'home',
-    name: StudioSection.HOME,
-    description: `Turning ideas into reality, your vision is our purpose...`,
-    imageUrl: '',
-    projects: []
-  },
+  // ============================
+  // Lógica de subida de archivos (ENQUIRY)
+  // ============================
+  const uploadFiles = (files: File[]) => {
+    if (!files?.length) return;
+    setIsUploading(true);
+    const initial: UploadedItem[] = files.map((f) => ({
+      id: fileId(f),
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      progress: 0,
+      status: "uploading",
+    }));
+    setItems((prev) => [...prev, ...initial]);
 
-  // TECHNOLOGY
-  {
-    id: 'technology',
-    name: StudioSection.TECHNOLOGY,
-    description: technologyDescription,
-    imageUrl: '',
-    projects: []
-  },
+    const xhr = new XMLHttpRequest();
+    const fd = new FormData();
+    files.forEach((f) => fd.append("files[]", f));
 
-  // PROJECT JOURNEY
-  {
-    id: 'project_journey',
-    name: StudioSection.PROJECT_JOURNEY,
-    description: '',
-    imageUrl: '',
-    projects: []
-  },
+    xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id) ? { ...it, progress: pct } : it
+        )
+      );
+    };
 
-  // ARCHITECTURE
-  {
-    id: 'arch',
-    name: StudioSection.ARCHITECTURE,
-    description: architectureDescription,
-    imageUrl: '',
-    projects: [
-      {
-        id: 'a8',
-        title: 'House Extension',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'A house extension that wraps around the existing structure, creating fluid and luminous spaces that integrate harmoniously with the outdoor environment, redefining modern living.',
-        additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256227/Proposal_Section_1_eukhba.jpg',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256234/Proposal_3d_u184de.jpg',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934572/PHOTO-2026-01-20-15-08-45-2_n2j93c.jpg',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769254262/Kitchen_4_qsxvpt.jpg',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256248/Elevation1_xbskva.png',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1769256264/Plan_View1_bxocj1.png'
-        ]
-      },
-      {
-        id: 'a4',
-        title: 'Detached & Semidetached Houses',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769253155/Semi-detached_hosue_cw3nxk.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'Residential projects focused on modern living spaces for single-family and semi-detached houses, combining comfort with contemporary design principles.',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1770298809/Adosadas_mhjmwn.png']
-      },
-      {
-        id: 'a9',
-        title: 'Residential Apartment Block',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768729189/120_Plurifamiliar_house_p44qfg.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'City living, thoughtfully designed. This apartment block balances density with comfort, creating homes that feel spacious, work beautifully, and fit their urban context..',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768731448/120_Plurifamiliar_house_2_ur0hav.png']
-      },
-      {
-        id: 'a1',
-        title: 'Police Station',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769428801/Polcie_Station_o79qbe.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'Security with civic pride. A contemporary police station that opens up to the community – defined by its iconic red facade, precise spatial layout, and a design that feels both authoritative and welcoming',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768642740/Police_Station_4_s0qdrs.png']
-      },
-      {
-        id: 'a11',
-        title: 'Community Centre',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769242331/Enhance_the_realism_bsvkpa.png',
-        category: StudioSection.ARCHITECTURE,
-        description: "A space that bends to your community's needs. Flexible rooms that work for small meetings or large events, with excellent acoustics and all the essential services – designed for connection, not compromise",
-        useAiInsight: false,
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769246925/centro_civico_1_ysdssk.png']
-      },
-      {
-        id: 'a10',
-        title: 'Office Building',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768726361/Edif_Edimar_1_tzg8su.png',
-        category: StudioSection.ARCHITECTURE,
-        description: 'A modern office building defined by functional design and spatial efficiency - integrating contemporary workspaces with a distinctive urban presence.',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768726518/Edificio_EDIMAR_45_cooijm.jpg']
-      },
-      {
-        id: 'a5',
-        title: 'Nursery',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768676962/08-07-31_14_vypbmt.jpg',
-        category: StudioSection.ARCHITECTURE,
-        description: 'A place to grow, play, and discover. This vibrant nursery is built around natural light and adaptable spaces - creating a nurturing environment where early development happens naturally.',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768724382/Interior_int2_j7x72k.png']
+    xhr.onload = () => {
+      const ok = xhr.status >= 200 && xhr.status < 300;
+      const raw = xhr.responseText || "";
+      let json: any = null;
+      try { json = JSON.parse(raw); } catch { json = null; }
+      if (!ok || !Array.isArray(json)) {
+        setItems((prev) =>
+          prev.map((it) =>
+            initial.some((i) => i.id === it.id)
+              ? { ...it, status: "error", error: "Invalid server response" }
+              : it
+          )
+        );
+        setIsUploading(false);
+        return;
       }
-    ]
-  },
+      const byName = new Map<string, { url?: string; error?: boolean }>();
+      json.forEach((r: any) => {
+        if (r && typeof r === "object" && typeof r.name === "string") {
+          byName.set(r.name, { url: r.url, error: !!r.error });
+        }
+      });
+      setItems((prev) =>
+        prev.map((it) => {
+          if (!initial.some((i) => i.id === it.id)) return it;
+          const safe = it.name.replace(/[^A-Za-z0-9._-]/g, "_");
+          const r = byName.get(safe);
+          if (!r) return { ...it, status: "error", error: "File missing" };
+          if (r.error) return { ...it, status: "error", error: "Upload failed" };
+          return { ...it, status: "uploaded", progress: 100, url: r.url };
+        })
+      );
+      setIsUploading(false);
+    };
 
-  // DESIGN
-  {
-    id: 'design',
-    name: StudioSection.DESIGN,
-    description: designPhilosophy,
-    imageUrl: '',
-    projects: [
-      { id: 'd1', title: '', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768940290/Irsham_dumpx3.png', category: StudioSection.DESIGN },
-      { id: 'd2', title: 'Modern Architectural Vision', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246957/Edit_the_previous_im_f8flks.png', category: StudioSection.DESIGN },
-      { id: 'd4', title: '', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769696194/Police_Station_2_p4fw4q.png', category: StudioSection.DESIGN }
-    ]
-  },
+    xhr.onerror = () => {
+      setItems((prev) =>
+        prev.map((it) =>
+          initial.some((i) => i.id === it.id)
+            ? { ...it, status: "error", error: "Network error" }
+            : it
+        )
+      );
+      setIsUploading(false);
+    };
 
-  // URBANISM
-  {
-    id: 'urban',
-    name: StudioSection.URBANISM,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
-      <ul class="pt-6 space-y-3 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
-        <li>• <span class="font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments</li>
-        <li>• <span class="font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing</li>
-        <li>• <span class="font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations</li>
-      </ul>
-    </div>`,
-    imageUrl: '',
-    projects: [
-      {
-        id: 'u3',
-        title: 'Urbanisation Project A',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768755870/Urbanisation3_w24ins.png',
-        category: StudioSection.URBANISM,
-        description: 'Comprehensive urban planning and development with multiple views and approaches, including paving and landscape design.',
-        additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770443971/Urbanisation02_z4mn6s.png',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770442038/Paviment_1_p5gdl4.png',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770451143/Ducts_z8oncn.png'
-        ]
-      },
-      {
-        id: 'u6',
-        title: 'Transformer Substation & Urban Park',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770444850/transformer_substation_agnlzu.png',
-        category: StudioSection.URBANISM,
-        description: 'Landscape integration of a transformer substation, minimising its visual impact in urban and rural environments, complemented by the creation of an urban park with sustainable design elements and multifunctional spaces for the community.',
-        additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1770407387/Gemini_Generated_Image_jo8e2fjo8e2fjo8e_1_y4hvfn.png']
-      },
-      {
-        id: 'u8',
-        title: 'Urbanisation Project C & Sanitation Profiles',
-        location: '',
-        year: '',
-        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770445675/Urbanisation01_aj7q3o.png',
-        category: StudioSection.URBANISM,
-        description: 'Urban design focusing on the aesthetics and functionality of public spaces, including detailed profiles for urban sanitation systems.',
-        additionalImages: [
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770447568/urban_sanitation_profiles_gtsapv.jpg',
-          'https://res.cloudinary.com/dwealmbfi/image/upload/v1770448383/urban_sanitation_profiles_2_ujmjpm.jpg'
-        ]
+    xhr.open("POST", UPLOAD_ENDPOINT, true);
+    xhr.withCredentials = false;
+    xhr.send(fd);
+  };
+
+  const onDropFiles = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const files = e.dataTransfer?.files ? Array.from(e.dataTransfer.files) : [];
+    if (files.length) uploadFiles(files);
+  };
+
+  const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target?.files ? Array.from(e.target.files) : [];
+    if (files.length) uploadFiles(files);
+    if (e.currentTarget) e.currentTarget.value = "";
+  };
+
+  const removeItem = (id: string) => setItems((prev) => prev.filter((it) => it.id !== id));
+  const clearErrored = () => setItems((prev) => prev.filter((it) => it.status !== "error"));
+  const fileUrls = items.filter((it) => it.status === "uploaded" && it.url).map((it) => it.url!);
+
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isUploading) return;
+    setIsSending(true);
+    const success = await sendProjectEnquiry({
+      name: formData.name,
+      email: formData.email,
+      message: formData.message,
+      fileUrls,
+    });
+    if (success) {
+      setEnquiryStep(4);
+      setTimeout(() => setFormData({ name: "", email: "", message: "" }), 2000);
+    }
+    setIsSending(false);
+  };
+
+  const navigateToEnquiry = () => {
+    if (onNavigateToEnquiry) {
+      onNavigateToEnquiry();
+    } else {
+      const enquirySection = document.getElementById("enquiry");
+      if (enquirySection) {
+        enquirySection.scrollIntoView({ behavior: "smooth" });
+      } else {
+        const enquiryNav = Array.from(document.querySelectorAll('nav button, a')).find(
+          (el) => el.textContent?.trim() === "Enquiry"
+        ) as HTMLElement;
+        if (enquiryNav) enquiryNav.click();
+        else console.warn("No se pudo navegar a Enquiry");
       }
-    ]
-  },
+    }
+  };
 
-  // STRUCTURE
-  {
-    id: 'struct',
-    name: StudioSection.STRUCTURE,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
-      <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
-        <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
-        <li>• <span class="font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
-        <li>• <span class="font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
-      </ul>
-    </div>`,
-    imageUrl: '',
-    projects: [
-      { id: 's4', title: 'Solar thermal panels', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770139360/Designer_2_botwja.png', category: StudioSection.STRUCTURE, description: 'Our work spans the full spectrum of building‑services engineering and structural pre‑design.' },
-      { id: 's6', title: 'Water supply calculation', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770140156/Water_u4ztb0.png', category: StudioSection.STRUCTURE, description: 'Technical calculation and modeling for domestic and commercial water supply systems.' },
-      { id: 's7', title: 'Foul drainage system', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770140488/Foul_Drainage_System_kybrun.png', category: StudioSection.STRUCTURE, description: 'Design and sizing of foul water management networks.' },
-      { id: 's8', title: 'HVAC', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770140867/HVAC_dnnhqd.png', category: StudioSection.STRUCTURE, description: 'Comprehensive design and modeling of Heating, Ventilation, and Air Conditioning systems.' },
-      { id: 's9', title: 'PV Systems', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770141242/Electricity_dql4qm.png', category: StudioSection.STRUCTURE, description: 'Design and implementation of Photovoltaic systems for sustainable energy generation.' },
-      { id: 's10', title: 'Thermal Load', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770141835/thermal_load_dnffmx.png', category: StudioSection.STRUCTURE, description: 'Technical analysis and calculation of thermal energy transfer within building environments.' },
-      { id: 's11', title: 'Fire Safety Systems', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770142197/Fire_safe_Systems_naspne.png', category: StudioSection.STRUCTURE, description: 'Specialized design of integrated fire protection and safety systems.' },
-      { id: 's12', title: 'Sound Insulation Analysis', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770143323/sound_insulation_Analisys_g3fg9i.png', category: StudioSection.STRUCTURE, description: 'Comprehensive acoustic modeling and sound insulation analysis.' },
-      { id: 's5', title: 'Complete Structural Calculations', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769257170/Structure_dvq57l.png', category: StudioSection.STRUCTURE, description: 'Development of preliminary structural schemes and sizing pre-calculations.' }
-    ]
-  },
+  // ============================
+  // RENDER PRINCIPAL
+  // ============================
+  return (
+    <div
+      className={`fixed inset-0 w-full transition-opacity duration-500 ${
+        isTransitioning ? "opacity-0" : "opacity-100"
+      } bg-transparent`}
+    >
+      {isEnquiry && (
+        <div className="absolute inset-0 z-20 overflow-hidden">
+          <img
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1769967857/make_the_background_2_xwqmiu.png"
+            alt="Enquiry Background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+      )}
 
-  // PROJECT SUPPORT
-  {
-    id: 'support',
-    name: StudioSection.PROJECT_SUPPORT,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Through companies such as Sir Robert McAlpine (Logistics & Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio.</p>
-      <p class="text-lg md:text-xl font-light pt-6">We specify mobile and fixed cranes for material delivery, site goods and personnel hoists, and prepare all necessary project documentation for windows and curtain wall systems.</p>
-    </div>`,
-    imageUrl: '',
-    projects: [
-      { id: 'ps1', title: 'Elizabeth Tower', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768648397/Elisabeth_Tower_xfw0ya.jpg', category: StudioSection.PROJECT_SUPPORT, additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769798570/WP_20170721_13_54_24_Pro_tkmlws.jpg'] },
-      { id: 'ps4', title: 'U.S. Embassy London', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768668065/EEUU_Londond_Emabassy_apyxqf.jpg', category: StudioSection.PROJECT_SUPPORT, description: 'Detailed architectural and structural support for the U.S. Embassy in London.' },
-      { id: 'ps5', title: 'Battersea Power Station', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769799148/Battersea_Power_Station_mphsuo.png', category: StudioSection.PROJECT_SUPPORT, description: 'Comprehensive project support for the iconic Battersea Power Station redevelopment.' },
-      { id: 'ps6', title: 'Bloomberg Building, London', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769799811/Bloomberg_cbyvac.png', category: StudioSection.PROJECT_SUPPORT, description: 'Architectural and technical support for the Bloomberg European Headquarters.', additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768668856/Bloomberg_2_dxkflf.jpg'] },
-      { id: 'ps7', title: 'Victoria Gate', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769801088/Victoria_Gate_hhox8n.png', category: StudioSection.PROJECT_SUPPORT, description: 'Project support for Victoria Gate, a significant retail and leisure development.' },
-      { id: 'ps8', title: "Chetham's Concert Hall, Manchester", location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769801515/Chetham_s_Concert_Hall_Manachester_nmeifd.png', category: StudioSection.PROJECT_SUPPORT, description: "Technical project support for Chetham's Concert Hall, Manchester." },
-      { id: 'ps9', title: 'London Fruit & Wool Exchange, London', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769802571/London_Fruit_Wool_Exchange._London_l95tke.png', category: StudioSection.PROJECT_SUPPORT, description: 'Project support for the redevelopment of the historic London Fruit & Wool Exchange.' },
-      { id: 'ps10', title: '110 Liverpool Square, London', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768669590/110_Liverpool_Square_g8ndux.jpg', category: StudioSection.PROJECT_SUPPORT, description: 'Architectural support for the commercial development at 110 Liverpool Square, London.' },
-      { id: 'ps11', title: 'Chasse Farm Hospital', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768672929/Chase_Farm_Hospital_do7epf.jpg', category: StudioSection.PROJECT_SUPPORT, description: 'Structural and BIM support for Chase Farm Hospital.' },
-      { id: 'ps12', title: 'Victoria Square, Birmingham', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769804578/Victoria_Square._Birmingham_sji346.png', category: StudioSection.PROJECT_SUPPORT, description: 'Project support for the urban revitalization of Victoria Square in Birmingham.' },
-      { id: 'ps3', title: 'Wimbledon Court No. 1', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768650449/Wimbledon_Court_1_n21un7.png', category: StudioSection.PROJECT_SUPPORT, description: 'Specialized support for the renovation and technical upgrades of Wimbledon Court No. 1.', additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1768650457/Wimbledon_Court_1-2_pp2ft6.jpg', 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769784896/Wimbledom_4_gkvyjb.png'] },
-      { id: 'ps2', title: 'University of Cambridge', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769695638/Portfolio_David_Bonilla-page-009_m21ffp.jpg', category: StudioSection.PROJECT_SUPPORT, description: 'Technical project support and high-precision modeling for the University of Cambridge.', additionalImages: ['https://res.cloudinary.com/dwealmbfi/image/upload/v1769696561/University_of_Cambridge_2_gtx09z.png', 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769696573/University_of_Cambridge_3_euj3sq.png', 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769696585/University_of_Cambridge_6_epzmqk.png'] }
-    ]
-  },
+      {/* HEADER (Aesthetic A) */}
+      <div
+        className={`fixed z-[40] flex items-center transition-all ${
+          stage === "intro"
+            ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-7xl px-10 justify-center"
+            : "top-24 left-10 translate-x-0 translate-y-0 pointer-events-none opacity-0 justify-start"
+        }`}
+        style={{
+          transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+          transitionDuration: "1000ms",
+          width: stage === "intro" ? "100%" : "calc(100% - 80px)",
+        }}
+      >
+        <div
+          className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
+          style={{
+            transitionTimingFunction: "cubic-bezier(0.77, 0, 0.175, 1)",
+            transitionDuration: "1000ms",
+            transform: stage === "gallery" ? `scale(${scaleTarget})` : "scale(1)",
+            transformOrigin: "left",
+          }}
+        >
+          <div className="flex items-center gap-3 shrink-0">
+            <h2
+              className={`text-9xl font-light tracking-tighter transition-all ${
+                isEnquiry ? "text-white" : "text-black"
+              } ${showDB ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}
+              style={{
+                fontSize: typeof window !== "undefined" && window.innerWidth >= 768 ? "12rem" : "9rem",
+                transitionTimingFunction: "cubic-bezier(0.23, 1, 0.32, 1)",
+                transitionDuration: "1000ms",
+              }}
+            >
+              DB
+            </h2>
+            <span
+              className={`text-6xl md:text-8xl font-thin transition-all ${
+                isEnquiry ? "text-gray-300" : "text-gray-400"
+              } ${showPlus ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-0 rotate-45"}`}
+              style={{ transitionDuration: "700ms" }}
+            >
+              +
+            </span>
+          </div>
+          <div
+            className="transition-all ease-out overflow-hidden flex-1"
+            style={{
+              transitionDuration: "700ms",
+              transform: showName ? "translateX(0)" : "translateX(-48px)",
+              opacity: showName ? 1 : 0,
+            }}
+          >
+            {isUrbanSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
+                  Masterplanning +
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  Urban
+                </span>
+              </div>
+            ) : isDesignSection ? (
+              <div className="flex flex-col items-start justify-center">
+                <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light leading-none block ${isEnquiry ? "text-white" : "text-black"}`}>
+                  Design
+                </span>
+                <span className="text-3xl md:text-5xl tracking-[0.15em] font-light text-gray-400 mt-4 leading-none block">
+                  &amp; Management
+                </span>
+              </div>
+            ) : (
+              <span className={`text-4xl md:text-6xl tracking-[0.15em] font-light block leading-none ${isEnquiry ? "text-white" : "text-black"}`}>
+                {isHomeSection ? "" : displayedCategory.name}
+              </span>
+            )}
+          </div>
+        </div>
+        {displayedCategory.description &&
+          !isHomeSection &&
+          !isDesignSection &&
+          !isEnquiry &&
+          !isProjectSupportSection &&
+          !isStructureSection &&
+          !isBehindDBSection &&
+          !isArchitectureSection && (
+            <div
+              className={`transition-all ease-out overflow-hidden flex-1 ${
+                stage === "gallery"
+                  ? "ml-6 md:ml-10 border-l border-black/20 pl-6 md:pl-10 max-w-3xl"
+                  : "pointer-events-none w-0 h-0"
+              }`}
+              style={{
+                transitionDuration: "1000ms",
+                opacity: stage === "gallery" && showDesc ? 1 : 0,
+                transform: stage === "gallery" && showDesc ? "translateX(0)" : "translateX(-40px)",
+              }}
+            >
+              {isUrbanSection ? (
+                <span className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line">
+                  {urbanMasterplanningHeaderDescription}
+                </span>
+              ) : (
+                <div
+                  className="font-light text-gray-400 leading-tight tracking-tight italic text-sm md:text-base lg:text-lg whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
+                />
+              )}
+            </div>
+          )}
+      </div>
 
-  // BEHIND DB
-  {
-    id: 'behinddb',
-    name: StudioSection.BEHIND_DB,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence.</p>
-      <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla doesn't just design buildings. He bridges the gap between creative vision and technical reality. Qualified as an Architect at Master's level (EQF 7 / RQF 7), registered with ARB and RIBA, and holding a UK Master's in BIM Management from Middlesex University, David brings both depth and breadth to every project.</p>
-      <p class="text-lg md:text-xl font-light pt-6">That multidisciplinary foundation means he can develop MEP systems for any building type, produce structural pre‑design calculations, and offer specialised urban planning input – all in‑house. The result? Clear, efficient, well‑coordinated solutions where design intent, technical performance, and your goals move forward together.</p>
-    </div>`,
-    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
-    projects: []
-  },
+      {/* CONTENEDOR DE SCROLL */}
+      <div
+        ref={scrollContainerRef}
+        className={`h-full w-full overflow-y-auto custom-scroll transition-opacity duration-1000 ${
+          stage === "gallery" ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        style={{
+          scrollSnapType: isProjectJourney ? "y mandatory" : "auto",
+          scrollBehavior: "smooth",
+          paddingTop: isProjectJourney ? "0px" : "100px",
+        }}
+      >
+        <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
+          {isEnquiry ? (
+            <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
+              <div className="relative z-[60]">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+                  <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
+                    <h3 className="text-3xl md:text-4xl font-light leading-tight">Contact<br />Information</h3>
+                    <div className="mt-8 space-y-6 text-white/80">
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Office</div><div className="mt-2 text-base leading-6">108 Kestrel Road, Corby,<br />Northamptonshire, England</div></div>
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Telephone</div><div className="mt-2 text-base">+44 07955018937</div></div>
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Email</div><a href="mailto:db@dbsdesigner.com" className="mt-2 block text-base text-red-400 hover:text-red-300">db@dbsdesigner.com</a></div>
+                    </div>
+                  </aside>
+                  <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
+                    <form onSubmit={handleEnquirySubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Full Name</label><input type="text" required placeholder="John Doe" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} disabled={isSending} /></div>
+                        <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Email Address</label><input type="email" required placeholder="john@example.com" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} disabled={isSending} /></div>
+                      </div>
+                      <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Project Brief</label><textarea required placeholder="Tell us about your architectural vision..." className="w-full h-44 bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} disabled={isSending} /></div>
+                      <div>
+                        <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">Attachments</label>
+                        <div className={["rounded-xl border-2 border-dashed cursor-pointer", dragActive ? "border-red-500 bg-red-500/10" : "border-white/20 bg-neutral-700/40", "p-6 md:p-8 transition-colors"].join(" ")} onClick={() => !isSending && fileInputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }} onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }} onDrop={onDropFiles}>
+                          <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
+                            <div className="p-3 rounded-full bg-white/10 border border-white/10"><Upload className="w-6 h-6 text-white/80" /></div>
+                            <div className="text-sm"><span className="text-white">Drag &amp; drop files here</span> <span className="text-white/60">or</span> <span className="text-red-400 underline">click to browse</span></div>
+                            <div className="text-xs text-white/50">Blueprints, PDFs, images… Large files supported.</div>
+                            {(isUploading || items.some((it) => it.status === "uploading")) && <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">Uploading…</div>}
+                          </div>
+                          <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onSelectFiles} disabled={isSending} />
+                        </div>
+                        {items.length > 0 && (
+                          <div className="mt-5 space-y-3">
+                            {items.map((it) => (
+                              <div key={it.id} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="mt-0.5">{it.status === "uploaded" ? <CheckCircle className="w-4 h-4 text-green-400" /> : it.status === "error" ? <AlertCircle className="w-4 h-4 text-red-400" /> : <FileIcon className="w-4 h-4 text-white/70" />}</div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2"><div className="text-sm text-white/90 truncate">{it.name}</div><div className="text-[11px] text-white/50">· {formatBytes(it.size)}</div></div>
+                                    {it.status === "uploading" && (<div className="mt-2"><div className="w-full bg-white/10 rounded-full h-2 overflow-hidden"><div className="h-2 bg-red-500 transition-all" style={{ width: `${it.progress}%` }} /></div><div className="text-[11px] text-white/60 mt-1">{it.progress}%</div></div>)}
+                                    {it.status === "error" && <div className="text-xs text-red-400 mt-2">{it.error || "Upload failed"}</div>}
+                                    {it.status === "uploaded" && it.url && (<div className="mt-2 flex items-center gap-3"><a href={it.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs text-red-300 hover:text-red-200 underline"><Link2 className="w-3.5 h-3.5" />Open file</a><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(it.url!); } catch {} }} className="text-xs text-white/60 hover:text-white">Copy URL</button></div>)}
+                                  </div>
+                                  <button type="button" onClick={() => removeItem(it.id)} className="text-white/40 hover:text-red-400 transition-colors"><CloseIcon className="w-4 h-4" /></button>
+                                </div>
+                              </div>
+                            ))}
+                            {items.some((x) => x.status === "error") && (<div className="pt-1"><button type="button" onClick={clearErrored} className="text-xs text-white/60 hover:text-white underline">Clear failed uploads</button></div>)}
+                          </div>
+                        )}
+                      </div>
+                      <button type="submit" disabled={isSending || isUploading} className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span className="text-xs font-bold tracking-[0.4em] uppercase">{isSending ? "Transmitting..." : isUploading ? "Uploading…" : "Submit to db+"}</span>
+                        {isSending || isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                      </button>
+                      {enquiryStep >= 4 && (
+                        <div className="py-16 flex flex-col items-center text-center space-y-6">
+                          <div className="p-5 bg-white rounded-full"><CheckCircle className="w-14 h-14 text-red-600" /></div>
+                          <div><h4 className="text-2xl font-light text-white">Vision Received</h4><p className="text-white/70 mt-2 leading-tight max-w-md">Your project details and documents have been submitted to <span className="text-red-400">db@dbsdesigner.com</span>. We will review your vision and contact you shortly.</p></div>
+                        </div>
+                      )}
+                    </form>
+                  </section>
+                </div>
+              </div>
+            </div>
+          ) : isBehindDBSection ? (
+            <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                </div>
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10">
+                  <img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" style={{ aspectRatio: typeof window !== "undefined" && window.innerWidth < 768 ? "1/1" : "unset" }} loading="lazy" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+              {/* Para Technology mostramos el árbol además de la descripción */}
+              {isTechnology && (
+                <div className="mb-12">
+                  <div
+                    className="text-black font-normal text-lg md:text-xl leading-tight px-10"
+                    dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
+                  />
+                  <div className="mt-8 px-10">
+                    <TechnologyTree onNavigate={(slug) => {
+                      console.log("Navigate to:", slug);
+                    }} />
+                  </div>
+                </div>
+              )}
+              {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
+                <div className="flex flex-col gap-12">
+                  {isArchitectureSection && (
+                    <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
+                      <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                        <div>{/* Architecture content */}</div>
+                      </div>
+                    </div>
+                  )}
+                  {isProjectJourney && (
+                    <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
+                  )}
+                  {!isProjectJourney && !isTechnology && (
+                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  )}
+                </div>
+              )}
+              {!isProjectJourney && !isTechnology && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-10">
+                    {displayedCategory.projects.map((project) => (
+                      <ProjectCard key={project.id} project={project} onClick={onProjectClick} currentSectionName={currentSectionName} />
+                    ))}
+                  </div>
+                  {isDesignSection && (
+                    <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto px-10">
+                      <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                        <div className="text-black leading-tight" dangerouslySetInnerHTML={{ __html: isoContent }} />
+                      </div>
+                      <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                        <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/Gemini_Generated_Image_867rii867rii867r_czfvu7.png" alt="Design & Management Vision" className="w-full h-auto object-cover" loading="lazy" />
+                      </div>
+                    </div>
+                  )}
+                  {isUrbanSection && (
+                    <div className="mt-32 mb-16 max-w-5xl mx-auto px-10">
+                      <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
+                        <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png" alt="Urban Masterplanning Drawing" className="w-full h-auto object-cover" loading="lazy" />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-  // ENQUIRY
-  {
-    id: 'enquiry',
-    name: StudioSection.ENQUIRY,
-    description: '',
-    imageUrl: '',
-    projects: []
-  }
-];
-
-export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
-  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
-);
+export default SectionView;
