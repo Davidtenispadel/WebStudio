@@ -75,13 +75,21 @@ export const technologyDescription = `
   <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
   
   <p class="text-lg md:text-xl font-light mb-6">
-    Una casa contemporánea no es solo un espacio habitable. Es un sistema tecnológico complejo donde convergen la envolvente arquitectónica, los sistemas energéticos, los materiales y la climatización.
+    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control all converge.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-12">
-    Esta sección es un recurso técnico vivo que irá creciendo con el tiempo, basado en mi experiencia como arquitecto, en normativas actualizadas y en evidencia científica.
+    This section is a living technical resource that will grow over time. Here, I will compile the latest advances – grounded in the rigour of scientific papers and real‑world evidence – and provide you with practical tools to make informed decisions. Whether you need to choose the most suitable materials for your project or compare photovoltaic systems with exact payback figures, you will find clear, data‑driven answers.
   </p>
 
+<p class="text-lg md:text-xl font-light mb-12">
+    As an architect, I will update this space continuously with updated regulations, emerging research, and real‑case insights. My goal is to help you understand not only what works, but exactly how much you can save, and why.
+  </p>  
+  
+<p class="text-lg md:text-xl font-light mb-12">
+   Let’s build knowledge together, branch by branch..
+  </p> 
+  
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
     <div class="border-l-4 border-green-500 pl-4 py-2">
       <h3 class="font-bold text-xl">⚡ Green Energy</h3>
