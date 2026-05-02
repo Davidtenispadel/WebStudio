@@ -1,4 +1,4 @@
-import { Project, CategoryGroup, StudioSection } from './types';
+import { Project, CategoryGroup, StudioSection } from '../types';
 
 export const isoContent = `
 <div class="text-black leading-tight">
