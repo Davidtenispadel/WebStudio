@@ -70,51 +70,35 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </div>
 </div>`;
 
+// TECHNOLOGY SECTION – sin iconos, texto en inglés, enlace a enquiry
 export const technologyDescription = `
 <div class="text-black leading-tight">
   <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
   
   <p class="text-lg md:text-xl font-light mb-6">
-    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control all converge.
+    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control converge.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    This section is a living technical resource that will grow over time. Here you will find the latest advances, verified by scientific papers and real‑world evidence, along with practical tools to make informed decisions. Whether you need to choose materials, compare photovoltaic systems, or calculate exact savings, you will get clear, data‑driven answers.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    As an architect, I will continuously update this space with new regulations, emerging research, and real‑case insights. My goal is to help you understand not only what works, but exactly how much you can save, and why.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-12">
-    This section is a living technical resource that will grow over time. Here, I will compile the latest advances – grounded in the rigour of scientific papers and real‑world evidence – and provide you with practical tools to make informed decisions. Whether you need to choose the most suitable materials for your project or compare photovoltaic systems with exact payback figures, you will find clear, data‑driven answers.
+    Let’s build knowledge together, branch by branch.
   </p>
 
-<p class="text-lg md:text-xl font-light mb-12">
-    As an architect, I will update this space continuously with updated regulations, emerging research, and real‑case insights. My goal is to help you understand not only what works, but exactly how much you can save, and why.
-  </p>  
-  
-<p class="text-lg md:text-xl font-light mb-12">
-   Let’s build knowledge together, branch by branch..
-  </p> 
-  
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-    <div class="border-l-4 border-green-500 pl-4 py-2">
-      <h3 class="font-bold text-xl">⚡ Green Energy</h3>
-      <p class="text-sm font-light">Solar, eólica, geotermia, biomasa. Análisis técnico y viabilidad real.</p>
-    </div>
-    <div class="border-l-4 border-gray-500 pl-4 py-2">
-      <h3 class="font-bold text-xl">🧱 Materials & Insulation</h3>
-      <p class="text-sm font-light">Aislantes, maderas técnicas, materiales reciclados y avanzados.</p>
-    </div>
-    <div class="border-l-4 border-red-500 pl-4 py-2">
-      <h3 class="font-bold text-xl">🔥 HVAC Systems</h3>
-      <p class="text-sm font-light">Calefacción, refrigeración, VMC. Eficiencia y confort térmico.</p>
-    </div>
-    <div class="border-l-4 border-purple-500 pl-4 py-2">
-      <h3 class="font-bold text-xl">📐 Structural Systems</h3>
-      <p class="text-sm font-light">Madera, sistemas mixtos, dimensionamiento estructural eficiente.</p>
-    </div>
+  <div class="my-8 p-4 bg-gray-50 rounded-lg text-center">
+    <p class="text-base font-light">
+      This section is regularly updated with new articles, policy analysis, and summaries of scientific papers.
+    </p>
+    <p class="mt-4">
+      <a href="#enquiry" class="inline-block bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Contact us</a>
+    </p>
   </div>
-
-  <hr class="my-12 border-black/10" />
-
-  <p class="text-center text-sm font-light text-gray-500">
-    Esta sección se actualizará periódicamente con nuevos artículos, análisis de normativa y síntesis de papers científicos.<br/>
-    ¿Quieres que profundice en algún tema específico? <a href="#enquiry" class="text-red-500 hover:underline">Contáctame</a>.
-  </p>
 </div>`;
 
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
