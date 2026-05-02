@@ -56,7 +56,6 @@ const Header: React.FC<HeaderProps> = ({
         setIsMenuOpen(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
@@ -104,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  // Ajustes de ancho (35% vertical, 45% horizontal)
+  // Ajustes responsivos
   const menuWidth = isLandscape ? '45%' : '35%';
   const menuMaxWidth = isLandscape ? '260px' : '220px';
   const minWidth = '180px';
@@ -134,32 +133,25 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {/* Technology - PRIMERO */}
+            {/* Technology - siempre primero */}
             <button
-              onClick={() => {
-                playClickSound();
-                onNavClick(StudioSection.TECHNOLOGY);
-              }}
+              onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
               className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
             >
               Technology
             </button>
-            {/* Resto de categorías (excepto Home y Technology) */}
-            {CATEGORIES.map(
-              (category) =>
-                category.name !== 'Home' && category.name !== 'Technology' && (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      playClickSound();
-                      onNavClick(category.name);
-                    }}
-                    className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                  >
-                    {category.name}
-                  </button>
-                )
-            )}
+            {CATEGORIES.map((category) => {
+              if (category.name === 'Home' || category.name === 'Technology') return null;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => handleMenuItemClick(category.name)}
+                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+                >
+                  {category.name}
+                </button>
+              );
+            })}
           </nav>
 
           <button
@@ -172,7 +164,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE SIDE MENU */}
+      {/* MOBILE MENU */}
       <div
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
@@ -206,14 +198,14 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
-          {/* Technology - PRIMERO en móvil */}
+          {/* Technology primero en móvil */}
           <button
             onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
             onTouchStart={() => handleTouchStart(StudioSection.TECHNOLOGY)}
             onTouchEnd={() => handleTouchEnd(StudioSection.TECHNOLOGY)}
-            className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 transition-all duration-75 rounded-md bg-white text-black ${
-              activeButton === StudioSection.TECHNOLOGY ? 'scale-105 bg-white' : 'scale-100 bg-white'
-            }`}
+            className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 rounded-md bg-white text-black ${
+              activeButton === StudioSection.TECHNOLOGY ? 'scale-105' : 'scale-100'
+            } transition-all duration-75`}
             style={{
               WebkitTapHighlightColor: 'rgba(0,0,0,0)',
               touchAction: 'pan-y',
@@ -222,17 +214,15 @@ const Header: React.FC<HeaderProps> = ({
           >
             Technology
           </button>
-          
-          {/* Resto de categorías (todas) - ya no excluimos Technology porque ya está arriba */}
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
               onTouchStart={() => handleTouchStart(category.name)}
               onTouchEnd={() => handleTouchEnd(category.name)}
-              className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 transition-all duration-75 rounded-md bg-white text-black ${
-                activeButton === category.name ? 'scale-105 bg-white' : 'scale-100 bg-white'
-              }`}
+              className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 rounded-md bg-white text-black ${
+                activeButton === category.name ? 'scale-105' : 'scale-100'
+              } transition-all duration-75`}
               style={{
                 WebkitTapHighlightColor: 'rgba(0,0,0,0)',
                 touchAction: 'pan-y',
@@ -246,7 +236,7 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* OVERLAY */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
           isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
