@@ -1,4 +1,4 @@
-iimport React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 import { StudioSection } from '../types';
