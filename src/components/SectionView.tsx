@@ -4,6 +4,7 @@
  * - Enquiry: formulario funcional con subida de archivos a upload.php
  * - Resto de secciones sin cambios
  * - Se añade TechnologyTree para la sección Technology
+ * - Se fuerza la visibilidad inmediata en Technology (stage = "gallery")
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -27,7 +28,7 @@ import {
 
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
-import TechnologyTree from "./TechnologyTree"; // ← NUEVO
+import TechnologyTree from "./TechnologyTree";
 
 // ============================
 // TIPOS Y CONSTANTES
@@ -153,6 +154,14 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
+  // FORZAR visibilidad inmediata para Technology (sin esperar animación)
+  useEffect(() => {
+    if (displayedCategory.name === StudioSection.TECHNOLOGY) {
+      setStage("gallery");
+      setShowGalleryItems(true);
+    }
+  }, [displayedCategory.name]);
+
   if (!isActive) return null;
 
   const isEnquiry = displayedCategory.name === StudioSection.ENQUIRY;
@@ -164,7 +173,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE;
   const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
   const isProjectJourney = displayedCategory.name === StudioSection.PROJECT_JOURNEY;
-  const isTechnology = displayedCategory.name === StudioSection.TECHNOLOGY; // ← NUEVO
+  const isTechnology = displayedCategory.name === StudioSection.TECHNOLOGY;
 
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
@@ -406,7 +415,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           !isStructureSection &&
           !isBehindDBSection &&
           !isArchitectureSection &&
-          !isTechnology && ( // no mostrar la descripción en Technology porque usamos el árbol
+          !isTechnology && (
             <div
               className={`transition-all ease-out overflow-hidden flex-1 ${
                 stage === "gallery"
@@ -528,14 +537,14 @@ const SectionView: React.FC<SectionViewProps> = ({
               {isTechnology && (
                 <div className="mb-12">
                   <div
-                    className="text-white font-normal text-lg md:text-xl leading-tight px-10"
+                    className="text-black font-normal text-lg md:text-xl leading-tight px-10"
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
                   <div className="mt-8 px-10">
                     <TechnologyTree onNavigate={(slug) => {
                       console.log("Navegar a:", slug);
                       // Aquí puedes implementar la navegación real:
-                      // 1. Con React Router: navigate(`/${slug}`)
+                      // 1. Con React Router: navigate(\`/\${slug}\`)
                       // 2. O usando onNavClick del padre si mapeas slug a nombre de sección
                     }} />
                   </div>
@@ -554,7 +563,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
                   {!isProjectJourney && !isTechnology && (
-                    <div className="text-white font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}
                 </div>
               )}
