@@ -19,7 +19,6 @@ const Header: React.FC<HeaderProps> = ({
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
   const [isLandscape, setIsLandscape] = useState(false);
-  const [activeButton, setActiveButton] = useState<string | null>(null);
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
 
@@ -56,6 +55,7 @@ const Header: React.FC<HeaderProps> = ({
         setIsMenuOpen(false);
       }
     };
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
@@ -64,7 +64,6 @@ const Header: React.FC<HeaderProps> = ({
     playClickSound();
     onNavClick(section);
     setIsMenuOpen(false);
-    setActiveButton(null);
   };
 
   const handleMenuButtonClick = () => {
@@ -88,32 +87,19 @@ const Header: React.FC<HeaderProps> = ({
     if (isMobile) setIsMenuOpen(false);
   };
 
-  const handleTouchStart = (section: string) => {
-    setActiveButton(section);
-  };
-
-  const handleTouchEnd = (section: string) => {
-    if (activeButton === section) {
-      handleMenuItemClick(section);
-    }
-    setActiveButton(null);
-  };
-
   const navLinkColorClass = isDarkBackground
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  // Ajustes responsivos
-  const menuWidth = isLandscape ? '45%' : '35%';
-  const menuMaxWidth = isLandscape ? '260px' : '220px';
-  const minWidth = '180px';
-  const buttonPadding = isLandscape ? 'py-1.5' : 'py-2';
-  const buttonTextSize = isLandscape ? 'text-xs' : 'text-sm';
-  const buttonGap = isLandscape ? 'gap-0.5' : 'gap-1';
-  const logoSize = isLandscape ? 'text-base' : 'text-lg';
-  const logoSymbolSize = isLandscape ? 'text-xs' : 'text-sm';
-  const containerPadding = isLandscape ? 'p-2' : 'p-3';
-  const navPadding = isLandscape ? 'p-2 pt-1' : 'p-3 pt-2';
+  const menuWidth = isLandscape ? '55%' : '75%';
+  const menuMaxWidth = isLandscape ? '240px' : '280px';
+  const buttonPadding = isLandscape ? 'py-1' : 'py-2';
+  const buttonTextSize = isLandscape ? 'text-xs' : 'text-base';
+  const buttonGap = isLandscape ? 'gap-0' : 'gap-1';
+  const logoSize = isLandscape ? 'text-lg' : 'text-2xl';
+  const logoSymbolSize = isLandscape ? 'text-base' : 'text-xl';
+  const containerPadding = isLandscape ? 'p-2' : 'p-4';
+  const navPadding = isLandscape ? 'p-2 pt-1' : 'p-4 pt-3';
 
   return (
     <>
@@ -131,27 +117,34 @@ const Header: React.FC<HeaderProps> = ({
             <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
-          {/* DESKTOP NAV */}
+          {/* DESKTOP NAV - Technology al PRINCIPIO */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {/* Technology - siempre primero */}
+            {/* Technology - nuevo botón */}
             <button
-              onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
+              onClick={() => {
+                playClickSound();
+                onNavClick(StudioSection.TECHNOLOGY);
+              }}
               className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
             >
               Technology
             </button>
-            {CATEGORIES.map((category) => {
-              if (category.name === 'Home' || category.name === 'Technology') return null;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => handleMenuItemClick(category.name)}
-                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                >
-                  {category.name}
-                </button>
-              );
-            })}
+            {/* Resto de categorías (excluyendo Home y Technology) */}
+            {CATEGORIES.map(
+              (category) =>
+                category.name !== 'Home' && category.name !== 'Technology' && (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      playClickSound();
+                      onNavClick(category.name);
+                    }}
+                    className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+                  >
+                    {category.name}
+                  </button>
+                )
+            )}
           </nav>
 
           <button
@@ -164,19 +157,21 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      {/* MOBILE MENU */}
+      {/* MOBILE SIDE MENU */}
       <div
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
-          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
+          transform: isMenuOpen && isMobile
+            ? 'translateX(0)'
+            : 'translateX(-100%)',
           top: 0,
           left: 0,
           right: 'auto',
           bottom: 0,
           width: menuWidth,
           maxWidth: menuMaxWidth,
-          minWidth: minWidth,
+          minWidth: '200px',
           backgroundColor: 'white',
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -190,10 +185,10 @@ const Header: React.FC<HeaderProps> = ({
           </div>
           <button
             onClick={handleCloseMenuClick}
-            className="p-1 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
+            className="p-1.5 rounded-full hover:bg-gray-100 active:scale-90 transition-all duration-75"
             aria-label="Close menu"
           >
-            <X className="w-3 h-3" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -201,45 +196,36 @@ const Header: React.FC<HeaderProps> = ({
           {/* Technology primero en móvil */}
           <button
             onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
-            onTouchStart={() => handleTouchStart(StudioSection.TECHNOLOGY)}
-            onTouchEnd={() => handleTouchEnd(StudioSection.TECHNOLOGY)}
-            className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 rounded-md bg-white text-black ${
-              activeButton === StudioSection.TECHNOLOGY ? 'scale-105' : 'scale-100'
-            } transition-all duration-75`}
+            className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
             style={{
-              WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-              touchAction: 'pan-y',
-              userSelect: 'none',
+              WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
             }}
           >
             Technology
           </button>
+          {/* Resto de categorías */}
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
               onClick={() => handleMenuItemClick(category.name)}
-              onTouchStart={() => handleTouchStart(category.name)}
-              onTouchEnd={() => handleTouchEnd(category.name)}
-              className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 rounded-md bg-white text-black ${
-                activeButton === category.name ? 'scale-105' : 'scale-100'
-              } transition-all duration-75`}
+              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
               style={{
-                WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-                touchAction: 'pan-y',
-                userSelect: 'none',
+                WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
               }}
             >
               {category.name}
             </button>
           ))}
-          <div style={{ height: isLandscape ? 15 : 25 }} />
+          <div style={{ height: isLandscape ? 15 : 20 }} />
         </nav>
       </div>
 
-      {/* OVERLAY */}
+      {/* MOBILE OVERLAY */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
-          isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          isMenuOpen && isMobile
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
         }`}
         style={{ zIndex: 9000 }}
         onClick={handleOverlayClick}
