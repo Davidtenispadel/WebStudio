@@ -3,6 +3,7 @@
  * - Project Journey usa componente externo con botón centrado y navegación a Enquiry
  * - Enquiry: formulario funcional con subida de archivos a upload.php
  * - Resto de secciones sin cambios
+ * - Se añade TechnologyTree para la sección Technology
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -26,6 +27,7 @@ import {
 
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
+import TechnologyTree from "./TechnologyTree"; // ← NUEVO
 
 // ============================
 // TIPOS Y CONSTANTES
@@ -162,6 +164,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE;
   const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
   const isProjectJourney = displayedCategory.name === StudioSection.PROJECT_JOURNEY;
+  const isTechnology = displayedCategory.name === StudioSection.TECHNOLOGY; // ← NUEVO
 
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
@@ -402,7 +405,8 @@ const SectionView: React.FC<SectionViewProps> = ({
           !isProjectSupportSection &&
           !isStructureSection &&
           !isBehindDBSection &&
-          !isArchitectureSection && (
+          !isArchitectureSection &&
+          !isTechnology && ( // no mostrar la descripción en Technology porque usamos el árbol
             <div
               className={`transition-all ease-out overflow-hidden flex-1 ${
                 stage === "gallery"
@@ -520,6 +524,23 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+              {/* Para Technology mostramos el árbol además de la descripción */}
+              {isTechnology && (
+                <div className="mb-12">
+                  <div
+                    className="text-white font-normal text-lg md:text-xl leading-tight px-10"
+                    dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
+                  />
+                  <div className="mt-8 px-10">
+                    <TechnologyTree onNavigate={(slug) => {
+                      console.log("Navegar a:", slug);
+                      // Aquí puedes implementar la navegación real:
+                      // 1. Con React Router: navigate(`/${slug}`)
+                      // 2. O usando onNavClick del padre si mapeas slug a nombre de sección
+                    }} />
+                  </div>
+                </div>
+              )}
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
                   {isArchitectureSection && (
@@ -532,12 +553,12 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {isProjectJourney && (
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
-                  {!isProjectJourney && (
+                  {!isProjectJourney && !isTechnology && (
                     <div className="text-white font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}
                 </div>
               )}
-              {!isProjectJourney && (
+              {!isProjectJourney && !isTechnology && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-10">
                     {displayedCategory.projects.map((project) => (
