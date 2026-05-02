@@ -20,6 +20,7 @@ export interface CategoryGroup {
 
 export enum StudioSection {
   HOME = "Home",
+  TECHNOLOGY = "Technology",
   PROJECT_JOURNEY = "Project Journey",
   ARCHITECTURE = "Architecture",
   DESIGN = "Design & Management",
