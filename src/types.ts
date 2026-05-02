@@ -30,9 +30,3 @@ export interface CategoryGroup {
   imageUrl?: string;
   projects: Project[];
 }
-EOF
-
-# Añadir y commit
-git add src/types.ts
-git commit -m "Add types.ts with correct exports"
-git push origin main
