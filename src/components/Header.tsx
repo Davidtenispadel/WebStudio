@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+iimport React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
 import { CATEGORIES } from '../constants';
 import { StudioSection } from '../types';
@@ -104,7 +104,7 @@ const Header: React.FC<HeaderProps> = ({
     ? 'text-white/70 hover:text-white'
     : 'text-gray-500 hover:text-red-600';
 
-  // Menú estrecho: 35% en vertical, 45% en horizontal
+  // Ajustes de ancho (35% vertical, 45% horizontal)
   const menuWidth = isLandscape ? '45%' : '35%';
   const menuMaxWidth = isLandscape ? '260px' : '220px';
   const minWidth = '180px';
@@ -132,19 +132,19 @@ const Header: React.FC<HeaderProps> = ({
             <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
-          {/* DESKTOP NAV - Technology al principio */}
+          {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {/* Technology primero */}
+            {/* Technology - PRIMERO */}
             <button
               onClick={() => {
                 playClickSound();
-                onNavClick(StudioSection.HOUSE_TECHNOLOGY);
+                onNavClick(StudioSection.TECHNOLOGY);
               }}
               className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
             >
               Technology
             </button>
-            {/* El resto de categorías */}
+            {/* Resto de categorías (excepto Home y Technology) */}
             {CATEGORIES.map(
               (category) =>
                 category.name !== 'Home' && category.name !== 'Technology' && (
@@ -177,9 +177,7 @@ const Header: React.FC<HeaderProps> = ({
         className="fixed top-0 left-0 bg-white shadow-xl transition-transform duration-500 ease-in-out md:hidden"
         style={{
           zIndex: 10000,
-          transform: isMenuOpen && isMobile
-            ? 'translateX(0)'
-            : 'translateX(-100%)',
+          transform: isMenuOpen && isMobile ? 'translateX(0)' : 'translateX(-100%)',
           top: 0,
           left: 0,
           right: 'auto',
@@ -207,15 +205,14 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* MOBILE NAV - Technology al principio */}
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
-          {/* Technology primero */}
+          {/* Technology - PRIMERO en móvil */}
           <button
-            onClick={() => handleMenuItemClick(StudioSection.HOUSE_TECHNOLOGY)}
-            onTouchStart={() => handleTouchStart(StudioSection.HOUSE_TECHNOLOGY)}
-            onTouchEnd={() => handleTouchEnd(StudioSection.HOUSE_TECHNOLOGY)}
+            onClick={() => handleMenuItemClick(StudioSection.TECHNOLOGY)}
+            onTouchStart={() => handleTouchStart(StudioSection.TECHNOLOGY)}
+            onTouchEnd={() => handleTouchEnd(StudioSection.TECHNOLOGY)}
             className={`text-left ${buttonTextSize} font-bold tracking-[0.03em] ${buttonPadding} px-2 transition-all duration-75 rounded-md bg-white text-black ${
-              activeButton === StudioSection.HOUSE_TECHNOLOGY ? 'scale-105 bg-white' : 'scale-100 bg-white'
+              activeButton === StudioSection.TECHNOLOGY ? 'scale-105 bg-white' : 'scale-100 bg-white'
             }`}
             style={{
               WebkitTapHighlightColor: 'rgba(0,0,0,0)',
@@ -226,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({
             Technology
           </button>
           
-          {/* El resto de categorías */}
+          {/* Resto de categorías (todas) - ya no excluimos Technology porque ya está arriba */}
           {CATEGORIES.map((category) => (
             <button
               key={category.id}
@@ -252,9 +249,7 @@ const Header: React.FC<HeaderProps> = ({
       {/* MOBILE OVERLAY */}
       <div
         className={`fixed inset-0 bg-black/50 transition-opacity md:hidden ${
-          isMenuOpen && isMobile
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
+          isMenuOpen && isMobile ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         style={{ zIndex: 9000 }}
         onClick={handleOverlayClick}
