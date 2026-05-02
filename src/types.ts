@@ -1,3 +1,16 @@
+export enum StudioSection {
+  HOME = "Home",
+  TECHNOLOGY = "Technology",
+  PROJECT_JOURNEY = "Project Journey",
+  ARCHITECTURE = "Architecture",
+  DESIGN = "Design & Management",
+  URBANISM = "Masterplanning + Urban",
+  STRUCTURE = "MEP & Structure",
+  PROJECT_SUPPORT = "Project Support",
+  BEHIND_DB = "Behind DB+",
+  ENQUIRY = "Enquiry"
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -16,17 +29,4 @@ export interface CategoryGroup {
   description: string;
   imageUrl?: string;
   projects: Project[];
-}
-
-export enum StudioSection {
-  HOME = "Home",
-  TECHNOLOGY = "Technology",
-  PROJECT_JOURNEY = "Project Journey",
-  ARCHITECTURE = "Architecture",
-  DESIGN = "Design & Management",
-  URBANISM = "Masterplanning + Urban",
-  STRUCTURE = "MEP & Structure",
-  PROJECT_SUPPORT = "Project Support",
-  BEHIND_DB = "Behind DB+",
-  ENQUIRY = "Enquiry"
 }
