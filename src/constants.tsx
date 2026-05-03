@@ -70,7 +70,7 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </div>
 </div>`;
 
-// TECHNOLOGY SECTION – sin iconos, texto en inglés, enlace a enquiry
+// TECHNOLOGY SECTION – actualizado con PVGIS y formulario de captura
 export const technologyDescription = `
 <div class="text-black leading-tight">
   <h2 class="text-3xl md:text-4xl font-light mb-6">Technology</h2>
@@ -91,6 +91,40 @@ export const technologyDescription = `
     Let’s build knowledge together, branch by branch.
   </p>
 
+  <!-- ========== PVGIS TOOL ========== -->
+  <div class="my-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
+    <h3 class="text-2xl font-bold mb-3">☀️ Discover your solar potential – free tool</h3>
+    <p class="mb-4 text-gray-700">
+      Use the official European Commission PVGIS calculator to estimate how much electricity your roof could generate.
+      Just enter your address, adjust the system size, and get instant results (irradiation, monthly production, optimal tilt angle).
+    </p>
+    <a 
+      href="https://re.jrc.ec.europa.eu/pvg_tools/en/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      class="inline-block bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-700 transition mb-4"
+    >
+      🔗 Open PVGIS calculator (free, no registration)
+    </a>
+    <p class="text-sm text-gray-500">Try different orientations, tilt angles, and system sizes. See real data for your location.</p>
+  </div>
+
+  <!-- ========== LEAD CAPTURE FORM ========== -->
+  <div class="my-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+    <h3 class="text-xl font-bold mb-2">📩 Get a personalised solar study</h3>
+    <p class="mb-4 text-gray-700">Leave your email and we'll send you a detailed analysis for your home – including estimated savings, payback period, battery options, and installation offers. <strong>Free, no obligation.</strong></p>
+    
+    <form id="solar-lead-form" class="space-y-4">
+      <input type="text" name="name" placeholder="Full name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" required />
+      <input type="email" name="email" placeholder="Email address" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" required />
+      <input type="text" name="postcode" placeholder="Postcode (optional)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" />
+      <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition w-full md:w-auto">
+        Request free study →
+      </button>
+    </form>
+    <p class="text-xs text-gray-500 mt-4">We'll contact you within 48 hours. Your data is secure and never shared.</p>
+  </div>
+
   <div class="my-8 p-4 bg-gray-50 rounded-lg text-center">
     <p class="text-base font-light">
       This section is regularly updated with new articles, policy analysis, and summaries of scientific papers.
@@ -99,7 +133,52 @@ export const technologyDescription = `
       <a href="#enquiry" class="inline-block bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Contact us</a>
     </p>
   </div>
-</div>`;
+</div>
+
+<script>
+  (function() {
+    const form = document.getElementById('solar-lead-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = form.querySelector('[name="name"]').value.trim();
+      const email = form.querySelector('[name="email"]').value.trim();
+      const postcode = form.querySelector('[name="postcode"]').value.trim();
+
+      if (!name || !email) {
+        alert('Please enter your name and email address.');
+        return;
+      }
+
+      const button = form.querySelector('button');
+      const originalText = button.innerText;
+      button.disabled = true;
+      button.innerText = 'Sending...';
+
+      try {
+        // You can replace this endpoint with your own backend URL
+        const response = await fetch('/api/send-solar-lead.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, postcode }),
+        });
+
+        if (response.ok) {
+          form.innerHTML = '<p class="text-green-700 font-semibold">✅ Thank you! We\'ll get back to you shortly.</p>';
+        } else {
+          throw new Error('Server responded with error');
+        }
+      } catch (err) {
+        console.error('Lead form error:', err);
+        alert('There was a problem sending your request. Please email db@dbsdesigner.com directly.');
+        button.disabled = false;
+        button.innerText = originalText;
+      }
+    });
+  })();
+</script>
+`;
 
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
 
