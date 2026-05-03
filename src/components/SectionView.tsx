@@ -2,12 +2,13 @@
  * SECTIONVIEW.TSX — Versión final con Project Journey
  * - Incluye todas las secciones: Enquiry, Behind DB, Architecture, etc.
  * - Integra TechnologyTree para la sección Technology
+ * - Integra SolarCalculator (calculadora solar automática vía PVGIS)
  * - Fuerza visibilidad inmediata para Technology
  * - ✅ Importación de tipos corregida: '../types'
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { CategoryGroup, Project, StudioSection } from "../types"; // ✅ Ruta corregida
+import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import {
   ChevronRight,
@@ -28,6 +29,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
 import TechnologyTree from "./TechnologyTree";
+import SolarCalculator from "./SolarCalculator"; // 👈 NUEVO
 
 // ============================
 // TIPOS Y CONSTANTES
@@ -531,14 +533,20 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* Para Technology mostramos el árbol además de la descripción */}
+              {/* Para Technology mostramos la calculadora solar y después el árbol */}
               {isTechnology && (
                 <div className="mb-12">
                   <div
                     className="text-black font-normal text-lg md:text-xl leading-tight px-10"
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
+                  {/* 👇 Calculadora solar integrada */}
                   <div className="mt-8 px-10">
+                    <SolarCalculator />
+                  </div>
+                  {/* 👇 Árbol de contenido */}
+                  <div className="mt-12 px-10">
+                    <h3 className="text-xl font-semibold mb-3">Explore all topics</h3>
                     <TechnologyTree onNavigate={(slug) => {
                       console.log("Navigate to:", slug);
                     }} />
