@@ -1,5 +1,3 @@
-// src/utils/solarCalculator.ts
-
 export const PANEL_TYPES = {
   monocrystalline: {
     name: 'Monocristalino (TOPCon)',
@@ -19,11 +17,11 @@ export const PANEL_TYPES = {
     color: '#44aaff',
     imageUrl: '/images/polycrystalline.jpg',
   },
-} as const;
+} as const; // 👈 La declaración 'as const' ahora está fuera del objeto
 
-export const EDGE_SETBACK = 0.400;     // 400 mm
-export const PANEL_GAP = 0.020;        // 20 mm
-export const OBSTACLE_CLEARANCE = 0.914; // 914 mm
+export const EDGE_SETBACK = 0.400;
+export const PANEL_GAP = 0.020;
+export const OBSTACLE_CLEARANCE = 0.914;
 
 export interface Obstacle {
   x: number;
