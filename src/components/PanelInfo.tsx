@@ -1,11 +1,7 @@
 import React from 'react';
 import { PANEL_TYPES } from '../utils/solarCalculator';
 
-interface PanelInfoProps {
-  panelType: keyof typeof PANEL_TYPES;
-}
-
-const PanelInfo: React.FC<PanelInfoProps> = ({ panelType }) => {
+const PanelInfo = ({ panelType }) => {
   const panel = PANEL_TYPES[panelType];
   return (
     <div className="flex flex-col items-center p-4 border rounded-xl shadow-md bg-white w-72">
