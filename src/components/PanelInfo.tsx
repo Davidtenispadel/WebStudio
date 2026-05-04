@@ -8,13 +8,10 @@ interface PanelInfoProps {
 
 const PanelInfo: React.FC<PanelInfoProps> = ({ panelType }) => {
   const panel = PANEL_TYPES[panelType];
-  // Usa imágenes locales o de Cloudinary; si no existen, muestra un placeholder
-  const imageUrl = `/images/${panelType}.jpg`; // asegúrate de tener las imágenes
-
   return (
     <div className="flex flex-col items-center p-4 border rounded-xl shadow-md bg-white w-72">
       <img
-        src={imageUrl}
+        src={panel.imageUrl}
         alt={panel.name}
         className="w-full h-40 object-contain rounded-md"
         onError={(e) => (e.currentTarget.src = 'https://placehold.co/300x200?text=No+Image')}
