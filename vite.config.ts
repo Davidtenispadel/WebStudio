@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  esbuild: {
+    target: 'es2020', // Asegura compatibilidad con 'as const' y otras características modernas
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'es2020',
+    },
+  },
 });
