@@ -1,4 +1,5 @@
 // src/utils/solarCalculator.ts
+
 export const PANEL_TYPES = {
   monocrystalline: {
     name: 'Monocristalino (TOPCon)',
