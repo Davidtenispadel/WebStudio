@@ -17,7 +17,7 @@ export const PANEL_TYPES = {
     color: '#44aaff',
     imageUrl: '/images/polycrystalline.jpg',
   },
-} as const; // 👈 La declaración 'as const' ahora está fuera del objeto
+};
 
 export const EDGE_SETBACK = 0.400;
 export const PANEL_GAP = 0.020;
