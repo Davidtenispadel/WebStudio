@@ -17,14 +17,38 @@ const technologyData: TreeNode = {
       name: 'Green Energy',
       slug: 'technology/green-energy',
       children: [
-        { id: 'solar-panels', name: 'Solar panels', slug: 'technology/green-energy/solar-panels' }, // 👈 NUEVO
+        { id: 'solar-panels', name: 'Solar panels', slug: 'technology/green-energy/solar-panels' }, // NUEVO
         { id: 'solar', name: 'Solar Energy', slug: 'technology/green-energy/solar' },
         { id: 'wind', name: 'Wind Energy', slug: 'technology/green-energy/wind' },
         { id: 'geothermal', name: 'Geothermal', slug: 'technology/green-energy/geothermal' },
         { id: 'biomass', name: 'Biomass', slug: 'technology/green-energy/biomass' },
       ]
     },
-    // ... resto de ramas sin cambios
+    {
+      id: 'materials',
+      name: 'Materials & Insulation',
+      slug: 'technology/materials',
+    },
+    {
+      id: 'hvac',
+      name: 'HVAC Systems',
+      slug: 'technology/hvac',
+    },
+    {
+      id: 'structural',
+      name: 'Structural Systems',
+      slug: 'technology/structural',
+    },
+    {
+      id: 'smart-home',
+      name: 'Smart Home',
+      slug: 'technology/smart-home',
+    },
+    {
+      id: 'digital-twin',
+      name: 'Digital Twin',
+      slug: 'technology/digital-twin',
+    },
   ]
 };
 
