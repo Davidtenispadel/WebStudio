@@ -1,5 +1,4 @@
 // src/utils/solarCalculator.ts
-
 export const PANEL_TYPES = {
   monocrystalline: {
     name: 'Monocristalino (TOPCon)',
@@ -26,9 +25,8 @@ export const PANEL_GAP = 0.020;        // 20 mm
 export const OBSTACLE_CLEARANCE = 0.914; // 914 mm
 
 export interface Obstacle {
-  x: number;          // centro X en metros
-  z: number;          // centro Z en metros
-  radius?: number;    // radio del obstáculo (opcional)
+  x: number;
+  z: number;
 }
 
 export function calculateUsableDimensions(
@@ -83,6 +81,7 @@ export function calculatePanelLayout(
   const panelStepZ = panelHeight + PANEL_GAP;
   const cols = Math.floor((usableLength + PANEL_GAP) / panelStepX);
   const rows = Math.floor((usableWidth + PANEL_GAP) / panelStepZ);
+  if (cols <= 0 || rows <= 0) return { cols: 0, rows: 0, totalPanels: 0, panelPositions: [] };
   const totalWidth = cols * panelWidth + (cols - 1) * PANEL_GAP;
   const startX = (usableLength - totalWidth) / 2;
   const startZ = (usableWidth - (rows * panelHeight + (rows - 1) * PANEL_GAP)) / 2;
