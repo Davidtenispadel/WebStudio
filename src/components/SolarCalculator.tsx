@@ -1,130 +1,74 @@
 import React, { useState } from 'react';
+import ThreeScene from './ThreeScene';
+import PanelInfo from './PanelInfo';
+import { PANEL_TYPES, calculateUsableDimensions, calculatePanelLayout } from '../utils/solarCalculator';
 
-const SolarCalculator: React.FC = () => {
-  const [postcode, setPostcode] = useState('');
-  const [peakPower, setPeakPower] = useState(4);
-  const [inclination, setInclination] = useState(35);
-  const [azimuth, setAzimuth] = useState(0);
-  const [battery, setBattery] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+const SolarPanelCalculator: React.FC = () => {
+  const [roofLength, setRoofLength] = useState(8);
+  const [roofWidth, setRoofWidth] = useState(5);
+  const [panelType, setPanelType] = useState('monocrystalline');
+  const [obstacles, setObstacles] = useState([]);
+  const [layout, setLayout] = useState(null);
 
-  const handleCalculate = async () => {
-    if (!postcode) return;
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        postcode,
-        peakPower: peakPower.toString(),
-        inclination: inclination.toString(),
-        azimuth: azimuth.toString(),
-        battery: battery.toString(),
-      });
-      const res = await fetch(`/api/solar-calc?${params}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-      alert('Error calculating. Please try again or contact us.');
-    } finally {
-      setLoading(false);
-    }
+  const handleCalculate = () => {
+    const panel = PANEL_TYPES[panelType];
+    const { length, width } = calculateUsableDimensions(roofLength, roofWidth, obstacles);
+    const calculatedLayout = calculatePanelLayout(length, width, panel.width, panel.height, obstacles);
+    setLayout(calculatedLayout);
+  };
+
+  const addObstacle = () => {
+    setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
+  };
+
+  const removeObstacle = (index) => {
+    setObstacles(obstacles.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-      <h3 className="text-2xl font-bold mb-4">☀️ Instant solar estimate for your home</h3>
-      <p className="text-gray-600 mb-4">Enter your postcode and basic roof data to see your potential savings.</p>
-      
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Postcode (e.g., NN17 1AB)"
-          value={postcode}
-          onChange={(e) => setPostcode(e.target.value)}
-          className="border p-2 rounded"
-        />
-        
+    <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+      <h2 className="text-3xl font-light mb-6">Solar Panel Layout Designer</h2>
+      <div className="grid md:grid-cols-2 gap-8">
         <div>
-          <label className="block text-sm font-medium">System size (kWp)</label>
-          <input
-            type="number"
-            step="0.5"
-            value={peakPower}
-            onChange={(e) => setPeakPower(parseFloat(e.target.value))}
-            className="border p-2 rounded w-full"
-          />
+          <div className="mb-4">
+            <label className="block font-medium">Roof length (m):</label>
+            <input type="number" step="0.5" value={roofLength} onChange={(e) => setRoofLength(parseFloat(e.target.value))} className="border p-2 rounded w-full" />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium">Roof width (m):</label>
+            <input type="number" step="0.5" value={roofWidth} onChange={(e) => setRoofWidth(parseFloat(e.target.value))} className="border p-2 rounded w-full" />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium">Panel type:</label>
+            <select value={panelType} onChange={(e) => setPanelType(e.target.value)} className="border p-2 rounded w-full">
+              <option value="monocrystalline">Monocristalino (TOPCon)</option>
+              <option value="polycrystalline">Policristalino (PERC)</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <button onClick={addObstacle} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Add chimney</button>
+            {obstacles.map((_, idx) => (
+              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-1">Remove {idx+1}</button>
+            ))}
+          </div>
+          <button onClick={handleCalculate} className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Calculate layout</button>
+          {layout && (
+            <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+              <p><strong>Total panels:</strong> {layout.totalPanels}</p>
+              <p><strong>Columns:</strong> {layout.cols} &nbsp;| <strong>Rows:</strong> {layout.rows}</p>
+              <p><strong>Estimated power:</strong> {(layout.totalPanels * PANEL_TYPES[panelType].powerWp).toFixed(0)} Wp</p>
+              <p><strong>Installation area:</strong> {(layout.totalPanels * PANEL_TYPES[panelType].width * PANEL_TYPES[panelType].height).toFixed(1)} m²</p>
+              <p className="text-xs text-gray-500 mt-2">* Margins: 400mm edges, 20mm gap. UK MCS compliant.</p>
+            </div>
+          )}
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium">Roof tilt (degrees)</label>
-          <input
-            type="number"
-            value={inclination}
-            onChange={(e) => setInclination(parseInt(e.target.value))}
-            className="border p-2 rounded w-full"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium">Roof orientation</label>
-          <select
-            value={azimuth}
-            onChange={(e) => setAzimuth(parseInt(e.target.value))}
-            className="border p-2 rounded w-full"
-          >
-            <option value="0">South (best)</option>
-            <option value="-90">East</option>
-            <option value="90">West</option>
-            <option value="180">North</option>
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium">Battery capacity (kWh)</label>
-          <input
-            type="number"
-            step="1"
-            value={battery}
-            onChange={(e) => setBattery(parseFloat(e.target.value))}
-            className="border p-2 rounded w-full"
-          />
-          <p className="text-xs text-gray-500">0 = no battery</p>
-        </div>
+        <PanelInfo panelType={panelType} />
       </div>
-      
-      <button
-        onClick={handleCalculate}
-        disabled={loading}
-        className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition disabled:opacity-50"
-      >
-        {loading ? 'Calculating...' : 'Calculate my solar potential →'}
-      </button>
-
-      {result && (
-        <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-          <h4 className="font-bold text-lg mb-2">📊 Your estimated solar potential</h4>
-          <p><strong>Annual production:</strong> {result.produccion_kwh} kWh</p>
-          <p><strong>Direct savings on bill:</strong> £{result.ahorro_directo_gbp} / year</p>
-          <p><strong>Excess energy sold:</strong> £{result.ingreso_excedente_gbp} / year</p>
-          <p><strong>CO₂ saved:</strong> {result.co2_evitado_kg} kg/year</p>
-          {result.inclinacion_optima && (
-            <p><strong>Optimal tilt for your location:</strong> {result.inclinacion_optima}°</p>
-          )}
-          {result.bateria && (
-            <>
-              <hr className="my-2" />
-              <p><strong>🔋 Battery ({result.bateria.capacidad_kwh} kWh):</strong> +£{result.bateria.ahorro_adicional_gbp}/year extra saving</p>
-              <p>Estimated battery cost: £{result.bateria.costo_estimado_gbp}</p>
-              <p>Payback period: {result.bateria.payback_anos} years</p>
-            </>
-          )}
-          <p className="text-xs text-gray-500 mt-3">* Estimates based on typical household consumption (4,500 kWh/year). For a precise quote, contact us.</p>
-        </div>
+      {layout && layout.panelPositions.length > 0 && (
+        <ThreeScene roofLength={roofLength} roofWidth={roofWidth} layout={layout} panelType={panelType} obstacles={obstacles} />
       )}
     </div>
   );
 };
 
-export default SolarCalculator;
+export default SolarPanelCalculator;
