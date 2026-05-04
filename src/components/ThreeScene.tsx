@@ -34,7 +34,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     roof.castShadow = true;
     scene.add(roof);
 
-    // Línea de seguridad
+    // Línea de seguridad (perímetro 400mm)
     const edge = EDGE_SETBACK;
     const points = [
       new THREE.Vector3(-roofLength / 2 + edge, 0, -roofWidth / 2 + edge),
@@ -48,7 +48,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     const marginLine = new THREE.Line(lineGeo, lineMat);
     scene.add(marginLine);
 
-    // Obstáculos
+    // Obstáculos (chimeneas)
     obstacles.forEach(obs => {
       const cylinderGeo = new THREE.CylinderGeometry(0.4, 0.5, 0.8, 16);
       const material = new THREE.MeshStandardMaterial({ color: 0xcc8866 });
@@ -56,7 +56,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       chimney.position.set(obs.x, 0, obs.z);
       chimney.castShadow = true;
       scene.add(chimney);
-      // círculo de seguridad
+      // círculo de seguridad (914mm)
       const circlePoints = [];
       const radius = 0.914;
       for (let i = 0; i <= 64; i++) {
@@ -71,7 +71,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       scene.add(circle);
     });
 
-    // Paneles
+    // Paneles solares
     const panel = PANEL_TYPES[panelType];
     const panelGeo = new THREE.BoxGeometry(panel.width, 0.02, panel.height);
     const panelMat = new THREE.MeshStandardMaterial({ color: panel.color, metalness: 0.2, roughness: 0.4 });
@@ -82,9 +82,9 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       scene.add(panelMesh);
     });
 
-    // Luces
-    const ambient = new THREE.AmbientLight(0x404060);
-    scene.add(ambient);
+    // Iluminación
+    const ambientLight = new THREE.AmbientLight(0x404060);
+    scene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(5, 10, 3);
     dirLight.castShadow = true;
@@ -98,6 +98,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
 
+    // Animación
     const animate = () => {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
@@ -105,6 +106,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     animate();
 
     const handleResize = () => {
+      if (!mount) return;
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
