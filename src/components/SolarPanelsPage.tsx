@@ -1,4 +1,3 @@
-// src/components/SolarPanelsPage.tsx
 import React from 'react';
 import SolarPanelCalculator from './SolarPanelCalculator';
 
