@@ -1,14 +1,14 @@
 // src/utils/solarCalculator.ts
 
-// Tipos de panel
 export const PANEL_TYPES = {
   monocrystalline: {
     name: 'Monocristalino (TOPCon)',
-    width: 1.05,      // metros
+    width: 1.05,
     height: 1.74,
     powerWp: 430,
-    pricePerWp: 0.90,  // £/Wp
+    pricePerWp: 0.90,
     color: '#2266ff',
+    imageUrl: '/images/monocrystalline.jpg',
   },
   polycrystalline: {
     name: 'Policristalino (PERC)',
@@ -17,48 +17,31 @@ export const PANEL_TYPES = {
     powerWp: 380,
     pricePerWp: 0.70,
     color: '#44aaff',
+    imageUrl: '/images/polycrystalline.jpg',
   },
 } as const;
 
-// Márgenes según normativa MCS UK
-export const EDGE_SETBACK = 0.400;    // 400 mm de todos los bordes y cumbrera
-export const PANEL_GAP = 0.020;       // 20 mm entre paneles
-export const OBSTACLE_CLEARANCE = 0.914; // 914 mm alrededor de obstáculos
+export const EDGE_SETBACK = 0.400;     // 400 mm
+export const PANEL_GAP = 0.020;        // 20 mm
+export const OBSTACLE_CLEARANCE = 0.914; // 914 mm
 
-// Tipo para obstáculo (chimenea, lucernario, etc.)
 export interface Obstacle {
-  x: number;   // coordenada x en metros (centro)
-  z: number;   // coordenada z en metros (centro)
-  radius: number; // radio de seguridad (opcional, por defecto OBSTACLE_CLEARANCE/2)
+  x: number;          // centro X en metros
+  z: number;          // centro Z en metros
+  radius?: number;    // radio del obstáculo (opcional)
 }
 
-/**
- * Calcula las dimensiones útiles del tejado tras restar los márgenes de seguridad
- * @param roofLength largo total del tejado (a lo largo de las tejas, horizontal)
- * @param roofWidth ancho total del tejado (desde alero hasta cumbrera)
- * @param obstacles lista de obstáculos (opcional)
- * @returns área útil en metros
- */
 export function calculateUsableDimensions(
   roofLength: number,
   roofWidth: number,
-  obstacles?: Obstacle[]
+  _obstacles?: Obstacle[]
 ): { length: number; width: number } {
-  let usableLength = roofLength - 2 * EDGE_SETBACK;
-  let usableWidth = roofWidth - EDGE_SETBACK; // solo un lado de cumbrera
-  // Aquí se podría restar clearance de obstáculos, pero se gestiona al colocar paneles
-  return { length: usableLength, width: usableWidth };
+  return {
+    length: roofLength - 2 * EDGE_SETBACK,
+    width: roofWidth - EDGE_SETBACK,
+  };
 }
 
-/**
- * Comprueba si un rectángulo (panel) colisiona con algún obstáculo (considerando clearance)
- * @param panelX posición X del centro del panel
- * @param panelZ posición Z del centro del panel
- * @param panelWidth ancho del panel
- * @param panelHeight alto del panel
- * @param obstacles lista de obstáculos
- * @returns true si hay colisión
- */
 function collidesWithObstacles(
   panelX: number,
   panelZ: number,
@@ -67,35 +50,23 @@ function collidesWithObstacles(
   obstacles?: Obstacle[]
 ): boolean {
   if (!obstacles) return false;
-  const halfWidth = panelWidth / 2;
-  const halfHeight = panelHeight / 2;
-  const panelMinX = panelX - halfWidth;
-  const panelMaxX = panelX + halfWidth;
-  const panelMinZ = panelZ - halfHeight;
-  const panelMaxZ = panelZ + halfHeight;
-
+  const halfW = panelWidth / 2;
+  const halfH = panelHeight / 2;
+  const minX = panelX - halfW;
+  const maxX = panelX + halfW;
+  const minZ = panelZ - halfH;
+  const maxZ = panelZ + halfH;
   for (const obs of obstacles) {
     const clearance = OBSTACLE_CLEARANCE;
     const obsMinX = obs.x - clearance;
     const obsMaxX = obs.x + clearance;
     const obsMinZ = obs.z - clearance;
     const obsMaxZ = obs.z + clearance;
-    if (panelMaxX > obsMinX && panelMinX < obsMaxX && panelMaxZ > obsMinZ && panelMinZ < obsMaxZ) {
-      return true;
-    }
+    if (maxX > obsMinX && minX < obsMaxX && maxZ > obsMinZ && minZ < obsMaxZ) return true;
   }
   return false;
 }
 
-/**
- * Calcula la disposición de paneles en el tejado
- * @param usableLength largo útil (metros)
- * @param usableWidth ancho útil (metros)
- * @param panelWidth ancho del panel
- * @param panelHeight alto del panel
- * @param obstacles lista de obstáculos
- * @returns layout con número de paneles y posiciones
- */
 export function calculatePanelLayout(
   usableLength: number,
   usableWidth: number,
@@ -121,16 +92,10 @@ export function calculatePanelLayout(
     const x = startX + i * (panelWidth + PANEL_GAP) + panelWidth / 2;
     for (let j = 0; j < rows; j++) {
       const z = startZ + j * (panelHeight + PANEL_GAP) + panelHeight / 2;
-      // Verificar colisión con obstáculos
       if (!collidesWithObstacles(x, z, panelWidth, panelHeight, obstacles)) {
         positions.push({ x, z });
       }
     }
   }
-  return {
-    cols,
-    rows,
-    totalPanels: positions.length,
-    panelPositions: positions,
-  };
+  return { cols, rows, totalPanels: positions.length, panelPositions: positions };
 }
