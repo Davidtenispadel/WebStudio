@@ -1,4 +1,3 @@
-// src/components/SolarPanelCalculator.tsx
 import React, { useState } from 'react';
 import ThreeScene from './ThreeScene';
 import PanelInfo from './PanelInfo';
@@ -47,9 +46,9 @@ const SolarPanelCalculator: React.FC = () => {
             </select>
           </div>
           <div className="mb-4">
-            <button onClick={addObstacle} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Add example chimney</button>
+            <button onClick={addObstacle} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Add chimney</button>
             {obstacles.map((_, idx) => (
-              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm">Remove chimney {idx+1}</button>
+              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-1">Remove {idx+1}</button>
             ))}
           </div>
           <button onClick={handleCalculate} className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Calculate layout</button>
@@ -58,8 +57,8 @@ const SolarPanelCalculator: React.FC = () => {
               <p><strong>Total panels:</strong> {layout.totalPanels}</p>
               <p><strong>Columns:</strong> {layout.cols} &nbsp;| <strong>Rows:</strong> {layout.rows}</p>
               <p><strong>Estimated power:</strong> {(layout.totalPanels * PANEL_TYPES[panelType].powerWp).toFixed(0)} Wp</p>
-              <p><strong>Estimated installation area:</strong> {(layout.totalPanels * PANEL_TYPES[panelType].width * PANEL_TYPES[panelType].height).toFixed(1)} m²</p>
-              <p className="text-xs text-gray-500 mt-2">* Margins: 400mm edges, 20mm gap between panels. UK MCS compliant.</p>
+              <p><strong>Installation area:</strong> {(layout.totalPanels * PANEL_TYPES[panelType].width * PANEL_TYPES[panelType].height).toFixed(1)} m²</p>
+              <p className="text-xs text-gray-500 mt-2">* Margins: 400mm edges, 20mm gap. UK MCS compliant.</p>
             </div>
           )}
         </div>
