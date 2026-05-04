@@ -19,7 +19,11 @@ const SolarPanelCalculator: React.FC = () => {
   };
 
   const addObstacle = () => {
-    setObstacles([...obstacles, { x: 1.5, z: 2.0, radius: 0.4 }]);
+    setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
+  };
+
+  const removeObstacle = (index: number) => {
+    setObstacles(obstacles.filter((_, i) => i !== index));
   };
 
   return (
@@ -43,7 +47,10 @@ const SolarPanelCalculator: React.FC = () => {
             </select>
           </div>
           <div className="mb-4">
-            <button onClick={addObstacle} className="bg-gray-500 text-white px-4 py-2 rounded">Add example chimney</button>
+            <button onClick={addObstacle} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Add example chimney</button>
+            {obstacles.map((_, idx) => (
+              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm">Remove chimney {idx+1}</button>
+            ))}
           </div>
           <button onClick={handleCalculate} className="bg-red-600 text-white px-6 py-2 rounded-full hover:bg-red-700 transition">Calculate layout</button>
           {layout && (
