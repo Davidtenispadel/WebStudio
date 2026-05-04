@@ -1,4 +1,3 @@
-// src/components/PanelInfo.tsx
 import React from 'react';
 import { PANEL_TYPES } from '../utils/solarCalculator';
 
