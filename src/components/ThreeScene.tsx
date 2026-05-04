@@ -1,4 +1,3 @@
-// src/components/ThreeScene.tsx
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { PANEL_TYPES, Obstacle, EDGE_SETBACK } from '../utils/solarCalculator';
@@ -35,7 +34,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     roof.castShadow = true;
     scene.add(roof);
 
-    // Línea de seguridad (perímetro)
+    // Línea de seguridad
     const edge = EDGE_SETBACK;
     const points = [
       new THREE.Vector3(-roofLength / 2 + edge, 0, -roofWidth / 2 + edge),
@@ -49,7 +48,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     const marginLine = new THREE.Line(lineGeo, lineMat);
     scene.add(marginLine);
 
-    // Obstáculos (chimeneas)
+    // Obstáculos
     obstacles.forEach(obs => {
       const cylinderGeo = new THREE.CylinderGeometry(0.4, 0.5, 0.8, 16);
       const material = new THREE.MeshStandardMaterial({ color: 0xcc8866 });
@@ -72,7 +71,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       scene.add(circle);
     });
 
-    // Paneles solares
+    // Paneles
     const panel = PANEL_TYPES[panelType];
     const panelGeo = new THREE.BoxGeometry(panel.width, 0.02, panel.height);
     const panelMat = new THREE.MeshStandardMaterial({ color: panel.color, metalness: 0.2, roughness: 0.4 });
@@ -106,7 +105,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     animate();
 
     const handleResize = () => {
-      if (!mount) return;
       camera.aspect = mount.clientWidth / mount.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(mount.clientWidth, mount.clientHeight);
