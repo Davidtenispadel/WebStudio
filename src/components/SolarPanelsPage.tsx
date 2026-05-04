@@ -58,34 +58,34 @@ const SolarPanelsPage: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-sm text-gray-600">The Smart Export Guarantee (SEG) pays 12-15p/kWh for exported surplus. A home with battery can achieve 70-80% self-consumption, saving up to £1,200/year.</p>
+      <p className="mt-2 text-sm text-gray-600">The Smart Export Guarantee (SEG) pays 12-15p/kWh for exported surplus. A home with battery can achieve 70-80% self‑consumption, saving up to £1,200/year.</p>
 
       {/* ========== 3. EMERGING TECHNOLOGIES ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">3. Emerging technologies (2026-2028)</h3>
       <ul className="list-disc pl-6 mb-4">
-        <li><strong>Perovskite‑silicon tandem:</strong> laboratory cells reach 28.96% – 29.76% efficiency; commercial modules (Tandem PV) already achieve 29.7% with <1% annual loss. Expected on market 2026-2028.</li>
-        <li><strong>Flexible tandem:</strong> LONGi developed cells only 60µm thick, 33.4% efficiency (NREL certified), power-to-weight ratio 1.77 W/gram.</li>
+        <li><strong>Perovskite‑silicon tandem:</strong> laboratory cells reach 28.96% – 29.76% efficiency; commercial modules (Tandem PV) already achieve 29.7% with &lt;1% annual loss. Expected on market 2026-2028.</li>
+        <li><strong>Flexible tandem:</strong> LONGi developed cells only 60µm thick, 33.4% efficiency (NREL certified), power‑to‑weight ratio 1.77 W/gram.</li>
         <li><strong>Bifacial modules:</strong> capture light from both sides, gaining 9.4% – 12.1% energy yield when used with trackers.</li>
       </ul>
 
       {/* ========== 4. WEIGHT AND STRUCTURAL CONSIDERATIONS ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">4. Weight and roof suitability (UK timber roofs)</h3>
-      <p className="mb-2">Modern monocrystalline panels (430-550Wp) weigh 18-23 kg each, similar to polycrystalline. However, monocrystalline systems require <strong>16-18 panels for 4kWp</strong> vs <strong>19-23 polycrystalline panels</strong>, saving 100-150 kg total roof load.</p>
-      <p className="text-sm text-gray-600">UK building regulations require 400mm fire setbacks from roof edges and ridge. Our calculator respects these MCS guidelines.</p>
+      <p className="mb-2">Modern monocrystalline panels (430-550Wp) weigh 18-23 kg each, similar to polycrystalline. However, monocrystalline systems require <strong>16-18 panels for 4 kWp</strong> vs <strong>19-23 polycrystalline panels</strong>, saving 100-150 kg total roof load.</p>
+      <p className="text-sm text-gray-600">UK building regulations require 400 mm fire setbacks from roof edges and ridge. Our calculator respects these MCS guidelines.</p>
 
       {/* ========== 5. BATTERY ANALYSIS ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">5. Battery storage – is it worth it?</h3>
       <ul className="list-disc pl-6 mb-4">
         <li><strong>LFP (LiFePO₄) batteries:</strong> safer, longer cycle life (6000+ cycles), recommended for residential.</li>
         <li><strong>NMC batteries:</strong> higher energy density, slightly lower safety.</li>
-        <li><strong>Payback:</strong> with current electricity prices (£0.25/kWh), a 5 kWh battery (£4,000-£5,000) adds 3-4 years to the payback period but increases self-sufficiency.</li>
+        <li><strong>Payback:</strong> with current electricity prices (£0.25/kWh), a 5 kWh battery (£4,000-£5,000) adds 3-4 years to the payback period but increases self‑sufficiency.</li>
       </ul>
 
       {/* ========== 6. CALCULATOR ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">6. Design your own layout</h3>
       <p className="mb-6">
         Use the interactive tool below to estimate how many panels fit on your roof, choose between monocrystalline and polycrystalline, and see a 3D preview.
-        The calculation respects UK MCS margins (400mm edges, 20mm between panels) and accounts for chimneys.
+        The calculation respects UK MCS margins (400 mm edges, 20 mm between panels) and accounts for chimneys.
       </p>
       
       <SolarPanelCalculator />
@@ -94,15 +94,15 @@ const SolarPanelsPage: React.FC = () => {
       <h3 className="text-2xl font-semibold mt-12 mb-4">📚 References & further reading</h3>
       <ul className="list-disc pl-6 text-sm text-gray-700 space-y-1">
         <li>R. Neumann, "Solar Panel Types Compared: Mono vs Poly vs TOPCon vs HJT (2026)", SurgePV, 2026.</li>
-        <li>Enerix, "Photovoltaikmodul Arten: Welche Module gibt es?" (2026). Market share TOPCon 97.7%, glass-glass degradation 0.45%.</li>
-        <li>"Tailored self-assembled molecule for efficient charge extraction…", <em>Chemical Engineering Journal</em>, May 2026 (28.96% perovskite-perovskite tandem).</li>
-        <li>"MXene-driven nanoscale field-effect junction for advanced 4‑terminal perovskite/silicon tandem solar panels", <em>Nature Communications</em>, 2026.</li>
-        <li>"New strategy unlocks 29.76% efficiency for all-perovskite tandem solar cells", <em>Joule</em>, Mar. 2026.</li>
+        <li>Enerix, "Photovoltaikmodul Arten: Welche Module gibt es?" (2026). Market share TOPCon 97.7%, glass‑glass degradation 0.45%.</li>
+        <li>"Tailored self‑assembled molecule for efficient charge extraction…", <em>Chemical Engineering Journal</em>, May 2026 (28.96% perovskite‑perovskite tandem).</li>
+        <li>"MXene‑driven nanoscale field‑effect junction for advanced 4‑terminal perovskite/silicon tandem solar panels", <em>Nature Communications</em>, 2026.</li>
+        <li>"New strategy unlocks 29.76% efficiency for all‑perovskite tandem solar cells", <em>Joule</em>, Mar. 2026.</li>
         <li>H. Mustoe, "How much do solar panels cost? UK 2025 prices guide", <em>The Independent</em>, Oct. 2025.</li>
-        <li>Y. He et al., "A techno-economic-environmental comparison of residential solar energy systems", <em>Energy Conversion and Management</em>, Dec. 2025.</li>
-        <li>"IoT-based evaluation of photovoltaic modules enhanced by different reflector materials", <em>Scientific Reports</em>, 2026 (reflector +21.2% yield).</li>
-        <li>"LONGi Breakthrough in Flexible Tandem Technology Selected Among China's Top 10 Scientific Advances", LONGi, Mar. 2026 (33.4% flexible tandem, 1.77 W/gram).</li>
-        <li>"Tandem PV launches commercial perovskite-silicon manufacturing in California", <em>pv magazine USA</em>, Apr. 2026 (40 MW factory, 29.7% modules).</li>
+        <li>Y. He et al., "A techno‑economic‑environmental comparison of residential solar energy systems", <em>Energy Conversion and Management</em>, Dec. 2025.</li>
+        <li>"IoT‑based evaluation of photovoltaic modules enhanced by different reflector materials", <em>Scientific Reports</em>, 2026 (reflector +21.2% yield).</li>
+        <li>"LONGi Breakthrough in Flexible Tandem Technology Selected Among China's Top 10 Scientific Advances", LONGi, Mar. 2026 (33.4% flexible tandem, 1.77 W/gram).</li>
+        <li>"Tandem PV launches commercial perovskite‑silicon manufacturing in California", <em>pv magazine USA</em>, Apr. 2026 (40 MW factory, 29.7% modules).</li>
       </ul>
     </div>
   );
