@@ -23,29 +23,28 @@ export const EDGE_SETBACK = 0.400;
 export const PANEL_GAP = 0.020;
 export const OBSTACLE_CLEARANCE = 0.914;
 
-export interface Obstacle {
-  x: number;
-  z: number;
-}
-
-export function calculateUsableDimensions(
-  roofLength: number,
-  roofWidth: number,
-  _obstacles?: Obstacle[]
-): { length: number; width: number } {
+/**
+ * @param {number} roofLength
+ * @param {number} roofWidth
+ * @param {Array<{x: number, z: number}>} _obstacles
+ * @returns {{length: number, width: number}}
+ */
+export function calculateUsableDimensions(roofLength, roofWidth, _obstacles) {
   return {
     length: roofLength - 2 * EDGE_SETBACK,
     width: roofWidth - EDGE_SETBACK,
   };
 }
 
-function collidesWithObstacles(
-  panelX: number,
-  panelZ: number,
-  panelWidth: number,
-  panelHeight: number,
-  obstacles?: Obstacle[]
-): boolean {
+/**
+ * @param {number} panelX
+ * @param {number} panelZ
+ * @param {number} panelWidth
+ * @param {number} panelHeight
+ * @param {Array<{x: number, z: number}>} obstacles
+ * @returns {boolean}
+ */
+function collidesWithObstacles(panelX, panelZ, panelWidth, panelHeight, obstacles) {
   if (!obstacles) return false;
   const halfW = panelWidth / 2;
   const halfH = panelHeight / 2;
@@ -64,18 +63,15 @@ function collidesWithObstacles(
   return false;
 }
 
-export function calculatePanelLayout(
-  usableLength: number,
-  usableWidth: number,
-  panelWidth: number,
-  panelHeight: number,
-  obstacles?: Obstacle[]
-): {
-  cols: number;
-  rows: number;
-  totalPanels: number;
-  panelPositions: { x: number; z: number }[];
-} {
+/**
+ * @param {number} usableLength
+ * @param {number} usableWidth
+ * @param {number} panelWidth
+ * @param {number} panelHeight
+ * @param {Array<{x: number, z: number}>} obstacles
+ * @returns {{cols: number, rows: number, totalPanels: number, panelPositions: Array<{x: number, z: number}>}}
+ */
+export function calculatePanelLayout(usableLength, usableWidth, panelWidth, panelHeight, obstacles) {
   const panelStepX = panelWidth + PANEL_GAP;
   const panelStepZ = panelHeight + PANEL_GAP;
   const cols = Math.floor((usableLength + PANEL_GAP) / panelStepX);
@@ -85,7 +81,7 @@ export function calculatePanelLayout(
   const startX = (usableLength - totalWidth) / 2;
   const startZ = (usableWidth - (rows * panelHeight + (rows - 1) * PANEL_GAP)) / 2;
 
-  const positions: { x: number; z: number }[] = [];
+  const positions = [];
   for (let i = 0; i < cols; i++) {
     const x = startX + i * (panelWidth + PANEL_GAP) + panelWidth / 2;
     for (let j = 0; j < rows; j++) {
