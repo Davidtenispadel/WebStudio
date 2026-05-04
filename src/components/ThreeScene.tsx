@@ -1,17 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { PANEL_TYPES, Obstacle, EDGE_SETBACK } from '../utils/solarCalculator';
+import { PANEL_TYPES, EDGE_SETBACK } from '../utils/solarCalculator';
 
-interface ThreeSceneProps {
-  roofLength: number;
-  roofWidth: number;
-  layout: { panelPositions: { x: number; z: number }[] };
-  panelType: keyof typeof PANEL_TYPES;
-  obstacles?: Obstacle[];
-}
-
-const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, panelType, obstacles = [] }) => {
-  const mountRef = useRef<HTMLDivElement>(null);
+const ThreeScene = ({ roofLength, roofWidth, layout, panelType, obstacles = [] }) => {
+  const mountRef = useRef(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -34,7 +26,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     roof.castShadow = true;
     scene.add(roof);
 
-    // Línea de seguridad (perímetro 400mm)
+    // Línea de seguridad
     const edge = EDGE_SETBACK;
     const points = [
       new THREE.Vector3(-roofLength / 2 + edge, 0, -roofWidth / 2 + edge),
@@ -48,7 +40,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     const marginLine = new THREE.Line(lineGeo, lineMat);
     scene.add(marginLine);
 
-    // Obstáculos (chimeneas)
+    // Obstáculos
     obstacles.forEach(obs => {
       const cylinderGeo = new THREE.CylinderGeometry(0.4, 0.5, 0.8, 16);
       const material = new THREE.MeshStandardMaterial({ color: 0xcc8866 });
@@ -56,7 +48,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       chimney.position.set(obs.x, 0, obs.z);
       chimney.castShadow = true;
       scene.add(chimney);
-      // círculo de seguridad (914mm)
+      // círculo de seguridad
       const circlePoints = [];
       const radius = 0.914;
       for (let i = 0; i <= 64; i++) {
@@ -71,7 +63,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       scene.add(circle);
     });
 
-    // Paneles solares
+    // Paneles
     const panel = PANEL_TYPES[panelType];
     const panelGeo = new THREE.BoxGeometry(panel.width, 0.02, panel.height);
     const panelMat = new THREE.MeshStandardMaterial({ color: panel.color, metalness: 0.2, roughness: 0.4 });
@@ -82,7 +74,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
       scene.add(panelMesh);
     });
 
-    // Iluminación
+    // Luces
     const ambientLight = new THREE.AmbientLight(0x404060);
     scene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -98,7 +90,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ roofLength, roofWidth, layout, 
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
 
-    // Animación
     const animate = () => {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
