@@ -115,7 +115,107 @@ const SolarPanelsPage: React.FC = () => {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Location</th><th className="border p-2">Annual production (kWh/kWp)</th><th className="border p-2">4 kWp example (kWh/year)</th><th className="border p-2">Estimated payback (2025)</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Location</th><th className="border p-2">Annual production (kWh/kWp)</th><th className="border p-2">4 kWp example (kWh/year)</th><th className="border p-2">Estimated payback (2025)</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">UK (south England)</td><td className="border p-2">850‑1,100</td><td className="border p-2">3,400‑4,400</td><td className="border p-2">8‑12 years</td></tr>
-            <tr><td class
+            <tr><td className="border p-2">UK (north/Scotland)</td><td className="border p-2">650‑850</td><td className="border p-2">2,600‑3,400</td><td className="border p-2">10‑14 years</td></tr>
+            <tr><td className="border p-2">Spain (average)</td><td className="border p-2">1,450</td><td className="border p-2">5,800</td><td className="border p-2">5‑7 years</td></tr>
+            <tr><td className="border p-2">Spain (Andalusia/Murcia)</td><td className="border p-2">1,800</td><td className="border p-2">7,200</td><td className="border p-2">4‑6 years</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 5. TYPES OF PANELS – EFFICIENCY, DIMENSIONS, WEIGHT */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">5. Types of solar panels – detailed comparison</h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-300 text-sm">
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Cell efficiency</th><th className="border p-2">Module efficiency</th><th className="border p-2">Temp coefficient</th><th className="border p-2">Typical dimensions (W×H)</th><th className="border p-2">Weight</th><th className="border p-2">Power (Wp)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td className="border p-2">Monocrystalline PERC</td><td className="border p-2">20‑22.5%</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">1.05×1.75 m</td><td className="border p-2">19‑21 kg</td><td className="border p-2">400‑430</td></tr>
+            <tr><td className="border p-2">TOPCon</td><td className="border p-2">22‑24.5%</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">1.05×1.75 m</td><td className="border p-2">20‑23 kg</td><td className="border p-2">430‑480</td></tr>
+            <tr><td className="border p-2">HJT</td><td className="border p-2">23‑25%</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.25%/°C</td><td className="border p-2">1.05×1.75 m</td><td className="border p-2">21‑24 kg</td><td className="border p-2">450‑500</td></tr>
+            <tr><td className="border p-2">Polycrystalline</td><td className="border p-2">16‑18%</td><td className="border p-2">14‑16%</td><td className="border p-2">-0.40%/°C</td><td className="border p-2">0.99×1.65 m</td><td className="border p-2">18‑22 kg</td><td className="border p-2">300‑380</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-sm text-gray-600">TOPCon (tunnel oxide passivated contact) currently represents ≈97% of new mono‑crystalline installations due to its excellent price/performance ratio.</p>
+
+      {/* ============================================================ */}
+      {/* 6. ROOF ORIENTATION, PITCH, SHADING */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">6. Roof orientation, pitch & shading – real production losses</h3>
+      <ul className="list-disc pl-6 mb-4">
+        <li><strong>South‑east / South‑west:</strong> 90‑95% of optimal</li>
+        <li><strong>East / West (flat pitch 10‑20°):</strong> 70‑80% of optimal</li>
+        <li><strong>East / West (steep 40‑50°):</strong> 60‑70% of optimal</li>
+        <li><strong>Flat roof (5‑10°):</strong> 85‑90% if oriented south</li>
+        <li><strong>North (any pitch):</strong> 45‑55% – generally not recommended</li>
+      </ul>
+      <p className="mb-4">Partial shading from chimneys or trees can slash output by 30‑70%. Micro‑inverters or power optimisers mitigate this; they add 10‑20% to system cost but are recommended when shade is present.</p>
+
+      {/* ============================================================ */}
+      {/* 7. BATTERIES – LFP vs NMC, OPTIMAL SIZING */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">7. Battery storage – LFP vs NMC, optimal sizing</h3>
+      <ul className="list-disc pl-6 mb-4">
+        <li><strong>LFP (Lithium Iron Phosphate):</strong> safer, 4,000‑6,000 cycles, lower energy density, ideal for daily cycling.</li>
+        <li><strong>NMC (Nickel Manganese Cobalt):</strong> higher energy density, cheaper per kWh, but 2,000‑3,000 cycles and lower thermal runaway threshold.</li>
+        <li><strong>Optimal size for 4‑6 kWp system:</strong> 5‑10 kWh (covers evening and night usage).</li>
+        <li><strong>Payback:</strong> a 5 kWh battery (£4,500‑£6,000) adds 3‑4 years to the payback period but increases self‑sufficiency.</li>
+      </ul>
+
+      {/* ============================================================ */}
+      {/* 8. PERMITTED DEVELOPMENT & MCS */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">8. Permitted development & MCS (UK)</h3>
+      <ul className="list-disc pl-6 mb-4">
+        <li>Panels are generally permitted development if they project ≤200 mm from the roof slope and do not exceed the highest part of the roof (excluding chimneys).</li>
+        <li>Listed buildings and conservation areas require full planning permission.</li>
+        <li>MCS certification is needed to access the Smart Export Guarantee (SEG).</li>
+      </ul>
+
+      {/* ============================================================ */}
+      {/* 9. INTERACTIVE CALCULATOR */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-12 mb-4">9. Design your own layout – interactive 3D tool</h3>
+      <p className="mb-6">
+        Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys. It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels) and shows a 3D preview. You can switch between monocrystalline and polycrystalline panels.
+      </p>
+      <SolarPanelCalculator />
+
+      {/* ============================================================ */}
+      {/* 10. COMPLETE BIBLIOGRAPHY */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-12 mb-4">📚 References & further reading</h3>
+      <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
+        <p>1. R. Neumann, "Solar Panel Types Compared: Mono vs Poly vs TOPCon vs HJT (2026)", SurgePV, 2026.</p>
+        <p>2. Enerix, "Photovoltaikmodul Arten: Welche Module gibt es? (Marktdaten 2026)", 2026.</p>
+        <p>3. Fraunhofer ISE, "Photovoltaics Report", updated November 2025.</p>
+        <p>4. H. Mustoe, "How much do solar panels cost? UK 2025 prices guide", The Independent, 2025.</p>
+        <p>5. Y. He et al., "A techno‑economic‑environmental comparison of residential solar energy systems", Energy Conversion and Management, 2025.</p>
+        <p>6. "Tailored self‑assembled molecule for efficient charge extraction…", Chemical Engineering Journal, May 2026.</p>
+        <p>7. "MXene‑driven nanoscale field‑effect junction…", Nature Communications, 2026.</p>
+        <p>8. "New strategy unlocks 29.76% efficiency for all‑perovskite tandem solar cells", Joule, Mar. 2026.</p>
+        <p>9. "IoT‑based evaluation of photovoltaic modules enhanced by different reflector materials", Scientific Reports, 2026.</p>
+        <p>10. "LONGi Breakthrough in Flexible Tandem Technology", LONGi, Mar. 2026.</p>
+        <p>11. "Tandem PV launches commercial perovskite‑silicon manufacturing", pv magazine USA, Apr. 2026.</p>
+        <p>12. UK Government, "Solar PV cost data – historical and projections 2025‑2030", DESNZ, Feb. 2025.</p>
+        <p>13. MCS, "Installation Best Practice Guide for Solar PV (Issue 6.2)", Jan. 2025.</p>
+        <p>14. PVGIS (European Commission JRC), "Solar radiation and PV performance data for the United Kingdom", 2025.</p>
+        <p>15. "Recycling solar photovoltaic panels as an end‑of‑life scenario", Science of The Total Environment, 2025.</p>
+        <p>16. Ofgem, "Smart Export Guarantee (SEG) – supplier rates and guidance", Apr. 2025.</p>
+        <p>17. Solar Energy UK, "Homeowner Guide to Battery Storage", 2025.</p>
+        <p>18. National Grid ESO, "Future Energy Scenarios 2025 – distributed generation outlook".</p>
+      </div>
+      <p className="text-xs text-gray-500 mt-4">Last review: May 2026. Data reflect most recent market research and peer‑reviewed studies.</p>
+    </div>
+  );
+};
+
+export default SolarPanelsPage;
