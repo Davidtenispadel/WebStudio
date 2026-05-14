@@ -16,140 +16,113 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
-      {/* 1. EXTENDED HISTORY OF SOLAR PANELS */}
+      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
-        1. Origins and evolution of solar panels – from 19th century experiments to today's revolution
+        1. Origins and evolution of solar panels – from 19th century to today's technology
       </h3>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🌞 The Pioneers (19th century – 1954)</h4>
       <p className="mb-2">
-        The history of solar energy began much earlier than most people imagine, although its
-        definitive leap to modernity occurred in the mid‑20th century. In <strong>1883</strong>,
+        The history of solar energy began much earlier than most people imagine. In <strong>1883</strong>,
         American inventor <strong>Charles Fritts</strong> built the first practical photovoltaic
         module using selenium coated with a thin layer of gold. Its efficiency was only about
-        <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale
-        electricity generation.
+        <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
       </p>
       <p className="mb-2">
         The true “big bang” of solar energy happened in <strong>1954</strong> when engineers at
-        <strong>Bell Laboratories</strong> (Daryl Chapin, Calvin Fuller, and Gerald Pearson)
-        developed the first practical silicon solar cell, achieving <strong>6% efficiency</strong>.
-        Popular Science called it “the beginning of a new era”.
+        <strong>Bell Laboratories</strong> developed the first practical silicon solar cell, achieving
+        <strong>6% efficiency</strong>. That cell was made of <strong>crystalline silicon</strong> – the
+        same base material still used in almost all panels today.
       </p>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🚀 The Space Race (late 1950s – 1960s)</h4>
       <p className="mb-2">
-        The need for reliable power in space catapulted solar technology. In <strong>1959</strong>,
-        <strong>Hoffman Electronics</strong> was already manufacturing commercial cells with
-        <strong>10% efficiency</strong>, used primarily on satellites. The Vanguard I satellite
-        (1958) was the first to be powered by solar cells. By the late 1960s, solar panels were
-        standard on spacecraft, but costs remained astronomical for terrestrial use.
+        The need for reliable power in space catapulted solar technology. By <strong>1959</strong>,
+        <strong>Hoffman Electronics</strong> was manufacturing commercial cells with
+        <strong>10% efficiency</strong>, used primarily on satellites. Costs remained astronomical
+        for Earth‑based use, but the technology matured rapidly.
       </p>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🏠 First Rooftops (1970 – 2000)</h4>
       <p className="mb-2">
-        The oil crisis of the 1970s spurred research into terrestrial applications. Although
-        solar panels began to appear on a few off‑grid homes, the cost was still prohibitive
-        ($30‑50/W). The real residential take‑off began in the 2000s, driven by subsidy policies
-        such as Germany's <strong>feed‑in tariffs (Renewable Energy Act 2000)</strong>, which
-        incentivised mass production and drove prices down.
+        The oil crisis of the 1970s spurred research into terrestrial applications. The first
+        residential solar panels were <strong>polycrystalline</strong> – cheaper to produce but less
+        efficient than monocrystalline. During this period, two main types of silicon panels emerged:
+      </p>
+      <ul className="list-disc pl-6 mb-4">
+        <li><strong>Monocrystalline silicon (mono‑Si):</strong> Made from a single crystal, higher
+        efficiency (15‑20%), uniform dark colour, but more expensive.</li>
+        <li><strong>Polycrystalline silicon (poly‑Si):</strong> Made from melted fragments, lower
+        efficiency (13‑16%), speckled blue appearance, cheaper to manufacture.</li>
+      </ul>
+      <p className="mb-2">
+        By the 1990s, both types were used on rooftops, but polycrystalline dominated the low‑cost
+        market. However, efficiency and manufacturing improvements steadily eroded the cost advantage
+        of poly.
       </p>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">📉 The incredible cost drop (1975 – today)</h4>
       <p className="mb-2">
-        The reason solar panels are affordable for homeowners today is not just technological
-        progress, but a spectacular price reduction driven by innovation and mass manufacturing.
+        The reason solar panels are affordable today is a spectacular price reduction driven by
+        innovation and mass manufacturing. In 1975, a solar cell cost <strong>$115/W</strong> – only
+        viable for satellites. By 2005, costs had dropped to $3.5/W, and by 2015 to $0.70/W. Today,
+        panel prices are below <strong>$0.10‑0.40/W</strong>, a reduction of more than 99.8% in 50 years.
+      </p>
+      <p className="mb-2">
+        China's entry into component manufacturing after 2000 accelerated this trend, making solar
+        the cheapest electricity source in history.
+      </p>
+
+      <h4 className="text-xl font-semibold mt-6 mb-2">
+        📊 Today's panels: monocrystalline dominates, polycrystalline is obsolete
+      </h4>
+      <p className="mb-2">
+        <strong>Do manufacturers still make polycrystalline panels?</strong> Yes, but they are rapidly
+        disappearing. In 2025, <strong>over 97% of new residential installations use monocrystalline
+        cells</strong>. Polycrystalline panels are only found in very low‑cost projects or developing
+        markets. Why?
       </p>
       <ul className="list-disc pl-6 mb-4">
-        <li><strong>1975:</strong> Cost ~$115/W – viable only for satellites and space missions.</li>
-        <li><strong>Experience curve:</strong> Historically, every doubling of global production capacity has reduced the price of solar panels by about 20%.</li>
-        <li><strong>Today:</strong> Panel cost has fallen below <strong>$0.10‑0.40/W</strong> – a reduction of more than <strong>99.8% in 50 years</strong>. Solar has gone from the most expensive energy source to one of the cheapest in history.</li>
-        <li><strong>Key factor:</strong> China's entry into component manufacturing from around 2000 accelerated cost reductions and democratised access to solar energy.</li>
+        <li><strong>Efficiency gap:</strong> Mono cells now reach 22‑24%, while poly struggles above 17%.</li>
+        <li><strong>Space:</strong> Poly requires more roof area for the same power output.</li>
+        <li><strong>Cost:</strong> The price difference has shrunk to less than 5‑10%, making mono the better value.</li>
+        <li><strong>Degradation:</strong> Poly panels degrade faster (0.5‑0.8%/year vs 0.3‑0.5% for modern mono).</li>
       </ul>
-      <p className="mb-4">For a detailed year‑by‑year payback evolution, see the table in the earlier section.</p>
-
-      {/* ============================================================ */}
-      {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        2. The near future: new solar technologies (2026‑2035)
-      </h3>
       <p className="mb-2">
-        Although today's panels (TOPCon, HJT) are already very efficient, science does not stand
-        still. Here are the technologies that will reach rooftops in the coming years.
+        Therefore, <strong>every panel recommended in this guide (PERC, TOPCon, HJT, IBC) is based on
+        monocrystalline silicon</strong>. Polycrystalline is no longer a sensible choice for
+        homeowners, unless you have extreme budget constraints and plenty of space.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">🔬 The tandem revolution: Perovskite + Silicon</h4>
+      {/* THEORY BEFORE DEGRADATION TABLE */}
+      <h4 className="text-xl font-semibold mt-6 mb-2">
+        🔬 How long do panels really last? (Degradation and durability)
+      </h4>
       <p className="mb-2">
-        <strong>What is it?</strong> The most promising emerging technology. It consists of
-        stacking two cells: a top <strong>perovskite</strong> cell (captures blue light better)
-        and a bottom <strong>silicon</strong> cell (captures red light better). This captures a
-        broader spectrum of sunlight.
+        All solar panels degrade over time. The main causes are UV radiation, thermal cycling,
+        humidity, and mechanical stress. A landmark University of New South Wales (UNSW) study of
+        11,000 PV systems found a <strong>median degradation rate of 0.9% per year</strong>, but
+        quality panels degrade much slower. For example, a Swiss study of panels installed
+        between 1987 and 1993 showed only <strong>0.25% annual degradation</strong> – proving that
+        premium materials can last 40‑50 years.
       </p>
       <p className="mb-2">
-        <strong>Expected efficiency:</strong> While a TOPCon panel is around 22‑24% efficient,
-        tandem cells have already surpassed <strong>30% efficiency at laboratory level</strong>
-        and are expected to reach <strong>35% in commercial modules</strong> in the coming years.
+        The table below compares modern technologies: TOPCon, HJT, PERC, polycrystalline, and
+        lightweight TOPCon. Note that <strong>HJT has the lowest degradation (0.25‑0.30%/year)</strong>,
+        while polycrystalline degrades fastest.
       </p>
-      <p className="mb-2">
-        <strong>Availability:</strong> <strong>2026‑2027</strong>. Manufacturers such as
-        <strong>Oxford PV</strong> (with its 'Centaur' series) will launch commercial products
-        with 20‑25 year warranties by this date. Prototypes and pilot production lines are already
-        visible in 2025.
-      </p>
-
-      <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
-      <p className="mb-2">
-        Your guide already notes that TOPCon dominates now. However, analysts predict that
-        <strong>Back‑Contact (BC) technology</strong> will reach cost parity with TOPCon
-        between <strong>2028 and 2030</strong>. Why? BC is more efficient because it has no metal
-        grid lines on the front of the panel, but it is more expensive to manufacture. When the
-        price drops, it will become popular.
-      </p>
-      <p className="mb-2">
-        <strong>The likely scenario:</strong> By 2030, TOPCon panels (low cost) and BC panels
-        (high efficiency) will coexist in the market, until Tandem (perovskite) panels displace
-        them completely towards <strong>2035</strong>.
-      </p>
-
-      <div className="bg-gray-50 p-4 rounded-md mb-6">
-        <p className="font-semibold">✨ Visual timeline of key milestones:</p>
-        <ul className="list-disc pl-6 mt-2">
-          <li>1839: Becquerel discovers photovoltaic effect</li>
-          <li>1883: Fritts builds first selenium cell (~1‑2%)</li>
-          <li>1954: Bell Labs creates first practical silicon cell (6%)</li>
-          <li>1959: Hoffman Electronics achieves 10% efficiency for satellites</li>
-          <li>1970s‑2000: First rooftops, but very expensive</li>
-          <li>2000‑2015: China scales production, prices collapse from $5/W to $0.70/W</li>
-          <li>2023‑2025: TOPCon becomes dominant (≈97% of new mono‑crystalline installs)</li>
-          <li>2026‑2028: First commercial Perovskite‑Silicon tandem panels</li>
-          <li>2028‑2030: Back‑Contact (BC) reaches cost parity with TOPCon</li>
-          <li>2030‑2035: Tandem panels become mainstream, efficiency &gt;30‑35%</li>
-        </ul>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 3. INTERNAL STRUCTURE */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">3. Internal structure of a solar panel</h3>
-      <ul className="list-disc pl-6 mb-4 space-y-1">
-        <li><strong>Aluminium frame:</strong> Anodised for corrosion resistance – provides rigidity and mounting points.</li>
-        <li><strong>Tempered glass:</strong> 3‑4 mm low‑iron glass with &gt;91% transmittance; withstands 25 mm hail.</li>
-        <li><strong>EVA encapsulant:</strong> Melts during lamination (~150°C) to seal and insulate cells.</li>
-        <li><strong>Solar cells:</strong> Monocrystalline (PERC, TOPCon, HJT, IBC) – polycrystalline is obsolete.</li>
-        <li><strong>Backsheet:</strong> White polymer sheet (TPT/TPE) that reflects unabsorbed light and blocks moisture.</li>
-        <li><strong>Junction box:</strong> Contains bypass diodes to prevent hot‑spots when cells are shaded.</li>
-        <li><strong>Silicone sealant:</strong> Seals the gap between frame and laminate.</li>
-      </ul>
-
-      {/* ============================================================ */}
-      {/* 4. DEGRADATION & DURABILITY */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">4. Degradation and durability – how long do panels really last?</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">1st year loss</th><th className="border p-2">Annual loss (years 2‑25)</th><th className="border p-2">Power at 25 years</th><th className="border p-2">Typical lifespan (years)</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border p-2">Technology</th>
+              <th className="border p-2">1st year loss</th>
+              <th className="border p-2">Annual loss (years 2‑25)</th>
+              <th className="border p-2">Power at 25 years</th>
+              <th className="border p-2">Typical lifespan (years)</th>
+            </tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">1%</td><td className="border p-2">0.35‑0.40%</td><td className="border p-2">≈89‑91%</td><td className="border p-2">35‑40</td></tr>
             <tr><td className="border p-2">HJT</td><td className="border p-2">1%</td><td className="border p-2">0.25‑0.30%</td><td className="border p-2">≈91‑93%</td><td className="border p-2">35‑45</td></tr>
@@ -160,14 +133,116 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ============================================================ */}
-      {/* 5. UK WINTER PRODUCTION vs CONSUMPTION (EV + heat pump, no battery) */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">5. UK winter performance: solar production vs household demand (with EV and heat pump)</h3>
+      {/* THEORY BEFORE TECHNOLOGY COMPARISON TABLE */}
+      <h4 className="text-xl font-semibold mt-6 mb-2">
+        ⚙️ Detailed comparison of modern monocrystalline technologies
+      </h4>
       <p className="mb-2">
-        The UK government is phasing out gas boilers; new homes after 2025 must use low‑carbon heating (heat pumps).
-        Many households also own an electric vehicle (EV) like a Tesla Model 3. Without a battery, most solar energy
-        generated in winter is self‑consumed immediately, but a significant fraction is exported or curtailed.
+        Today, the market offers several variations of monocrystalline panels: <strong>PERC</strong>
+        (the previous standard), <strong>TOPCon</strong> (the new mainstream), <strong>HJT</strong>
+        (high‑efficiency, best temperature coefficient), and <strong>Lightweight TOPCon</strong>
+        (reduced weight for timber roofs). The table below compares their efficiency, temperature
+        coefficient, power, weight, price per panel, and expected lifespan. Use it to choose the
+        right panel for your specific needs.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-300 text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border p-2">Technology</th>
+              <th className="border p-2">Efficiency</th>
+              <th className="border p-2">Temp coef</th>
+              <th className="border p-2">Power (Wp)</th>
+              <th className="border p-2">Weight (kg)</th>
+              <th className="border p-2">Price per panel (£)</th>
+              <th className="border p-2">Lifespan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
+            <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
+            <tr><td className="border p-2">HJT</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.24%/°C</td><td className="border p-2">450‑480</td><td className="border p-2">21‑24</td><td className="border p-2">£450‑600</td><td className="border p-2">35‑45</td></tr>
+            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590</td><td className="border p-2">25‑30</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 2. FUTURE TECHNOLOGIES (2026-2035) – kept as is */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">
+        2. The near future: new solar technologies (2026‑2035)
+      </h3>
+      <p className="mb-2">
+        Although today's panels are already very efficient, science continues to advance. Here are
+        the technologies that will reach rooftops in the coming years.
+      </p>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🔬 The tandem revolution: Perovskite + Silicon</h4>
+      <p className="mb-2">
+        <strong>What is it?</strong> Stacking a top perovskite cell (captures blue light) and a bottom
+        silicon cell (captures red light) to capture a broader solar spectrum.
+      </p>
+      <p className="mb-2">
+        <strong>Expected efficiency:</strong> Already above 30% in labs, commercial modules expected
+        to reach 35% by 2030.
+      </p>
+      <p className="mb-2">
+        <strong>Availability:</strong> 2026‑2027. Oxford PV and others plan commercial products with
+        20‑25 year warranties.
+      </p>
+      <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
+      <p className="mb-2">
+        Back‑Contact (BC) technology moves all metal contacts to the rear, increasing efficiency by
+        2‑3% but at higher cost. Analysts predict BC will reach cost parity with TOPCon between
+        2028 and 2030. By 2035, tandem panels (perovskite‑silicon) may replace both.
+      </p>
+      <div className="bg-gray-50 p-4 rounded-md mb-6">
+        <p className="font-semibold">✨ Visual timeline of key milestones:</p>
+        <ul className="list-disc pl-6 mt-2">
+          <li>1839: Becquerel discovers photovoltaic effect</li>
+          <li>1883: Fritts builds first selenium cell (~1‑2%)</li>
+          <li>1954: Bell Labs creates first practical silicon cell (6%)</li>
+          <li>1959: Hoffman Electronics achieves 10% efficiency for satellites</li>
+          <li>1970s‑2000: First rooftops, polycrystalline and monocrystalline coexist</li>
+          <li>2000‑2015: China scales production, prices collapse from $5/W to $0.70/W</li>
+          <li>2023‑2025: TOPCon becomes dominant (≈97% of new mono‑crystalline installs)</li>
+          <li>2026‑2028: First commercial Perovskite‑Silicon tandem panels</li>
+          <li>2028‑2030: Back‑Contact (BC) reaches cost parity with TOPCon</li>
+          <li>2030‑2035: Tandem panels become mainstream, efficiency &gt;30‑35%</li>
+        </ul>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 3. INTERNAL STRUCTURE (theory + diagram) */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">3. Internal structure of a solar panel</h3>
+      <p className="mb-2">
+        Every modern solar panel is a multi‑layer laminate designed to protect the cells while
+        maximising light absorption. The main layers are:
+      </p>
+      <ul className="list-disc pl-6 mb-4 space-y-1">
+        <li><strong>Aluminium frame:</strong> Anodised for corrosion resistance – provides rigidity and mounting points.</li>
+        <li><strong>Tempered glass:</strong> 3‑4 mm low‑iron glass with &gt;91% transmittance; withstands 25 mm hail.</li>
+        <li><strong>EVA encapsulant:</strong> Melts during lamination (~150°C) to seal and insulate cells.</li>
+        <li><strong>Solar cells:</strong> Monocrystalline (PERC, TOPCon, HJT, IBC) – polycrystalline is obsolete.</li>
+        <li><strong>Backsheet:</strong> White polymer sheet (TPT/TPE) that reflects unabsorbed light and blocks moisture.</li>
+        <li><strong>Junction box:</strong> Contains bypass diodes to prevent hot‑spots when cells are shaded.</li>
+        <li><strong>Silicone sealant:</strong> Seals the gap between frame and laminate.</li>
+      </ul>
+      <p className="mb-4">
+        The quality of lamination and materials determines long‑term durability. Premium panels use
+        thicker glass, UV‑stable EVA, and robust backsheets to achieve 35+ year lifespans.
+      </p>
+
+      {/* ============================================================ */}
+      {/* 4. UK WINTER PERFORMANCE (with EV + heat pump) – theory + table */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">4. UK winter performance: solar production vs household demand (with EV and heat pump)</h3>
+      <p className="mb-2">
+        The UK government is phasing out gas boilers; new homes after 2025 must use low‑carbon heating
+        (heat pumps). Many households also own an electric vehicle (EV) like a Tesla Model 3. Without
+        a battery, most solar energy generated in winter is self‑consumed immediately, but a
+        significant fraction is exported or curtailed. The analysis below uses realistic assumptions.
       </p>
       <h4 className="text-lg font-semibold mt-4 mb-2">🔢 Assumptions for a typical UK home (4 bedrooms, 2 adults, EV, heat pump):</h4>
       <ul className="list-disc pl-6 mb-4">
@@ -209,22 +284,32 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 6. ROOF ORIENTATION, PITCH & NORTH LOSSES */}
+      {/* 5. ROOF ORIENTATION, PITCH & NORTH LOSSES (theory + bullet list) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">6. Roof orientation, pitch, and shading – why north is a problem</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">5. Roof orientation, pitch, and shading – why north is a problem</h3>
+      <p className="mb-2">
+        In the northern hemisphere, a south‑facing roof at about 35° tilt receives the maximum annual
+        solar radiation. Deviations cause significant losses. The following guide shows expected
+        production relative to a perfect south‑facing array.
+      </p>
       <ul className="list-disc pl-6 mb-4">
         <li><strong>South‑east / South‑west:</strong> 90‑95% of optimal</li>
         <li><strong>East / West (flat pitch 10‑20°):</strong> 70‑80%</li>
         <li><strong>East / West (steep 40‑50°):</strong> 60‑70%</li>
-        <li><strong>Flat roof (5‑10°) with south orientation:</strong> 85‑90%</li>
+        <li><strong>Flat roof (5‑10°) with south orientation:</strong> 85‑90% (use tilt frames to improve)</li>
         <li><strong>North (any pitch):</strong> <span className="font-bold text-red-700">45‑55% – generally not recommended</span></li>
       </ul>
-      <p className="mb-4">Partial shading can slash output by 30‑70%. Microinverters or optimisers help but add 10‑20% to system cost.</p>
+      <p className="mb-4">Partial shading from chimneys, trees, or neighbouring buildings can slash output by 30‑70%. Microinverters or power optimisers help but add 10‑20% to system cost.</p>
 
       {/* ============================================================ */}
-      {/* 7. PRODUCTION COMPARISON: UK vs SPAIN */}
+      {/* 6. UK vs SPAIN PRODUCTION (theory + table) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">7. Production comparison: United Kingdom vs Spain</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">6. Production comparison: United Kingdom vs Spain</h3>
+      <p className="mb-2">
+        Solar radiation varies dramatically across Europe. Spain receives nearly twice as much annual
+        sunlight as the UK, which directly affects payback periods. The table below shows typical
+        yields and expected payback times for a 4 kWp system.
+      </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm mb-4">
           <thead className="bg-gray-100"><tr><th className="border p-2">Location</th><th className="border p-2">kWh/kWp/year</th><th className="border p-2">4 kWp yearly output</th><th className="border p-2">Payback (2025)</th></tr></thead>
@@ -238,9 +323,14 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 8. VISUAL IDENTIFICATION GUIDE */}
+      {/* 7. VISUAL IDENTIFICATION GUIDE (theory + table) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">8. Visual identification guide – spot the technology at a glance</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">7. Visual identification guide – spot the technology at a glance</h3>
+      <p className="mb-2">
+        You can often identify the type of solar cell by looking at the colour and the pattern of
+        thin metal lines (busbars) on the front of the panel. The table below summarises the visual
+        differences.
+      </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr></thead>
@@ -254,25 +344,15 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 9. FULL TECHNOLOGY COMPARISON */}
+      {/* 8. CLIMATE ZONE RECOMMENDATIONS (theory + table) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">9. Full comparison of solar panel technologies (2025‑2026)</h3>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr></thead>
-          <tbody>
-            <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
-            <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
-            <tr><td className="border p-2">HJT</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.24%/°C</td><td className="border p-2">450‑480</td><td className="border p-2">21‑24</td><td className="border p-2">£450‑600</td><td className="border p-2">35‑45</td></tr>
-            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590</td><td className="border p-2">25‑30</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 10. CLIMATE ZONE RECOMMENDATIONS */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">10. Climate zone recommendations – choose by where you live</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">8. Climate zone recommendations – choose by where you live</h3>
+      <p className="mb-2">
+        Different technologies perform better in different climates. HJT panels have the best
+        temperature coefficient, making them ideal for hot southern Europe. TOPCon excels in
+        low‑light conditions, perfect for the UK and central Europe. The table below summarises
+        the best choice for each climate zone.
+      </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100"><tr><th className="border p-2">Climate zone</th><th className="border p-2">Countries</th><th className="border p-2">Best technology</th><th className="border p-2">Why</th><th className="border p-2">4 kWp cost (installed)</th></tr></thead>
@@ -285,9 +365,14 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 11. UK TIMBER ROOF ADVICE */}
+      {/* 9. UK TIMBER ROOF ADVICE (theory + decision flow) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">11. Special advice for UK timber roofs – weight matters</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">9. Special advice for UK timber roofs – weight matters</h3>
+      <p className="mb-2">
+        Many British homes have timber roof structures that may not support heavy loads. A typical
+        solar array adds 15‑25 kg/m². Unreinforced roofs often have a safe limit of around 20 kg/m².
+        The following decision flow helps you choose the right panel based on your roof's capacity.
+      </p>
       <div className="bg-yellow-50 p-4 rounded-md mb-6">
         <p className="font-semibold">📐 UK decision flow for timber roofs:</p>
         <ol className="list-decimal pl-6 mt-2">
@@ -299,9 +384,15 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 12. COST BREAKDOWN */}
+      {/* 10. COST BREAKDOWN (UK) – theory + table */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">12. Cost breakdown – solar installation in the UK (2025‑2026)</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">10. Cost breakdown – solar installation in the UK (2025‑2026)</h3>
+      <p className="mb-2">
+        The total cost of a solar installation includes not only the panels but also the inverter,
+        mounting system, scaffolding, electrical components, labour, and administrative fees.
+        The table below shows a typical breakdown for a 4 kWp TOPCon system installed in southern
+        England. All prices include 0% VAT (valid until March 2027).
+      </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm mb-4">
           <thead className="bg-gray-100"><tr><th className="border p-2">Component</th><th className="border p-2">Estimated cost (£)</th></tr></thead>
@@ -320,19 +411,25 @@ const SolarPanelsPage: React.FC = () => {
       <p className="mb-4">Annual savings + SEG income: <strong>£700‑£950</strong> → payback <strong>7‑10 years</strong>.</p>
 
       {/* ============================================================ */}
-      {/* 13. PERMITTED DEVELOPMENT & MCS */}
+      {/* 11. PERMITTED DEVELOPMENT & MCS */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">13. Permitted development & MCS (UK)</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">11. Permitted development & MCS (UK)</h3>
+      <p className="mb-2">
+        In most cases, installing solar panels on a residential roof in the UK is considered
+        <strong>permitted development</strong>, meaning you do not need planning permission as long as
+        certain conditions are met. However, listed buildings and conservation areas have stricter rules.
+      </p>
       <ul className="list-disc pl-6 mb-4">
-        <li>Panels are generally permitted development if they project ≤200 mm from the roof slope and do not exceed the highest part of the roof (excluding chimneys).</li>
+        <li>Panels must project ≤200 mm from the roof slope.</li>
+        <li>They cannot exceed the highest part of the roof (excluding chimneys).</li>
         <li>Listed buildings and conservation areas require full planning permission.</li>
-        <li>MCS certification is needed to access the Smart Export Guarantee (SEG).</li>
+        <li><strong>MCS certification</strong> (Microgeneration Certification Scheme) is required to access the Smart Export Guarantee (SEG), which pays you for exported electricity.</li>
       </ul>
 
       {/* ============================================================ */}
-      {/* 14. INTERACTIVE CALCULATOR */}
+      {/* 12. INTERACTIVE CALCULATOR */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">14. Design your own layout – interactive 3D tool</h3>
+      <h3 className="text-2xl font-semibold mt-12 mb-4">12. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
         Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
         It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
@@ -341,7 +438,7 @@ const SolarPanelsPage: React.FC = () => {
       <SolarPanelCalculator />
 
       {/* ============================================================ */}
-      {/* 15. BIBLIOGRAPHY */}
+      {/* 13. BIBLIOGRAPHY */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">📚 References & further reading</h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
