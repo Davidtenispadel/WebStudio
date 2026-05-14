@@ -16,15 +16,13 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
-      {/* 1. EXTENDED HISTORY OF SOLAR PANELS (Pioneers, Space Race, Cost Drop) */}
+      {/* 1. EXTENDED HISTORY OF SOLAR PANELS */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         1. Origins and evolution of solar panels – from 19th century experiments to today's revolution
       </h3>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        🌞 The Pioneers (19th century – 1954)
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🌞 The Pioneers (19th century – 1954)</h4>
       <p className="mb-2">
         The history of solar energy began much earlier than most people imagine, although its
         definitive leap to modernity occurred in the mid‑20th century. In <strong>1883</strong>,
@@ -40,9 +38,7 @@ const SolarPanelsPage: React.FC = () => {
         Popular Science called it “the beginning of a new era”.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        🚀 The Space Race (late 1950s – 1960s)
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🚀 The Space Race (late 1950s – 1960s)</h4>
       <p className="mb-2">
         The need for reliable power in space catapulted solar technology. In <strong>1959</strong>,
         <strong>Hoffman Electronics</strong> was already manufacturing commercial cells with
@@ -51,9 +47,7 @@ const SolarPanelsPage: React.FC = () => {
         standard on spacecraft, but costs remained astronomical for terrestrial use.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        🏠 First Rooftops (1970 – 2000)
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🏠 First Rooftops (1970 – 2000)</h4>
       <p className="mb-2">
         The oil crisis of the 1970s spurred research into terrestrial applications. Although
         solar panels began to appear on a few off‑grid homes, the cost was still prohibitive
@@ -62,37 +56,21 @@ const SolarPanelsPage: React.FC = () => {
         incentivised mass production and drove prices down.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        📉 The incredible cost drop (1975 – today)
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">📉 The incredible cost drop (1975 – today)</h4>
       <p className="mb-2">
         The reason solar panels are affordable for homeowners today is not just technological
         progress, but a spectacular price reduction driven by innovation and mass manufacturing.
       </p>
       <ul className="list-disc pl-6 mb-4">
-        <li>
-          <strong>1975:</strong> Cost ~$115/W – viable only for satellites and space missions.
-        </li>
-        <li>
-          <strong>Experience curve:</strong> Historically, every doubling of global production
-          capacity has reduced the price of solar panels by about 20%.
-        </li>
-        <li>
-          <strong>Today:</strong> Panel cost has fallen below <strong>$0.10‑0.40/W</strong> – a
-          reduction of more than <strong>99.8% in 50 years</strong>. Solar has gone from the most
-          expensive energy source to one of the cheapest in history.
-        </li>
-        <li>
-          <strong>Key factor:</strong> China's entry into component manufacturing from around 2000
-          accelerated cost reductions and democratised access to solar energy.
-        </li>
+        <li><strong>1975:</strong> Cost ~$115/W – viable only for satellites and space missions.</li>
+        <li><strong>Experience curve:</strong> Historically, every doubling of global production capacity has reduced the price of solar panels by about 20%.</li>
+        <li><strong>Today:</strong> Panel cost has fallen below <strong>$0.10‑0.40/W</strong> – a reduction of more than <strong>99.8% in 50 years</strong>. Solar has gone from the most expensive energy source to one of the cheapest in history.</li>
+        <li><strong>Key factor:</strong> China's entry into component manufacturing from around 2000 accelerated cost reductions and democratised access to solar energy.</li>
       </ul>
-      <p className="mb-4">
-        For a detailed year‑by‑year payback evolution, see the table in the earlier section.
-      </p>
+      <p className="mb-4">For a detailed year‑by‑year payback evolution, see the table in the earlier section.</p>
 
       {/* ============================================================ */}
-      {/* 2. FUTURE TECHNOLOGIES (2026-2035): TANDEM, BACK-CONTACT, etc. */}
+      {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
         2. The near future: new solar technologies (2026‑2035)
@@ -102,9 +80,7 @@ const SolarPanelsPage: React.FC = () => {
         still. Here are the technologies that will reach rooftops in the coming years.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        🔬 The tandem revolution: Perovskite + Silicon
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🔬 The tandem revolution: Perovskite + Silicon</h4>
       <p className="mb-2">
         <strong>What is it?</strong> The most promising emerging technology. It consists of
         stacking two cells: a top <strong>perovskite</strong> cell (captures blue light better)
@@ -123,9 +99,7 @@ const SolarPanelsPage: React.FC = () => {
         visible in 2025.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        ⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
       <p className="mb-2">
         Your guide already notes that TOPCon dominates now. However, analysts predict that
         <strong>Back‑Contact (BC) technology</strong> will reach cost parity with TOPCon
@@ -151,12 +125,12 @@ const SolarPanelsPage: React.FC = () => {
           <li>2023‑2025: TOPCon becomes dominant (≈97% of new mono‑crystalline installs)</li>
           <li>2026‑2028: First commercial Perovskite‑Silicon tandem panels</li>
           <li>2028‑2030: Back‑Contact (BC) reaches cost parity with TOPCon</li>
-          <li>2030‑2035: Tandem panels become mainstream, efficiency >30‑35%</li>
+          <li>2030‑2035: Tandem panels become mainstream, efficiency &gt;30‑35%</li>
         </ul>
       </div>
 
       {/* ============================================================ */}
-      {/* 3. INTERNAL STRUCTURE OF A SOLAR PANEL (kept) */}
+      {/* 3. INTERNAL STRUCTURE */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">3. Internal structure of a solar panel</h3>
       <ul className="list-disc pl-6 mb-4 space-y-1">
@@ -170,7 +144,7 @@ const SolarPanelsPage: React.FC = () => {
       </ul>
 
       {/* ============================================================ */}
-      {/* 4. DEGRADATION & DURABILITY (same as before) */}
+      {/* 4. DEGRADATION & DURABILITY */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">4. Degradation and durability – how long do panels really last?</h3>
       <div className="overflow-x-auto">
@@ -280,7 +254,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 9. FULL TECHNOLOGY COMPARISON (efficiency, price, weight, lifespan) */}
+      {/* 9. FULL TECHNOLOGY COMPARISON */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">9. Full comparison of solar panel technologies (2025‑2026)</h3>
       <div className="overflow-x-auto">
@@ -325,7 +299,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 12. COST BREAKDOWN (UK) */}
+      {/* 12. COST BREAKDOWN */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">12. Cost breakdown – solar installation in the UK (2025‑2026)</h3>
       <div className="overflow-x-auto">
@@ -356,7 +330,7 @@ const SolarPanelsPage: React.FC = () => {
       </ul>
 
       {/* ============================================================ */}
-      {/* 14. INTERACTIVE CALCULATOR (unchanged) */}
+      {/* 14. INTERACTIVE CALCULATOR */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">14. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
@@ -367,7 +341,7 @@ const SolarPanelsPage: React.FC = () => {
       <SolarPanelCalculator />
 
       {/* ============================================================ */}
-      {/* 15. BIBLIOGRAPHY (updated) */}
+      {/* 15. BIBLIOGRAPHY */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">📚 References & further reading</h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
