@@ -75,7 +75,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">
-        📊 Today's panels: monocrystalline dominates, polycrystalline is obsolete
+        📊 Monocrystalline panels dominate; polycrystalline is losing relevance
       </h4>
       <p className="mb-2">
         <strong>Do manufacturers still make polycrystalline panels?</strong> Yes, but they are rapidly
