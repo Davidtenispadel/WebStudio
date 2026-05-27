@@ -193,17 +193,17 @@ const SolarPanelsPage: React.FC = () => {
       <p className="mb-2">
         Today’s comparison between Oxford PV’s perovskite tandem panels and standard monocrystalline 
         technology highlights a clear trade-off between performance and market maturity. Monocrystalline 
-        panels—the current industry standard—typically cost around <strong>£0.20–£0.32/W,<s/trong> supported by large-scale 
+        panels—the current industry standard—typically cost around <strong>£0.20–£0.32/W</strong>, supported by large-scale 
         global manufacturing, proven lifespans exceeding 25 years, and efficiencies in the 20–23% range 
         (up to ~25% with advanced designs). In contrast, Oxford PV’s panels achieve higher efficiencies of 
-        around <strong>24–25%</strong>strong>, but come with estimated production costs of $0.29–0.42/W, likely higher in commercial
-        agreements due to their early-stage positioning and limited scale. Importantly, the company only beg
-        an commercial sales in <strong>September 2024</strong>strong>, with its first shipment delivered to a U.S. utility-scale 
+        around <strong>24–25%</strong>, but come with estimated production costs of $0.29–0.42/W, likely higher in commercial
+        agreements due to their early-stage positioning and limited scale. Importantly, the company only 
+        began commercial sales in <strong>September 2024</strong>, with its first shipment delivered to a U.S. utility-scale 
         project, marking the world’s first deployment of this technology.
       </p>
       <p className="mb-2">
         From a market perspective, Oxford PV is not yet competing in the mainstream solar segment. Its panels 
-        are currently sold through select, <strong>large-scale (utility) projects and pilot applications</strong>strong>, rather than 
+        are currently sold through select, <strong>large-scale (utility) projects and pilot applications</strong>, rather than 
         open commercial distribution, with plans to expand into residential and broader markets in the future. 
         This means that while Oxford PV offers superior energy output per square meter, it does not yet 
         outperform monocrystalline panels on a cost-risk basis. Monocrystalline remains cheaper, widely 
@@ -231,6 +231,23 @@ const SolarPanelsPage: React.FC = () => {
           <li>2028‑2030: Back‑Contact (BC) reaches cost parity with TOPCon</li>
           <li>2030‑2035: Tandem panels become mainstream, efficiency &gt;30‑35%</li>
         </ul>
+      </div>
+
+      {/* ============================================================ */}
+      {/* TEXTO INSERTADO SOBRE BACK-CONTACT (BC) – ANTES DEL APARTADO 3 */}
+      {/* ============================================================ */}
+      <div className="bg-gray-50 p-5 rounded-md border-l-4 border-blue-500 my-6">
+        <h4 className="text-xl font-semibold mb-3">🔘 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
+        <p className="mb-2">
+          Back-Contact (BC) is a solar cell technology in which all electrical contacts are placed on the rear side
+          of the cell, leaving the entire front surface fully exposed to sunlight and eliminating shading losses
+          caused by metal gridlines. This design improves light capture and boosts efficiency compared to conventional
+          panels, while also delivering a uniform, all-black appearance. As a result, BC technology is particularly
+          suited for high-end residential installations and architecturally sensitive applications, where visual
+          quality and design integration are key and the solar system becomes part of the property’s aesthetic
+          distinction. However, its more complex manufacturing process and higher cost limit its adoption in mass
+          markets, meaning it is likely to remain a premium solution rather than a mainstream standard.
+        </p>
       </div>
 
       {/* ============================================================ */}
