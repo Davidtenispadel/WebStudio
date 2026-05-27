@@ -190,6 +190,27 @@ const SolarPanelsPage: React.FC = () => {
         <strong>Availability:</strong> 2026‑2027. Oxford PV and others plan commercial products with
         20‑25 year warranties.
       </p>
+      <p className="mb-2">
+        Today’s comparison between Oxford PV’s perovskite tandem panels and standard monocrystalline 
+        technology highlights a clear trade-off between performance and market maturity. Monocrystalline 
+        panels—the current industry standard—typically cost around <strong>£0.20–£0.32/W,<s/trong> supported by large-scale 
+        global manufacturing, proven lifespans exceeding 25 years, and efficiencies in the 20–23% range 
+        (up to ~25% with advanced designs). In contrast, Oxford PV’s panels achieve higher efficiencies of 
+        around <strong>24–25%</strong>strong>, but come with estimated production costs of $0.29–0.42/W, likely higher in commercial
+        agreements due to their early-stage positioning and limited scale. Importantly, the company only beg
+        an commercial sales in <strong>September 2024</strong>strong>, with its first shipment delivered to a U.S. utility-scale 
+        project, marking the world’s first deployment of this technology.
+      </p>
+      <p className="mb-2">
+        From a market perspective, Oxford PV is not yet competing in the mainstream solar segment. Its panels 
+        are currently sold through select, <strong>large-scale (utility) projects and pilot applications</strong>strong>, rather than 
+        open commercial distribution, with plans to expand into residential and broader markets in the future. 
+        This means that while Oxford PV offers superior energy output per square meter, it does not yet 
+        outperform monocrystalline panels on a cost-risk basis. Monocrystalline remains cheaper, widely 
+        available, and fully bankable, whereas Oxford PV is still an emerging, high-efficiency solution with 
+        greater uncertainty—positioned less as an immediate replacement and more as a potential 
+        next-generation technology if it successfully scales and proves long-term reliability.
+      </p>
       <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
       <p className="mb-2">
         Back‑Contact (BC) technology moves all metal contacts to the rear, increasing efficiency by
