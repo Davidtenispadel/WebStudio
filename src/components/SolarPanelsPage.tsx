@@ -29,26 +29,31 @@ const SolarPanelsPage: React.FC = () => {
         module using selenium coated with a thin layer of gold. Its efficiency was only about
         <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
       </p>
-      
+
       {/* ============================================================ */}
-      {/* TWO IMAGES IN PARALLEL (after first paragraph) */}
+      {/* TWO IMAGES IN PARALLEL (after first paragraph) - same size as third image */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-        <div className="w-full rounded-lg overflow-hidden shadow-md">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952585/4218c5e2-e86e-4093-b8c4-21aa628fbd49.png" 
-            alt="Diagram 1" 
-            className="w-full h-auto object-cover"
-          />
+        <div className="flex justify-center">
+          <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
+            <img 
+              src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952585/4218c5e2-e86e-4093-b8c4-21aa628fbd49.png" 
+              alt="Diagram 1" 
+              className="w-full h-auto object-cover"
+            />
+          </div>
         </div>
-        <div className="w-full rounded-lg overflow-hidden shadow-md">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" 
-            alt="Diagram 2" 
-            className="w-full h-auto object-cover"
-          />
+        <div className="flex justify-center">
+          <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
+            <img 
+              src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" 
+              alt="Diagram 2" 
+              className="w-full h-auto object-cover"
+            />
+          </div>
         </div>
       </div>
+
       <p className="mb-2">
         The true “big bang” of solar energy happened in <strong>1954</strong> when engineers at
         <strong>Bell Laboratories</strong> developed the first practical silicon solar cell, achieving
@@ -72,6 +77,15 @@ const SolarPanelsPage: React.FC = () => {
         <strong>10% efficiency</strong>, used primarily on satellites. Costs remained astronomical
         for Earth‑based use, but the technology matured rapidly.
       </p>
+
+      {/* NEW CENTERED IMAGE AFTER "matured rapidly" */}
+      <div className="flex justify-center my-6">
+        <img 
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779956789/1703e28d-97a4-4f98-a2d2-69166a1c8755.png" 
+          alt="Space race solar panel diagram" 
+          className="w-full max-w-md rounded-lg shadow-md"
+        />
+      </div>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🏠 First Rooftops (1970 – 2000)</h4>
       <p className="mb-2">
@@ -177,15 +191,7 @@ const SolarPanelsPage: React.FC = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100">
-            <tr>
-              <th className="border p-2">Technology</th>
-              <th className="border p-2">Efficiency</th>
-              <th className="border p-2">Temp coef</th>
-              <th className="border p-2">Power (Wp)</th>
-              <th className="border p-2">Weight (kg)</th>
-              <th className="border p-2">Price per panel (£)</th>
-              <th className="border p-2">Lifespan</th>
-            </tr>
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr>
           </thead>
           <tbody>
             <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
