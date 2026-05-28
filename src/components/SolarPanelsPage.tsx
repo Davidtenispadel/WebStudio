@@ -44,7 +44,7 @@ const SolarPanelsPage: React.FC = () => {
           </div>
         </div>
         <div className="flex justify-center">
-          <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
+          <div className="w-full max-w-xs rounded-lg overflow-hidden shadow-md">
             <img 
               src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" 
               alt="Diagram 2" 
@@ -96,8 +96,54 @@ const SolarPanelsPage: React.FC = () => {
       <ul className="list-disc pl-6 mb-4">
         <li><strong>Monocrystalline silicon (mono‑Si):</strong> Made from a single crystal, higher
         efficiency (15‑20%), uniform dark colour, but more expensive.</li>
+
+        {/* IMAGE INSERTED AFTER "but more expensive" */}
+        <div className="flex justify-center my-4">
+          <img 
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png" 
+            alt="Monocrystalline silicon panel" 
+            className="w-full max-w-md rounded-lg shadow-md"
+          />
+        </div>
+
         <li><strong>Polycrystalline silicon (poly‑Si):</strong> Made from melted fragments, lower
         efficiency (13‑16%), speckled blue appearance, cheaper to manufacture.</li>
+
+        {/* IMAGE INSERTED AFTER "cheaper to manufacture" */}
+        <div className="flex justify-center my-4">
+          <img 
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png" 
+            alt="Polycrystalline silicon panel" 
+            className="w-full max-w-md rounded-lg shadow-md"
+          />
+        </div>
+
+        {/* VISUAL DIFFERENCES TEXT BLOCK INSERTED AFTER SECOND IMAGE */}
+        <div className="bg-gray-100 p-4 rounded-md my-6">
+          <p className="font-semibold text-lg mb-2">Visual Differences: Monocrystalline vs Polycrystalline Solar Panels</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="font-semibold">Monocrystalline Panels</p>
+              <ul className="list-disc pl-5">
+                <li>Color: Deep black (uniform)</li>
+                <li>Cells: Smooth and consistent appearance</li>
+                <li>Shape: Cells often have rounded corners</li>
+                <li>Texture: Clean, solid look (no visible variation)</li>
+                <li>Overall style: Premium, modern, minimal</li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold">Polycrystalline Panels</p>
+              <ul className="list-disc pl-5">
+                <li>Color: Blue (sometimes light or mixed shades)</li>
+                <li>Cells: Speckled / grainy texture (like crystal fragments)</li>
+                <li>Shape: More square-looking cells</li>
+                <li>Texture: Visible irregular patterns inside each cell</li>
+                <li>Overall style: More industrial, less uniform</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </ul>
       <p className="mb-2">
         By the 1990s, both types were used on rooftops, but polycrystalline dominated the low‑cost
