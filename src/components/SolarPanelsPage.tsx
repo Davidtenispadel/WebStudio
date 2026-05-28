@@ -16,6 +16,21 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
+      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-8 mb-4">
+        1. Origins and evolution of solar panels – from 19th century to today's technology
+      </h3>
+
+      <h4 className="text-xl font-semibold mt-6 mb-2">🌞 The Pioneers (19th century – 1954)</h4>
+      <p className="mb-2">
+        The history of solar energy began much earlier than most people imagine. In <strong>1883</strong>,
+        American inventor <strong>Charles Fritts</strong> built the first practical photovoltaic
+        module using selenium coated with a thin layer of gold. Its efficiency was only about
+        <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
+      </p>
+      
+      {/* ============================================================ */}
       {/* TWO IMAGES IN PARALLEL (after first paragraph) */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
@@ -34,21 +49,6 @@ const SolarPanelsPage: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* ============================================================ */}
-      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-8 mb-4">
-        1. Origins and evolution of solar panels – from 19th century to today's technology
-      </h3>
-
-      <h4 className="text-xl font-semibold mt-6 mb-2">🌞 The Pioneers (19th century – 1954)</h4>
-      <p className="mb-2">
-        The history of solar energy began much earlier than most people imagine. In <strong>1883</strong>,
-        American inventor <strong>Charles Fritts</strong> built the first practical photovoltaic
-        module using selenium coated with a thin layer of gold. Its efficiency was only about
-        <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
-      </p>
       <p className="mb-2">
         The true “big bang” of solar energy happened in <strong>1954</strong> when engineers at
         <strong>Bell Laboratories</strong> developed the first practical silicon solar cell, achieving
