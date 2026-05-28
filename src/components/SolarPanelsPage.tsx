@@ -16,6 +16,26 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
+      {/* TWO IMAGES IN PARALLEL (after first paragraph) */}
+      {/* ============================================================ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div className="w-full rounded-lg overflow-hidden shadow-md">
+          <img 
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952585/4218c5e2-e86e-4093-b8c4-21aa628fbd49.png" 
+            alt="Diagram 1" 
+            className="w-full h-auto object-cover"
+          />
+        </div>
+        <div className="w-full rounded-lg overflow-hidden shadow-md">
+          <img 
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" 
+            alt="Diagram 2" 
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      </div>
+
+      {/* ============================================================ */}
       {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
@@ -33,8 +53,17 @@ const SolarPanelsPage: React.FC = () => {
         The true “big bang” of solar energy happened in <strong>1954</strong> when engineers at
         <strong>Bell Laboratories</strong> developed the first practical silicon solar cell, achieving
         <strong>6% efficiency</strong>. That cell was made of <strong>crystalline silicon</strong> – the
-        same base material still used in almost all panels today.
+        same base material still used in almost <strong>all panels today</strong>.
       </p>
+
+      {/* NEW CENTERED IMAGE AFTER "all panels today" */}
+      <div className="flex justify-center my-6">
+        <img 
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952879/4396d0fd-a82f-424e-bcac-dcf41e8911d6.png" 
+          alt="Solar panel diagram" 
+          className="w-full max-w-md rounded-lg shadow-md"
+        />
+      </div>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🚀 The Space Race (late 1950s – 1960s)</h4>
       <p className="mb-2">
