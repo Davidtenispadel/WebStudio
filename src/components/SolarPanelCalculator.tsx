@@ -1,7 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Box, Html } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useState, useEffect } from 'react';
 
 // ==================== DATOS DE IRRADIACIÓN POR PAÍS ====================
 type CountryInsolation = { name: string; north: number; south: number };
@@ -65,7 +62,6 @@ const countriesInsolation: CountryInsolation[] = [
 ];
 
 // ==================== CONSTANTES DE PANELES ====================
-// Precios reales orientativos (sin IVA)
 const REAL_PANEL_PRICES = {
   monocrystalline: 80,   // £ por panel (TOPCon)
   polycrystalline: 65,   // £ por panel (PERC)
@@ -77,29 +73,18 @@ const PANEL_DIMENSIONS = {
 };
 
 // ==================== FUNCIÓN DE ORIENTACIÓN REALISTA ====================
-// Factor de producción según ángulo (0° = Sur, 90° = Este, 180° = Norte, 270° = Oeste)
-// Valores más realistas: norte muy malo (0.35), este/oeste aceptable (0.75)
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
-  // Puntos de control: (ángulo, factor)
-  // Sur: 0° y 360° -> 1.0
-  // Sureste: 45° -> 0.85
-  // Este: 90° -> 0.75
-  // Noreste: 135° -> 0.55
-  // Norte: 180° -> 0.35
-  // Noroeste: 225° -> 0.55
-  // Oeste: 270° -> 0.75
-  // Suroeste: 315° -> 0.85
   const anchors = [
-    { deg: 0, factor: 1.0 },
-    { deg: 45, factor: 0.85 },
-    { deg: 90, factor: 0.75 },
-    { deg: 135, factor: 0.55 },
-    { deg: 180, factor: 0.35 },
-    { deg: 225, factor: 0.55 },
-    { deg: 270, factor: 0.75 },
-    { deg: 315, factor: 0.85 },
+    { deg: 0, factor: 1.0 },   // Sur
+    { deg: 45, factor: 0.85 }, // Sureste
+    { deg: 90, factor: 0.75 }, // Este
+    { deg: 135, factor: 0.55 },// Noreste
+    { deg: 180, factor: 0.35 },// Norte
+    { deg: 225, factor: 0.55 },// Noroeste
+    { deg: 270, factor: 0.75 },// Oeste
+    { deg: 315, factor: 0.85 },// Suroeste
     { deg: 360, factor: 1.0 }
   ];
   for (let i = 0; i < anchors.length - 1; i++) {
@@ -113,18 +98,16 @@ const getOrientationFactor = (deg: number): number => {
   return 1.0;
 };
 
-// Factor de inclinación (0° plano, 35° óptimo, 60° muy inclinado)
 const getTiltFactor = (tiltDeg: number): number => {
   const tilt = Math.min(60, Math.max(0, tiltDeg));
   if (tilt <= 35) return 0.9 + (tilt / 35) * 0.1;
   else return 1.0 - ((tilt - 35) / 25) * 0.15;
 };
 
-// ==================== CÁLCULO DE DISPOSICIÓN DE PANELES ====================
+// ==================== CÁLCULO DE DISPOSICIÓN ====================
 type Obstacle = { x: number; z: number };
-
 const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
-  const margin = 0.4; // 400 mm
+  const margin = 0.4;
   let length = roofLength - 2 * margin;
   let width = roofWidth - 2 * margin;
   if (obstacles.length > 0) {
@@ -159,67 +142,14 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
   return { totalPanels: panelPositions.length, cols, rows, panelPositions };
 };
 
-// ==================== COMPONENTE 3D DE LA CASA ====================
-const House3D: React.FC<{
-  roofLength: number;
-  roofWidth: number;
-  layout: { panelPositions: { x: number; z: number }[] } | null;
-  panelType: 'monocrystalline' | 'polycrystalline';
-  obstacles: Obstacle[];
-  orientationDeg: number;
-}> = ({ roofLength, roofWidth, layout, panelType, obstacles, orientationDeg }) => {
-  const groupRef = useRef<THREE.Group>(null);
-
-  // Aplicar rotación según el ángulo (en grados)
-  useEffect(() => {
-    if (groupRef.current) {
-      const rad = (orientationDeg * Math.PI) / 180;
-      groupRef.current.rotation.y = rad;
-    }
-  }, [orientationDeg]);
-
-  return (
-    <group ref={groupRef}>
-      {/* Base / suelo */}
-      <Box args={[roofLength + 1, 0.2, roofWidth + 1]} position={[0, -0.5, 0]}>
-        <meshStandardMaterial color="#8B5A2B" />
-      </Box>
-
-      {/* Tejado (simple caja) */}
-      <Box args={[roofLength, 0.1, roofWidth]} position={[0, 0.2, 0]}>
-        <meshStandardMaterial color="#C0A080" />
-      </Box>
-
-      {/* Paneles solares */}
-      {layout && layout.panelPositions.map((pos, idx) => {
-        const panelW = PANEL_DIMENSIONS[panelType].width;
-        const panelH = PANEL_DIMENSIONS[panelType].height;
-        const panelColor = panelType === 'monocrystalline' ? "#1E3A8A" : "#3B82F6";
-        return (
-          <Box key={idx} args={[panelW, 0.05, panelH]} position={[pos.x, 0.35, pos.z]}>
-            <meshStandardMaterial color={panelColor} metalness={0.7} roughness={0.3} />
-          </Box>
-        );
-      })}
-
-      {/* Obstáculos (chimeneas) */}
-      {obstacles.map((obs, idx) => (
-        <Box key={`obs-${idx}`} args={[0.5, 0.8, 0.5]} position={[obs.x, 0.1, obs.z]}>
-          <meshStandardMaterial color="#A52A2A" />
-        </Box>
-      ))}
-    </group>
-  );
-};
-
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  // Estado de dimensiones y obstáculos
+  // Dimensiones y obstáculos
   const [roofLength, setRoofLength] = useState(8);
   const [roofWidth, setRoofWidth] = useState(5);
   const [panelType, setPanelType] = useState<'monocrystalline' | 'polycrystalline'>('monocrystalline');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [orientationDeg, setOrientationDeg] = useState(0); // 0 = sur
+  const [orientationDeg, setOrientationDeg] = useState(0);
   const [tiltDeg, setTiltDeg] = useState(35);
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
@@ -240,10 +170,9 @@ const SolarPanelCalculator: React.FC = () => {
   const [monthlyBill, setMonthlyBill] = useState(120);
   const importPrice = 24; // p/kWh
 
-  // Layout calculado automáticamente
+  // Layout calculado
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
-  // Recalcular layout al cambiar dimensiones o tipo de panel u obstáculos
   useEffect(() => {
     const panel = PANEL_DIMENSIONS[panelType];
     const { length, width } = calculateUsableDimensions(roofLength, roofWidth, obstacles);
@@ -251,18 +180,15 @@ const SolarPanelCalculator: React.FC = () => {
     setLayout(newLayout);
   }, [roofLength, roofWidth, panelType, obstacles]);
 
-  // Sincronizar precio del panel con el tipo seleccionado
   useEffect(() => {
     setPanelPricePerUnit(REAL_PANEL_PRICES[panelType]);
   }, [panelType]);
 
-  // Sincronizar coste del inversor según tipo
   useEffect(() => {
     const inverterPrices = { string: 900, micro: 1400, hybrid: 1600 };
     setInverterCost(inverterPrices[inverterType]);
   }, [inverterType]);
 
-  // Cálculos de producción
   const totalWp = layout ? layout.totalPanels * PANEL_DIMENSIONS[panelType].powerWp : 0;
   const orientationFactor = getOrientationFactor(orientationDeg);
   const tiltFactor = getTiltFactor(tiltDeg);
@@ -280,7 +206,6 @@ const SolarPanelCalculator: React.FC = () => {
     autumn: annualKwh * seasonalDistribution.autumn,
     winter: annualKwh * seasonalDistribution.winter,
   };
-
   const selfConsumedKwh = annualKwh * (selfConsumptionPercent / 100);
   const exportedKwh = annualKwh - selfConsumedKwh;
   const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100;
@@ -303,53 +228,48 @@ const SolarPanelCalculator: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-light mb-2 text-center">Solar Panel Designer – 3D Interactive</h2>
+      <h2 className="text-3xl font-light mb-2 text-center">Solar Panel Designer – 2D Interactive</h2>
       <p className="text-sm text-gray-600 mb-6 text-center">
-        * All prices exclude VAT (0% valid until March 2027). Use the slider to rotate the house.
+        * All prices exclude VAT (0% valid until March 2027). Adjust orientation with the compass slider.
       </p>
 
-      {/* Lienzo 3D con la casa orientable */}
-      <div className="w-full h-[500px] bg-gray-100 rounded-xl overflow-hidden mb-6">
-        <Canvas camera={{ position: [6, 5, 8], fov: 45 }}>
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 10, 5]} intensity={1} />
-          <House3D
-            roofLength={roofLength}
-            roofWidth={roofWidth}
-            layout={layout}
-            panelType={panelType}
-            obstacles={obstacles}
-            orientationDeg={orientationDeg}
-          />
-          <OrbitControls enablePan={false} enableZoom={true} zoomSpeed={1.0} rotateSpeed={1.0} target={[0, 1, 0]} />
-        </Canvas>
+      {/* Compass visual (orientación) */}
+      <div className="bg-gray-100 p-4 rounded-lg mb-6 flex flex-col items-center">
+        <div className="relative w-48 h-48 mb-4">
+          <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-red-600 origin-bottom transform -translate-x-1/2 -translate-y-full" style={{ transform: `translateX(-50%) translateY(-100%) rotate(${orientationDeg}deg)` }}></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-90"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-180"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full -rotate-90"></div>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">N</div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">S</div>
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">W</div>
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">E</div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">🏠</div>
+        </div>
+        <div className="w-full max-w-md">
+          <label className="block text-center font-medium">Roof orientation (degrees from south):</label>
+          <input type="range" min="0" max="360" step="1" value={orientationDeg} onChange={(e) => setOrientationDeg(parseInt(e.target.value))} className="w-full" />
+          <p className="text-center text-sm mt-1"><strong>{orientationDeg}°</strong> → Factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
+          <p className="text-xs text-center text-gray-500">0° = South, 90° = East, 180° = North, 270° = West</p>
+        </div>
       </div>
 
       {/* Controles en una sola columna */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Dimensiones y tipo de panel */}
         <div className="grid md:grid-cols-3 gap-4">
-          <div>
-            <label className="block font-medium">Roof length (m):</label>
-            <input type="number" step="0.5" value={roofLength} onChange={(e) => setRoofLength(parseFloat(e.target.value))} className="border p-2 rounded w-full" />
-          </div>
-          <div>
-            <label className="block font-medium">Roof width (m):</label>
-            <input type="number" step="0.5" value={roofWidth} onChange={(e) => setRoofWidth(parseFloat(e.target.value))} className="border p-2 rounded w-full" />
-          </div>
+          <div><label className="block font-medium">Roof length (m):</label><input type="number" step="0.5" value={roofLength} onChange={(e) => setRoofLength(parseFloat(e.target.value))} className="border p-2 rounded w-full" /></div>
+          <div><label className="block font-medium">Roof width (m):</label><input type="number" step="0.5" value={roofWidth} onChange={(e) => setRoofWidth(parseFloat(e.target.value))} className="border p-2 rounded w-full" /></div>
           <div>
             <label className="block font-medium">Panel type:</label>
             <select value={panelType} onChange={(e) => setPanelType(e.target.value as any)} className="border p-2 rounded w-full">
               <option value="monocrystalline">Monocristalino (TOPCon) – £80/panel</option>
               <option value="polycrystalline">Policristalino (PERC) – £65/panel</option>
             </select>
-            <div className="mt-1 flex justify-center">
-              <img src={panelType === 'monocrystalline' ? monoImage : polyImage} alt={panelType} className="h-16 w-auto rounded shadow" />
-            </div>
+            <div className="mt-1 flex justify-center"><img src={panelType === 'monocrystalline' ? monoImage : polyImage} alt={panelType} className="h-16 w-auto rounded shadow" /></div>
           </div>
         </div>
 
-        {/* Inversor y obstáculos */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium">Inverter type:</label>
@@ -362,13 +282,10 @@ const SolarPanelCalculator: React.FC = () => {
           <div>
             <label className="block font-medium">Obstacles (chimneys):</label>
             <button onClick={addObstacle} className="bg-gray-500 text-white px-3 py-1 rounded mr-2">+ Add</button>
-            {obstacles.map((_, idx) => (
-              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-1">Remove {idx+1}</button>
-            ))}
+            {obstacles.map((_, idx) => (<button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-1">Remove {idx+1}</button>))}
           </div>
         </div>
 
-        {/* Costes editables */}
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="font-bold text-lg mb-2">💰 Edit your cost estimates (0% VAT)</h3>
           <div className="grid md:grid-cols-3 gap-3 text-sm">
@@ -382,42 +299,20 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* Ubicación, orientación e inclinación */}
         <div className="bg-green-50 p-4 rounded-lg">
-          <h3 className="font-bold text-lg mb-2">🌍 Location, Orientation & Roof Pitch</h3>
+          <h3 className="font-bold text-lg mb-2">🌍 Location & Roof Pitch</h3>
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block font-medium">Country:</label>
-              <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">
-                {countriesInsolation.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block font-medium">Region:</label>
-              <select value={region} onChange={(e) => setRegion(e.target.value as 'north' | 'south')} className="border p-2 rounded w-full">
-                <option value="south">Southern half (higher irradiance)</option>
-                <option value="north">Northern half (lower irradiance)</option>
-              </select>
-            </div>
-          </div>
-          <div className="mt-3">
-            <label className="block font-medium">Roof orientation (degrees from south):</label>
-            <input type="range" min="0" max="360" step="1" value={orientationDeg} onChange={(e) => setOrientationDeg(parseInt(e.target.value))} className="w-full" />
-            <div className="flex justify-between text-xs"><span>0° S</span><span>90° E</span><span>180° N</span><span>270° W</span><span>360° S</span></div>
-            <p className="text-sm mt-1">Current: <strong>{orientationDeg}°</strong> → Orientation factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
+            <div><label className="block font-medium">Country:</label><select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">{countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}</select></div>
+            <div><label className="block font-medium">Region:</label><select value={region} onChange={(e) => setRegion(e.target.value as 'north' | 'south')} className="border p-2 rounded w-full"><option value="south">Southern half</option><option value="north">Northern half</option></select></div>
           </div>
           <div className="mt-3">
             <label className="block font-medium">Roof pitch (tilt) degrees:</label>
             <input type="range" min="0" max="60" step="1" value={tiltDeg} onChange={(e) => setTiltDeg(parseInt(e.target.value))} className="w-full" />
-            <div className="flex justify-between text-xs"><span>0° flat</span><span>35° optimal</span><span>60° steep</span></div>
             <p className="text-sm mt-1">Current tilt: <strong>{tiltDeg}°</strong> → Factor: <strong>{tiltFactor.toFixed(2)}</strong></p>
           </div>
-          <div className="mt-2 text-sm">
-            <p>🏠 Base insolation: {insolation} kWh/kWp/year (south-facing, optimal tilt)</p>
-          </div>
+          <p className="text-sm mt-2">Base insolation: {insolation} kWh/kWp/year (south-facing, optimal tilt)</p>
         </div>
 
-        {/* Resultados del diseño */}
         {layout && (
           <>
             <div className="bg-gray-100 p-4 rounded-lg text-center">
