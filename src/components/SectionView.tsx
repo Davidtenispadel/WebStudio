@@ -5,6 +5,7 @@
  * - Ahora permite abrir artículos internos dentro de la sección Technology (ej. Solar panels)
  * - Fuerza visibilidad inmediata para Technology
  * - Resetea el artículo seleccionado al salir de Technology (evita que el árbol aparezca en Home)
+ * - [MOD] Reemplaza el texto "Green Energy" por el logo personalizado
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -94,6 +95,9 @@ const SectionView: React.FC<SectionViewProps> = ({
   // Estado para artículos internos (dentro de Technology)
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
 
+  // Referencia al contenedor del árbol tecnológico para reemplazar texto por logo
+  const technologyTreeContainerRef = useRef<HTMLDivElement>(null);
+
   // ============================
   // Animaciones (Aesthetic A)
   // ============================
@@ -172,6 +176,87 @@ const SectionView: React.FC<SectionViewProps> = ({
       setSelectedArticleSlug(null);
     }
   }, [displayedCategory.name]);
+
+  // ============================
+  // Reemplazar el texto "Green Energy" por el logo (MutationObserver)
+  // ============================
+  useEffect(() => {
+    if (
+      displayedCategory.name !== StudioSection.TECHNOLOGY ||
+      selectedArticleSlug !== null ||
+      !technologyTreeContainerRef.current
+    ) {
+      return;
+    }
+
+    // Función para reemplazar el nodo de texto "Green Energy" por la imagen del logo
+    const replaceGreenEnergyTextWithLogo = () => {
+      const container = technologyTreeContainerRef.current;
+      if (!container) return;
+
+      // Buscar cualquier elemento que contenga exactamente el texto "Green Energy"
+      // (ignorando mayúsculas/minúsculas y espacios alrededor)
+      const xpath = "//*[normalize-space(text())='Green Energy']";
+      const result = document.evaluate(
+        xpath,
+        container,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+      );
+      const targetNode = result.singleNodeValue as HTMLElement | null;
+
+      if (targetNode && targetNode.parentNode) {
+        // Crear el elemento imagen
+        const logoImg = document.createElement("img");
+        logoImg.src =
+          "https://res.cloudinary.com/dwealmbfi/image/upload/v1780075454/Greenenergy_lxlahz.png";
+        logoImg.alt = "Green Energy Logo";
+        logoImg.className = "green-energy-logo";
+        logoImg.style.height = "1.8rem";
+        logoImg.style.width = "auto";
+        logoImg.style.maxWidth = "180px";
+        logoImg.style.objectFit = "contain";
+        logoImg.style.verticalAlign = "middle";
+        logoImg.style.display = "inline-block";
+
+        // Reemplazar el nodo de texto por la imagen
+        targetNode.parentNode.replaceChild(logoImg, targetNode);
+
+        // Asegurarse de que el contenedor padre mantenga la interactividad (el enlace aún funciona)
+        const parentAnchor = targetNode.closest("a, button, [role='button']");
+        if (parentAnchor) {
+          // Si el elemento reemplazado estaba dentro de un enlace, la imagen hereda el click
+          logoImg.style.cursor = "pointer";
+        }
+      }
+    };
+
+    // Ejecutar inicialmente
+    replaceGreenEnergyTextWithLogo();
+
+    // Configurar MutationObserver para detectar cambios en el DOM del árbol
+    const observer = new MutationObserver((mutations) => {
+      let shouldReplace = false;
+      for (const mutation of mutations) {
+        if (mutation.type === "childList" || mutation.type === "characterData") {
+          shouldReplace = true;
+          break;
+        }
+      }
+      if (shouldReplace) {
+        replaceGreenEnergyTextWithLogo();
+      }
+    });
+
+    observer.observe(technologyTreeContainerRef.current, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    return () => observer.disconnect();
+  }, [displayedCategory.name, selectedArticleSlug]);
 
   if (!isActive) return null;
 
@@ -567,7 +652,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
                   {!selectedArticleSlug ? (
-                    <div className="mt-8 px-10">
+                    <div className="mt-8 px-10" ref={technologyTreeContainerRef}>
                       <h3 className="text-xl font-semibold mb-3">Explore all topics</h3>
                       <TechnologyTree onNavigate={handleTreeNavigate} />
                     </div>
