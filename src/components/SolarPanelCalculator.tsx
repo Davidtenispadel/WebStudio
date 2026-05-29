@@ -61,18 +61,54 @@ const countriesInsolation: CountryInsolation[] = [
   { name: "Nigeria", north: 1600, south: 1800 },
 ];
 
-// ==================== CONSTANTES DE PANELES ====================
-const REAL_PANEL_PRICES = {
-  monocrystalline: 80,   // £ por panel (TOPCon)
-  polycrystalline: 65,   // £ por panel (PERC)
+// ==================== DEFINICIÓN DE TIPOS DE PANEL ====================
+// Cada tipo tiene: nombre visible, precio estimado (£/panel), potencia (Wp), eficiencia (aproximada), tipo de célula
+const PANEL_CATALOG = {
+  perc: {
+    name: "PERC (monocristalino)",
+    price: 75,
+    powerWp: 410,
+    efficiency: "18‑20%",
+    appearance: "Dark blue/black, 9‑12 thick busbars, visible ribs",
+    imageType: "mono"
+  },
+  topcon: {
+    name: "TOPCon (monocristalino)",
+    price: 85,
+    powerWp: 440,
+    efficiency: "20‑22.5%",
+    appearance: "Intense black, 12‑16 very thin busbars, clean minimal reflections",
+    imageType: "mono"
+  },
+  hjt: {
+    name: "HJT (monocristalino)",
+    price: 95,
+    powerWp: 460,
+    efficiency: "21‑23%",
+    appearance: "Jet black, 6‑8 extremely thin busbars, uniform black mirror",
+    imageType: "mono"
+  },
+  ibc: {
+    name: "IBC (monocristalino)",
+    price: 110,
+    powerWp: 480,
+    efficiency: "22‑24%",
+    appearance: "Pure black, no front busbars, smooth no grid",
+    imageType: "mono"
+  },
+  poly: {
+    name: "Policristalino (policristalino)",
+    price: 65,
+    powerWp: 400,
+    efficiency: "16‑18%",
+    appearance: "Speckled blue, visible crystal fragments",
+    imageType: "poly"
+  }
 };
 
-const PANEL_DIMENSIONS = {
-  monocrystalline: { width: 1.0, height: 1.7, powerWp: 430 },
-  polycrystalline: { width: 1.0, height: 1.7, powerWp: 400 },
-};
+type PanelKey = keyof typeof PANEL_CATALOG;
 
-// ==================== FUNCIÓN DE ORIENTACIÓN REALISTA ====================
+// ==================== FUNCIONES DE ORIENTACIÓN E INCLINACIÓN ====================
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
@@ -104,8 +140,9 @@ const getTiltFactor = (tiltDeg: number): number => {
   else return 1.0 - ((tilt - 35) / 25) * 0.15;
 };
 
-// ==================== CÁLCULO DE DISPOSICIÓN ====================
+// ==================== CÁLCULO DE DISPOSICIÓN DE PANELES ====================
 type Obstacle = { x: number; z: number };
+
 const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
   const margin = 0.4;
   let length = roofLength - 2 * margin;
@@ -144,10 +181,10 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  // Dimensiones y obstáculos
+  // Estados
   const [roofLength, setRoofLength] = useState(8);
   const [roofWidth, setRoofWidth] = useState(5);
-  const [panelType, setPanelType] = useState<'monocrystalline' | 'polycrystalline'>('monocrystalline');
+  const [panelKey, setPanelKey] = useState<PanelKey>('topcon');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [orientationDeg, setOrientationDeg] = useState(0);
   const [tiltDeg, setTiltDeg] = useState(35);
@@ -155,7 +192,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [region, setRegion] = useState<'north' | 'south'>('south');
 
   // Costes editables
-  const [panelPricePerUnit, setPanelPricePerUnit] = useState(REAL_PANEL_PRICES.monocrystalline);
+  const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
   const [inverterCost, setInverterCost] = useState(900);
   const [mountingCost, setMountingCost] = useState(450);
@@ -164,7 +201,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [labourCost, setLabourCost] = useState(1150);
   const [adminCost, setAdminCost] = useState(175);
 
-  // Parámetros financieros
+  // Financieros
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
   const [exportTariff, setExportTariff] = useState(15);
   const [monthlyBill, setMonthlyBill] = useState(120);
@@ -173,23 +210,30 @@ const SolarPanelCalculator: React.FC = () => {
   // Layout calculado
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
+  // Actualizar layout cuando cambien dimensiones o tipo de panel
   useEffect(() => {
-    const panel = PANEL_DIMENSIONS[panelType];
+    const panel = PANEL_CATALOG[panelKey];
+    // Asumimos dimensiones estándar 1.0 x 1.7 para todos (simplificación)
+    const panelW = 1.0;
+    const panelH = 1.7;
     const { length, width } = calculateUsableDimensions(roofLength, roofWidth, obstacles);
-    const newLayout = calculatePanelLayout(length, width, panel.width, panel.height, obstacles);
+    const newLayout = calculatePanelLayout(length, width, panelW, panelH, obstacles);
     setLayout(newLayout);
-  }, [roofLength, roofWidth, panelType, obstacles]);
+  }, [roofLength, roofWidth, panelKey, obstacles]);
 
+  // Actualizar precio del panel según tipo seleccionado
   useEffect(() => {
-    setPanelPricePerUnit(REAL_PANEL_PRICES[panelType]);
-  }, [panelType]);
+    setPanelPricePerUnit(PANEL_CATALOG[panelKey].price);
+  }, [panelKey]);
 
+  // Precio del inversor según tipo
   useEffect(() => {
     const inverterPrices = { string: 900, micro: 1400, hybrid: 1600 };
     setInverterCost(inverterPrices[inverterType]);
   }, [inverterType]);
 
-  const totalWp = layout ? layout.totalPanels * PANEL_DIMENSIONS[panelType].powerWp : 0;
+  // Cálculo de producción
+  const totalWp = layout ? layout.totalPanels * PANEL_CATALOG[panelKey].powerWp : 0;
   const orientationFactor = getOrientationFactor(orientationDeg);
   const tiltFactor = getTiltFactor(tiltDeg);
   const getInsolation = () => {
@@ -223,8 +267,21 @@ const SolarPanelCalculator: React.FC = () => {
   const addObstacle = () => setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
   const removeObstacle = (index: number) => setObstacles(obstacles.filter((_, i) => i !== index));
 
+  // Colores dinámicos para el thumb y la flecha basados en orientationFactor (0.35 a 1.0)
+  const getColorFromFactor = (factor: number): string => {
+    // factor mínimo 0.35, máximo 1.0. Normalizamos a 0-1
+    const t = (factor - 0.35) / 0.65; // 0 = rojo, 1 = verde
+    const r = Math.floor(255 * (1 - t));
+    const g = Math.floor(255 * t);
+    const b = 0;
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+  const orientationColor = getColorFromFactor(orientationFactor);
+
+  // Imágenes
   const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
   const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
+  const currentPanelImage = PANEL_CATALOG[panelKey].imageType === 'mono' ? monoImage : polyImage;
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
@@ -233,40 +290,124 @@ const SolarPanelCalculator: React.FC = () => {
         * All prices exclude VAT (0% valid until March 2027). Adjust orientation with the compass slider.
       </p>
 
-      {/* Compass visual (orientación) */}
+      {/* Compass visual con flecha giratoria desde el centro */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6 flex flex-col items-center">
         <div className="relative w-48 h-48 mb-4">
+          {/* Círculo exterior */}
           <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
-          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-red-600 origin-bottom transform -translate-x-1/2 -translate-y-full" style={{ transform: `translateX(-50%) translateY(-100%) rotate(${orientationDeg}deg)` }}></div>
+          {/* Marcas de dirección */}
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-0"></div>
           <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-90"></div>
           <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-180"></div>
           <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full -rotate-90"></div>
+          {/* Letras N, S, E, W */}
           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">N</div>
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">S</div>
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">W</div>
           <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">E</div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg">🏠</div>
+          {/* Flecha giratoria (triángulo) desde el centro */}
+          <div
+            className="absolute top-1/2 left-1/2 w-0 h-0"
+            style={{
+              transform: `translate(-50%, -50%) rotate(${orientationDeg}deg)`,
+              transformOrigin: 'center'
+            }}
+          >
+            <div
+              style={{
+                width: 0,
+                height: 0,
+                borderLeft: '8px solid transparent',
+                borderRight: '8px solid transparent',
+                borderBottom: `24px solid ${orientationColor}`,
+                position: 'relative',
+                left: '-8px',
+                top: '-36px'
+              }}
+            />
+            {/* Línea delgada desde la punta al centro */}
+            <div
+              style={{
+                position: 'absolute',
+                width: '2px',
+                height: '36px',
+                backgroundColor: orientationColor,
+                left: '-1px',
+                top: '-12px'
+              }}
+            />
+          </div>
+          {/* Casita en el centro */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🏠</div>
         </div>
+
         <div className="w-full max-w-md">
           <label className="block text-center font-medium">Roof orientation (degrees from south):</label>
-          <input type="range" min="0" max="360" step="1" value={orientationDeg} onChange={(e) => setOrientationDeg(parseInt(e.target.value))} className="w-full" />
+          <div className="relative w-full h-8 flex items-center">
+            <input
+              type="range"
+              min="0"
+              max="360"
+              step="1"
+              value={orientationDeg}
+              onChange={(e) => setOrientationDeg(parseInt(e.target.value))}
+              className="w-full appearance-none bg-transparent focus:outline-none"
+              style={{
+                WebkitAppearance: 'none',
+                background: 'transparent'
+              }}
+            />
+            <style>{`
+              input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: ${orientationColor};
+                cursor: pointer;
+                box-shadow: 0 0 4px rgba(0,0,0,0.3);
+                border: 2px solid white;
+              }
+              input[type=range]::-webkit-slider-runnable-track {
+                height: 4px;
+                background: transparent;
+              }
+              input[type=range]::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: ${orientationColor};
+                cursor: pointer;
+                border: none;
+              }
+              input[type=range]::-moz-range-track {
+                background: transparent;
+              }
+            `}</style>
+          </div>
           <p className="text-center text-sm mt-1"><strong>{orientationDeg}°</strong> → Factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
           <p className="text-xs text-center text-gray-500">0° = South, 90° = East, 180° = North, 270° = West</p>
         </div>
       </div>
 
-      {/* Controles en una sola columna */}
+      {/* Controles en una columna */}
       <div className="grid grid-cols-1 gap-6">
         <div className="grid md:grid-cols-3 gap-4">
           <div><label className="block font-medium">Roof length (m):</label><input type="number" step="0.5" value={roofLength} onChange={(e) => setRoofLength(parseFloat(e.target.value))} className="border p-2 rounded w-full" /></div>
           <div><label className="block font-medium">Roof width (m):</label><input type="number" step="0.5" value={roofWidth} onChange={(e) => setRoofWidth(parseFloat(e.target.value))} className="border p-2 rounded w-full" /></div>
           <div>
             <label className="block font-medium">Panel type:</label>
-            <select value={panelType} onChange={(e) => setPanelType(e.target.value as any)} className="border p-2 rounded w-full">
-              <option value="monocrystalline">Monocristalino (TOPCon) – £80/panel</option>
-              <option value="polycrystalline">Policristalino (PERC) – £65/panel</option>
+            <select value={panelKey} onChange={(e) => setPanelKey(e.target.value as PanelKey)} className="border p-2 rounded w-full">
+              <option value="perc">PERC (monocristalino) – {PANEL_CATALOG.perc.price}£</option>
+              <option value="topcon">TOPCon (monocristalino) – {PANEL_CATALOG.topcon.price}£</option>
+              <option value="hjt">HJT (monocristalino) – {PANEL_CATALOG.hjt.price}£</option>
+              <option value="ibc">IBC (monocristalino) – {PANEL_CATALOG.ibc.price}£</option>
+              <option value="poly">Policristalino (policristalino) – {PANEL_CATALOG.poly.price}£</option>
             </select>
-            <div className="mt-1 flex justify-center"><img src={panelType === 'monocrystalline' ? monoImage : polyImage} alt={panelType} className="h-16 w-auto rounded shadow" /></div>
+            <div className="mt-1 flex justify-center">
+              <img src={currentPanelImage} alt={PANEL_CATALOG[panelKey].name} className="h-16 w-auto rounded shadow" />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">{PANEL_CATALOG[panelKey].appearance}</p>
           </div>
         </div>
 
@@ -286,6 +427,7 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
+        {/* Costes editables */}
         <div className="bg-blue-50 p-4 rounded-lg">
           <h3 className="font-bold text-lg mb-2">💰 Edit your cost estimates (0% VAT)</h3>
           <div className="grid md:grid-cols-3 gap-3 text-sm">
@@ -299,6 +441,7 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
+        {/* Ubicación e inclinación */}
         <div className="bg-green-50 p-4 rounded-lg">
           <h3 className="font-bold text-lg mb-2">🌍 Location & Roof Pitch</h3>
           <div className="grid md:grid-cols-2 gap-4">
@@ -318,7 +461,7 @@ const SolarPanelCalculator: React.FC = () => {
             <div className="bg-gray-100 p-4 rounded-lg text-center">
               <h3 className="font-bold text-lg">📐 Layout Results</h3>
               <p><strong>Total panels:</strong> {layout.totalPanels} &nbsp;| <strong>Columns:</strong> {layout.cols} &nbsp;| <strong>Rows:</strong> {layout.rows}</p>
-              <p><strong>Estimated power:</strong> {totalWp.toFixed(0)} Wp &nbsp;| <strong>Installation area:</strong> {(layout.totalPanels * PANEL_DIMENSIONS[panelType].width * PANEL_DIMENSIONS[panelType].height).toFixed(1)} m²</p>
+              <p><strong>Estimated power:</strong> {totalWp.toFixed(0)} Wp &nbsp;| <strong>Installation area:</strong> {(layout.totalPanels * 1.0 * 1.7).toFixed(1)} m²</p>
               <p className="text-xs text-gray-500">* Margins: 400mm edges, 20mm gap. UK MCS compliant.</p>
             </div>
 
