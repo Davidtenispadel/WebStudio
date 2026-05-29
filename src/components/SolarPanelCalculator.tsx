@@ -1,36 +1,50 @@
-// SolarPanelCalculator.tsx (actualizado)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ThreeScene from './ThreeScene';
 import PanelInfo from './PanelInfo';
 import { PANEL_TYPES, calculateUsableDimensions, calculatePanelLayout, Obstacle } from '../utils/solarCalculator';
 
-// Imágenes para los paneles (las mismas que usaste)
+// Imágenes para los paneles
 const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
 const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
 
-// Tipos de inversor con coste medio (0% VAT)
-const inverterOptions = [
-  { id: 'string', name: 'String inverter (3.68 kW)', cost: 900 },      // media £600-1200
-  { id: 'micro', name: 'Microinverters (per panel)', cost: 1400 },     // estimación
-  { id: 'hybrid', name: 'Hybrid inverter (battery ready)', cost: 1600 },
-];
-
-// Costes fijos sin IVA (valores medios de los rangos proporcionados)
-const fixedCosts = {
-  mounting: 450,        // £300-600
-  scaffolding: 600,     // £400-800
-  electrical: 350,      // £200-500
-  labour: 1150,         // £800-1500
-  admin: 175,           // £100-250
+// Costes por defecto (valores medios sin IVA)
+const DEFAULT_PANEL_PRICE = { monocrystalline: 45, polycrystalline: 35 };
+const DEFAULT_INVERTER_PRICES = { string: 900, micro: 1400, hybrid: 1600 };
+const DEFAULT_FIXED_COSTS = {
+  mounting: 450,
+  scaffolding: 600,
+  electrical: 350,
+  labour: 1150,
+  admin: 175,
 };
 
 const SolarPanelCalculator: React.FC = () => {
+  // Dimensiones y obstáculos
   const [roofLength, setRoofLength] = useState(8);
   const [roofWidth, setRoofWidth] = useState(5);
   const [panelType, setPanelType] = useState<'monocrystalline' | 'polycrystalline'>('monocrystalline');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
-  const [inverterType, setInverterType] = useState(inverterOptions[0].id);
+
+  // Costes editables por el usuario
+  const [panelPricePerUnit, setPanelPricePerUnit] = useState(DEFAULT_PANEL_PRICE.monocrystalline);
+  const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
+  const [inverterCost, setInverterCost] = useState(DEFAULT_INVERTER_PRICES.string);
+  const [mountingCost, setMountingCost] = useState(DEFAULT_FIXED_COSTS.mounting);
+  const [scaffoldingCost, setScaffoldingCost] = useState(DEFAULT_FIXED_COSTS.scaffolding);
+  const [electricalCost, setElectricalCost] = useState(DEFAULT_FIXED_COSTS.electrical);
+  const [labourCost, setLabourCost] = useState(DEFAULT_FIXED_COSTS.labour);
+  const [adminCost, setAdminCost] = useState(DEFAULT_FIXED_COSTS.admin);
+
+  // Sincronizar precio del panel según tipo (por defecto, pero usuario puede cambiarlo)
+  useEffect(() => {
+    setPanelPricePerUnit(DEFAULT_PANEL_PRICE[panelType]);
+  }, [panelType]);
+
+  // Sincronizar coste del inversor según tipo seleccionado
+  useEffect(() => {
+    setInverterCost(DEFAULT_INVERTER_PRICES[inverterType]);
+  }, [inverterType]);
 
   const handleCalculate = () => {
     const panel = PANEL_TYPES[panelType];
@@ -47,11 +61,11 @@ const SolarPanelCalculator: React.FC = () => {
     setObstacles(obstacles.filter((_, i) => i !== index));
   };
 
-  // Cálculo de coste total (0% VAT)
+  // Cálculo del coste total (0% VAT)
   const totalCost = layout ? (
-    layout.totalPanels * (panelType === 'monocrystalline' ? 45 : 35) +
-    (inverterOptions.find(opt => opt.id === inverterType)?.cost || 0) +
-    fixedCosts.mounting + fixedCosts.scaffolding + fixedCosts.electrical + fixedCosts.labour + fixedCosts.admin
+    layout.totalPanels * panelPricePerUnit +
+    inverterCost +
+    mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost
   ) : 0;
 
   return (
@@ -73,8 +87,8 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="mb-4">
             <label className="block font-medium">Panel type:</label>
             <select value={panelType} onChange={(e) => setPanelType(e.target.value as any)} className="border p-2 rounded w-full">
-              <option value="monocrystalline">Monocristalino (TOPCon) – £45/panel est.</option>
-              <option value="polycrystalline">Policristalino (PERC) – £35/panel est.</option>
+              <option value="monocrystalline">Monocristalino (TOPCon)</option>
+              <option value="polycrystalline">Policristalino (PERC)</option>
             </select>
             <div className="mt-2 flex justify-center">
               <img 
@@ -87,10 +101,10 @@ const SolarPanelCalculator: React.FC = () => {
 
           <div className="mb-4">
             <label className="block font-medium">Inverter type:</label>
-            <select value={inverterType} onChange={(e) => setInverterType(e.target.value)} className="border p-2 rounded w-full">
-              {inverterOptions.map(opt => (
-                <option key={opt.id} value={opt.id}>{opt.name} – £{opt.cost}</option>
-              ))}
+            <select value={inverterType} onChange={(e) => setInverterType(e.target.value as any)} className="border p-2 rounded w-full">
+              <option value="string">String inverter (3.68 kW)</option>
+              <option value="micro">Microinverters (per panel)</option>
+              <option value="hybrid">Hybrid inverter (battery ready)</option>
             </select>
           </div>
 
@@ -116,23 +130,50 @@ const SolarPanelCalculator: React.FC = () => {
 
         <div>
           <PanelInfo panelType={panelType} />
-          {/* Desglose de costes (se muestra solo si layout calculado) */}
-          {layout && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="font-bold text-lg mb-2">💰 Estimated cost breakdown (0% VAT)</h3>
-              <ul className="text-sm space-y-1">
-                <li>Panels ({layout.totalPanels} × {panelType === 'monocrystalline' ? '£45' : '£35'}): <strong>£{(layout.totalPanels * (panelType === 'monocrystalline' ? 45 : 35)).toFixed(0)}</strong></li>
-                <li>Inverter ({inverterOptions.find(opt => opt.id === inverterType)?.name}): <strong>£{inverterOptions.find(opt => opt.id === inverterType)?.cost}</strong></li>
-                <li>Mounting system: £{fixedCosts.mounting}</li>
-                <li>Scaffolding: £{fixedCosts.scaffolding}</li>
-                <li>Electrical components: £{fixedCosts.electrical}</li>
-                <li>Labour (MCS certified): £{fixedCosts.labour}</li>
-                <li>MCS / DNO admin: £{fixedCosts.admin}</li>
-                <li className="pt-2 font-bold border-t">Total installed (0% VAT): <span className="text-red-700">£{totalCost.toFixed(0)}</span></li>
-              </ul>
-              <p className="text-xs text-gray-500 mt-2">* Prices exclude VAT (valid until March 2027). Estimates based on 2025-2026 UK market.</p>
+
+          {/* Sección de costes editables (visible siempre) */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 className="font-bold text-lg mb-2">💰 Edit your cost estimates (0% VAT)</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <label>Panel price (£ per panel):</label>
+                <input type="number" value={panelPricePerUnit} onChange={(e) => setPanelPricePerUnit(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="5" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>Inverter cost (£):</label>
+                <input type="number" value={inverterCost} onChange={(e) => setInverterCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>Mounting system (£):</label>
+                <input type="number" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>Scaffolding (£):</label>
+                <input type="number" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>Electrical components (£):</label>
+                <input type="number" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>Labour (MCS) (£):</label>
+                <input type="number" value={labourCost} onChange={(e) => setLabourCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" />
+              </div>
+              <div className="flex justify-between items-center">
+                <label>MCS/DNO admin (£):</label>
+                <input type="number" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="25" />
+              </div>
             </div>
-          )}
+            {layout && (
+              <div className="mt-4 pt-2 border-t border-blue-300">
+                <p className="font-bold text-lg">Total installed: <span className="text-red-700">£{totalCost.toFixed(0)}</span></p>
+                <p className="text-xs text-gray-500 mt-1">* Based on {layout.totalPanels} panels. Change any cost above to match your quote.</p>
+              </div>
+            )}
+            {!layout && (
+              <p className="text-xs text-gray-500 mt-2">Click "Calculate layout" to see total cost based on panel count.</p>
+            )}
+          </div>
         </div>
       </div>
 
