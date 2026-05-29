@@ -1,9 +1,8 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes (sin árbol)
- * - Sustituye el componente TechnologyTree por una navegación visual por imágenes.
- * - Cada nivel muestra imágenes que al clicar llevan a subimágenes o al artículo final.
- * - Los logos son más grandes (altura fija de 8rem / 128px).
- * - Incluye todas las demás secciones: Enquiry, Behind DB, Architecture, etc.
+ * - Incluye "Green Energy" con tres hijos: "Solar Panels", "Batteries" y "Wind Turbines".
+ * - Los logos tienen tamaño grande (h-32).
+ * - Navegación por niveles con imágenes.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -42,6 +41,21 @@ type TechNode = {
   articleComponent?: React.ReactNode;
 };
 
+// Componentes placeholder para los artículos (puedes sustituirlos por contenido real)
+const BatteriesPlaceholder: React.FC = () => (
+  <div className="p-8 bg-white rounded-2xl shadow-xl">
+    <h2 className="text-3xl font-light mb-4">Batteries</h2>
+    <p className="text-gray-600">Information about energy storage systems will appear here soon.</p>
+  </div>
+);
+
+const WindTurbinesPlaceholder: React.FC = () => (
+  <div className="p-8 bg-white rounded-2xl shadow-xl">
+    <h2 className="text-3xl font-light mb-4">Wind Turbines</h2>
+    <p className="text-gray-600">Information about wind energy systems will appear here soon.</p>
+  </div>
+);
+
 // Configuración inicial de la tecnología (Nivel 1)
 const technologyRootNodes: TechNode[] = [
   {
@@ -53,21 +67,28 @@ const technologyRootNodes: TechNode[] = [
       {
         id: "solar-panels",
         title: "Solar Panels",
-        // Nueva imagen proporcionada por el usuario
         imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780076711/66681c59-9afc-41e2-be6f-ef0f5d5af64d.png",
         description: "Photovoltaic technology",
         articleComponent: <SolarPanelsPage />,
       },
-      // Puedes agregar más hijos aquí: Inverters, Baterías, etc.
+      {
+        id: "batteries",
+        title: "Batteries",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780078524/bater%C3%ADa_verde_con_ed_a8rxo8.png",
+        description: "Energy storage systems",
+        articleComponent: <BatteriesPlaceholder />,
+      },
+      {
+        id: "wind-turbines",
+        title: "Wind Turbines",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780079324/wind_Turbines_oft0q6.png",
+        description: "Wind energy generation",
+        articleComponent: <WindTurbinesPlaceholder />,
+      },
+      // Aquí puedes agregar más hijos: Inverters, etc.
     ],
   },
-  // Puedes agregar más nodos raíz, por ejemplo:
-  // {
-  //   id: "materials",
-  //   title: "Advanced Materials",
-  //   imageUrl: "https://ejemplo.com/materials.jpg",
-  //   children: [...]
-  // }
+  // Puedes agregar más nodos raíz...
 ];
 
 // ============================
