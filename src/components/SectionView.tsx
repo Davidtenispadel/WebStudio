@@ -1,11 +1,8 @@
 /*
- * SECTIONVIEW.TSX — Versión final con Project Journey
- * - Incluye todas las secciones: Enquiry, Behind DB, Architecture, etc.
- * - Integra TechnologyTree para la sección Technology
- * - Ahora permite abrir artículos internos dentro de la sección Technology (ej. Solar panels)
- * - Fuerza visibilidad inmediata para Technology
- * - Resetea el artículo seleccionado al salir de Technology (evita que el árbol aparezca en Home)
- * - [MOD] Reemplaza el texto "Green Energy" por el logo personalizado
+ * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes (sin árbol)
+ * - Sustituye el componente TechnologyTree por una navegación visual por imágenes.
+ * - Cada nivel muestra imágenes que al clicar llevan a subimágenes o al artículo final.
+ * - Se incluye el logo "Green Energy" como imagen principal de ese tema.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -20,6 +17,7 @@ import {
   Link2,
   File as FileIcon,
   AlertCircle,
+  ArrowLeft,
 } from "lucide-react";
 
 import {
@@ -29,11 +27,49 @@ import {
 
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
-import TechnologyTree from "./TechnologyTree";
 import SolarPanelsPage from "./SolarPanelsPage";
 
 // ============================
-// TIPOS Y CONSTANTES
+// DEFINICIÓN DE LA ESTRUCTURA DE IMÁGENES PARA TECHNOLOGY
+// ============================
+type TechNode = {
+  id: string;
+  title: string;
+  imageUrl: string;
+  description?: string;
+  children?: TechNode[];
+  articleComponent?: React.ReactNode; // si es hoja, el contenido a mostrar
+};
+
+// Configuración inicial de la tecnología (Nivel 1)
+const technologyRootNodes: TechNode[] = [
+  {
+    id: "green-energy",
+    title: "Green Energy",
+    imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780075454/Greenenergy_lxlahz.png",
+    description: "Renewable energy systems for homes",
+    children: [
+      {
+        id: "solar-panels",
+        title: "Solar Panels",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1771155566/solar_panels_placeholder.png", // Reemplazar con imagen real
+        description: "Photovoltaic technology",
+        articleComponent: <SolarPanelsPage />,
+      },
+      // Aquí puedes agregar más hijos: Inverters, Baterías, etc.
+    ],
+  },
+  // Puedes agregar más nodos raíz, por ejemplo:
+  // {
+  //   id: "materials",
+  //   title: "Advanced Materials",
+  //   imageUrl: "https://ejemplo.com/materials.jpg",
+  //   children: [...]
+  // }
+];
+
+// ============================
+// TIPOS Y CONSTANTES (sin cambios)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -72,7 +108,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
   onNavigateToEnquiry,
 }) => {
-  // Estados de animación
+  // Estados de animación (sin cambios)
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
   const [showDB, setShowDB] = useState(false);
   const [showPlus, setShowPlus] = useState(false);
@@ -92,14 +128,13 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Estado para artículos internos (dentro de Technology)
-  const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
-
-  // Referencia al contenedor del árbol tecnológico para reemplazar texto por logo
-  const technologyTreeContainerRef = useRef<HTMLDivElement>(null);
+  // ========== NUEVO ESTADO PARA LA NAVEGACIÓN POR IMÁGENES ==========
+  const [currentTechNodes, setCurrentTechNodes] = useState<TechNode[]>(technologyRootNodes);
+  const [techHistory, setTechHistory] = useState<TechNode[][]>([]); // pila de niveles anteriores
+  const [activeArticle, setActiveArticle] = useState<React.ReactNode | null>(null); // si se muestra un artículo
 
   // ============================
-  // Animaciones (Aesthetic A)
+  // Animaciones (sin cambios)
   // ============================
   const resetSequence = () => {
     setShowDB(false);
@@ -162,101 +197,23 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
-  // Forzar visibilidad inmediata para Technology
   useEffect(() => {
     if (displayedCategory.name === StudioSection.TECHNOLOGY) {
       setStage("gallery");
       setShowGalleryItems(true);
+      // Resetear navegación al entrar a Technology
+      setCurrentTechNodes(technologyRootNodes);
+      setTechHistory([]);
+      setActiveArticle(null);
     }
   }, [displayedCategory.name]);
 
-  // Resetear artículo seleccionado al salir de Technology (evita que el árbol aparezca en Home)
+  // Resetear artículo seleccionado al salir de Technology
   useEffect(() => {
     if (displayedCategory.name !== StudioSection.TECHNOLOGY) {
-      setSelectedArticleSlug(null);
+      setActiveArticle(null);
     }
   }, [displayedCategory.name]);
-
-  // ============================
-  // Reemplazar el texto "Green Energy" por el logo (MutationObserver)
-  // ============================
-  useEffect(() => {
-    if (
-      displayedCategory.name !== StudioSection.TECHNOLOGY ||
-      selectedArticleSlug !== null ||
-      !technologyTreeContainerRef.current
-    ) {
-      return;
-    }
-
-    // Función para reemplazar el nodo de texto "Green Energy" por la imagen del logo
-    const replaceGreenEnergyTextWithLogo = () => {
-      const container = technologyTreeContainerRef.current;
-      if (!container) return;
-
-      // Buscar cualquier elemento que contenga exactamente el texto "Green Energy"
-      // (ignorando mayúsculas/minúsculas y espacios alrededor)
-      const xpath = "//*[normalize-space(text())='Green Energy']";
-      const result = document.evaluate(
-        xpath,
-        container,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      );
-      const targetNode = result.singleNodeValue as HTMLElement | null;
-
-      if (targetNode && targetNode.parentNode) {
-        // Crear el elemento imagen
-        const logoImg = document.createElement("img");
-        logoImg.src =
-          "https://res.cloudinary.com/dwealmbfi/image/upload/v1780075454/Greenenergy_lxlahz.png";
-        logoImg.alt = "Green Energy Logo";
-        logoImg.className = "green-energy-logo";
-        logoImg.style.height = "1.8rem";
-        logoImg.style.width = "auto";
-        logoImg.style.maxWidth = "180px";
-        logoImg.style.objectFit = "contain";
-        logoImg.style.verticalAlign = "middle";
-        logoImg.style.display = "inline-block";
-
-        // Reemplazar el nodo de texto por la imagen
-        targetNode.parentNode.replaceChild(logoImg, targetNode);
-
-        // Asegurarse de que el contenedor padre mantenga la interactividad (el enlace aún funciona)
-        const parentAnchor = targetNode.closest("a, button, [role='button']");
-        if (parentAnchor) {
-          // Si el elemento reemplazado estaba dentro de un enlace, la imagen hereda el click
-          logoImg.style.cursor = "pointer";
-        }
-      }
-    };
-
-    // Ejecutar inicialmente
-    replaceGreenEnergyTextWithLogo();
-
-    // Configurar MutationObserver para detectar cambios en el DOM del árbol
-    const observer = new MutationObserver((mutations) => {
-      let shouldReplace = false;
-      for (const mutation of mutations) {
-        if (mutation.type === "childList" || mutation.type === "characterData") {
-          shouldReplace = true;
-          break;
-        }
-      }
-      if (shouldReplace) {
-        replaceGreenEnergyTextWithLogo();
-      }
-    });
-
-    observer.observe(technologyTreeContainerRef.current, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    return () => observer.disconnect();
-  }, [displayedCategory.name, selectedArticleSlug]);
 
   if (!isActive) return null;
 
@@ -274,7 +231,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Lógica de subida de archivos (ENQUIRY)
+  // Lógica de subida de archivos (ENQUIRY) - sin cambios
   // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
@@ -406,20 +363,41 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
-  // Manejo de navegación desde el árbol
-  const handleTreeNavigate = (slug: string) => {
-    console.log("Tree navigate to:", slug);
-    if (slug === 'technology/green-energy/solar-panels') {
-      setSelectedArticleSlug('solar-panels');
-    } else {
-      // Para otros nodos, puedes limpiar la selección o añadir más artículos
-      setSelectedArticleSlug(null);
+  // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES ==========
+  const handleTechNodeClick = (node: TechNode) => {
+    if (node.articleComponent) {
+      // Mostrar artículo
+      setActiveArticle(node.articleComponent);
+      // Guardar la pila actual y limpiar nodos (para que se vea solo el artículo)
+      setTechHistory([...techHistory, currentTechNodes]);
+      setCurrentTechNodes([]); // No se muestran imágenes mientras se lee el artículo
+    } else if (node.children && node.children.length > 0) {
+      // Bajar un nivel
+      setTechHistory([...techHistory, currentTechNodes]);
+      setCurrentTechNodes(node.children);
+      setActiveArticle(null);
     }
   };
 
-  // Función para volver al árbol principal dentro de Technology
-  const handleBackToTree = () => {
-    setSelectedArticleSlug(null);
+  const handleTechGoBack = () => {
+    if (activeArticle) {
+      // Si estamos viendo un artículo, volvemos al nivel anterior de nodos
+      const previousNodes = techHistory[techHistory.length - 1];
+      if (previousNodes) {
+        setCurrentTechNodes(previousNodes);
+        setTechHistory(techHistory.slice(0, -1));
+        setActiveArticle(null);
+      } else {
+        // Si no hay historial (artículo de primer nivel? raro) volvemos a raíz
+        setCurrentTechNodes(technologyRootNodes);
+        setActiveArticle(null);
+      }
+    } else if (techHistory.length > 0) {
+      // Estamos en un subnivel, retroceder
+      const previousNodes = techHistory[techHistory.length - 1];
+      setCurrentTechNodes(previousNodes);
+      setTechHistory(techHistory.slice(0, -1));
+    }
   };
 
   // ============================
@@ -442,7 +420,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) */}
+      {/* HEADER (Aesthetic A) - sin cambios */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -567,6 +545,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
           {isEnquiry ? (
+            // ... (código de ENQUIRY sin cambios, idéntico al original)
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
@@ -644,31 +623,71 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* Sección Technology con árbol y artículos internos */}
+              {/* SECCIÓN TECHNOLOGY TOTALMENTE RENOVADA CON IMÁGENES */}
               {isTechnology && (
                 <div className="mb-12">
                   <div
-                    className="text-black font-normal text-lg md:text-xl leading-tight px-10"
+                    className="text-black font-normal text-lg md:text-xl leading-tight px-10 mb-8"
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
-                  {!selectedArticleSlug ? (
-                    <div className="mt-8 px-10" ref={technologyTreeContainerRef}>
-                      <h3 className="text-xl font-semibold mb-3">Explore all topics</h3>
-                      <TechnologyTree onNavigate={handleTreeNavigate} />
-                    </div>
-                  ) : (
-                    <div className="mt-8 px-10">
+                  <div className="px-10">
+                    {/* Botón para volver atrás (si hay historial o artículo activo) */}
+                    {(techHistory.length > 0 || activeArticle) && (
                       <button
-                        onClick={handleBackToTree}
-                        className="mb-4 inline-flex items-center text-red-600 hover:underline"
+                        onClick={handleTechGoBack}
+                        className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 mb-6 transition-colors"
                       >
-                        ← Back to all topics
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back</span>
                       </button>
-                      {selectedArticleSlug === 'solar-panels' && <SolarPanelsPage />}
-                    </div>
-                  )}
+                    )}
+
+                    {/* Si hay un artículo activo, lo mostramos */}
+                    {activeArticle && (
+                      <div className="mt-4">
+                        {activeArticle}
+                      </div>
+                    )}
+
+                    {/* Si no hay artículo activo, mostramos las imágenes del nivel actual */}
+                    {!activeArticle && (
+                      <>
+                        {currentTechNodes.length === 0 ? (
+                          <p className="text-gray-500">No hay elementos en este nivel.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                            {currentTechNodes.map((node) => (
+                              <div
+                                key={node.id}
+                                onClick={() => handleTechNodeClick(node)}
+                                className="group cursor-pointer transition-transform duration-300 hover:scale-105"
+                              >
+                                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow">
+                                  <div className="aspect-video w-full overflow-hidden bg-gray-50">
+                                    <img
+                                      src={node.imageUrl}
+                                      alt={node.title}
+                                      className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                  </div>
+                                  <div className="p-4 text-center">
+                                    <h4 className="font-medium text-lg text-gray-800">{node.title}</h4>
+                                    {node.description && (
+                                      <p className="text-sm text-gray-500 mt-1">{node.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
+
+              {/* RESTO DE SECCIONES (Urban, Structure, Design, etc.) - SIN CAMBIOS */}
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
                   {isArchitectureSection && (
