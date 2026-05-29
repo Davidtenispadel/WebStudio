@@ -107,19 +107,21 @@ const PANEL_CATALOG = {
 type PanelKey = keyof typeof PANEL_CATALOG;
 
 // ==================== FACTORES DE ORIENTACIÓN E INCLINACIÓN ====================
+// Ahora 0° = Norte, 90° = Este, 180° = Sur, 270° = Oeste
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
+  // Definimos factores para cada punto cardinal
   const anchors = [
-    { deg: 0, factor: 1.0 },   // Sur
-    { deg: 45, factor: 0.85 }, // Sureste
-    { deg: 90, factor: 0.75 }, // Este
-    { deg: 135, factor: 0.55 },// Noreste
-    { deg: 180, factor: 0.35 },// Norte
-    { deg: 225, factor: 0.55 },// Noroeste
-    { deg: 270, factor: 0.75 },// Oeste
-    { deg: 315, factor: 0.85 },// Suroeste
-    { deg: 360, factor: 1.0 }
+    { deg: 0, factor: 0.35 },   // Norte
+    { deg: 45, factor: 0.45 },  // Noreste
+    { deg: 90, factor: 0.75 },  // Este
+    { deg: 135, factor: 0.85 }, // Sureste
+    { deg: 180, factor: 1.0 },  // Sur
+    { deg: 225, factor: 0.85 }, // Suroeste
+    { deg: 270, factor: 0.75 }, // Oeste
+    { deg: 315, factor: 0.45 }, // Noroeste
+    { deg: 360, factor: 0.35 }  // Vuelta a Norte
   ];
   for (let i = 0; i < anchors.length - 1; i++) {
     const a1 = anchors[i];
@@ -129,7 +131,7 @@ const getOrientationFactor = (deg: number): number => {
       return a1.factor + t * (a2.factor - a1.factor);
     }
   }
-  return 1.0;
+  return 0.35;
 };
 
 const getTiltFactor = (tiltDeg: number): number => {
@@ -191,7 +193,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [roofWidth, setRoofWidth] = useState(5);
   const [panelKey, setPanelKey] = useState<PanelKey>('topcon');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [orientationDeg, setOrientationDeg] = useState(0);
+  const [orientationDeg, setOrientationDeg] = useState(180); // default sur (verde)
   const [tiltDeg, setTiltDeg] = useState(35);
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
@@ -265,9 +267,12 @@ const SolarPanelCalculator: React.FC = () => {
   const addObstacle = () => setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
   const removeObstacle = (index: number) => setObstacles(obstacles.filter((_, i) => i !== index));
 
-  // Colores dinámicos para sliders
+  // Colores dinámicos para sliders (con track negro)
   const orientationColor = getColorFromFactor(orientationFactor, 0.35, 1.0);
-  const tiltColor = getColorFromFactor(tiltFactor, 0.85, 1.0); // tilt factor min ~0.85, max 1.0
+  const tiltColor = getColorFromFactor(tiltFactor, 0.85, 1.0);
+  // Color para la barra financiera (verde a rojo según porcentaje de autoconsumo)
+  const financeBarColor = `linear-gradient(to right, #22c55e, #eab308, #ef4444)`;
+  const financeBarWidth = selfConsumptionPercent;
 
   // Imágenes
   const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
@@ -293,7 +298,7 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">S</div>
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">W</div>
           <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">E</div>
-          {/* Flecha giratoria desde el centro (apunta al sur = 0°, gira con el ángulo) */}
+          {/* Flecha giratoria desde el centro */}
           <div
             className="absolute top-1/2 left-1/2 w-0 h-0"
             style={{
@@ -327,8 +332,8 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🏠</div>
         </div>
         <div className="w-full max-w-md">
-          <label className="block text-center font-medium">Roof orientation (degrees from south):</label>
-          <div className="relative w-full h-8 flex items-center">
+          <label className="block text-center font-medium">Roof orientation (degrees from north):</label>
+          <div className="relative w-full h-10 flex items-center">
             <input
               type="range"
               min="0"
@@ -339,50 +344,56 @@ const SolarPanelCalculator: React.FC = () => {
               className="w-full appearance-none bg-transparent focus:outline-none"
             />
             <style>{`
-              input[type=range]::-webkit-slider-thumb {
+              input[type=range] {
                 -webkit-appearance: none;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: ${orientationColor};
-                cursor: pointer;
-                box-shadow: 0 0 4px rgba(0,0,0,0.3);
-                border: 2px solid white;
+                background: transparent;
               }
               input[type=range]::-webkit-slider-runnable-track {
                 height: 4px;
-                background: transparent;
+                background: #000;
+                border-radius: 2px;
               }
-              input[type=range]::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
+              input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 40px;
+                height: 40px;
                 border-radius: 50%;
                 background: ${orientationColor};
                 cursor: pointer;
-                border: none;
+                box-shadow: 0 0 6px rgba(0,0,0,0.3);
+                border: 2px solid white;
+                margin-top: -18px;
               }
               input[type=range]::-moz-range-track {
-                background: transparent;
+                height: 4px;
+                background: #000;
+                border-radius: 2px;
+              }
+              input[type=range]::-moz-range-thumb {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: ${orientationColor};
+                cursor: pointer;
+                border: 2px solid white;
               }
             `}</style>
           </div>
           <p className="text-center text-sm mt-1"><strong>{orientationDeg}°</strong> → Orientation factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
+          <p className="text-xs text-center text-gray-500">0° = North, 90° = East, 180° = South, 270° = West</p>
         </div>
       </div>
 
-      {/* Representación gráfica del pitch (inclinación) */}
+      {/* Representación gráfica del pitch */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6 flex flex-col items-center">
         <h3 className="font-semibold mb-2">Roof tilt (pitch) visualization</h3>
         <div className="relative w-full max-w-md h-40 flex justify-center items-center">
           <svg width="300" height="150" viewBox="0 0 300 150" className="mx-auto">
-            {/* Suelo */}
             <line x1="20" y1="130" x2="280" y2="130" stroke="#666" strokeWidth="2" />
-            {/* Panel inclinado */}
             <g transform={`translate(150, 130) rotate(${-tiltDeg})`}>
               <rect x="-40" y="-70" width="80" height="10" fill="#4A90D9" stroke="#333" strokeWidth="1" />
               <rect x="-40" y="-70" width="80" height="3" fill="#FFD700" opacity="0.6" />
             </g>
-            {/* Arco del ángulo */}
             <path
               d={`M 110 130 A 40 40 0 0 1 ${150 - 40 * Math.sin(tiltDeg * Math.PI / 180)} ${130 - 40 * Math.cos(tiltDeg * Math.PI / 180)}`}
               fill="none"
@@ -395,7 +406,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
         <div className="w-full max-w-md mt-2">
           <label className="block text-center font-medium">Roof pitch (tilt) degrees:</label>
-          <div className="relative w-full h-8 flex items-center">
+          <div className="relative w-full h-10 flex items-center">
             <input
               type="range"
               min="0"
@@ -406,30 +417,38 @@ const SolarPanelCalculator: React.FC = () => {
               className="w-full appearance-none bg-transparent focus:outline-none"
             />
             <style>{`
-              input[type=range]::-webkit-slider-thumb {
+              input[type=range] {
                 -webkit-appearance: none;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: ${tiltColor};
-                cursor: pointer;
-                box-shadow: 0 0 4px rgba(0,0,0,0.3);
-                border: 2px solid white;
+                background: transparent;
               }
               input[type=range]::-webkit-slider-runnable-track {
                 height: 4px;
-                background: transparent;
+                background: #000;
+                border-radius: 2px;
               }
-              input[type=range]::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
+              input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 40px;
+                height: 40px;
                 border-radius: 50%;
                 background: ${tiltColor};
                 cursor: pointer;
-                border: none;
+                box-shadow: 0 0 6px rgba(0,0,0,0.3);
+                border: 2px solid white;
+                margin-top: -18px;
               }
               input[type=range]::-moz-range-track {
-                background: transparent;
+                height: 4px;
+                background: #000;
+                border-radius: 2px;
+              }
+              input[type=range]::-moz-range-thumb {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: ${tiltColor};
+                cursor: pointer;
+                border: 2px solid white;
               }
             `}</style>
           </div>
@@ -438,7 +457,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* Controles en una columna (resto del componente) */}
+      {/* Controles en una columna */}
       <div className="grid grid-cols-1 gap-6">
         {/* Dimensiones y tipo de panel */}
         <div className="grid md:grid-cols-3 gap-4">
@@ -525,9 +544,14 @@ const SolarPanelCalculator: React.FC = () => {
               <div className="grid md:grid-cols-2 gap-3 text-sm">
                 <div>
                   <p>Annual generation: <strong>{annualKwh.toFixed(0)} kWh</strong></p>
-                  <label className="block mt-2">Self-consumption (%):</label>
-                  <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full" />
-                  <p>{selfConsumptionPercent}% consumed, {100-selfConsumptionPercent}% exported</p>
+                  <label className="block mt-2">Self-consumption vs Export:</label>
+                  <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden my-1">
+                    <div className="h-full text-center text-xs text-white font-medium" style={{ width: `${financeBarWidth}%`, background: `linear-gradient(90deg, #22c55e, ${financeBarWidth > 50 ? '#eab308' : '#ef4444'})` }}>
+                      {financeBarWidth}%
+                    </div>
+                  </div>
+                  <p className="text-xs">{selfConsumptionPercent}% self-consumed, {100-selfConsumptionPercent}% exported</p>
+                  <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full mt-1" />
                 </div>
                 <div>
                   <div className="flex justify-between"><span>Export tariff (p/kWh):</span><input type="number" step="0.5" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" /></div>
