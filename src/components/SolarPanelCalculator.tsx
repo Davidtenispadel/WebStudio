@@ -1,9 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import ThreeScene from './ThreeScene';
-import PanelInfo from './PanelInfo';
-import { PANEL_TYPES, calculateUsableDimensions, calculatePanelLayout, Obstacle } from '../utils/solarCalculator';
 
-// Imágenes para los paneles (reemplazan cualquier "NO IMAGE")
+// Intentamos importar los componentes auxiliares, pero si fallan, los reemplazamos por placeholders
+let ThreeScene: React.ComponentType<any> = () => <div className="h-96 bg-gray-200 flex items-center justify-center">3D view not available</div>;
+let PanelInfo: React.ComponentType<any> = () => <div className="bg-gray-100 p-4 rounded">Panel info not available</div>;
+
+try {
+  // @ts-ignore
+  const ThreeSceneModule = require('./ThreeScene');
+  if (ThreeSceneModule.default) ThreeScene = ThreeSceneModule.default;
+} catch (e) {
+  console.warn("ThreeScene not found, using placeholder");
+}
+
+try {
+  // @ts-ignore
+  const PanelInfoModule = require('./PanelInfo');
+  if (PanelInfoModule.default) PanelInfo = PanelInfoModule.default;
+} catch (e) {
+  console.warn("PanelInfo not found, using placeholder");
+}
+
+// Definiciones locales de tipos de panel (por si el archivo solarCalculator no existe)
+const PANEL_TYPES = {
+  monocrystalline: { width: 1.0, height: 1.7, powerWp: 430 },
+  polycrystalline: { width: 1.0, height: 1.7, powerWp: 400 },
+};
+
+type Obstacle = { x: number; z: number };
+
+// Función local para calcular dimensiones útiles (restando márgenes y obstáculos)
+const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
+  const margin = 0.4; // 400 mm
+  let length = roofLength - 2 * margin;
+  let width = roofWidth - 2 * margin;
+  // Reducción simplificada por obstáculos (si hay alguno, restamos área)
+  if (obstacles.length > 0) {
+    const obstacleArea = obstacles.reduce((acc, obs) => acc + 0.5 * 0.5, 0); // cada obstáculo 0.5x0.5
+    const totalArea = length * width;
+    const reduction = Math.min(0.3, obstacleArea / totalArea);
+    length *= (1 - reduction);
+    width *= (1 - reduction);
+  }
+  return { length, width };
+};
+
+// Función local para calcular disposición de paneles
+const calculatePanelLayout = (length: number, width: number, panelW: number, panelH: number, obstacles: Obstacle[]) => {
+  const gap = 0.02;
+  const cols = Math.floor((length + gap) / (panelW + gap));
+  const rows = Math.floor((width + gap) / (panelH + gap));
+  const panelPositions: { x: number; z: number }[] = [];
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      const x = -length/2 + i * (panelW + gap) + panelW/2;
+      const z = -width/2 + j * (panelH + gap) + panelH/2;
+      let collide = false;
+      for (const obs of obstacles) {
+        if (Math.abs(x - obs.x) < (panelW/2 + 0.3) && Math.abs(z - obs.z) < (panelH/2 + 0.3)) {
+          collide = true;
+          break;
+        }
+      }
+      if (!collide) panelPositions.push({ x, z });
+    }
+  }
+  return { totalPanels: panelPositions.length, cols, rows, panelPositions };
+};
+
+// Imágenes de paneles
 const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
 const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
 
@@ -18,16 +82,16 @@ const DEFAULT_FIXED_COSTS = {
   admin: 175,
 };
 
-// Factor de orientación (0° = sur, 180° = norte)
+// Factor de orientación (0° = sur)
 const getOrientationFactor = (orientationDeg: number): number => {
   const angle = Math.abs(orientationDeg % 360);
-  if (angle <= 45) return 1.0;          // Sur ±45°
-  if (angle <= 90) return 0.85;         // Sureste / Suroeste
-  if (angle <= 135) return 0.65;        // Este / Oeste
-  return 0.5;                           // Norte
+  if (angle <= 45) return 1.0;
+  if (angle <= 90) return 0.85;
+  if (angle <= 135) return 0.65;
+  return 0.5;
 };
 
-// Distribución estacional típica para Reino Unido (% sobre producción anual)
+// Distribución estacional (%)
 const seasonalDistribution = {
   spring: 0.25,
   summer: 0.40,
@@ -36,14 +100,14 @@ const seasonalDistribution = {
 };
 
 const SolarPanelCalculator: React.FC = () => {
-  // --- Dimensiones y disposición ---
+  // Dimensiones
   const [roofLength, setRoofLength] = useState(8);
   const [roofWidth, setRoofWidth] = useState(5);
   const [panelType, setPanelType] = useState<'monocrystalline' | 'polycrystalline'>('monocrystalline');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
-  // --- Costes editables ---
+  // Costes editables
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(DEFAULT_PANEL_PRICE.monocrystalline);
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
   const [inverterCost, setInverterCost] = useState(DEFAULT_INVERTER_PRICES.string);
@@ -53,16 +117,15 @@ const SolarPanelCalculator: React.FC = () => {
   const [labourCost, setLabourCost] = useState(DEFAULT_FIXED_COSTS.labour);
   const [adminCost, setAdminCost] = useState(DEFAULT_FIXED_COSTS.admin);
 
-  // --- Parámetros de producción y finanzas ---
-  const [orientation, setOrientation] = useState(0);        // grados (0 = sur)
-  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50); // % autoconsumo
-  const [exportTariff, setExportTariff] = useState(15);     // pence por kWh (ej. Octopus)
-  const [monthlyBill, setMonthlyBill] = useState(120);      // £ libras mensuales de factura
+  // Parámetros producción / finanzas
+  const [orientation, setOrientation] = useState(0);
+  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
+  const [exportTariff, setExportTariff] = useState(15); // p/kWh
+  const [monthlyBill, setMonthlyBill] = useState(120);  // £
 
-  // Precio de la electricidad importada (p/kWh) – típico 24p
   const importPrice = 24; // p/kWh
 
-  // Sincronizar precios por defecto según tipo
+  // Sincronizar precios según tipo
   useEffect(() => {
     setPanelPricePerUnit(DEFAULT_PANEL_PRICE[panelType]);
   }, [panelType]);
@@ -86,13 +149,11 @@ const SolarPanelCalculator: React.FC = () => {
     setObstacles(obstacles.filter((_, i) => i !== index));
   };
 
-  // --- Cálculo de producción y finanzas ---
   const totalWp = layout ? layout.totalPanels * PANEL_TYPES[panelType].powerWp : 0;
   const orientationFactor = getOrientationFactor(orientation);
-  // Producción base anual para Reino Unido: 950 kWh por kWp (orientación sur)
   const baseAnnualKwhPerKw = 950;
   const annualKwh = (totalWp / 1000) * baseAnnualKwhPerKw * orientationFactor;
-  
+
   const seasonalKwh = {
     spring: annualKwh * seasonalDistribution.spring,
     summer: annualKwh * seasonalDistribution.summer,
@@ -100,13 +161,12 @@ const SolarPanelCalculator: React.FC = () => {
     winter: annualKwh * seasonalDistribution.winter,
   };
 
-  // Finanzas
   const selfConsumedKwh = annualKwh * (selfConsumptionPercent / 100);
   const exportedKwh = annualKwh - selfConsumedKwh;
-  const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100; // £
-  const annualExportIncome = (exportedKwh * exportTariff) / 100;       // £
+  const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100;
+  const annualExportIncome = (exportedKwh * exportTariff) / 100;
   const totalAnnualBenefit = annualSavingFromSelf + annualExportIncome;
-  
+
   const totalInstallCost = layout ? (
     layout.totalPanels * panelPricePerUnit +
     inverterCost +
@@ -123,7 +183,7 @@ const SolarPanelCalculator: React.FC = () => {
       <p className="text-sm text-gray-600 mb-4">* All prices exclude VAT (0% valid until March 2027)</p>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Columna izquierda: medidas, tipo panel, obstáculos, botón cálculo */}
+        {/* Columna izquierda */}
         <div>
           <div className="mb-4">
             <label className="block font-medium">Roof length (m):</label>
@@ -178,11 +238,10 @@ const SolarPanelCalculator: React.FC = () => {
           )}
         </div>
 
-        {/* Columna derecha: PanelInfo + costes editables + nueva sección de producción y finanzas */}
+        {/* Columna derecha */}
         <div>
           <PanelInfo panelType={panelType} />
 
-          {/* Costes editables (sin IVA) */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="font-bold text-lg mb-2">💰 Edit your cost estimates (0% VAT)</h3>
             <div className="space-y-2 text-sm">
@@ -217,16 +276,14 @@ const SolarPanelCalculator: React.FC = () => {
             </div>
           </div>
 
-          {/* Nueva sección: Orientación, producción estacional y análisis financiero */}
           {layout && (
             <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
               <h3 className="font-bold text-lg mb-2">☀️ Orientation & Seasonal Production</h3>
-              
               <div className="mb-3">
                 <label className="block font-medium">Roof orientation (degrees):</label>
                 <input type="range" min="0" max="360" step="5" value={orientation} onChange={(e) => setOrientation(parseInt(e.target.value))} className="w-full" />
                 <div className="flex justify-between text-sm">
-                  <span>0° (South)</span><span>90° (East)</span><span>180° (North)</span><span>270° (West)</span>
+                  <span>0° (S)</span><span>90° (E)</span><span>180° (N)</span><span>270° (W)</span>
                 </div>
                 <p className="text-sm mt-1">Current: <strong>{orientation}°</strong> – Factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
               </div>
@@ -247,14 +304,14 @@ const SolarPanelCalculator: React.FC = () => {
                 <div>
                   <label className="block">Self-consumption (%):</label>
                   <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full" />
-                  <span className="text-xs">{selfConsumptionPercent}% consumed at home, {100-selfConsumptionPercent}% exported</span>
+                  <span className="text-xs">{selfConsumptionPercent}% consumed, {100-selfConsumptionPercent}% exported</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Export tariff (p/kWh):</span>
                   <input type="number" step="0.5" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-24 text-right" />
                 </div>
                 <div className="flex justify-between">
-                  <span>Monthly electricity bill (£):</span>
+                  <span>Monthly bill (£):</span>
                   <input type="number" step="10" value={monthlyBill} onChange={(e) => setMonthlyBill(parseFloat(e.target.value))} className="border p-1 rounded w-24 text-right" />
                 </div>
                 <div className="border-t pt-2 mt-2">
@@ -262,7 +319,7 @@ const SolarPanelCalculator: React.FC = () => {
                   <p>📡 Exported: {exportedKwh.toFixed(0)} kWh → income <strong>£{(annualExportIncome).toFixed(0)}/year</strong></p>
                   <p className="font-semibold">💰 Total annual benefit: <span className="text-green-700">£{totalAnnualBenefit.toFixed(0)}</span></p>
                   <p>🏠 New monthly bill: <strong>£{newMonthlyBill.toFixed(0)}</strong> (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
-                  <p>📅 Payback period: <strong>{paybackYears.toFixed(1)} years</strong> (based on total cost £{totalInstallCost.toFixed(0)})</p>
+                  <p>📅 Payback period: <strong>{paybackYears.toFixed(1)} years</strong> (cost £{totalInstallCost.toFixed(0)})</p>
                 </div>
               </div>
             </div>
