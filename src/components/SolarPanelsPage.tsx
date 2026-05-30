@@ -8,37 +8,38 @@ const SolarPanelsPage: React.FC = () => {
         <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
 
- <p className="text-lg mb-6">
-  Photovoltaic solar panels convert sunlight into electricity and today stand among the most profitable investments for homeowners. In this guide, you'll discover when solar panels were first developed, how much they used to cost, and how much they cost now after a price drop of more than 90%.
-  <br /><br />
-  <strong>But the real question is: are they truly a good investment?</strong>
-</p>
+      <p className="text-lg mb-6">
+        Photovoltaic solar panels convert sunlight into electricity and today stand among the most profitable investments for homeowners. In this guide, you'll discover when solar panels were first developed, how much they used to cost, and how much they cost now after a price drop of more than 90%.
+        <br /><br />
+        <strong>But the real question is: are they truly a good investment?</strong>
+      </p>
 
-<div className="flex justify-center my-4">
-  <img 
-    src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" 
-    alt="Investment" 
-    className="w-auto" 
-    style={{ height: '13.2rem' }}
-  />
-</div>
+      <div className="flex justify-center my-4">
+        <img 
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" 
+          alt="Investment" 
+          className="w-auto" 
+          style={{ height: '13.2rem' }}
+        />
+      </div>
 
-<p className="text-lg mb-6">
-  You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve between 12% and 18% annually, depending on your home and your consumption. Additionally, you will learn how to calculate with a simple formula how many years it will take to recoup your investment without batteries, by entering your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell the surplus to the electricity company, you will know exactly when your energy will become completely free.
-</p>
+      <p className="text-lg mb-6">
+        You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve between 12% and 18% annually, depending on your home and your consumption. 
+        <strong> Additionally, you will learn how to use a simple formula to calculate how many years it will take to recoup your investment – without batteries. You can enter your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell surplus energy back to the electricity company, you will know exactly when your electricity will become completely free.</strong>
+      </p>
 
-<div className="flex justify-center my-4">
-  <img 
-    src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" 
-    alt="Inversion" 
-    className="w-auto" 
-    style={{ height: '13.2rem' }}
-  />
-</div>
+      <div className="flex justify-center my-4">
+        <img 
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" 
+          alt="Inversion" 
+          className="w-auto" 
+          style={{ height: '13.2rem' }}
+        />
+      </div>
 
-<p className="text-lg mb-6">
-  Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
-</p>
+      <p className="text-lg mb-6">
+        Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
+      </p>
 
       {/* ============================================================ */}
       {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
