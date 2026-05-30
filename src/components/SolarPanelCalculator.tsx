@@ -440,7 +440,7 @@ const SolarPanelCalculator: React.FC = () => {
             <p><strong className="text-xl">🏠 New monthly bill:</strong> £{newMonthlyBill.toFixed(0)} (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
             <p><strong className="text-xl">📅 Payback period:</strong> {paybackYears.toFixed(1)} years</p>
             <p><strong className="text-3xl text-green-400">📈 ROI: {roiPercent.toFixed(1)}%</strong> 
-              {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent ( > stock market)</span>}
+              {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent (higher than stock market)</span>}
               {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-300">👍 Good</span>}
               {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-300">⚠️ Low</span>}
               {roiPercent <= 0 && <span className="ml-2 text-red-400">❌ Not profitable</span>}
