@@ -107,11 +107,9 @@ const PANEL_CATALOG = {
 type PanelKey = keyof typeof PANEL_CATALOG;
 
 // ==================== FACTORES DE ORIENTACIÓN E INCLINACIÓN ====================
-// Ahora 0° = Norte, 90° = Este, 180° = Sur, 270° = Oeste
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
-  // Definimos factores para cada punto cardinal
   const anchors = [
     { deg: 0, factor: 0.35 },   // Norte
     { deg: 45, factor: 0.45 },  // Noreste
@@ -140,7 +138,6 @@ const getTiltFactor = (tiltDeg: number): number => {
   else return 1.0 - ((tilt - 35) / 25) * 0.15;
 };
 
-// Color dinámico según factor (verde=1, rojo=mínimo)
 const getColorFromFactor = (factor: number, minFactor: number, maxFactor: number): string => {
   const t = (factor - minFactor) / (maxFactor - minFactor);
   const r = Math.floor(255 * (1 - t));
@@ -193,12 +190,11 @@ const SolarPanelCalculator: React.FC = () => {
   const [roofWidth, setRoofWidth] = useState(5);
   const [panelKey, setPanelKey] = useState<PanelKey>('topcon');
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [orientationDeg, setOrientationDeg] = useState(180); // default sur (verde)
+  const [orientationDeg, setOrientationDeg] = useState(180);
   const [tiltDeg, setTiltDeg] = useState(35);
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
 
-  // Costes editables
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
   const [inverterCost, setInverterCost] = useState(900);
@@ -208,7 +204,6 @@ const SolarPanelCalculator: React.FC = () => {
   const [labourCost, setLabourCost] = useState(1150);
   const [adminCost, setAdminCost] = useState(175);
 
-  // Financieros
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
   const [exportTariff, setExportTariff] = useState(15);
   const [monthlyBill, setMonthlyBill] = useState(120);
@@ -233,7 +228,6 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(inverterPrices[inverterType]);
   }, [inverterType]);
 
-  // Cálculo de producción
   const totalWp = layout ? layout.totalPanels * PANEL_CATALOG[panelKey].powerWp : 0;
   const orientationFactor = getOrientationFactor(orientationDeg);
   const tiltFactor = getTiltFactor(tiltDeg);
@@ -261,20 +255,25 @@ const SolarPanelCalculator: React.FC = () => {
     mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost
   ) : 0;
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
+  
+  // === NUEVO: Cálculo del ROI anual ===
+  const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
+  const getRoiColor = (roi: number): string => {
+    if (roi >= 12) return 'text-green-700';
+    if (roi >= 6) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
   const monthlyBillSaving = totalAnnualBenefit / 12;
   const newMonthlyBill = Math.max(0, monthlyBill - monthlyBillSaving);
 
   const addObstacle = () => setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
   const removeObstacle = (index: number) => setObstacles(obstacles.filter((_, i) => i !== index));
 
-  // Colores dinámicos para sliders (con track negro)
   const orientationColor = getColorFromFactor(orientationFactor, 0.35, 1.0);
   const tiltColor = getColorFromFactor(tiltFactor, 0.85, 1.0);
-  // Color para la barra financiera (verde a rojo según porcentaje de autoconsumo)
-  const financeBarColor = `linear-gradient(to right, #22c55e, #eab308, #ef4444)`;
   const financeBarWidth = selfConsumptionPercent;
 
-  // Imágenes
   const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
   const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
   const currentPanelImage = PANEL_CATALOG[panelKey].imageType === 'mono' ? monoImage : polyImage;
@@ -286,7 +285,7 @@ const SolarPanelCalculator: React.FC = () => {
         * All prices exclude VAT (0% valid until March 2027). Adjust orientation and tilt with the sliders.
       </p>
 
-      {/* Compass de orientación */}
+      {/* Compass de orientación (igual que antes) */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6 flex flex-col items-center">
         <div className="relative w-48 h-48 mb-4">
           <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
@@ -298,7 +297,6 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">S</div>
           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">W</div>
           <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">E</div>
-          {/* Flecha giratoria desde el centro */}
           <div
             className="absolute top-1/2 left-1/2 w-0 h-0"
             style={{
@@ -384,7 +382,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* Representación gráfica del pitch */}
+      {/* Representación gráfica del pitch (igual) */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6 flex flex-col items-center">
         <h3 className="font-semibold mb-2">Roof tilt (pitch) visualization</h3>
         <div className="relative w-full max-w-md h-40 flex justify-center items-center">
@@ -564,6 +562,18 @@ const SolarPanelCalculator: React.FC = () => {
                 <p className="font-semibold">💰 Total annual benefit: <span className="text-green-700">£{totalAnnualBenefit.toFixed(0)}</span></p>
                 <p>🏠 New monthly bill: <strong>£{newMonthlyBill.toFixed(0)}</strong> (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
                 <p>📅 Payback period: <strong>{paybackYears.toFixed(1)} years</strong> (installation cost £{totalInstallCost.toFixed(0)})</p>
+                
+                {/* === NUEVO: ROI ANUAL === */}
+                <p className="mt-2 pt-2 border-t border-purple-200">
+                  📈 <strong>Annual ROI (Return on Investment):</strong>{' '}
+                  <span className={`font-bold text-lg ${getRoiColor(roiPercent)}`}>
+                    {roiPercent.toFixed(1)}%
+                  </span>
+                  {roiPercent >= 12 && <span className="ml-2 text-green-600">✨ Excellent! Higher than stock market average.</span>}
+                  {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-600">👍 Good, competitive return.</span>}
+                  {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-500">⚠️ Low return – consider improving self-consumption or reducing costs.</span>}
+                  {roiPercent <= 0 && <span className="ml-2 text-red-700">❌ Not profitable – adjust parameters.</span>}
+                </p>
               </div>
             </div>
           </>
