@@ -24,8 +24,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       <p className="text-lg mb-6">
-        You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve between 12% and 18% annually, depending on your home and your consumption. 
-        <strong> Additionally, you will learn how to use a simple formula to calculate how many years it will take to recoup your investment – without batteries. You can enter your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell surplus energy back to the electricity company, you will know exactly when your electricity will become completely free.</strong>
+        You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach <strong>10%</strong>, but solar panels achieve between <strong>12% and 18%</strong> annually, depending on your home and your consumption. Additionally, you will learn how to use a simple formula to calculate how many years it will take to recoup your investment, without batteries. You can enter your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell surplus energy back to the electricity company, you will know exactly when your electricity will become completely free. <strong>Is the investment profitable then? Could it even be more profitable than investing in the stock market?</strong>
       </p>
 
       <div className="flex justify-center my-4">
@@ -253,9 +252,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
-            <tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr>
-          </thead>
+          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr></thead>
           <tbody>
             <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
             <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
