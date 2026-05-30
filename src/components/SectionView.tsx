@@ -3,6 +3,7 @@
  * - Incluye "Green Energy" con tres hijos: "Solar Panels", "Batteries" y "Wind Turbines".
  * - Los logos tienen tamaño grande (h-32).
  * - Navegación por niveles con imágenes.
+ * - MODIFICADO: padding responsivo para móvil (px-4 sm:px-10)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -559,7 +560,7 @@ const SectionView: React.FC<SectionViewProps> = ({
           paddingTop: isProjectJourney ? "0px" : "100px",
         }}
       >
-        <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-10 pb-48"}>
+        <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-4 sm:px-10 pb-48"}>
           {isEnquiry ? (
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
               <div className="relative z-[60]">
@@ -626,7 +627,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
-            <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
+            <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-4 sm:px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
                 <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
                   <div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
@@ -642,10 +643,10 @@ const SectionView: React.FC<SectionViewProps> = ({
               {isTechnology && (
                 <div className="mb-12">
                   <div
-                    className="text-black font-normal text-lg md:text-xl leading-tight px-10 mb-8"
+                    className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mb-8"
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
-                  <div className="px-10">
+                  <div className="px-4 sm:px-10">
                     {(techHistory.length > 0 || activeArticle) && (
                       <button
                         onClick={handleTechGoBack}
@@ -713,20 +714,20 @@ const SectionView: React.FC<SectionViewProps> = ({
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
                   {!isProjectJourney && !isTechnology && (
-                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}
                 </div>
               )}
 
               {!isProjectJourney && !isTechnology && (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-4 sm:px-10">
                     {displayedCategory.projects.map((project) => (
                       <ProjectCard key={project.id} project={project} onClick={onProjectClick} currentSectionName={currentSectionName} />
                     ))}
                   </div>
                   {isDesignSection && (
-                    <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto px-10">
+                    <div className="flex flex-col gap-24 mt-32 mb-16 max-w-5xl mx-auto px-4 sm:px-10">
                       <div className="p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
                         <div className="text-black leading-tight" dangerouslySetInnerHTML={{ __html: isoContent }} />
                       </div>
@@ -736,7 +737,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     </div>
                   )}
                   {isUrbanSection && (
-                    <div className="mt-32 mb-16 max-w-5xl mx-auto px-10">
+                    <div className="mt-32 mb-16 max-w-5xl mx-auto px-4 sm:px-10">
                       <div className="w-full overflow-hidden rounded-2xl shadow-2xl border border-white/10">
                         <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1770138676/dibujo_limpio_profesional_1_i078jd.png" alt="Urban Masterplanning Drawing" className="w-full h-auto object-cover" loading="lazy" />
                       </div>
