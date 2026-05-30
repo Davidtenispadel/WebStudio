@@ -8,7 +8,7 @@ const SolarPanelsPage: React.FC = () => {
         <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
 
-  <p className="text-lg mb-6">
+ <p className="text-lg mb-6">
   Photovoltaic solar panels convert sunlight into electricity and today stand among the most profitable investments for homeowners. In this guide, you'll discover when solar panels were first developed, how much they used to cost, and how much they cost now after a price drop of more than 90%.
   <br /><br />
   <strong>But the real question is: are they truly a good investment?</strong>
@@ -37,7 +37,7 @@ const SolarPanelsPage: React.FC = () => {
 </div>
 
 <p className="text-lg mb-6">
-  Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. <strong>Let's go.</strong>
+  Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
 </p>
 
       {/* ============================================================ */}
