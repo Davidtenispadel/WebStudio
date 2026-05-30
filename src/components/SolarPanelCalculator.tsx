@@ -61,6 +61,16 @@ const countriesInsolation: CountryInsolation[] = [
   { name: "Nigeria", north: 1600, south: 1800 },
 ];
 
+// ==================== FACTOR CLIMÁTICO (LLUVIA / NUBOSIDAD) POR PAÍS ====================
+// Basado en días de lluvia al año y porcentaje de nubosidad. Valor entre 0.7 (muy nublado/lluvioso) y 1.0 (muy soleado)
+const getClimateFactor = (countryName: string): number => {
+  const rainyCountries = ["United Kingdom", "Ireland", "Netherlands", "Belgium", "Denmark", "Norway", "Sweden", "Finland", "Iceland", "New Zealand"];
+  const dryCountries = ["Spain", "Portugal", "Greece", "Italy", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India"];
+  if (rainyCountries.includes(countryName)) return 0.85;
+  if (dryCountries.includes(countryName)) return 0.98;
+  return 0.92; // valor por defecto para países templados
+};
+
 // ==================== CATÁLOGO DE PANELES ====================
 const PANEL_CATALOG = {
   perc: { name: "PERC (monocristalino)", price: 75, powerWp: 410, efficiency: "18‑20%", imageType: "mono" },
@@ -139,7 +149,7 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  // Tejado A
+  // --- Estados para Tejado A ---
   const [roofALength, setRoofALength] = useState(8);
   const [roofAWidth, setRoofAWidth] = useState(5);
   const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
@@ -150,7 +160,8 @@ const SolarPanelCalculator: React.FC = () => {
   const [shadingPercentA, setShadingPercentA] = useState(0);
   const [layoutA, setLayoutA] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
-  // Tejado B
+  // --- Estados para Tejado B (con checkbox para activar) ---
+  const [enableRoofB, setEnableRoofB] = useState(true);
   const [roofBLength, setRoofBLength] = useState(6);
   const [roofBWidth, setRoofBWidth] = useState(4);
   const [panelKeyB, setPanelKeyB] = useState<PanelKey>('topcon');
@@ -161,7 +172,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [shadingPercentB, setShadingPercentB] = useState(0);
   const [layoutB, setLayoutB] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
-  // Comunes
+  // --- Parámetros comunes ---
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
@@ -169,7 +180,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [monthlyBill, setMonthlyBill] = useState(120);
   const importPrice = 24;
 
-  // Costes
+  // Costes de instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
   const [inverterCost, setInverterCost] = useState(900);
@@ -189,6 +200,9 @@ const SolarPanelCalculator: React.FC = () => {
   const [customStandbyW, setCustomStandbyW] = useState(0);
   const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
+  // Factor climático (reducción por lluvia/nubosidad)
+  const climateFactor = getClimateFactor(selectedCountry);
+
   // Layout effects
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
@@ -199,21 +213,23 @@ const SolarPanelCalculator: React.FC = () => {
   }, [roofALength, roofAWidth, obstaclesA]);
 
   useEffect(() => {
-    const panelW = 1.0, panelH = 1.7;
-    if (roofBLength > 0 && roofBWidth > 0) {
-      const { length, width } = calculateUsableDimensions(roofBLength, roofBWidth, obstaclesB);
-      setLayoutB(calculatePanelLayout(length, width, panelW, panelH, obstaclesB));
+    if (enableRoofB) {
+      const panelW = 1.0, panelH = 1.7;
+      if (roofBLength > 0 && roofBWidth > 0) {
+        const { length, width } = calculateUsableDimensions(roofBLength, roofBWidth, obstaclesB);
+        setLayoutB(calculatePanelLayout(length, width, panelW, panelH, obstaclesB));
+      } else setLayoutB(null);
     } else setLayoutB(null);
-  }, [roofBLength, roofBWidth, obstaclesB]);
+  }, [enableRoofB, roofBLength, roofBWidth, obstaclesB]);
 
   useEffect(() => {
     const invPrices = { string: 900, micro: 1400, hybrid: 1600 };
     setInverterCost(invPrices[inverterType]);
   }, [inverterType]);
 
-  // Cálculo de producción
+  // Función para calcular producción de un tejado (con clima y estaciones)
   const getRoofProduction = (layout: typeof layoutA, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
-    if (!layout) return { totalWp: 0, annualKwh: 0, orientationFactor: 0, tiltFactor: 0 };
+    if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 }, orientationFactor: 0, tiltFactor: 0 };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
     const totalWp = layout.totalPanels * panelPower;
     const orientationFactor = getOrientationFactor(orientation);
@@ -222,15 +238,24 @@ const SolarPanelCalculator: React.FC = () => {
     const countryBase = countriesInsolation.find(c => c.name === selectedCountry);
     const insolationBase = countryBase ? (region === 'south' ? countryBase.south : countryBase.north) : 1000;
     let annualKwh = (totalWp / 1000) * insolationBase * orientationFactor * tiltFactor;
-    annualKwh = annualKwh * (1 - shading / 100);
-    return { totalWp, annualKwh, orientationFactor, tiltFactor };
+    // Aplicar sombra y factor climático
+    annualKwh = annualKwh * (1 - shading / 100) * climateFactor;
+    // Distribución estacional (porcentajes típicos)
+    const seasonal = { spring: 0.25, summer: 0.40, autumn: 0.20, winter: 0.15 };
+    const seasonalKwh = {
+      spring: annualKwh * seasonal.spring,
+      summer: annualKwh * seasonal.summer,
+      autumn: annualKwh * seasonal.autumn,
+      winter: annualKwh * seasonal.winter,
+    };
+    return { totalWp, annualKwh, seasonalKwh, orientationFactor, tiltFactor };
   };
 
   const prodA = getRoofProduction(layoutA, panelKeyA, orientationDegA, enablePitchA, tiltDegA, shadingPercentA);
   const prodB = getRoofProduction(layoutB, panelKeyB, orientationDegB, enablePitchB, tiltDegB, shadingPercentB);
-  const totalWp = prodA.totalWp + prodB.totalWp;
-  const totalAnnualKwh = prodA.annualKwh + prodB.annualKwh;
-  const totalPanelsCount = (layoutA?.totalPanels || 0) + (layoutB?.totalPanels || 0);
+  const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
+  const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
+  const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
   // Cálculos financieros
   const selfConsumedKwh = totalAnnualKwh * (selfConsumptionPercent / 100);
@@ -262,10 +287,10 @@ const SolarPanelCalculator: React.FC = () => {
     else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
   };
 
-  // Representación visual SVG (vista superior, simplificada)
+  // Renderizado SVG para layout (paneles y chimeneas)
   const renderSVG = (layout: typeof layoutA, widthM: number, lengthM: number, obstacles: Obstacle[], title: string) => {
-    if (!layout || layout.totalPanels === 0) return <p>No panels fit (check dimensions or obstacles)</p>;
-    const scale = 15; // px por metro
+    if (!layout || layout.totalPanels === 0) return <p className="text-sm text-gray-500">No panels fit (check dimensions or obstacles)</p>;
+    const scale = 15;
     const svgWidth = lengthM * scale + 20;
     const svgHeight = widthM * scale + 20;
     const panelWpx = 1.0 * scale;
@@ -286,93 +311,163 @@ const SolarPanelCalculator: React.FC = () => {
             return <rect key={idx} x={x - 8} y={y - 8} width="16" height="16" fill="#ef4444" stroke="#7f1d1d" strokeWidth="1" rx="2" />;
           })}
         </svg>
-        <p className="text-xs text-center mt-1">Blue: panels, Red: chimney obstacles</p>
+        <p className="text-xs text-center mt-1">Blue: panels, Red: chimneys</p>
+      </div>
+    );
+  };
+
+  // Componente para la brújula de orientación
+  const OrientationCompass = ({ orientation, onChange, color, label }: { orientation: number; onChange: (v: number) => void; color: string; label: string }) => {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="relative w-40 h-40 mb-2">
+          <div className="absolute inset-0 rounded-full border-2 border-gray-600"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-16 bg-gray-500 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-0"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-16 bg-gray-500 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-90"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-16 bg-gray-500 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-180"></div>
+          <div className="absolute top-1/2 left-1/2 w-0.5 h-16 bg-gray-500 origin-bottom transform -translate-x-1/2 -translate-y-full -rotate-90"></div>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 font-bold text-xs">N</div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-xs">S</div>
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-xs">W</div>
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-xs">E</div>
+          <div className="absolute top-1/2 left-1/2 w-0 h-0" style={{ transform: `translate(-50%, -50%) rotate(${orientation}deg)`, transformOrigin: 'center' }}>
+            <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderBottom: `20px solid ${color}`, position: 'relative', left: '-6px', top: '-30px' }} />
+            <div style={{ position: 'absolute', width: '2px', height: '30px', backgroundColor: color, left: '-1px', top: '-10px' }} />
+          </div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">🏠</div>
+        </div>
+        <label className="text-sm font-medium">{label}</label>
+        <input type="range" min="0" max="360" step="1" value={orientation} onChange={(e) => onChange(parseInt(e.target.value))} className="w-full max-w-xs" />
+        <p className="text-xs">{orientation}° → factor {getOrientationFactor(orientation).toFixed(2)}</p>
+      </div>
+    );
+  };
+
+  // Componente para la visualización del pitch
+  const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: { tilt: number; onChange: (v: number) => void; enabled: boolean; setEnabled: (v: boolean) => void; label: string }) => {
+    return (
+      <div className="flex flex-col items-center">
+        <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={enabled} onChange={() => setEnabled(!enabled)} /> Custom {label}</label>
+        {enabled ? (
+          <>
+            <svg width="200" height="100" viewBox="0 0 200 100" className="my-2">
+              <line x1="20" y1="80" x2="180" y2="80" stroke="#666" strokeWidth="1.5" />
+              <g transform={`translate(100, 80) rotate(${-tilt})`}>
+                <rect x="-25" y="-45" width="50" height="8" fill="#4A90D9" stroke="#333" strokeWidth="1" />
+                <rect x="-25" y="-45" width="50" height="3" fill="#FFD700" opacity="0.6" />
+              </g>
+              <path d={`M 75 80 A 25 25 0 0 1 ${100 - 25 * Math.sin(tilt * Math.PI / 180)} ${80 - 25 * Math.cos(tilt * Math.PI / 180)}`} fill="none" stroke="#888" strokeWidth="1" strokeDasharray="3" />
+              <text x="75" y="70" fontSize="10" fill="#333">{tilt}°</text>
+            </svg>
+            <input type="range" min="0" max="90" step="1" value={tilt} onChange={(e) => onChange(parseInt(e.target.value))} className="w-full max-w-xs" />
+            <p className="text-xs">Factor: {getTiltFactor(tilt).toFixed(2)}</p>
+          </>
+        ) : (
+          <p className="text-sm text-gray-600">Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <div className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg">
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
       {/* TEJADO A */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-6">
+          <OrientationCompass orientation={orientationDegA} onChange={setOrientationDegA} color={getColorFromFactor(getOrientationFactor(orientationDegA), 0.35, 1.0)} label="Orientation A" />
+          <PitchVisualization tilt={tiltDegA} onChange={setTiltDegA} enabled={enablePitchA} setEnabled={setEnablePitchA} label="pitch A" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
           <div>
-            <label className="block">Orientation (0‑360°):</label>
-            <input type="range" min="0" max="360" step="1" value={orientationDegA} onChange={(e) => setOrientationDegA(parseInt(e.target.value))} className="w-full" />
-            <p>{orientationDegA}° → factor {prodA.orientationFactor.toFixed(2)}</p>
-          </div>
-          <div>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={enablePitchA} onChange={() => setEnablePitchA(!enablePitchA)} /> Custom pitch</label>
-            {enablePitchA && (
-              <><input type="range" min="0" max="90" step="1" value={tiltDegA} onChange={(e) => setTiltDegA(parseInt(e.target.value))} className="w-full" /><p>{tiltDegA}° → factor {getTiltFactor(tiltDegA).toFixed(2)}</p></>
-            )}
-            {!enablePitchA && <p>Using 35° (optimum)</p>}
-          </div>
-          <div>
-            <label>Panel type:</label>
+            <label className="block">Panel type:</label>
             <select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full">
               {Object.entries(PANEL_CATALOG).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp, £{v.price}</option>)}
             </select>
           </div>
           <div>
             <label>Roof dimensions (m):</label>
-            <input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" placeholder="Length" />
-            <input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} className="border p-1 rounded w-full" placeholder="Width" />
+            <div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div>
           </div>
           <div>
             <label>Shading from trees/buildings (%):</label>
             <input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" />
-            <p>{shadingPercentA}% reduction</p>
+            <p className="text-sm">{shadingPercentA}% reduction</p>
           </div>
           <div>
             <button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>
             {obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
           </div>
         </div>
-        {renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, `Roof A (${prodA.totalWp.toFixed(0)} Wp, ${prodA.annualKwh.toFixed(0)} kWh/year)`)}
-      </div>
-
-      {/* TEJADO B */}
-      <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
-        <h3 className="font-bold text-xl mb-3">🏠 Roof B</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label>Orientation (0‑360°):</label>
-            <input type="range" min="0" max="360" step="1" value={orientationDegB} onChange={(e) => setOrientationDegB(parseInt(e.target.value))} className="w-full" />
-            <p>{orientationDegB}° → factor {prodB.orientationFactor.toFixed(2)}</p>
-          </div>
-          <div>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={enablePitchB} onChange={() => setEnablePitchB(!enablePitchB)} /> Custom pitch</label>
-            {enablePitchB && (
-              <><input type="range" min="0" max="90" step="1" value={tiltDegB} onChange={(e) => setTiltDegB(parseInt(e.target.value))} className="w-full" /><p>{tiltDegB}° → factor {getTiltFactor(tiltDegB).toFixed(2)}</p></>
-            )}
-            {!enablePitchB && <p>Using 35° (optimum)</p>}
-          </div>
-          <div>
-            <label>Panel type:</label>
-            <select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full">
-              {Object.entries(PANEL_CATALOG).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp, £{v.price}</option>)}
-            </select>
-          </div>
-          <div>
-            <label>Roof dimensions (m):</label>
-            <input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" placeholder="Length" />
-            <input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} className="border p-1 rounded w-full" placeholder="Width" />
-          </div>
-          <div>
-            <label>Shading from trees/buildings (%):</label>
-            <input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" />
-            <p>{shadingPercentB}% reduction</p>
-          </div>
-          <div>
-            <button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>
-            {obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
+        {/* Factor climático y producción estacional */}
+        <div className="mt-4 p-3 bg-blue-50 rounded">
+          <p className="text-sm font-semibold">🌦️ Climate factor for {selectedCountry}: <strong>{(climateFactor * 100).toFixed(0)}%</strong> (rain/cloud reduction)</p>
+          <p className="text-xs text-gray-600">Based on annual rainy days and cloud cover.</p>
+          <div className="mt-2">
+            <p className="font-semibold">📅 Seasonal production (after climate & shading):</p>
+            <div className="grid grid-cols-4 gap-2 text-center text-sm">
+              <div className="bg-white p-1 rounded">🌱 Spring<br/>{prodA.seasonalKwh.spring.toFixed(0)} kWh</div>
+              <div className="bg-white p-1 rounded">☀️ Summer<br/>{prodA.seasonalKwh.summer.toFixed(0)} kWh</div>
+              <div className="bg-white p-1 rounded">🍂 Autumn<br/>{prodA.seasonalKwh.autumn.toFixed(0)} kWh</div>
+              <div className="bg-white p-1 rounded">❄️ Winter<br/>{prodA.seasonalKwh.winter.toFixed(0)} kWh</div>
+            </div>
+            <p className="text-sm mt-1">Annual: <strong>{prodA.annualKwh.toFixed(0)} kWh</strong> | Power: {prodA.totalWp.toFixed(0)} Wp</p>
           </div>
         </div>
-        {renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, `Roof B (${prodB.totalWp.toFixed(0)} Wp, ${prodB.annualKwh.toFixed(0)} kWh/year)`)}
+        {renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, `Roof A layout`)}
+      </div>
+
+      {/* TEJADO B (activatable) */}
+      <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
+        <div className="flex justify-between items-center">
+          <h3 className="font-bold text-xl mb-2">🏠 Roof B</h3>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label>
+        </div>
+        {enableRoofB && (
+          <>
+            <div className="grid md:grid-cols-2 gap-6">
+              <OrientationCompass orientation={orientationDegB} onChange={setOrientationDegB} color={getColorFromFactor(getOrientationFactor(orientationDegB), 0.35, 1.0)} label="Orientation B" />
+              <PitchVisualization tilt={tiltDegB} onChange={setTiltDegB} enabled={enablePitchB} setEnabled={setEnablePitchB} label="pitch B" />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label>Panel type:</label>
+                <select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full">
+                  {Object.entries(PANEL_CATALOG).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp, £{v.price}</option>)}
+                </select>
+              </div>
+              <div>
+                <label>Roof dimensions (m):</label>
+                <div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div>
+              </div>
+              <div>
+                <label>Shading from trees/buildings (%):</label>
+                <input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" />
+                <p className="text-sm">{shadingPercentB}% reduction</p>
+              </div>
+              <div>
+                <button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>
+                {obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-green-50 rounded">
+              <p className="text-sm font-semibold">🌦️ Climate factor for {selectedCountry}: <strong>{(climateFactor * 100).toFixed(0)}%</strong> (same as Roof A)</p>
+              <div className="mt-2">
+                <p className="font-semibold">📅 Seasonal production (after climate & shading):</p>
+                <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                  <div className="bg-white p-1 rounded">🌱 Spring<br/>{prodB.seasonalKwh.spring.toFixed(0)} kWh</div>
+                  <div className="bg-white p-1 rounded">☀️ Summer<br/>{prodB.seasonalKwh.summer.toFixed(0)} kWh</div>
+                  <div className="bg-white p-1 rounded">🍂 Autumn<br/>{prodB.seasonalKwh.autumn.toFixed(0)} kWh</div>
+                  <div className="bg-white p-1 rounded">❄️ Winter<br/>{prodB.seasonalKwh.winter.toFixed(0)} kWh</div>
+                </div>
+                <p className="text-sm mt-1">Annual: <strong>{prodB.annualKwh.toFixed(0)} kWh</strong> | Power: {prodB.totalWp.toFixed(0)} Wp</p>
+              </div>
+            </div>
+            {renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, `Roof B layout`)}
+          </>
+        )}
       </div>
 
       {/* INVERTER */}
