@@ -163,18 +163,18 @@ const SolarPanelCalculator: React.FC = () => {
   const [labourCost, setLabourCost] = useState(1150);
   const [adminCost, setAdminCost] = useState(175);
 
-  // Mantenimiento
+  // Mantenimiento (costes cada 3 años)
   const [includeMaintenance, setIncludeMaintenance] = useState(false);
-  const [environment, setEnvironment] = useState<'urban' | 'rural'>('urban');
-  const [climate, setClimate] = useState<'rainy' | 'dry'>('rainy');
-  const [countryCostLevel, setCountryCostLevel] = useState<'expensive' | 'economical'>('expensive');
-  const [customCleaningCost, setCustomCleaningCost] = useState<number | null>(null);
-  const [customElectricalCost, setCustomElectricalCost] = useState<number | null>(null);
+  const [cleaningCost3Years, setCleaningCost3Years] = useState(150);
+  const [electricalInspection3Years, setElectricalInspection3Years] = useState(120);
 
   // Autoconsumo del inversor (modelo + vatios)
   const [selectedInverterModel, setSelectedInverterModel] = useState<string>('none');
   const [customInverterW, setCustomInverterW] = useState<number>(0);
   const [inverterSelfConsumptionW, setInverterSelfConsumptionW] = useState<number>(0);
+
+  // Sombra de árboles/edificios (0-50%)
+  const [shadingPercent, setShadingPercent] = useState(0);
 
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
@@ -207,30 +207,19 @@ const SolarPanelCalculator: React.FC = () => {
     if (!country) return 1000;
     return region === 'south' ? country.south : country.north;
   })();
-  const annualKwh = (totalWp / 1000) * insolation * orientationFactor * tiltFactor;
+  let annualKwh = (totalWp / 1000) * insolation * orientationFactor * tiltFactor;
+  // Aplicar reducción por sombras (árboles/edificios)
+  annualKwh = annualKwh * (1 - shadingPercent / 100);
   const selfConsumedKwh = annualKwh * (selfConsumptionPercent / 100);
   const exportedKwh = Math.max(0, annualKwh - selfConsumedKwh);
   const inverterAnnualKwh = (inverterSelfConsumptionW * 24 * 365) / 1000;
   const solarOffsetKwh = Math.min(inverterAnnualKwh, exportedKwh);
   const inverterNetCost = Math.max(0, (inverterAnnualKwh * importPrice / 100) - (solarOffsetKwh * (importPrice - exportTariff) / 100));
 
-  // Costes mantenimiento recomendados
-  const getRecommendedCleaningCostAnnual = (): number => {
-    const base = countryCostLevel === 'expensive' ? 150 : 80;
-    let years = 2;
-    if (climate === 'rainy' && environment === 'rural') years = 2.5;
-    else if (climate === 'rainy' && environment === 'urban') years = 2;
-    else if (climate === 'dry' && environment === 'rural') years = 1.5;
-    else if (climate === 'dry' && environment === 'urban') years = 1;
-    return base / years;
-  };
-  const getRecommendedElectricalCostAnnual = (): number => {
-    const base = countryCostLevel === 'expensive' ? 120 : 70;
-    return base / 4;
-  };
-  const cleaningCostAnnual = customCleaningCost !== null ? customCleaningCost : (includeMaintenance ? getRecommendedCleaningCostAnnual() : 0);
-  const electricalMaintenanceCostAnnual = customElectricalCost !== null ? customElectricalCost : (includeMaintenance ? getRecommendedElectricalCostAnnual() : 0);
-  const totalCleaningAndElectricalAnnual = cleaningCostAnnual + electricalMaintenanceCostAnnual;
+  // Costes mantenimiento anuales (prorrateo cada 3 años)
+  const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
+  const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
+  const totalCleaningAndElectricalAnnual = cleaningCostAnnual + electricalInspectionAnnual;
   const totalAnnualMaintenanceCost = totalCleaningAndElectricalAnnual + inverterNetCost;
 
   const totalInstallCost = layout ? (
@@ -253,6 +242,16 @@ const SolarPanelCalculator: React.FC = () => {
   const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
   const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
   const currentPanelImage = PANEL_CATALOG[panelKey].imageType === 'mono' ? monoImage : polyImage;
+
+  // Texto informativo para el tipo de inversor
+  const getInverterInfo = (type: string) => {
+    switch (type) {
+      case 'string': return '3.68 kW, single‑phase';
+      case 'micro': return 'per panel (300‑400 W each), single‑phase';
+      case 'hybrid': return '3.68 kW, single‑phase, battery ready';
+      default: return '';
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
@@ -327,17 +326,17 @@ const SolarPanelCalculator: React.FC = () => {
           <div>
             <label className="block font-medium">Inverter type (cost):</label>
             <select value={inverterType} onChange={(e) => setInverterType(e.target.value as any)} className="border p-2 rounded w-full mb-2">
-              <option value="string">String inverter – £900</option>
-              <option value="micro">Microinverters – £1400</option>
-              <option value="hybrid">Hybrid (battery ready) – £1600</option>
+              <option value="string">String inverter – £900 ({getInverterInfo('string')})</option>
+              <option value="micro">Microinverters – £1400 ({getInverterInfo('micro')})</option>
+              <option value="hybrid">Hybrid – £1600 ({getInverterInfo('hybrid')})</option>
             </select>
-            <label className="block font-medium mt-2">Inverter model (standby power):</label>
+            <label className="block font-medium mt-2">Inverter standby power:</label>
             <select value={selectedInverterModel} onChange={(e) => setSelectedInverterModel(e.target.value)} className="border p-2 rounded w-full">
-              <option value="none">None (0 W) – ideal</option>
-              <option value="huawei">Huawei SUN2000 – 2 W</option>
-              <option value="sma">SMA Sunny Boy – 3 W</option>
-              <option value="solaredge">SolarEdge HD‑Wave – 2 W</option>
-              <option value="fronius">Fronius GEN24 – 3 W</option>
+              <option value="none">None (0 W)</option>
+              <option value="huawei">Huawei (2 W)</option>
+              <option value="sma">SMA (3 W)</option>
+              <option value="solaredge">SolarEdge (2 W)</option>
+              <option value="fronius">Fronius (3 W)</option>
               <option value="custom">Custom value (enter below)</option>
             </select>
             {selectedInverterModel === 'custom' && (
@@ -371,22 +370,19 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
         <div className="text-right font-bold mt-2">Total installation cost: <span className="text-lg">£{totalInstallCost.toFixed(0)}</span></div>
 
-        {/* Opción de mantenimiento anual */}
+        {/* Opción de mantenimiento anual con costes cada 3 años */}
         <div className="mt-4 border-t pt-3">
-          <label className="flex items-center gap-2"><input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} /> Include annual cleaning & electrical maintenance</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} /> Include annual cleaning & electrical maintenance (prorated from 3‑year costs)</label>
           {includeMaintenance && (
             <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
-              <select value={environment} onChange={(e) => setEnvironment(e.target.value as any)} className="border p-1 rounded"><option value="urban">Urban (more dust)</option><option value="rural">Rural (less dust)</option></select>
-              <select value={climate} onChange={(e) => setClimate(e.target.value as any)} className="border p-1 rounded"><option value="rainy">Rainy (natural cleaning)</option><option value="dry">Dry (frequent cleaning)</option></select>
-              <select value={countryCostLevel} onChange={(e) => setCountryCostLevel(e.target.value as any)} className="border p-1 rounded"><option value="expensive">Expensive country</option><option value="economical">Economical country</option></select>
-              <div><label>Cleaning cost (£/year):</label><input type="number" step="5" value={customCleaningCost !== null ? customCleaningCost : cleaningCostAnnual} onChange={(e) => setCustomCleaningCost(e.target.value === '' ? null : parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
-              <div><label>Electrical inspection (£/year):</label><input type="number" step="5" value={customElectricalCost !== null ? customElectricalCost : electricalMaintenanceCostAnnual} onChange={(e) => setCustomElectricalCost(e.target.value === '' ? null : parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+              <div><label>Cleaning cost (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+              <div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ==================== 5. LOCATION + SEASONAL PRODUCTION ==================== */}
+      {/* ==================== 5. LOCATION + SEASONAL PRODUCTION + SHADING ==================== */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">5. 🌍 Location & Seasonal Production</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -395,13 +391,19 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
         <p className="text-sm mt-2">Base insolation: {insolation} kWh/kWp/year (south, optimal tilt)</p>
         <div className="mt-3">
-          <p className="font-semibold">📅 Estimated seasonal production:</p>
+          <p className="font-semibold">📅 Estimated seasonal production (before shading):</p>
           <div className="grid grid-cols-4 gap-2 text-center text-sm">
-            <div className="bg-white p-1 rounded">🌱 Spring<br/>{(annualKwh * 0.25).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">☀️ Summer<br/>{(annualKwh * 0.40).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">🍂 Autumn<br/>{(annualKwh * 0.20).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">❄️ Winter<br/>{(annualKwh * 0.15).toFixed(0)} kWh</div>
+            <div className="bg-white p-1 rounded">🌱 Spring<br/>{(annualKwh * 0.25 / (1 - shadingPercent/100)).toFixed(0)} kWh</div>
+            <div className="bg-white p-1 rounded">☀️ Summer<br/>{(annualKwh * 0.40 / (1 - shadingPercent/100)).toFixed(0)} kWh</div>
+            <div className="bg-white p-1 rounded">🍂 Autumn<br/>{(annualKwh * 0.20 / (1 - shadingPercent/100)).toFixed(0)} kWh</div>
+            <div className="bg-white p-1 rounded">❄️ Winter<br/>{(annualKwh * 0.15 / (1 - shadingPercent/100)).toFixed(0)} kWh</div>
           </div>
+        </div>
+        <div className="mt-3">
+          <label className="block font-medium">🌳 Shading from trees / buildings (%):</label>
+          <input type="range" min="0" max="50" step="1" value={shadingPercent} onChange={(e) => setShadingPercent(parseInt(e.target.value))} className="w-full" />
+          <p className="text-sm text-center"><strong>{shadingPercent}%</strong> reduction in annual generation</p>
+          <p className="text-xs text-gray-500 italic mt-1">Note: This reduction is applied after orientation and tilt factors. For chimneys, the layout automatically avoids placing panels on them, but additional shading from nearby trees or buildings can be set here.</p>
         </div>
       </div>
 
@@ -410,7 +412,7 @@ const SolarPanelCalculator: React.FC = () => {
         <h3 className="font-bold text-xl mb-3">6. 💰 Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label>Annual generation: <strong>{annualKwh.toFixed(0)} kWh</strong></label>
+            <label>Annual generation (after shading): <strong>{annualKwh.toFixed(0)} kWh</strong></label>
             <label className="block mt-2">Self-consumption vs Export:</label>
             <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden my-1">
               <div className="h-full text-center text-xs text-white font-medium" style={{ width: `${selfConsumptionPercent}%`, background: `linear-gradient(90deg, #22c55e, ${selfConsumptionPercent > 50 ? '#eab308' : '#ef4444'})` }}>
@@ -435,7 +437,7 @@ const SolarPanelCalculator: React.FC = () => {
             <p><strong className="text-xl">📐 Layout:</strong> {layout.totalPanels} panels, {layout.cols} columns × {layout.rows} rows, {(layout.totalPanels * 1.0 * 1.7).toFixed(1)} m² area</p>
             <p><strong className="text-xl">⚡ Power:</strong> {totalWp.toFixed(0)} Wp</p>
             <p><strong className="text-xl">💰 Installation cost (one‑time):</strong> £{totalInstallCost.toFixed(0)}</p>
-            <p><strong className="text-xl">🔄 Annual maintenance cost:</strong> £{totalAnnualMaintenanceCost.toFixed(1)}</p>
+            <p><strong className="text-xl">🔄 Annual maintenance cost:</strong> £{totalAnnualMaintenanceCost.toFixed(1)} (cleaning: £{cleaningCostAnnual.toFixed(1)}, electrical: £{electricalInspectionAnnual.toFixed(1)}, inverter standby: £{inverterNetCost.toFixed(1)})</p>
             <p><strong className="text-xl">✅ Annual benefit (after all costs):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
             <p><strong className="text-xl">🏠 New monthly bill:</strong> £{newMonthlyBill.toFixed(0)} (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
             <p><strong className="text-xl">📅 Payback period:</strong> {paybackYears.toFixed(1)} years</p>
