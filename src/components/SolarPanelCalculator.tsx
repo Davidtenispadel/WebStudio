@@ -169,9 +169,9 @@ const SolarPanelCalculator: React.FC = () => {
   const [customCleaningCost, setCustomCleaningCost] = useState<number | null>(null);
   const [customElectricalCost, setCustomElectricalCost] = useState<number | null>(null);
 
-  // NUEVO: Autoconsumo del inversor (W)
+  // Autoconsumo del inversor
   const [inverterSelfConsumptionW, setInverterSelfConsumptionW] = useState<number>(0);
-  const [selectedInverterModel, setSelectedInverterModel] = useState<string>('none'); // 'none', 'huawei', 'sma', 'solaredge', 'fronius', 'custom'
+  const [selectedInverterModel, setSelectedInverterModel] = useState<string>('none');
   const [customInverterW, setCustomInverterW] = useState<number>(0);
 
   const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
@@ -189,7 +189,6 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(inverterPrices[inverterType]);
   }, [inverterType]);
 
-  // Actualizar valor de autoconsumo según modelo seleccionado
   useEffect(() => {
     const modelWatts: Record<string, number> = {
       none: 0,
@@ -202,7 +201,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterSelfConsumptionW(modelWatts[selectedInverterModel] || 0);
   }, [selectedInverterModel, customInverterW]);
 
-  // ==================== CÁLCULO DE COSTES DE MANTENIMIENTO ====================
+  // ==================== COSTES DE MANTENIMIENTO RECOMENDADOS ====================
   const getRecommendedCleaningCostAnnual = (): number => {
     const baseCleaningEvent = countryCostLevel === 'expensive' ? 150 : 80;
     let yearsBetween = 2;
@@ -219,10 +218,10 @@ const SolarPanelCalculator: React.FC = () => {
   };
 
   const cleaningCostAnnual = customCleaningCost !== null ? customCleaningCost : (includeMaintenance ? getRecommendedCleaningCostAnnual() : 0);
-  const electricalCostAnnual = customElectricalCost !== null ? customElectricalCost : (includeMaintenance ? getRecommendedElectricalCostAnnual() : 0);
-  const totalMaintenanceCostAnnual = cleaningCostAnnual + electricalCostAnnual;
+  const electricalMaintenanceCostAnnual = customElectricalCost !== null ? customElectricalCost : (includeMaintenance ? getRecommendedElectricalCostAnnual() : 0);
+  const totalCleaningAndElectricalAnnual = cleaningCostAnnual + electricalMaintenanceCostAnnual;
 
-  // ==================== CÁLCULOS ENERGÉTICOS Y FINANCIEROS BASE ====================
+  // Coste neto anual por autoconsumo del inversor
   const totalWp = layout ? layout.totalPanels * PANEL_CATALOG[panelKey].powerWp : 0;
   const orientationFactor = getOrientationFactor(orientationDeg);
   const tiltFactor = getTiltFactor(tiltDeg);
@@ -232,32 +231,30 @@ const SolarPanelCalculator: React.FC = () => {
     return region === 'south' ? country.south : country.north;
   })();
   const annualKwh = (totalWp / 1000) * insolation * orientationFactor * tiltFactor;
-  const seasonalDistribution = { spring: 0.25, summer: 0.40, autumn: 0.20, winter: 0.15 };
-  const seasonalKwh = {
-    spring: annualKwh * seasonalDistribution.spring,
-    summer: annualKwh * seasonalDistribution.summer,
-    autumn: annualKwh * seasonalDistribution.autumn,
-    winter: annualKwh * seasonalDistribution.winter,
-  };
   const selfConsumedKwh = annualKwh * (selfConsumptionPercent / 100);
   const exportedKwh = Math.max(0, annualKwh - selfConsumedKwh);
+  const inverterAnnualKwh = (inverterSelfConsumptionW * 24 * 365) / 1000;
+  const solarOffsetKwh = Math.min(inverterAnnualKwh, exportedKwh);
+  const inverterNetCost = Math.max(0, (inverterAnnualKwh * importPrice / 100) - (solarOffsetKwh * (importPrice - exportTariff) / 100));
+
+  const totalAnnualMaintenanceCost = totalCleaningAndElectricalAnnual + inverterNetCost;
+
+  // ==================== COSTES DE INSTALACIÓN (ÚNICOS) ====================
+  const totalInstallCost = layout ? (
+    layout.totalPanels * panelPricePerUnit +
+    inverterCost +
+    mountingCost +
+    scaffoldingCost +
+    electricalCost +
+    labourCost +
+    adminCost
+  ) : 0;
+
+  // ==================== BENEFICIOS Y RETORNO ====================
   const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100;
   const annualExportIncome = (exportedKwh * exportTariff) / 100;
   const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
-
-  // ==================== COSTE POR AUTOCONSUMO DEL INVERSOR ====================
-  const inverterAnnualKwh = (inverterSelfConsumptionW * 24 * 365) / 1000;
-  // La energía del inversor puede ser parcialmente compensada por energía que antes se exportaba
-  const solarOffsetKwh = Math.min(inverterAnnualKwh, exportedKwh);
-  // Coste neto = (energía total * precio importe) - (energía compensada * (precio importe - tarifa exportación))
-  const inverterNetCost = (inverterAnnualKwh * importPrice / 100) - (solarOffsetKwh * (importPrice - exportTariff) / 100);
-  const netInverterCost = Math.max(0, inverterNetCost);
-
-  // ==================== BENEFICIO NETO FINAL ====================
-  const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalMaintenanceCostAnnual - netInverterCost);
-  const totalInstallCost = layout ? (
-    layout.totalPanels * panelPricePerUnit + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost
-  ) : 0;
+  const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
   const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
 
@@ -369,9 +366,9 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* Costes editables */}
+        {/* Costes editables (instalación) */}
         <div className="bg-blue-50 p-4 rounded-lg">
-          <h3 className="font-bold text-lg mb-2">💰 Edit your cost estimates (0% VAT)</h3>
+          <h3 className="font-bold text-lg mb-2">💰 Installation cost (one‑time, 0% VAT)</h3>
           <div className="grid md:grid-cols-3 gap-3 text-sm">
             <div className="flex justify-between items-center"><label>Panel price (£/panel):</label><input type="number" value={panelPricePerUnit} onChange={(e) => setPanelPricePerUnit(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="5" /></div>
             <div className="flex justify-between items-center"><label>Inverter cost (£):</label><input type="number" value={inverterCost} onChange={(e) => setInverterCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
@@ -381,6 +378,7 @@ const SolarPanelCalculator: React.FC = () => {
             <div className="flex justify-between items-center"><label>Labour (MCS) (£):</label><input type="number" value={labourCost} onChange={(e) => setLabourCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
             <div className="flex justify-between items-center"><label>MCS/DNO admin (£):</label><input type="number" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="25" /></div>
           </div>
+          <p className="text-right font-bold mt-2">Total installation cost: <span className="text-lg">£{totalInstallCost.toFixed(0)}</span></p>
         </div>
 
         {/* Ubicación */}
@@ -393,7 +391,7 @@ const SolarPanelCalculator: React.FC = () => {
           <p className="text-sm mt-2">Base insolation: {insolation} kWh/kWp/year (south-facing, optimal tilt)</p>
         </div>
 
-        {/* ========== MANTENIMIENTO Y LIMPIEZA ========== */}
+        {/* ========== MANTENIMIENTO Y LIMPIEZA (ANUAL) ========== */}
         <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
           <div className="flex items-center gap-3 mb-3">
             <input type="checkbox" id="includeMaintenance" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} className="w-5 h-5" />
@@ -429,19 +427,16 @@ const SolarPanelCalculator: React.FC = () => {
                   <p className="text-xs text-gray-500">Recommended: £{getRecommendedCleaningCostAnnual().toFixed(1)}/year</p>
                 </div>
                 <div>
-                  <label className="block font-medium">⚡ Electrical maintenance (£/year):</label>
-                  <input type="number" step="5" value={customElectricalCost !== null ? customElectricalCost : electricalCostAnnual} onChange={(e) => setCustomElectricalCost(e.target.value === '' ? null : parseFloat(e.target.value))} className="border p-1 rounded w-full" />
+                  <label className="block font-medium">⚡ Electrical inspection (£/year):</label>
+                  <input type="number" step="5" value={customElectricalCost !== null ? customElectricalCost : electricalMaintenanceCostAnnual} onChange={(e) => setCustomElectricalCost(e.target.value === '' ? null : parseFloat(e.target.value))} className="border p-1 rounded w-full" />
                   <p className="text-xs text-gray-500">Recommended: £{getRecommendedElectricalCostAnnual().toFixed(1)}/year</p>
                 </div>
-              </div>
-              <div className="col-span-2 text-center text-sm font-semibold text-amber-800">
-                Total annual maintenance: <span className="text-lg">£{totalMaintenanceCostAnnual.toFixed(1)}</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* ========== NUEVO: AUTOCONSUMO DEL INVERSOR ========== */}
+        {/* ========== AUTOCONSUMO DEL INVERSOR ========== */}
         <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
           <h3 className="font-bold text-lg mb-2">⚡ Inverter self‑consumption (nighttime & standby)</h3>
           <p className="text-xs text-gray-600 mb-2">Some inverters consume power even when no load is present. This reduces your net savings.</p>
@@ -465,8 +460,7 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
           {inverterSelfConsumptionW > 0 && (
             <div className="mt-2 text-sm bg-white p-2 rounded">
-              <p>🔌 Annual energy wasted: <strong>{(inverterSelfConsumptionW * 24 * 365 / 1000).toFixed(1)} kWh</strong></p>
-              <p>📉 Net annual cost after solar offset: <strong>£{netInverterCost.toFixed(1)}</strong></p>
+              <p>🔌 Annual energy wasted: <strong>{(inverterAnnualKwh).toFixed(1)} kWh</strong> → cost after solar offset: <strong>£{inverterNetCost.toFixed(1)}/year</strong></p>
             </div>
           )}
         </div>
@@ -483,10 +477,10 @@ const SolarPanelCalculator: React.FC = () => {
             <div className="bg-yellow-50 p-4 rounded-lg">
               <h3 className="font-bold text-lg">☀️ Seasonal Production</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                <div className="bg-white p-2 rounded text-center">🌱 Spring<br/>{seasonalKwh.spring.toFixed(0)} kWh</div>
-                <div className="bg-white p-2 rounded text-center">☀️ Summer<br/>{seasonalKwh.summer.toFixed(0)} kWh</div>
-                <div className="bg-white p-2 rounded text-center">🍂 Autumn<br/>{seasonalKwh.autumn.toFixed(0)} kWh</div>
-                <div className="bg-white p-2 rounded text-center">❄️ Winter<br/>{seasonalKwh.winter.toFixed(0)} kWh</div>
+                <div className="bg-white p-2 rounded text-center">🌱 Spring<br/>{(annualKwh * 0.25).toFixed(0)} kWh</div>
+                <div className="bg-white p-2 rounded text-center">☀️ Summer<br/>{(annualKwh * 0.40).toFixed(0)} kWh</div>
+                <div className="bg-white p-2 rounded text-center">🍂 Autumn<br/>{(annualKwh * 0.20).toFixed(0)} kWh</div>
+                <div className="bg-white p-2 rounded text-center">❄️ Winter<br/>{(annualKwh * 0.15).toFixed(0)} kWh</div>
               </div>
             </div>
 
@@ -510,21 +504,23 @@ const SolarPanelCalculator: React.FC = () => {
                 </div>
               </div>
               <div className="mt-3 text-sm border-t pt-2">
-                <p>✅ Self-consumed: {selfConsumedKwh.toFixed(0)} kWh → saves <strong>£{annualSavingFromSelf.toFixed(0)}/year</strong></p>
-                <p>📡 Exported: {exportedKwh.toFixed(0)} kWh → income <strong>£{annualExportIncome.toFixed(0)}/year</strong></p>
-                {includeMaintenance && <p className="text-red-600">🧹 Annual maintenance cost: <strong>-£{totalMaintenanceCostAnnual.toFixed(0)}</strong></p>}
-                {inverterSelfConsumptionW > 0 && <p className="text-red-600">🔌 Inverter self‑consumption cost: <strong>-£{netInverterCost.toFixed(1)}</strong></p>}
-                <p className="font-semibold">💰 Net annual benefit after all costs: <span className="text-green-700">£{totalAnnualBenefit.toFixed(0)}</span></p>
-                <p>🏠 New monthly bill: <strong>£{newMonthlyBill.toFixed(0)}</strong> (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
-                <p>📅 Payback period: <strong>{paybackYears.toFixed(1)} years</strong> (installation cost £{totalInstallCost.toFixed(0)})</p>
-                <p className="mt-2 pt-2 border-t border-purple-200">
-                  📈 <strong>Annual ROI (Return on Investment):</strong>{' '}
-                  <span className={`font-bold text-lg ${getRoiColor(roiPercent)}`}>{roiPercent.toFixed(1)}%</span>
-                  {roiPercent >= 12 && <span className="ml-2 text-green-600">✨ Excellent! Higher than stock market average.</span>}
-                  {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-600">👍 Good, competitive return.</span>}
-                  {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-500">⚠️ Low return – consider improving self-consumption or reducing costs.</span>}
-                  {roiPercent <= 0 && <span className="ml-2 text-red-700">❌ Not profitable – adjust parameters.</span>}
-                </p>
+                <p className="font-semibold">💷 Installation cost (one‑time): <span className="text-blue-700">£{totalInstallCost.toFixed(0)}</span></p>
+                <p className="font-semibold mt-1">🔄 Annual maintenance cost (recurring): <span className="text-red-600">£{totalAnnualMaintenanceCost.toFixed(1)}</span></p>
+                <div className="mt-2 pt-2 border-t">
+                  <p>✅ Self-consumed: {selfConsumedKwh.toFixed(0)} kWh → saves <strong>£{annualSavingFromSelf.toFixed(0)}/year</strong></p>
+                  <p>📡 Exported: {exportedKwh.toFixed(0)} kWh → income <strong>£{annualExportIncome.toFixed(0)}/year</strong></p>
+                  <p className="font-semibold">💰 Net annual benefit after all costs: <span className="text-green-700">£{totalAnnualBenefit.toFixed(0)}</span></p>
+                  <p>🏠 New monthly bill: <strong>£{newMonthlyBill.toFixed(0)}</strong> (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
+                  <p>📅 Payback period: <strong>{paybackYears.toFixed(1)} years</strong></p>
+                  <p className="mt-2 pt-2 border-t border-purple-200">
+                    📈 <strong>Annual ROI (Return on Investment):</strong>{' '}
+                    <span className={`font-bold text-lg ${getRoiColor(roiPercent)}`}>{roiPercent.toFixed(1)}%</span>
+                    {roiPercent >= 12 && <span className="ml-2 text-green-600">✨ Excellent! Higher than stock market average.</span>}
+                    {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-600">👍 Good, competitive return.</span>}
+                    {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-500">⚠️ Low return – consider improving self-consumption or reducing costs.</span>}
+                    {roiPercent <= 0 && <span className="ml-2 text-red-700">❌ Not profitable – adjust parameters.</span>}
+                  </p>
+                </div>
               </div>
             </div>
           </>
