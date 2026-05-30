@@ -63,11 +63,11 @@ const countriesInsolation: CountryInsolation[] = [
 
 // ==================== CATÁLOGO DE PANELES ====================
 const PANEL_CATALOG = {
-  perc: { name: "PERC (monocristalino)", price: 75, powerWp: 410, efficiency: "18‑20%", appearance: "Dark blue/black, 9‑12 thick busbars", imageType: "mono" },
-  topcon: { name: "TOPCon (monocristalino)", price: 85, powerWp: 440, efficiency: "20‑22.5%", appearance: "Intense black, 12‑16 very thin busbars", imageType: "mono" },
-  hjt: { name: "HJT (monocristalino)", price: 95, powerWp: 460, efficiency: "21‑23%", appearance: "Jet black, 6‑8 extremely thin busbars", imageType: "mono" },
-  ibc: { name: "IBC (monocristalino)", price: 110, powerWp: 480, efficiency: "22‑24%", appearance: "Pure black, no front busbars", imageType: "mono" },
-  poly: { name: "Policristalino (policristalino)", price: 65, powerWp: 400, efficiency: "16‑18%", appearance: "Speckled blue, visible crystal fragments", imageType: "poly" }
+  perc: { name: "PERC (monocristalino)", price: 75, powerWp: 410, efficiency: "18‑20%", imageType: "mono" },
+  topcon: { name: "TOPCon (monocristalino)", price: 85, powerWp: 440, efficiency: "20‑22.5%", imageType: "mono" },
+  hjt: { name: "HJT (monocristalino)", price: 95, powerWp: 460, efficiency: "21‑23%", imageType: "mono" },
+  ibc: { name: "IBC (monocristalino)", price: 110, powerWp: 480, efficiency: "22‑24%", imageType: "mono" },
+  poly: { name: "Policristalino", price: 65, powerWp: 400, efficiency: "16‑18%", imageType: "poly" }
 };
 type PanelKey = keyof typeof PANEL_CATALOG;
 
@@ -93,16 +93,10 @@ const getOrientationFactor = (deg: number): number => {
 const getTiltFactor = (tiltDeg: number): number => {
   const tilt = Math.min(90, Math.max(0, tiltDeg));
   if (tilt <= 35) return 0.9 + (tilt / 35) * 0.1;
-  return 1.0 - ((tilt - 35) / 55) * 0.2; // Ajustado para 0‑90°
+  return 1.0 - ((tilt - 35) / 55) * 0.2;
 };
 
-const getColorFromFactor = (factor: number, minFactor: number, maxFactor: number): string => {
-  const t = (factor - minFactor) / (maxFactor - minFactor);
-  const r = Math.floor(255 * (1 - t)), g = Math.floor(255 * t);
-  return `rgb(${r}, ${g}, 0)`;
-};
-
-// ==================== CÁLCULO DE DISPOSICIÓN ====================
+// ==================== CÁLCULO DE DISPOSICIÓN POR TEJADO ====================
 type Obstacle = { x: number; z: number };
 const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
   const margin = 0.4;
@@ -139,21 +133,29 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  // --- Estados generales ---
-  const [roofLength, setRoofLength] = useState(8);
-  const [roofWidth, setRoofWidth] = useState(5);
-  const [panelKey, setPanelKey] = useState<PanelKey>('topcon');
-  const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [orientationDeg, setOrientationDeg] = useState(180);
-  
-  // Grupo 2: Solar Pitch (activación opcional)
-  const [enablePitch, setEnablePitch] = useState(true);
-  const [tiltDeg, setTiltDeg] = useState(35);
-  
-  // Sombra de árboles/edificios (0-50%)
-  const [shadingPercent, setShadingPercent] = useState(0);
-  
-  // Resto de parámetros
+  // --- Estados para Tejado A ---
+  const [roofALength, setRoofALength] = useState(8);
+  const [roofAWidth, setRoofAWidth] = useState(5);
+  const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
+  const [obstaclesA, setObstaclesA] = useState<Obstacle[]>([]);
+  const [orientationDegA, setOrientationDegA] = useState(180);
+  const [enablePitchA, setEnablePitchA] = useState(true);
+  const [tiltDegA, setTiltDegA] = useState(35);
+  const [shadingPercentA, setShadingPercentA] = useState(0);
+  const [layoutA, setLayoutA] = useState<{ totalPanels: number; cols: number; rows: number } | null>(null);
+
+  // --- Estados para Tejado B ---
+  const [roofBLength, setRoofBLength] = useState(6);
+  const [roofBWidth, setRoofBWidth] = useState(4);
+  const [panelKeyB, setPanelKeyB] = useState<PanelKey>('topcon');
+  const [obstaclesB, setObstaclesB] = useState<Obstacle[]>([]);
+  const [orientationDegB, setOrientationDegB] = useState(180);
+  const [enablePitchB, setEnablePitchB] = useState(true);
+  const [tiltDegB, setTiltDegB] = useState(35);
+  const [shadingPercentB, setShadingPercentB] = useState(0);
+  const [layoutB, setLayoutB] = useState<{ totalPanels: number; cols: number; rows: number } | null>(null);
+
+  // Parámetros comunes
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
@@ -161,8 +163,8 @@ const SolarPanelCalculator: React.FC = () => {
   const [monthlyBill, setMonthlyBill] = useState(120);
   const importPrice = 24;
 
-  // Costes de instalación
-  const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
+  // Costes de instalación (globales, se suman paneles de ambos tejados)
+  const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price); // se usa para ambos tejados, pero se pueden diferenciar? Por simplicidad usamos el mismo precio por panel.
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
   const [inverterCost, setInverterCost] = useState(900);
   const [mountingCost, setMountingCost] = useState(450);
@@ -171,66 +173,88 @@ const SolarPanelCalculator: React.FC = () => {
   const [labourCost, setLabourCost] = useState(1150);
   const [adminCost, setAdminCost] = useState(175);
 
-  // Mantenimiento (costes cada 3 años)
+  // Mantenimiento
   const [includeMaintenance, setIncludeMaintenance] = useState(false);
   const [cleaningCost3Years, setCleaningCost3Years] = useState(150);
   const [electricalInspection3Years, setElectricalInspection3Years] = useState(120);
 
-  // Inverter (grupo 4): tipo y modelo de autoconsumo
-  const [selectedInverterModel, setSelectedInverterModel] = useState<string>('none');
-  const [customInverterW, setCustomInverterW] = useState<number>(0);
-  const [inverterSelfConsumptionW, setInverterSelfConsumptionW] = useState<number>(0);
+  // Inversor: standby power (W) rango 0-60
+  const [standbyPowerW, setStandbyPowerW] = useState(0);
+  const [customStandbyW, setCustomStandbyW] = useState(0);
+  const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
-  const [layout, setLayout] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
-
-  // ==================== EFECTOS ====================
+  // ==================== EFECTOS DE CÁLCULO DE LAYOUT ====================
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
-    const { length, width } = calculateUsableDimensions(roofLength, roofWidth, obstacles);
-    setLayout(calculatePanelLayout(length, width, panelW, panelH, obstacles));
-  }, [roofLength, roofWidth, panelKey, obstacles]);
+    if (roofALength > 0 && roofAWidth > 0) {
+      const { length, width } = calculateUsableDimensions(roofALength, roofAWidth, obstaclesA);
+      const layout = calculatePanelLayout(length, width, panelW, panelH, obstaclesA);
+      setLayoutA(layout);
+    }
+  }, [roofALength, roofAWidth, obstaclesA]);
 
-  useEffect(() => setPanelPricePerUnit(PANEL_CATALOG[panelKey].price), [panelKey]);
+  useEffect(() => {
+    const panelW = 1.0, panelH = 1.7;
+    if (roofBLength > 0 && roofBWidth > 0) {
+      const { length, width } = calculateUsableDimensions(roofBLength, roofBWidth, obstaclesB);
+      const layout = calculatePanelLayout(length, width, panelW, panelH, obstaclesB);
+      setLayoutB(layout);
+    }
+  }, [roofBLength, roofBWidth, obstaclesB]);
+
   useEffect(() => {
     const inverterPrices = { string: 900, micro: 1400, hybrid: 1600 };
     setInverterCost(inverterPrices[inverterType]);
   }, [inverterType]);
 
-  useEffect(() => {
-    const modelWatts: Record<string, number> = {
-      none: 0, huawei: 2, sma: 3, solaredge: 2, fronius: 3, custom: customInverterW
-    };
-    setInverterSelfConsumptionW(modelWatts[selectedInverterModel] || 0);
-  }, [selectedInverterModel, customInverterW]);
+  // ==================== CÁLCULOS DE PRODUCCIÓN POR TEJADO ====================
+  const getRoofProduction = (
+    layout: { totalPanels: number } | null,
+    panelKey: PanelKey,
+    orientation: number,
+    enablePitch: boolean,
+    tilt: number,
+    shading: number
+  ) => {
+    if (!layout) return { totalWp: 0, annualKwh: 0, orientationFactor: 0, tiltFactor: 0 };
+    const panelPower = PANEL_CATALOG[panelKey].powerWp;
+    const totalWp = layout.totalPanels * panelPower;
+    const orientationFactor = getOrientationFactor(orientation);
+    const effectiveTilt = enablePitch ? tilt : 35;
+    const tiltFactor = getTiltFactor(effectiveTilt);
+    const insolationBase = (() => {
+      const country = countriesInsolation.find(c => c.name === selectedCountry);
+      if (!country) return 1000;
+      return region === 'south' ? country.south : country.north;
+    })();
+    let annualKwh = (totalWp / 1000) * insolationBase * orientationFactor * tiltFactor;
+    annualKwh = annualKwh * (1 - shading / 100);
+    return { totalWp, annualKwh, orientationFactor, tiltFactor };
+  };
 
-  // ==================== CÁLCULOS ====================
-  const totalWp = layout ? layout.totalPanels * PANEL_CATALOG[panelKey].powerWp : 0;
-  const orientationFactor = getOrientationFactor(orientationDeg);
-  const effectiveTilt = enablePitch ? tiltDeg : 35;
-  const tiltFactor = getTiltFactor(effectiveTilt);
-  const insolation = (() => {
-    const country = countriesInsolation.find(c => c.name === selectedCountry);
-    if (!country) return 1000;
-    return region === 'south' ? country.south : country.north;
-  })();
-  let annualKwh = (totalWp / 1000) * insolation * orientationFactor * tiltFactor;
-  // Aplicar reducción por sombras (árboles/edificios)
-  annualKwh = annualKwh * (1 - shadingPercent / 100);
-  const selfConsumedKwh = annualKwh * (selfConsumptionPercent / 100);
-  const exportedKwh = Math.max(0, annualKwh - selfConsumedKwh);
-  const inverterAnnualKwh = (inverterSelfConsumptionW * 24 * 365) / 1000;
-  const solarOffsetKwh = Math.min(inverterAnnualKwh, exportedKwh);
-  const inverterNetCost = Math.max(0, (inverterAnnualKwh * importPrice / 100) - (solarOffsetKwh * (importPrice - exportTariff) / 100));
+  const prodA = getRoofProduction(layoutA, panelKeyA, orientationDegA, enablePitchA, tiltDegA, shadingPercentA);
+  const prodB = getRoofProduction(layoutB, panelKeyB, orientationDegB, enablePitchB, tiltDegB, shadingPercentB);
+  const totalWp = prodA.totalWp + prodB.totalWp;
+  const totalAnnualKwh = prodA.annualKwh + prodB.annualKwh;
+  const totalPanelsCount = (layoutA?.totalPanels || 0) + (layoutB?.totalPanels || 0);
 
-  // Costes mantenimiento anuales (prorrateo cada 3 años)
+  // ==================== CÁLCULOS FINANCIEROS ====================
+  const selfConsumedKwh = totalAnnualKwh * (selfConsumptionPercent / 100);
+  const exportedKwh = Math.max(0, totalAnnualKwh - selfConsumedKwh);
+  
+  // Consumo del inversor (standby) – 24/7, pero parte puede ser cubierto por solar durante el día
+  const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
+  const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwh); // Durante el día, parte del autoconsumo ya incluye el inversor
+  // Coste neto: lo que no cubre la solar lo paga de la red
+  const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importPrice / 100);
+
+  // Mantenimiento
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
   const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
-  const totalCleaningAndElectricalAnnual = cleaningCostAnnual + electricalInspectionAnnual;
-  const totalAnnualMaintenanceCost = totalCleaningAndElectricalAnnual + inverterNetCost;
+  const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
 
-  const totalInstallCost = layout ? (
-    layout.totalPanels * panelPricePerUnit + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost
-  ) : 0;
+  const totalPanelCost = totalPanelsCount * panelPricePerUnit;
+  const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
   const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100;
   const annualExportIncome = (exportedKwh * exportTariff) / 100;
   const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
@@ -240,159 +264,151 @@ const SolarPanelCalculator: React.FC = () => {
   const monthlyBillSaving = totalAnnualBenefit / 12;
   const newMonthlyBill = Math.max(0, monthlyBill - monthlyBillSaving);
 
-  // Auxiliares UI
-  const addObstacle = () => setObstacles([...obstacles, { x: 1.5, z: 2.0 }]);
-  const removeObstacle = (index: number) => setObstacles(obstacles.filter((_, i) => i !== index));
-  const orientationColor = getColorFromFactor(orientationFactor, 0.35, 1.0);
-  const monoImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png';
-  const polyImage = 'https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png';
-  const currentPanelImage = PANEL_CATALOG[panelKey].imageType === 'mono' ? monoImage : polyImage;
+  // Función para manejar obstáculos por tejado
+  const addObstacle = (roof: 'A' | 'B') => {
+    if (roof === 'A') setObstaclesA([...obstaclesA, { x: 1.5, z: 2.0 }]);
+    else setObstaclesB([...obstaclesB, { x: 1.5, z: 2.0 }]);
+  };
+  const removeObstacle = (roof: 'A' | 'B', index: number) => {
+    if (roof === 'A') setObstaclesA(obstaclesA.filter((_, i) => i !== index));
+    else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
+  };
 
-  const getInverterInfo = (type: string) => {
-    switch (type) {
-      case 'string': return '3.68 kW, single‑phase';
-      case 'micro': return 'per panel (300‑400 W each), single‑phase';
-      case 'hybrid': return '3.68 kW, single‑phase, battery ready';
-      default: return '';
-    }
+  // Colores (solo para orientación)
+  const orientationColorA = getColorFromFactor(prodA.orientationFactor, 0.35, 1.0);
+  const orientationColorB = getColorFromFactor(prodB.orientationFactor, 0.35, 1.0);
+  const getColorFromFactor = (factor: number, min: number, max: number): string => {
+    const t = (factor - min) / (max - min);
+    const r = Math.floor(255 * (1 - t)), g = Math.floor(255 * t);
+    return `rgb(${r}, ${g}, 0)`;
   };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-      <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Interactive</h2>
+      <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* ==================== GRUPO 1: ROOF ORIENTATION ==================== */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">1. 🧭 Roof Orientation</h3>
-        <div className="flex flex-col items-center">
-          <div className="relative w-48 h-48 mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
-            <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-0"></div>
-            <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-90"></div>
-            <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full rotate-180"></div>
-            <div className="absolute top-1/2 left-1/2 w-0.5 h-20 bg-gray-600 origin-bottom transform -translate-x-1/2 -translate-y-full -rotate-90"></div>
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">N</div>
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 font-bold text-sm">S</div>
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">W</div>
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 font-bold text-sm">E</div>
-            <div className="absolute top-1/2 left-1/2 w-0 h-0" style={{ transform: `translate(-50%, -50%) rotate(${orientationDeg}deg)`, transformOrigin: 'center' }}>
-              <div style={{ width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderBottom: `24px solid ${orientationColor}`, position: 'relative', left: '-8px', top: '-36px' }} />
-              <div style={{ position: 'absolute', width: '2px', height: '36px', backgroundColor: orientationColor, left: '-1px', top: '-12px' }} />
-            </div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🏠</div>
-          </div>
-          <div className="w-full max-w-md">
-            <label className="block text-center font-medium">Degrees from North:</label>
-            <input type="range" min="0" max="360" step="1" value={orientationDeg} onChange={(e) => setOrientationDeg(parseInt(e.target.value))} className="w-full" />
-            <p className="text-center text-sm mt-1"><strong>{orientationDeg}°</strong> → Factor: <strong>{orientationFactor.toFixed(2)}</strong></p>
-            <p className="text-xs text-center text-gray-500">0°=N, 90°=E, 180°=S, 270°=W</p>
-          </div>
+      {/* ==================== TEJADO A ==================== */}
+      <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
+        {/* Orientación */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label className="block font-medium">Orientation (degrees from North):</label>
+          <input type="range" min="0" max="360" step="1" value={orientationDegA} onChange={(e) => setOrientationDegA(parseInt(e.target.value))} className="w-full" />
+          <p>{orientationDegA}° → factor {prodA.orientationFactor.toFixed(2)}</p>
         </div>
+        {/* Pitch */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={enablePitchA} onChange={() => setEnablePitchA(!enablePitchA)} /> Enable custom pitch</label>
+          {enablePitchA && (
+            <div><label>Tilt (0‑90°):</label><input type="range" min="0" max="90" step="1" value={tiltDegA} onChange={(e) => setTiltDegA(parseInt(e.target.value))} className="w-full" /><p>{tiltDegA}° → factor {getTiltFactor(tiltDegA).toFixed(2)}</p></div>
+          )}
+          {!enablePitchA && <p>Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>}
+        </div>
+        {/* Panel type */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label>Panel type:</label>
+          <select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full">
+            {Object.entries(PANEL_CATALOG).map(([key, val]) => <option key={key} value={key}>{val.name} – {val.powerWp}Wp, £{val.price}</option>)}
+          </select>
+        </div>
+        {/* Dimensiones y obstáculos */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label>Roof length (m):</label><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" />
+          <label>Roof width (m):</label><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" />
+          <button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>
+          {obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
+        </div>
+        {/* Sombra */}
+        <div className="bg-gray-100 p-3 rounded">
+          <label>Shading from trees/buildings (%):</label>
+          <input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" />
+          <p>{shadingPercentA}% reduction</p>
+        </div>
+        <div className="mt-2 text-sm text-gray-600">📊 {layoutA?.totalPanels || 0} panels, {prodA.totalWp.toFixed(0)} Wp, {prodA.annualKwh.toFixed(0)} kWh/year</div>
       </div>
 
-      {/* ==================== GRUPO 2: SOLAR PITCH (ACTIVABLE) ==================== */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">2. 📐 Solar Panel Pitch (Tilt)</h3>
-        <label className="flex items-center gap-2 mb-3">
-          <input type="checkbox" checked={enablePitch} onChange={(e) => setEnablePitch(e.target.checked)} />
-          <span>Enable custom pitch (if unchecked, optimal 35° is used)</span>
-        </label>
-        {enablePitch && (
-          <div className="flex flex-col items-center">
-            <svg width="300" height="150" viewBox="0 0 300 150" className="mx-auto">
-              <line x1="20" y1="130" x2="280" y2="130" stroke="#666" strokeWidth="2" />
-              <g transform={`translate(150, 130) rotate(${-tiltDeg})`}>
-                <rect x="-40" y="-70" width="80" height="10" fill="#4A90D9" stroke="#333" strokeWidth="1" />
-                <rect x="-40" y="-70" width="80" height="3" fill="#FFD700" opacity="0.6" />
-              </g>
-              <path d={`M 110 130 A 40 40 0 0 1 ${150 - 40 * Math.sin(tiltDeg * Math.PI / 180)} ${130 - 40 * Math.cos(tiltDeg * Math.PI / 180)}`} fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="4" />
-              <text x="105" y="115" fontSize="12" fill="#333">{tiltDeg}°</text>
-            </svg>
-            <div className="w-full max-w-md mt-2">
-              <label className="block text-center font-medium">Tilt degrees (0‑90°):</label>
-              <input type="range" min="0" max="90" step="1" value={tiltDeg} onChange={(e) => setTiltDeg(parseInt(e.target.value))} className="w-full" />
-              <p className="text-center text-sm mt-1"><strong>{tiltDeg}°</strong> → Factor: <strong>{getTiltFactor(tiltDeg).toFixed(2)}</strong></p>
-              <p className="text-center text-xs text-gray-500">Optimal ~35°</p>
-            </div>
-          </div>
-        )}
-        {!enablePitch && (
-          <p className="text-sm text-gray-600">Using fixed optimal tilt: 35° (factor: {getTiltFactor(35).toFixed(2)})</p>
-        )}
+      {/* ==================== TEJADO B ==================== */}
+      <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3">🏠 Roof B</h3>
+        {/* Orientación */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label>Orientation (degrees from North):</label>
+          <input type="range" min="0" max="360" step="1" value={orientationDegB} onChange={(e) => setOrientationDegB(parseInt(e.target.value))} className="w-full" />
+          <p>{orientationDegB}° → factor {prodB.orientationFactor.toFixed(2)}</p>
+        </div>
+        {/* Pitch */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={enablePitchB} onChange={() => setEnablePitchB(!enablePitchB)} /> Enable custom pitch</label>
+          {enablePitchB && (
+            <div><label>Tilt (0‑90°):</label><input type="range" min="0" max="90" step="1" value={tiltDegB} onChange={(e) => setTiltDegB(parseInt(e.target.value))} className="w-full" /><p>{tiltDegB}° → factor {getTiltFactor(tiltDegB).toFixed(2)}</p></div>
+          )}
+          {!enablePitchB && <p>Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>}
+        </div>
+        {/* Panel type */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label>Panel type:</label>
+          <select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full">
+            {Object.entries(PANEL_CATALOG).map(([key, val]) => <option key={key} value={key}>{val.name} – {val.powerWp}Wp, £{val.price}</option>)}
+          </select>
+        </div>
+        {/* Dimensiones y obstáculos */}
+        <div className="bg-gray-100 p-3 rounded mb-3">
+          <label>Roof length (m):</label><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" />
+          <label>Roof width (m):</label><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} className="border p-1 rounded w-full mb-1" />
+          <button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>
+          {obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
+        </div>
+        {/* Sombra */}
+        <div className="bg-gray-100 p-3 rounded">
+          <label>Shading from trees/buildings (%):</label>
+          <input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" />
+          <p>{shadingPercentB}% reduction</p>
+        </div>
+        <div className="mt-2 text-sm text-gray-600">📊 {layoutB?.totalPanels || 0} panels, {prodB.totalWp.toFixed(0)} Wp, {prodB.annualKwh.toFixed(0)} kWh/year</div>
       </div>
 
-      {/* ==================== GRUPO 3: SOLAR PANELS ==================== */}
-      <div className="bg-blue-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">3. 🔧 Solar Panels</h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Subgrupo: Panel type */}
-          <div>
-            <label className="block font-medium">Panel type:</label>
-            <select value={panelKey} onChange={(e) => setPanelKey(e.target.value as PanelKey)} className="border p-2 rounded w-full">
-              <option value="perc">PERC – £{PANEL_CATALOG.perc.price}</option>
-              <option value="topcon">TOPCon – £{PANEL_CATALOG.topcon.price}</option>
-              <option value="hjt">HJT – £{PANEL_CATALOG.hjt.price}</option>
-              <option value="ibc">IBC – £{PANEL_CATALOG.ibc.price}</option>
-              <option value="poly">Polycrystalline – £{PANEL_CATALOG.poly.price}</option>
-            </select>
-            <div className="mt-2 flex justify-center"><img src={currentPanelImage} alt="panel" className="h-16 w-auto rounded shadow" /></div>
-          </div>
-          {/* Subgrupo: Roof dimensions + obstacles */}
-          <div>
-            <label className="block font-medium">Roof dimensions (m):</label>
-            <div className="grid grid-cols-2 gap-2">
-              <input type="number" step="0.5" value={roofLength} onChange={(e) => setRoofLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded" />
-              <input type="number" step="0.5" value={roofWidth} onChange={(e) => setRoofWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded" />
-            </div>
-            <label className="block font-medium mt-2">Obstacles (chimneys):</label>
-            <button onClick={addObstacle} className="bg-gray-500 text-white px-3 py-1 rounded text-sm">+ Add chimney</button>
-            {obstacles.map((_, idx) => (
-              <button key={idx} onClick={() => removeObstacle(idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>
-            ))}
-          </div>
-        </div>
-        {/* Barra de sombras (árboles/edificios) */}
-        <div className="mt-4 pt-3 border-t border-blue-200">
-          <label className="block font-medium">🌳 Shading from trees / buildings (%):</label>
-          <input type="range" min="0" max="50" step="1" value={shadingPercent} onChange={(e) => setShadingPercent(parseInt(e.target.value))} className="w-full" />
-          <p className="text-sm text-center"><strong>{shadingPercent}%</strong> reduction in annual generation</p>
-          <p className="text-xs text-gray-500 italic">Note: Chimney obstacles are avoided in layout; this slider adds extra shading from surroundings.</p>
-        </div>
-      </div>
-
-      {/* ==================== GRUPO 4: INVERTER ==================== */}
+      {/* ==================== INVERTER (standby power) ==================== */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">4. 🔌 Inverter</h3>
+        <h3 className="font-bold text-xl mb-3">⚡ Inverter</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block font-medium">Inverter type:</label>
+            <label>Inverter type:</label>
             <select value={inverterType} onChange={(e) => setInverterType(e.target.value as any)} className="border p-2 rounded w-full">
-              <option value="string">String inverter – £900 ({getInverterInfo('string')})</option>
-              <option value="micro">Microinverters – £1400 ({getInverterInfo('micro')})</option>
-              <option value="hybrid">Hybrid inverter – £1600 ({getInverterInfo('hybrid')})</option>
+              <option value="string">String inverter – £900 (3.68 kW, single‑phase)</option>
+              <option value="micro">Microinverters – £1400 (per panel, single‑phase)</option>
+              <option value="hybrid">Hybrid inverter – £1600 (3.68 kW, battery ready)</option>
             </select>
           </div>
           <div>
-            <label className="block font-medium">Standby power consumption:</label>
-            <select value={selectedInverterModel} onChange={(e) => setSelectedInverterModel(e.target.value)} className="border p-2 rounded w-full">
-              <option value="none">None (0 W)</option>
-              <option value="huawei">Huawei (2 W)</option>
-              <option value="sma">SMA (3 W)</option>
-              <option value="solaredge">SolarEdge (2 W)</option>
-              <option value="fronius">Fronius (3 W)</option>
-              <option value="custom">Custom (enter below)</option>
-            </select>
-            {selectedInverterModel === 'custom' && (
-              <input type="number" step="1" value={customInverterW} onChange={(e) => setCustomInverterW(parseFloat(e.target.value) || 0)} placeholder="Watts" className="border p-1 rounded w-full mt-1" />
-            )}
-            <p className="text-xs text-gray-500 mt-1">This consumption (24/7) reduces your net savings.</p>
+            <label>Standby power consumption (0‑60 W) – when no solar production:</label>
+            <div className="flex gap-2 items-center">
+              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded">
+                <option value="preset">Preset values</option>
+                <option value="custom">Custom</option>
+              </select>
+              {standbySource === 'preset' ? (
+                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded">
+                  <option value="0">0 W (ideal, no standby)</option>
+                  <option value="2">2 W (very efficient)</option>
+                  <option value="3">3 W (efficient)</option>
+                  <option value="5">5 W (average)</option>
+                  <option value="10">10 W (moderate)</option>
+                  <option value="20">20 W (inefficient)</option>
+                  <option value="40">40 W (old model)</option>
+                  <option value="60">60 W (very inefficient)</option>
+                </select>
+              ) : (
+                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">This power is consumed 24/7. Part of it may be covered by solar during the day.</p>
           </div>
         </div>
       </div>
 
-      {/* ==================== GRUPO 5: COST ESTIMATE (mantenimiento) ==================== */}
+      {/* ==================== COST ESTIMATE & MAINTENANCE ==================== */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">5. 💷 Cost Estimate (one‑time, 0% VAT)</h3>
+        <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
         <div className="grid md:grid-cols-3 gap-3 text-sm">
           <div className="flex justify-between"><label>Panel price (£/panel):</label><input type="number" value={panelPricePerUnit} onChange={(e) => setPanelPricePerUnit(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="5" /></div>
           <div className="flex justify-between"><label>Inverter cost (£):</label><input type="number" value={inverterCost} onChange={(e) => setInverterCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
@@ -402,8 +418,7 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="flex justify-between"><label>Labour (MCS) (£):</label><input type="number" value={labourCost} onChange={(e) => setLabourCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
           <div className="flex justify-between"><label>MCS/DNO admin (£):</label><input type="number" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="25" /></div>
         </div>
-        <div className="text-right font-bold mt-2">Total installation cost: <span className="text-lg">£{totalInstallCost.toFixed(0)}</span></div>
-
+        <div className="text-right font-bold mt-2">Total installation cost: £{totalInstallCost.toFixed(0)}</div>
         <div className="mt-4 border-t pt-3">
           <label className="flex items-center gap-2"><input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} /> Include annual maintenance (prorated from 3‑year costs)</label>
           {includeMaintenance && (
@@ -415,32 +430,16 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== GRUPO 6: LOCATION + SEASONAL PRODUCTION ==================== */}
+      {/* ==================== LOCATION + FINANCIAL ANALYSIS ==================== */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">6. 🌍 Location & Seasonal Production</h3>
-        <div className="grid md:grid-cols-2 gap-4">
+        <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div><label>Country:</label><select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">{countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}</select></div>
           <div><label>Region:</label><select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full"><option value="south">Southern half</option><option value="north">Northern half</option></select></div>
         </div>
-        <p className="text-sm mt-2">Base insolation: {insolation} kWh/kWp/year (south, optimal tilt)</p>
-        <div className="mt-3">
-          <p className="font-semibold">📅 Estimated seasonal production (after shading):</p>
-          <div className="grid grid-cols-4 gap-2 text-center text-sm">
-            <div className="bg-white p-1 rounded">🌱 Spring<br/>{(annualKwh * 0.25).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">☀️ Summer<br/>{(annualKwh * 0.40).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">🍂 Autumn<br/>{(annualKwh * 0.20).toFixed(0)} kWh</div>
-            <div className="bg-white p-1 rounded">❄️ Winter<br/>{(annualKwh * 0.15).toFixed(0)} kWh</div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================== GRUPO 7: FINANCIAL ANALYSIS ==================== */}
-      <div className="bg-purple-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">7. 💰 Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label>Annual generation (after shading): <strong>{annualKwh.toFixed(0)} kWh</strong></label>
-            <label className="block mt-2">Self-consumption vs Export:</label>
+            <label>Self-consumption vs Export:</label>
             <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden my-1">
               <div className="h-full text-center text-xs text-white font-medium" style={{ width: `${selfConsumptionPercent}%`, background: `linear-gradient(90deg, #22c55e, ${selfConsumptionPercent > 50 ? '#eab308' : '#ef4444'})` }}>
                 {selfConsumptionPercent}%
@@ -448,6 +447,7 @@ const SolarPanelCalculator: React.FC = () => {
             </div>
             <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full" />
             <p className="text-xs">{selfConsumptionPercent}% self-consumed, {100-selfConsumptionPercent}% exported</p>
+            <p className="text-xs text-gray-500 italic">Note: Inverter standby power reduces net savings but does not change this percentage.</p>
           </div>
           <div>
             <div className="flex justify-between"><span>Export tariff (p/kWh):</span><input type="number" step="0.5" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" /></div>
@@ -456,27 +456,25 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== GRUPO 8: RESULTS (large & bold) ==================== */}
-      {layout && (
-        <div className="bg-gray-800 text-white p-6 rounded-lg mb-4">
-          <h3 className="font-bold text-2xl mb-4">📊 8. RESULTS</h3>
+      {/* ==================== RESULTS ==================== */}
+      {(layoutA || layoutB) && (
+        <div className="bg-gray-800 text-white p-6 rounded-lg">
+          <h3 className="font-bold text-2xl mb-4">📊 RESULTS (Combined)</h3>
           <div className="text-lg space-y-2">
-            <p><strong className="text-xl">📐 Layout:</strong> {layout.totalPanels} panels, {layout.cols} columns × {layout.rows} rows, {(layout.totalPanels * 1.0 * 1.7).toFixed(1)} m² area</p>
-            <p><strong className="text-xl">⚡ Power:</strong> {totalWp.toFixed(0)} Wp</p>
-            <p><strong className="text-xl">💰 Installation cost (one‑time):</strong> £{totalInstallCost.toFixed(0)}</p>
+            <p><strong className="text-xl">📐 Total panels:</strong> {totalPanelsCount}</p>
+            <p><strong className="text-xl">⚡ Total power:</strong> {totalWp.toFixed(0)} Wp</p>
+            <p><strong className="text-xl">☀️ Annual generation:</strong> {totalAnnualKwh.toFixed(0)} kWh</p>
+            <p><strong className="text-xl">💰 Installation cost:</strong> £{totalInstallCost.toFixed(0)}</p>
             <p><strong className="text-xl">🔄 Annual maintenance cost:</strong> £{totalAnnualMaintenanceCost.toFixed(1)} (cleaning: £{cleaningCostAnnual.toFixed(1)}, electrical: £{electricalInspectionAnnual.toFixed(1)}, inverter standby: £{inverterNetCost.toFixed(1)})</p>
             <p><strong className="text-xl">✅ Annual benefit (after all costs):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
             <p><strong className="text-xl">🏠 New monthly bill:</strong> £{newMonthlyBill.toFixed(0)} (saving £{monthlyBillSaving.toFixed(0)}/month)</p>
             <p><strong className="text-xl">📅 Payback period:</strong> {paybackYears.toFixed(1)} years</p>
-            <p><strong className="text-3xl text-green-400">📈 ROI: {roiPercent.toFixed(1)}%</strong> 
-              {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent (higher than stock market)</span>}
+            <p><strong className="text-3xl text-green-400">📈 ROI: {roiPercent.toFixed(1)}%</strong>
+              {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent</span>}
               {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-300">👍 Good</span>}
               {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-300">⚠️ Low</span>}
               {roiPercent <= 0 && <span className="ml-2 text-red-400">❌ Not profitable</span>}
             </p>
-            {inverterSelfConsumptionW > 0 && (
-              <p className="text-sm text-gray-300">* Inverter standby cost already included (model: {selectedInverterModel}, {inverterSelfConsumptionW} W).</p>
-            )}
           </div>
         </div>
       )}
