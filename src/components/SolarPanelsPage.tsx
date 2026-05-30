@@ -8,19 +8,13 @@ const SolarPanelsPage: React.FC = () => {
         <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
 
-     <p className="text-lg mb-6">
-  Photovoltaic solar panels convert sunlight into electricity and today are one of the most profitable
-  investments for any homeowner. In this guide you will discover when they were born, how much they
-  used to cost, and how much they cost now, after a price drop of more than <strong>90%</strong>.
-  You will also see what real returns they offer compared to other investments: a bank deposit yields
-  around <strong>3%</strong>, the stock market can reach <strong>10%</strong>, but solar panels typically
-  achieve between <strong>12%</strong> and <strong>18%</strong> annually. Additionally, you will learn
-  how to calculate with a simple formula how many years it will take to recoup your investment without
-  batteries, by entering your own data: orientation, location, number of panels, roof pitch, installation
-  costs, and your average consumption. If you sell the surplus to the electricity company, you will know
-  exactly when your energy will become completely free. <strong>In short, this guide will allow you to
-  know the exact profitability of YOUR installation, tailored to the real characteristics of your home.
-  Let's go.</strong>
+    <p className="text-lg mb-6">
+  Photovoltaic solar panels convert sunlight into electricity and today stand among the most profitable investments for homeowners. In this guide, you'll discover when solar panels were first developed, how much they used to cost, and how much they cost now after a price drop of more than 90%.<br /><br />
+  <strong>But the real question is: are they truly a good investment?</strong>
+  <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" alt="Investment" className="inline-block ml-2 h-6 w-auto" /><br /><br />
+  You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve between 12% and 18% annually, depending on your home and your consumption. Additionally, you will learn how to calculate with a simple formula how many years it will take to recoup your investment without batteries, by entering your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell the surplus to the electricity company, you will know exactly when your energy will become completely free.
+  <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" alt="Inversion" className="inline-block ml-2 h-6 w-auto" /><br /><br />
+  Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. <strong>Let's go.</strong>
 </p>
 
       {/* ============================================================ */}
