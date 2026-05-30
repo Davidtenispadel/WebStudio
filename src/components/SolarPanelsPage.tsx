@@ -5,14 +5,23 @@ const SolarPanelsPage: React.FC = () => {
   return (
     <div className="text-black max-w-6xl mx-auto px-4">
       <h2 className="text-3xl md:text-4xl font-light mb-6">
-        Solar panels: complete technical guide for homeowners (2025‑2026)
+        <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
 
       <p className="text-lg mb-6">
-        Solar photovoltaic (PV) panels convert sunlight directly into electricity. A well‑designed
-        system can cover 50‑100% of a household's annual consumption, reduce energy bills, cut
-        carbon emissions, and increase property value. This guide compiles the latest scientific and
-        market data to help you make an informed decision.
+        Photovoltaic solar panels convert sunlight into electricity and today are one of the most
+        profitable investments for any homeowner. In this guide you will discover when they were
+        born, how much they used to cost, and how much they cost now, after a price drop of more
+        than 90%. You will also see what real returns they offer compared to other investments: a
+        bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve
+        between 12% and 18% annually, depending on your home and your consumption. Additionally,
+        you will learn how to calculate with a simple formula how many years it will take to
+        recoup your investment without batteries, by entering your own data: orientation,
+        location, number of panels, roof pitch, installation costs, and your average consumption.
+        If you sell the surplus to the electricity company, you will know exactly when your
+        energy will become completely free. In short, this guide will allow you to know the
+        exact profitability of YOUR installation, tailored to the real characteristics of your
+        home. Let's go.
       </p>
 
       {/* ============================================================ */}
@@ -30,9 +39,7 @@ const SolarPanelsPage: React.FC = () => {
         <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
       </p>
 
-      {/* ============================================================ */}
-      {/* TWO IMAGES IN PARALLEL (after first paragraph) - same size as third image */}
-      {/* ============================================================ */}
+      {/* TWO IMAGES IN PARALLEL */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
         <div className="flex justify-center">
           <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
@@ -61,7 +68,6 @@ const SolarPanelsPage: React.FC = () => {
         same base material still used in almost <strong>all panels today</strong>.
       </p>
 
-      {/* NEW CENTERED IMAGE AFTER "all panels today" */}
       <div className="flex justify-center my-6">
         <img 
           src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952879/4396d0fd-a82f-424e-bcac-dcf41e8911d6.png" 
@@ -78,7 +84,6 @@ const SolarPanelsPage: React.FC = () => {
         for Earth‑based use, but the technology matured rapidly.
       </p>
 
-      {/* NEW CENTERED IMAGE AFTER "matured rapidly" */}
       <div className="flex justify-center my-6">
         <img 
           src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779956789/1703e28d-97a4-4f98-a2d2-69166a1c8755.png" 
@@ -97,7 +102,6 @@ const SolarPanelsPage: React.FC = () => {
         <li><strong>Monocrystalline silicon (mono‑Si):</strong> Made from a single crystal, higher
         efficiency (15‑20%), uniform dark colour, but more expensive.</li>
 
-        {/* IMAGE INSERTED AFTER "but more expensive" */}
         <div className="flex justify-center my-4">
           <img 
             src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png" 
@@ -109,7 +113,6 @@ const SolarPanelsPage: React.FC = () => {
         <li><strong>Polycrystalline silicon (poly‑Si):</strong> Made from melted fragments, lower
         efficiency (13‑16%), speckled blue appearance, cheaper to manufacture.</li>
 
-        {/* IMAGE INSERTED AFTER "cheaper to manufacture" */}
         <div className="flex justify-center my-4">
           <img 
             src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png" 
@@ -118,7 +121,6 @@ const SolarPanelsPage: React.FC = () => {
           />
         </div>
 
-        {/* VISUAL DIFFERENCES TEXT BLOCK INSERTED AFTER SECOND IMAGE */}
         <div className="bg-gray-100 p-4 rounded-md my-6">
           <p className="font-semibold text-lg mb-2">Visual Differences: Monocrystalline vs Polycrystalline Solar Panels</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -184,7 +186,6 @@ const SolarPanelsPage: React.FC = () => {
         homeowners, unless you have extreme budget constraints and plenty of space.
       </p>
 
-      {/* THEORY BEFORE DEGRADATION TABLE */}
       <h4 className="text-xl font-semibold mt-6 mb-2">
         🔬 How long do panels really last? (Degradation and durability)
       </h4>
@@ -222,7 +223,6 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* THEORY BEFORE TECHNOLOGY COMPARISON TABLE */}
       <h4 className="text-xl font-semibold mt-6 mb-2">
         ⚙️ Detailed comparison of modern monocrystalline technologies
       </h4>
@@ -249,7 +249,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 2. FUTURE TECHNOLOGIES (2026-2035) – kept as is */}
+      {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
         2. The near future: new solar technologies (2026‑2035)
@@ -314,9 +314,7 @@ const SolarPanelsPage: React.FC = () => {
         </ul>
       </div>
 
-      {/* ============================================================ */}
-      {/* TEXTO INSERTADO SOBRE BACK-CONTACT (BC) – ANTES DEL APARTADO 3 */}
-      {/* ============================================================ */}
+      {/* Back-Contact section */}
       <div className="bg-gray-50 p-5 rounded-md border-l-4 border-blue-500 my-6">
         <h4 className="text-xl font-semibold mb-3">🔘 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
         <p className="mb-2">
@@ -332,7 +330,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 3. INTERNAL STRUCTURE (theory + diagram) */}
+      {/* 3. INTERNAL STRUCTURE */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">3. Internal structure of a solar panel</h3>
       <p className="mb-2">
@@ -354,7 +352,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
-      {/* 4. UK WINTER PERFORMANCE (with EV + heat pump) – theory + table */}
+      {/* 4. UK WINTER PERFORMANCE */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">4. UK winter performance: solar production vs household demand (with EV and heat pump)</h3>
       <p className="mb-2">
@@ -403,7 +401,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 5. ROOF ORIENTATION, PITCH & NORTH LOSSES (theory + bullet list) */}
+      {/* 5. ROOF ORIENTATION */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">5. Roof orientation, pitch, and shading – why north is a problem</h3>
       <p className="mb-2">
@@ -421,7 +419,7 @@ const SolarPanelsPage: React.FC = () => {
       <p className="mb-4">Partial shading from chimneys, trees, or neighbouring buildings can slash output by 30‑70%. Microinverters or power optimisers help but add 10‑20% to system cost.</p>
 
       {/* ============================================================ */}
-      {/* 6. UK vs SPAIN PRODUCTION (theory + table) */}
+      {/* 6. UK vs SPAIN */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">6. Production comparison: United Kingdom vs Spain</h3>
       <p className="mb-2">
@@ -442,7 +440,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 7. VISUAL IDENTIFICATION GUIDE (theory + table) */}
+      {/* 7. VISUAL IDENTIFICATION */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">7. Visual identification guide – spot the technology at a glance</h3>
       <p className="mb-2">
@@ -463,7 +461,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 8. CLIMATE ZONE RECOMMENDATIONS (theory + table) */}
+      {/* 8. CLIMATE ZONE */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">8. Climate zone recommendations – choose by where you live</h3>
       <p className="mb-2">
@@ -484,7 +482,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 9. UK TIMBER ROOF ADVICE (theory + decision flow) */}
+      {/* 9. TIMBER ROOF */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">9. Special advice for UK timber roofs – weight matters</h3>
       <p className="mb-2">
@@ -503,7 +501,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 10. COST BREAKDOWN (UK) – theory + table */}
+      {/* 10. COST BREAKDOWN */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">10. Cost breakdown – solar installation in the UK (2025‑2026)</h3>
       <p className="mb-2">
