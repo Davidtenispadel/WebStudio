@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface TreeNode {
   id: string;
@@ -22,6 +23,12 @@ const technologyData: TreeNode = {
         { id: 'wind', name: 'Wind Energy', slug: 'technology/green-energy/wind' },
         { id: 'geothermal', name: 'Geothermal', slug: 'technology/green-energy/geothermal' },
         { id: 'biomass', name: 'Biomass', slug: 'technology/green-energy/biomass' },
+        // 👇 NUEVO: SOLAR ROI CALCULATOR
+        {
+          id: 'solar-roi-calculator',
+          name: 'Solar ROI Calculator',
+          slug: 'solar-calculator',   // ruta que definimos en App.tsx
+        }
       ]
     },
     {
@@ -53,7 +60,8 @@ const technologyData: TreeNode = {
 };
 
 const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onNavigate }) => {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['technology']));
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(['technology', 'green-energy'])); // expandimos Green Energy por defecto
 
   const toggle = (id: string) => {
     setExpanded(prev => {
@@ -62,6 +70,16 @@ const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onN
       else newSet.add(id);
       return newSet;
     });
+  };
+
+  const handleNodeClick = (slug: string) => {
+    // Si es la calculadora, navegamos directamente
+    if (slug === 'solar-calculator') {
+      navigate('/solar-calculator');
+    } else {
+      // Para el resto de nodos, llamamos al callback si existe
+      if (onNavigate) onNavigate(slug);
+    }
   };
 
   const renderNode = (node: TreeNode, level = 0) => {
@@ -82,7 +100,7 @@ const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onN
           )}
           {!hasChildren && <span className="w-5 mr-1"></span>}
           <span
-            onClick={() => onNavigate && onNavigate(node.slug)}
+            onClick={() => handleNodeClick(node.slug)}
             className="text-base font-medium hover:text-red-600"
           >
             {node.name}
