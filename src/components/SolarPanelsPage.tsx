@@ -1,5 +1,5 @@
 import React from 'react';
-import SolarPanelCalculator from './SolarPanelCalculator';
+// ❌ Elimina esta línea: import SolarPanelCalculator from './SolarPanelCalculator';
 
 const SolarPanelsPage: React.FC = () => {
   return (
@@ -558,15 +558,16 @@ const SolarPanelsPage: React.FC = () => {
       </ul>
 
       {/* ============================================================ */}
-      {/* 12. INTERACTIVE CALCULATOR */}
+      {/* 12. INTERACTIVE CALCULATOR - ELIMINADO PARA EVITAR DUPLICIDAD */}
+      {/* El usuario debe acceder a la calculadora desde Tools → Solar Panel Layout */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">12. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
-        Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
-        It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
-        and shows a 3D preview.
+        To calculate your personalized ROI and design your solar array layout, please visit the 
+        <strong> <a href="/solar-calculator" className="text-red-600 hover:underline">Solar ROI Calculator</a> </strong> 
+        in the <strong>Tools</strong> section. There you can enter your roof dimensions, orientation, 
+        location, and other parameters to get an accurate financial analysis.
       </p>
-      <SolarPanelCalculator />
 
       {/* ============================================================ */}
       {/* 13. BIBLIOGRAPHY */}
