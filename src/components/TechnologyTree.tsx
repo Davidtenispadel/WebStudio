@@ -70,7 +70,8 @@ const technologyData: TreeNode = {
 
 const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onNavigate }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['technology', 'green-energy']));
+  // ✅ IMPORTANTE: Añadimos 'tools' al Set para que aparezca expandido
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(['technology', 'green-energy', 'tools']));
 
   const toggle = (id: string) => {
     setExpanded(prev => {
