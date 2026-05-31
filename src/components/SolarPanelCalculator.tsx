@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // ==================== DATOS DE IRRADIACIÓN POR PAÍS ====================
 type CountryInsolation = { name: string; north: number; south: number };
@@ -148,13 +149,12 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  // Referencia para hacer scroll al componente
+  const navigate = useNavigate(); // Para el botón "Back to Technology"
   const calculatorRef = useRef<HTMLDivElement>(null);
 
-  // Scroll suave al montar el componente (cuando se navega a esta ruta)
+  // Scroll suave al cargar la página
   useEffect(() => {
     if (calculatorRef.current) {
-      // Pequeño retraso para asegurar que el DOM está listo
       setTimeout(() => {
         calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
@@ -190,7 +190,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
   const [exportTariff, setExportTariff] = useState(15);
   const [monthlyBill, setMonthlyBill] = useState(120);
-  const importPrice = 24;
+  const importPrice = 24; // p/kWh
 
   // Costes de instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
@@ -212,7 +212,6 @@ const SolarPanelCalculator: React.FC = () => {
   const [customStandbyW, setCustomStandbyW] = useState(0);
   const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
-  // Factor climático
   const climateFactor = getClimateFactor(selectedCountry);
 
   // Effects para layouts
@@ -385,6 +384,17 @@ const SolarPanelCalculator: React.FC = () => {
       id="solar-calculator"
       className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24"
     >
+      {/* BOTÓN PARA VOLVER A TECHNOLOGY */}
+      <div className="flex justify-start mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 transition-all duration-200 border border-gray-300 rounded-md hover:border-red-600"
+        >
+          <span className="text-lg">←</span> 
+          <span>Back to Technology</span>
+        </button>
+      </div>
+
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
       {/* TEJADO A */}
@@ -562,7 +572,7 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* Barra de autoconsumo mensual (máximo = toda la producción solar) */}
+        {/* Barra de autoconsumo mensual */}
         {(() => {
           const totalProductionKwh = totalAnnualKwh;
           const selfConsumedKwhLocal = totalProductionKwh * (selfConsumptionPercent / 100);
