@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // ==================== DATOS DE IRRADIACIÓN POR PAÍS ====================
 type CountryInsolation = { name: string; north: number; south: number };
@@ -61,7 +61,7 @@ const countriesInsolation: CountryInsolation[] = [
   { name: "Nigeria", north: 1600, south: 1800 },
 ];
 
-// ==================== FACTOR CLIMÁTICO (LLUVIA / NUBOSIDAD) POR PAÍS ====================
+// ==================== FACTOR CLIMÁTICO ====================
 const getClimateFactor = (countryName: string): number => {
   const rainyCountries = ["United Kingdom", "Ireland", "Netherlands", "Belgium", "Denmark", "Norway", "Sweden", "Finland", "Iceland", "New Zealand"];
   const dryCountries = ["Spain", "Portugal", "Greece", "Italy", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India"];
@@ -80,7 +80,7 @@ const PANEL_CATALOG = {
 };
 type PanelKey = keyof typeof PANEL_CATALOG;
 
-// ==================== FACTORES DE ORIENTACIÓN E INCLINACIÓN ====================
+// ==================== FACTORES ORIENTACIÓN E INCLINACIÓN ====================
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
@@ -111,7 +111,7 @@ const getColorFromFactor = (factor: number, minFactor: number, maxFactor: number
   return `rgb(${r}, ${g}, 0)`;
 };
 
-// ==================== CÁLCULO DE DISPOSICIÓN ====================
+// ==================== DISPOSICIÓN EN TEJADO ====================
 type Obstacle = { x: number; z: number };
 const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
   const margin = 0.4;
@@ -148,6 +148,19 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
+  // Referencia para hacer scroll al componente
+  const calculatorRef = useRef<HTMLDivElement>(null);
+
+  // Scroll suave al montar el componente (cuando se navega a esta ruta)
+  useEffect(() => {
+    if (calculatorRef.current) {
+      // Pequeño retraso para asegurar que el DOM está listo
+      setTimeout(() => {
+        calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, []);
+
   // --- Estados para Tejado A ---
   const [roofALength, setRoofALength] = useState(8);
   const [roofAWidth, setRoofAWidth] = useState(5);
@@ -159,7 +172,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [shadingPercentA, setShadingPercentA] = useState(0);
   const [layoutA, setLayoutA] = useState<{ totalPanels: number; cols: number; rows: number; panelPositions: { x: number; z: number }[] } | null>(null);
 
-  // --- Estados para Tejado B (con checkbox para activar) ---
+  // --- Estados para Tejado B ---
   const [enableRoofB, setEnableRoofB] = useState(true);
   const [roofBLength, setRoofBLength] = useState(6);
   const [roofBWidth, setRoofBWidth] = useState(4);
@@ -202,7 +215,7 @@ const SolarPanelCalculator: React.FC = () => {
   // Factor climático
   const climateFactor = getClimateFactor(selectedCountry);
 
-  // Layout effects
+  // Effects para layouts
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
     if (roofALength > 0 && roofAWidth > 0) {
@@ -226,7 +239,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(invPrices[inverterType]);
   }, [inverterType]);
 
-  // Función para calcular producción de un tejado
+  // Cálculo de producción por tejado
   const getRoofProduction = (layout: typeof layoutA, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 }, orientationFactor: 0, tiltFactor: 0 };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -274,7 +287,7 @@ const SolarPanelCalculator: React.FC = () => {
   const monthlyBillSaving = totalAnnualBenefit / 12;
   const newMonthlyBill = Math.max(0, monthlyBill - monthlyBillSaving);
 
-  // Handlers
+  // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
     if (roof === 'A') setObstaclesA([...obstaclesA, { x: 1.5, z: 2.0 }]);
     else setObstaclesB([...obstaclesB, { x: 1.5, z: 2.0 }]);
@@ -340,7 +353,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Visualización del pitch
+  // Visualización inclinación
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: { tilt: number; onChange: (v: number) => void; enabled: boolean; setEnabled: (v: boolean) => void; label: string }) => {
     return (
       <div className="flex flex-col items-center">
@@ -367,7 +380,11 @@ const SolarPanelCalculator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+    <div
+      ref={calculatorRef}
+      id="solar-calculator"
+      className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24"
+    >
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
       {/* TEJADO A */}
@@ -545,11 +562,11 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* ✅ NUEVA BARRA DE AUTOCONSUMO MENSUAL (MÁXIMO = TODA LA PRODUCCIÓN SOLAR) */}
+        {/* Barra de autoconsumo mensual (máximo = toda la producción solar) */}
         {(() => {
           const totalProductionKwh = totalAnnualKwh;
           const selfConsumedKwhLocal = totalProductionKwh * (selfConsumptionPercent / 100);
-          const pricePerKwh = importPrice / 100; // importPrice está en p/kWh
+          const pricePerKwh = importPrice / 100;
           const monthlyMaxPotential = (totalProductionKwh * pricePerKwh) / 12;
           const monthlySelfConsumptionMoney = (selfConsumedKwhLocal * pricePerKwh) / 12;
           const fillPercent = monthlyMaxPotential > 0
