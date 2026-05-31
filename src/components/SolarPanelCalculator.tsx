@@ -149,12 +149,17 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
 
 // ==================== COMPONENTE PRINCIPAL ====================
 const SolarPanelCalculator: React.FC = () => {
-  const navigate = useNavigate(); // Para el botón "Back to Technology"
+  const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
-  // Scroll suave al cargar la página
+  // Scroll suave al cargar la página (con hash y sin hash)
   useEffect(() => {
-    if (calculatorRef.current) {
+    if (window.location.hash === '#solar-calculator') {
+      setTimeout(() => {
+        const el = document.getElementById('solar-calculator');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    } else {
       setTimeout(() => {
         calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
