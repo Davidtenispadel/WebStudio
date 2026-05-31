@@ -62,13 +62,12 @@ const countriesInsolation: CountryInsolation[] = [
 ];
 
 // ==================== FACTOR CLIMÁTICO (LLUVIA / NUBOSIDAD) POR PAÍS ====================
-// Basado en días de lluvia al año y porcentaje de nubosidad. Valor entre 0.7 (muy nublado/lluvioso) y 1.0 (muy soleado)
 const getClimateFactor = (countryName: string): number => {
   const rainyCountries = ["United Kingdom", "Ireland", "Netherlands", "Belgium", "Denmark", "Norway", "Sweden", "Finland", "Iceland", "New Zealand"];
   const dryCountries = ["Spain", "Portugal", "Greece", "Italy", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India"];
   if (rainyCountries.includes(countryName)) return 0.85;
   if (dryCountries.includes(countryName)) return 0.98;
-  return 0.92; // valor por defecto para países templados
+  return 0.92;
 };
 
 // ==================== CATÁLOGO DE PANELES ====================
@@ -200,7 +199,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [customStandbyW, setCustomStandbyW] = useState(0);
   const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
-  // Factor climático (reducción por lluvia/nubosidad)
+  // Factor climático
   const climateFactor = getClimateFactor(selectedCountry);
 
   // Layout effects
@@ -227,7 +226,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(invPrices[inverterType]);
   }, [inverterType]);
 
-  // Función para calcular producción de un tejado (con clima y estaciones)
+  // Función para calcular producción de un tejado
   const getRoofProduction = (layout: typeof layoutA, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 }, orientationFactor: 0, tiltFactor: 0 };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -238,9 +237,7 @@ const SolarPanelCalculator: React.FC = () => {
     const countryBase = countriesInsolation.find(c => c.name === selectedCountry);
     const insolationBase = countryBase ? (region === 'south' ? countryBase.south : countryBase.north) : 1000;
     let annualKwh = (totalWp / 1000) * insolationBase * orientationFactor * tiltFactor;
-    // Aplicar sombra y factor climático
     annualKwh = annualKwh * (1 - shading / 100) * climateFactor;
-    // Distribución estacional (porcentajes típicos)
     const seasonal = { spring: 0.25, summer: 0.40, autumn: 0.20, winter: 0.15 };
     const seasonalKwh = {
       spring: annualKwh * seasonal.spring,
@@ -287,7 +284,7 @@ const SolarPanelCalculator: React.FC = () => {
     else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
   };
 
-  // Renderizado SVG para layout (paneles y chimeneas)
+  // Renderizado SVG para layout
   const renderSVG = (layout: typeof layoutA, widthM: number, lengthM: number, obstacles: Obstacle[], title: string) => {
     if (!layout || layout.totalPanels === 0) return <p className="text-sm text-gray-500">No panels fit (check dimensions or obstacles)</p>;
     const scale = 15;
@@ -316,7 +313,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Componente para la brújula de orientación
+  // Compás de orientación
   const OrientationCompass = ({ orientation, onChange, color, label }: { orientation: number; onChange: (v: number) => void; color: string; label: string }) => {
     return (
       <div className="flex flex-col items-center">
@@ -343,7 +340,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Componente para la visualización del pitch
+  // Visualización del pitch
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: { tilt: number; onChange: (v: number) => void; enabled: boolean; setEnabled: (v: boolean) => void; label: string }) => {
     return (
       <div className="flex flex-col items-center">
@@ -401,7 +398,6 @@ const SolarPanelCalculator: React.FC = () => {
             {obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}
           </div>
         </div>
-        {/* Factor climático y producción estacional */}
         <div className="mt-4 p-3 bg-blue-50 rounded">
           <p className="text-sm font-semibold">🌦️ Climate factor for {selectedCountry}: <strong>{(climateFactor * 100).toFixed(0)}%</strong> (rain/cloud reduction)</p>
           <p className="text-xs text-gray-600">Based on annual rainy days and cloud cover.</p>
@@ -548,6 +544,41 @@ const SolarPanelCalculator: React.FC = () => {
             <div className="flex justify-between mt-1"><span>Monthly bill (£):</span><input type="number" step="10" value={monthlyBill} onChange={(e) => setMonthlyBill(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" /></div>
           </div>
         </div>
+
+        {/* ✅ NUEVA BARRA DE AUTOCONSUMO MENSUAL (MÁXIMO = TODA LA PRODUCCIÓN SOLAR) */}
+        {(() => {
+          const totalProductionKwh = totalAnnualKwh;
+          const selfConsumedKwhLocal = totalProductionKwh * (selfConsumptionPercent / 100);
+          const pricePerKwh = importPrice / 100; // importPrice está en p/kWh
+          const monthlyMaxPotential = (totalProductionKwh * pricePerKwh) / 12;
+          const monthlySelfConsumptionMoney = (selfConsumedKwhLocal * pricePerKwh) / 12;
+          const fillPercent = monthlyMaxPotential > 0
+            ? Math.min(100, (monthlySelfConsumptionMoney / monthlyMaxPotential) * 100)
+            : 0;
+          return (
+            <div className="mt-4 pt-2 border-t border-green-200">
+              <div className="flex justify-between text-sm mb-1">
+                <span>💰 Autoconsumo mensual (ahorro real)</span>
+                <span className="font-bold text-green-700">£{monthlySelfConsumptionMoney.toFixed(2)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                <div
+                  className="h-full text-center text-xs text-white font-medium transition-all duration-200 flex items-center justify-end pr-2"
+                  style={{
+                    width: `${fillPercent}%`,
+                    backgroundColor: '#22c55e',
+                  }}
+                >
+                  {fillPercent > 12 && `${fillPercent.toFixed(0)}% del máximo`}
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Máximo posible si consumieras toda tu generación solar: <strong>£{monthlyMaxPotential.toFixed(2)}/mes</strong><br />
+                Basado en {selfConsumptionPercent}% de autoconsumo y factura actual de £{monthlyBill}.
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* RESULTS */}
