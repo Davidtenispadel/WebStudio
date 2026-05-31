@@ -1,5 +1,6 @@
+// src/components/SolarPanelsPage.tsx
 import React from 'react';
-// ❌ Elimina esta línea: import SolarPanelCalculator from './SolarPanelCalculator';
+import SolarPanelCalculator from './SolarPanelCalculator'; // ✅ Calculadora al final
 
 const SolarPanelsPage: React.FC = () => {
   return (
@@ -41,7 +42,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       {/* ============================================================ */}
-      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
+      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         1. Origins and evolution of solar panels – from 19th century to today's technology
@@ -55,7 +56,6 @@ const SolarPanelsPage: React.FC = () => {
         <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
       </p>
 
-      {/* TWO IMAGES IN PARALLEL */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
         <div className="flex justify-center">
           <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
@@ -265,9 +265,7 @@ const SolarPanelsPage: React.FC = () => {
       {/* ============================================================ */}
       {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        2. The near future: new solar technologies (2026‑2035)
-      </h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">2. The near future: new solar technologies (2026‑2035)</h3>
       <p className="mb-2">
         Although today's panels are already very efficient, science continues to advance. Here are
         the technologies that will reach rooftops in the coming years.
@@ -328,7 +326,6 @@ const SolarPanelsPage: React.FC = () => {
         </ul>
       </div>
 
-      {/* Back-Contact section */}
       <div className="bg-gray-50 p-5 rounded-md border-l-4 border-blue-500 my-6">
         <h4 className="text-xl font-semibold mb-3">🔘 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
         <p className="mb-2">
@@ -558,16 +555,13 @@ const SolarPanelsPage: React.FC = () => {
       </ul>
 
       {/* ============================================================ */}
-      {/* 12. INTERACTIVE CALCULATOR - ELIMINADO PARA EVITAR DUPLICIDAD */}
-      {/* El usuario debe acceder a la calculadora desde Tools → Solar Panel Layout */}
+      {/* 12. INTERACTIVE CALCULATOR – AL FINAL DE LA PÁGINA */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">12. Design your own layout – interactive 3D tool</h3>
+      <h3 className="text-2xl font-semibold mt-12 mb-4">📊 12. Interactive ROI Calculator</h3>
       <p className="mb-6">
-        To calculate your personalized ROI and design your solar array layout, please visit the 
-        <strong> <a href="/solar-calculator" className="text-red-600 hover:underline">Solar ROI Calculator</a> </strong> 
-        in the <strong>Tools</strong> section. There you can enter your roof dimensions, orientation, 
-        location, and other parameters to get an accurate financial analysis.
+        Enter your roof dimensions, orientation, location, and other parameters to calculate your personalized return on investment.
       </p>
+      <SolarPanelCalculator />  {/* ✅ CALCULADORA AL FINAL */}
 
       {/* ============================================================ */}
       {/* 13. BIBLIOGRAPHY */}
