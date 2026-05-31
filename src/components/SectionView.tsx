@@ -2,12 +2,12 @@
  * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes
  * - Incluye "Green Energy" con tres hijos: "Solar Panels", "Batteries" y "Wind Turbines".
  * - Incluye "Tools" con un hijo "Solar Panel Layout" que enlaza a la calculadora.
- * - Los logos tienen tamaño grande (h-64) para máxima visibilidad.
+ * - Los logos tienen tamaño grande (h-48) para mejor visibilidad.
  * - Navegación por niveles con imágenes.
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // ← importar navigate
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import {
@@ -41,7 +41,7 @@ type TechNode = {
   description?: string;
   children?: TechNode[];
   articleComponent?: React.ReactNode;
-  externalLink?: string;
+  externalLink?: string; // ← nueva propiedad para enlaces externos
 };
 
 // Componentes placeholder
@@ -90,6 +90,7 @@ const technologyRootNodes: TechNode[] = [
       },
     ],
   },
+  // 👇 NUEVO NODO "Tools"
   {
     id: "tools",
     title: "Tools",
@@ -101,14 +102,14 @@ const technologyRootNodes: TechNode[] = [
         title: "Solar Panel Layout",
         imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249738/Icono_minimalista_pa_dufmt7.png",
         description: "Calculate ROI and design your solar array",
-        externalLink: "/solar-calculator",
+        externalLink: "/solar-calculator", // ← enlace a la calculadora
       },
     ],
   },
 ];
 
 // ============================
-// TIPOS Y CONSTANTES
+// TIPOS Y CONSTANTES (sin cambios)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -147,7 +148,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
   onNavigateToEnquiry,
 }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // para navegación externa
 
   // Estados de animación
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
@@ -270,7 +271,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Lógica de subida de archivos (sin cambios)
+  // Lógica de subida de archivos (ENQUIRY) - sin cambios
   // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
@@ -404,6 +405,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES ==========
   const handleTechNodeClick = (node: TechNode) => {
+    // Si tiene enlace externo, navegar directamente
     if (node.externalLink) {
       navigate(node.externalLink);
       return;
@@ -470,7 +472,6 @@ const SectionView: React.FC<SectionViewProps> = ({
           width: stage === "intro" ? "100%" : "calc(100% - 80px)",
         }}
       >
-        {/* ... contenido del header (idéntico al original) ... */}
         <div
           className="flex items-center gap-16 md:gap-24 lg:gap-40 transition-all shrink-0"
           style={{
@@ -583,8 +584,8 @@ const SectionView: React.FC<SectionViewProps> = ({
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-4 sm:px-10 pb-48"}>
           {isEnquiry ? (
+            // ... (código de Enquiry sin cambios) ...
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
-              {/* ... contenido de enquiry (sin cambios) ... */}
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
                   <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
@@ -649,6 +650,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
+            // ... (Behind DB sin cambios) ...
             <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-4 sm:px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
                 <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
@@ -698,12 +700,12 @@ const SectionView: React.FC<SectionViewProps> = ({
                                 className="group cursor-pointer transition-transform duration-300 hover:scale-105"
                               >
                                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow">
-                                  {/* AUMENTAMOS A h-64 (256px) para imágenes mucho más grandes */}
-                                  <div className="w-full overflow-hidden bg-gray-50 flex items-center justify-center p-4" style={{ minHeight: '16rem' }}>
+                                  {/* AUMENTAMOS EL TAMAÑO DE LA IMAGEN: h-48 en lugar de h-32 */}
+                                  <div className="aspect-video w-full overflow-hidden bg-gray-50 flex items-center justify-center p-4">
                                     <img
                                       src={node.imageUrl}
                                       alt={node.title}
-                                      className="w-auto h-64 object-contain group-hover:scale-110 transition-transform duration-500"
+                                      className="w-auto h-48 object-contain group-hover:scale-110 transition-transform duration-500"
                                     />
                                   </div>
                                   <div className="p-4 text-center">
@@ -723,7 +725,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               )}
 
-              {/* RESTO DE SECCIONES (Urban, Structure, etc.) - sin cambios */}
+              {/* RESTO DE SECCIONES (sin cambios) */}
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
                   {isArchitectureSection && (
