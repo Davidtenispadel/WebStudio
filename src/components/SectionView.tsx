@@ -1,13 +1,13 @@
 /*
  * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes
- * - Incluye "Green Energy" y "Tools" como nodos raíz.
- * - "Tools" contiene "Solar Panel Layout" que enlaza a la calculadora externa.
- * - Navegación por niveles con imágenes y enlaces externos.
- * - MODIFICADO: padding responsivo para móvil (px-4 sm:px-10)
+ * - Incluye "Green Energy" con tres hijos: "Solar Panels", "Batteries" y "Wind Turbines".
+ * - Incluye "Tools" con un hijo "Solar Panel Layout" que enlaza a la calculadora.
+ * - Los logos tienen tamaño grande (h-48) para mejor visibilidad.
+ * - Navegación por niveles con imágenes.
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Necesario para externalLink
+import { useNavigate } from "react-router-dom"; // ← importar navigate
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import {
@@ -41,10 +41,10 @@ type TechNode = {
   description?: string;
   children?: TechNode[];
   articleComponent?: React.ReactNode;
-  externalLink?: string; // NUEVO: para enlaces externos como la calculadora
+  externalLink?: string; // ← nueva propiedad para enlaces externos
 };
 
-// Componentes placeholder para los artículos
+// Componentes placeholder
 const BatteriesPlaceholder: React.FC = () => (
   <div className="p-8 bg-white rounded-2xl shadow-xl">
     <h2 className="text-3xl font-light mb-4">Batteries</h2>
@@ -59,7 +59,7 @@ const WindTurbinesPlaceholder: React.FC = () => (
   </div>
 );
 
-// Configuración inicial de la tecnología (Nivel 1) - AHORA CON "Tools"
+// Configuración inicial de la tecnología (Nivel 1)
 const technologyRootNodes: TechNode[] = [
   {
     id: "green-energy",
@@ -90,7 +90,7 @@ const technologyRootNodes: TechNode[] = [
       },
     ],
   },
-  // NUEVO NODO "Tools" CON ENLACE EXTERNO
+  // 👇 NUEVO NODO "Tools"
   {
     id: "tools",
     title: "Tools",
@@ -102,14 +102,14 @@ const technologyRootNodes: TechNode[] = [
         title: "Solar Panel Layout",
         imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249738/Icono_minimalista_pa_dufmt7.png",
         description: "Calculate ROI and design your solar array",
-        externalLink: "/solar-calculator", // Navegación a la calculadora
+        externalLink: "/solar-calculator", // ← enlace a la calculadora
       },
     ],
   },
 ];
 
 // ============================
-// TIPOS Y CONSTANTES
+// TIPOS Y CONSTANTES (sin cambios)
 // ============================
 type UploadStatus = "uploading" | "uploaded" | "error";
 interface UploadedItem {
@@ -148,7 +148,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
   onNavigateToEnquiry,
 }) => {
-  const navigate = useNavigate(); // Para enlaces externos
+  const navigate = useNavigate(); // para navegación externa
 
   // Estados de animación
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
@@ -176,7 +176,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const [activeArticle, setActiveArticle] = useState<React.ReactNode | null>(null);
 
   // ============================
-  // Animaciones (Aesthetic A)
+  // Animaciones (sin cambios)
   // ============================
   const resetSequence = () => {
     setShowDB(false);
@@ -243,7 +243,6 @@ const SectionView: React.FC<SectionViewProps> = ({
     if (displayedCategory.name === StudioSection.TECHNOLOGY) {
       setStage("gallery");
       setShowGalleryItems(true);
-      // Resetear navegación al entrar a Technology
       setCurrentTechNodes(technologyRootNodes);
       setTechHistory([]);
       setActiveArticle(null);
@@ -272,7 +271,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
   // ============================
-  // Lógica de subida de archivos (ENQUIRY)
+  // Lógica de subida de archivos (ENQUIRY) - sin cambios
   // ============================
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
@@ -404,21 +403,18 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
-  // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES (CON SOPORTE A EXTERNAL LINK) ==========
+  // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES ==========
   const handleTechNodeClick = (node: TechNode) => {
-    // Si el nodo tiene un enlace externo, navegamos directamente
+    // Si tiene enlace externo, navegar directamente
     if (node.externalLink) {
       navigate(node.externalLink);
       return;
     }
-    // Si tiene componente de artículo, lo mostramos internamente
     if (node.articleComponent) {
       setActiveArticle(node.articleComponent);
       setTechHistory([...techHistory, currentTechNodes]);
       setCurrentTechNodes([]);
-    } 
-    // Si tiene hijos, navegamos a ese nivel
-    else if (node.children && node.children.length > 0) {
+    } else if (node.children && node.children.length > 0) {
       setTechHistory([...techHistory, currentTechNodes]);
       setCurrentTechNodes(node.children);
       setActiveArticle(null);
@@ -463,7 +459,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) */}
+      {/* HEADER (Aesthetic A) - sin cambios */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -588,6 +584,7 @@ const SectionView: React.FC<SectionViewProps> = ({
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-4 sm:px-10 pb-48"}>
           {isEnquiry ? (
+            // ... (código de Enquiry sin cambios) ...
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
               <div className="relative z-[60]">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
@@ -653,6 +650,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               </div>
             </div>
           ) : isBehindDBSection ? (
+            // ... (Behind DB sin cambios) ...
             <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-4 sm:px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
                 <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
@@ -665,7 +663,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* SECCIÓN TECHNOLOGY CON IMÁGENES (incluye Tools) */}
+              {/* SECCIÓN TECHNOLOGY */}
               {isTechnology && (
                 <div className="mb-12">
                   <div
@@ -702,11 +700,12 @@ const SectionView: React.FC<SectionViewProps> = ({
                                 className="group cursor-pointer transition-transform duration-300 hover:scale-105"
                               >
                                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow">
-                                  <div className="aspect-video w-full overflow-hidden bg-gray-50 flex items-center justify-center">
+                                  {/* AUMENTAMOS EL TAMAÑO DE LA IMAGEN: h-48 en lugar de h-32 */}
+                                  <div className="aspect-video w-full overflow-hidden bg-gray-50 flex items-center justify-center p-4">
                                     <img
                                       src={node.imageUrl}
                                       alt={node.title}
-                                      className="w-auto h-32 object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                                      className="w-auto h-48 object-contain group-hover:scale-110 transition-transform duration-500"
                                     />
                                   </div>
                                   <div className="p-4 text-center">
@@ -726,7 +725,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               )}
 
-              {/* RESTO DE SECCIONES: Urban, Structure, Design, etc. */}
+              {/* RESTO DE SECCIONES (sin cambios) */}
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
                   {isArchitectureSection && (
