@@ -152,18 +152,15 @@ const SolarPanelCalculator: React.FC = () => {
   const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
-  // Scroll suave al cargar la página (con hash y sin hash)
+  // ✅ Scroll suave SOLO si se accede con el hash (desde Tools)
   useEffect(() => {
     if (window.location.hash === '#solar-calculator') {
       setTimeout(() => {
         const el = document.getElementById('solar-calculator');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 200);
-    } else {
-      setTimeout(() => {
-        calculatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
     }
+    // Si no hay hash, NO se hace scroll automático (evita que la calculadora desplace la página cuando se ve dentro de SolarPanelsPage)
   }, []);
 
   // --- Estados para Tejado A ---
