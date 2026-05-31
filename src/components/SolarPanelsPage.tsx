@@ -1,10 +1,22 @@
 // src/components/SolarPanelsPage.tsx
-import React from 'react';
-import SolarPanelCalculator from './SolarPanelCalculator'; // ✅ Calculadora al final
+import React, { useEffect, useRef } from 'react';
+import SolarPanelCalculator from './SolarPanelCalculator';
 
 const SolarPanelsPage: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ✅ Scroll al principio del contenido cuando se monta el componente
+  useEffect(() => {
+    if (containerRef.current) {
+      // Pequeño retraso para asegurar que el DOM esté listo
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, []);
+
   return (
-    <div className="text-black max-w-6xl mx-auto px-4">
+    <div ref={containerRef} className="text-black max-w-6xl mx-auto px-4">
       <h2 className="text-3xl md:text-4xl font-light mb-6">
         <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
@@ -561,7 +573,7 @@ const SolarPanelsPage: React.FC = () => {
       <p className="mb-6">
         Enter your roof dimensions, orientation, location, and other parameters to calculate your personalized return on investment.
       </p>
-      <SolarPanelCalculator />  {/* ✅ CALCULADORA AL FINAL */}
+      <SolarPanelCalculator />
 
       {/* ============================================================ */}
       {/* 13. BIBLIOGRAPHY */}
