@@ -1,12 +1,13 @@
 /*
- * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes (sin árbol)
- * - Incluye "Green Energy" con tres hijos: "Solar Panels", "Batteries" y "Wind Turbines".
- * - Los logos tienen tamaño grande (h-32).
- * - Navegación por niveles con imágenes.
+ * SECTIONVIEW.TSX — Versión final con Technology basada en imágenes
+ * - Incluye "Green Energy" y "Tools" como nodos raíz.
+ * - "Tools" contiene "Solar Panel Layout" que enlaza a la calculadora externa.
+ * - Navegación por niveles con imágenes y enlaces externos.
  * - MODIFICADO: padding responsivo para móvil (px-4 sm:px-10)
  */
 
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Necesario para externalLink
 import { CategoryGroup, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import {
@@ -40,9 +41,10 @@ type TechNode = {
   description?: string;
   children?: TechNode[];
   articleComponent?: React.ReactNode;
+  externalLink?: string; // NUEVO: para enlaces externos como la calculadora
 };
 
-// Componentes placeholder para los artículos (puedes sustituirlos por contenido real)
+// Componentes placeholder para los artículos
 const BatteriesPlaceholder: React.FC = () => (
   <div className="p-8 bg-white rounded-2xl shadow-xl">
     <h2 className="text-3xl font-light mb-4">Batteries</h2>
@@ -57,7 +59,7 @@ const WindTurbinesPlaceholder: React.FC = () => (
   </div>
 );
 
-// Configuración inicial de la tecnología (Nivel 1)
+// Configuración inicial de la tecnología (Nivel 1) - AHORA CON "Tools"
 const technologyRootNodes: TechNode[] = [
   {
     id: "green-energy",
@@ -86,10 +88,24 @@ const technologyRootNodes: TechNode[] = [
         description: "Wind energy generation",
         articleComponent: <WindTurbinesPlaceholder />,
       },
-      // Aquí puedes agregar más hijos: Inverters, etc.
     ],
   },
-  // Puedes agregar más nodos raíz...
+  // NUEVO NODO "Tools" CON ENLACE EXTERNO
+  {
+    id: "tools",
+    title: "Tools",
+    imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249527/Hero_horizontal_2560_d7r0ik.png",
+    description: "Utilities and calculators",
+    children: [
+      {
+        id: "solar-panel-layout",
+        title: "Solar Panel Layout",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249738/Icono_minimalista_pa_dufmt7.png",
+        description: "Calculate ROI and design your solar array",
+        externalLink: "/solar-calculator", // Navegación a la calculadora
+      },
+    ],
+  },
 ];
 
 // ============================
@@ -132,6 +148,8 @@ const SectionView: React.FC<SectionViewProps> = ({
   currentSectionName,
   onNavigateToEnquiry,
 }) => {
+  const navigate = useNavigate(); // Para enlaces externos
+
   // Estados de animación
   const [displayedCategory, setDisplayedCategory] = useState<CategoryGroup>(category);
   const [showDB, setShowDB] = useState(false);
@@ -386,13 +404,21 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
-  // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES ==========
+  // ========== FUNCIONES DE NAVEGACIÓN PARA LAS IMÁGENES (CON SOPORTE A EXTERNAL LINK) ==========
   const handleTechNodeClick = (node: TechNode) => {
+    // Si el nodo tiene un enlace externo, navegamos directamente
+    if (node.externalLink) {
+      navigate(node.externalLink);
+      return;
+    }
+    // Si tiene componente de artículo, lo mostramos internamente
     if (node.articleComponent) {
       setActiveArticle(node.articleComponent);
       setTechHistory([...techHistory, currentTechNodes]);
       setCurrentTechNodes([]);
-    } else if (node.children && node.children.length > 0) {
+    } 
+    // Si tiene hijos, navegamos a ese nivel
+    else if (node.children && node.children.length > 0) {
       setTechHistory([...techHistory, currentTechNodes]);
       setCurrentTechNodes(node.children);
       setActiveArticle(null);
@@ -639,7 +665,7 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* SECCIÓN TECHNOLOGY TOTALMENTE RENOVADA CON IMÁGENES */}
+              {/* SECCIÓN TECHNOLOGY CON IMÁGENES (incluye Tools) */}
               {isTechnology && (
                 <div className="mb-12">
                   <div
