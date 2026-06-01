@@ -147,39 +147,39 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
   return { totalPanels: panelPositions.length, cols, rows, panelPositions };
 };
 
-// ==================== PRECIOS DE ENERGÍA POR PAÍS ====================
+// ==================== PRECIOS DE ENERGÍA POR PAÍS (IMPORT Y EXPORT) ====================
 const electricityPricesByCountry: { [key: string]: { importRate: number; exportRate: number; standingCharge: number; currency: string; importSource: string; exportSource: string } } = {
   "United Kingdom": { 
     importRate: 0.2800, exportRate: 0.0900, standingCharge: 15, currency: "£",
-    importSource: "Ofgem (estimado)", exportSource: "SEG average rate 2026 (range 0.034-0.173£/kWh)" 
+    importSource: "Ofgem (estimado)", exportSource: "SEG average rate 2026" 
   },
   "Germany": { 
     importRate: 0.3869, exportRate: 0.0811, standingCharge: 18, currency: "€",
-    importSource: "Eurostat H2 2025 (€38.69/100kWh)", exportSource: "EEG feed-in tariff 2026 (≤10 kWp)" 
+    importSource: "Eurostat H2 2025", exportSource: "EEG feed-in tariff 2026" 
   },
   "France": { 
     importRate: 0.2561, exportRate: 0.0565, standingCharge: 12, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Average net metering tariff (April-June 2026)" 
+    importSource: "Countryeconomy", exportSource: "Net metering tariff" 
   },
   "Spain": { 
     importRate: 0.2669, exportRate: 0.0400, standingCharge: 10, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Excedente compensation tariff 2025" 
+    importSource: "Countryeconomy", exportSource: "Excedente compensation 2025" 
   },
   "Italy": { 
     importRate: 0.2966, exportRate: 0.0464, standingCharge: 14, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Ritiro Dedicato minimum guaranteed price 2025" 
+    importSource: "Countryeconomy", exportSource: "Ritiro Dedicato 2025" 
   },
   "Netherlands": { 
     importRate: 0.2930, exportRate: 0.1000, standingCharge: 16, currency: "€",
-    importSource: "Eurostat H2 2025", exportSource: "Market estimate based on energy prices" 
+    importSource: "Eurostat H2 2025", exportSource: "Market estimate" 
   },
   "Belgium": { 
     importRate: 0.3499, exportRate: 0.0830, standingCharge: 15, currency: "€",
-    importSource: "Eurostat H2 2025 (€34.99/100kWh)", exportSource: "Regional estimate (Brussels/Wallonia reference)" 
+    importSource: "Eurostat H2 2025", exportSource: "Regional estimate" 
   },
   "Denmark": { 
     importRate: 0.3312, exportRate: 0.0390, standingCharge: 20, currency: "€",
-    importSource: "Eurostat H2 2025 (€33.12/100kWh)", exportSource: "Green Power Denmark tariff increase 2025" 
+    importSource: "Eurostat H2 2025", exportSource: "Green Power Denmark" 
   },
   "Sweden": { 
     importRate: 0.2700, exportRate: 0.0500, standingCharge: 13, currency: "€",
@@ -187,27 +187,27 @@ const electricityPricesByCountry: { [key: string]: { importRate: number; exportR
   },
   "Poland": { 
     importRate: 0.2100, exportRate: 0.0500, standingCharge: 11, currency: "€",
-    importSource: "Eurostat H2 2025", exportSource: "Wholesale market based rate" 
+    importSource: "Eurostat H2 2025", exportSource: "Wholesale based" 
   },
   "Czech Republic": { 
     importRate: 0.3217, exportRate: 0.0500, standingCharge: 12, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Wholesale market based rate" 
+    importSource: "Countryeconomy", exportSource: "Wholesale based" 
   },
   "Portugal": { 
     importRate: 0.2434, exportRate: 0.0420, standingCharge: 10, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Excedente compensation tariff 2025" 
+    importSource: "Countryeconomy", exportSource: "Excedente compensation" 
   },
   "Austria": { 
     importRate: 0.3272, exportRate: 0.0650, standingCharge: 14, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Average OeMAG feed-in tariff (5.74–7.67 ct/kWh)" 
+    importSource: "Countryeconomy", exportSource: "OeMAG feed-in" 
   },
   "Greece": { 
     importRate: 0.2378, exportRate: 0.0450, standingCharge: 11, currency: "€",
-    importSource: "Countryeconomy (Dic 2025)", exportSource: "Market estimate for net metering" 
+    importSource: "Countryeconomy", exportSource: "Market estimate" 
   },
   "Ireland": { 
     importRate: 0.4042, exportRate: 0.0800, standingCharge: 17, currency: "€",
-    importSource: "Eurostat H2 2025 (€40.42/100kWh)", exportSource: "Micro-generation support scheme estimate" 
+    importSource: "Eurostat H2 2025", exportSource: "Micro-generation support" 
   },
 };
 
@@ -216,6 +216,7 @@ const SolarPanelCalculator: React.FC = () => {
   const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
+  // Scroll suave SOLO si se accede con el hash (desde Tools)
   useEffect(() => {
     if (window.location.hash === '#solar-calculator') {
       setTimeout(() => {
@@ -253,10 +254,10 @@ const SolarPanelCalculator: React.FC = () => {
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
   
-  // NUEVO: Consumo mensual del hogar (kWh/mes) - el usuario lo introduce
-  const [monthlyConsumption, setMonthlyConsumption] = useState<number | null>(null);
+  // NUEVO: Consumo mensual del hogar (kWh/mes) que introduce el usuario
+  const [monthlyConsumption, setMonthlyConsumption] = useState(300);
   
-  // Tarifas de energía
+  // Tarifas de energía (se actualizan al cambiar país)
   const [importTariff, setImportTariff] = useState(0.2800);
   const [exportTariff, setExportTariff] = useState(0.0900);
   const [standingCharge, setStandingCharge] = useState(15);
@@ -283,7 +284,7 @@ const SolarPanelCalculator: React.FC = () => {
 
   const climateFactor = getClimateFactor(selectedCountry);
 
-  // Efecto para actualizar tarifas al cambiar país
+  // Efecto para actualizar tarifas al cambiar de país
   useEffect(() => {
     const priceData = electricityPricesByCountry[selectedCountry];
     if (priceData) {
@@ -293,7 +294,7 @@ const SolarPanelCalculator: React.FC = () => {
     }
   }, [selectedCountry]);
 
-  // Layout effects
+  // Effects para layouts
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
     if (roofALength > 0 && roofAWidth > 0) {
@@ -317,7 +318,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(invPrices[inverterType]);
   }, [inverterType]);
 
-  // Producción por tejado
+  // Cálculo de producción por tejado
   const getRoofProduction = (layout: typeof layoutA, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 }, orientationFactor: 0, tiltFactor: 0 };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -345,44 +346,9 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // Energía solar generada mensual (promedio anual)
-  const monthlySolarGeneration = totalAnnualKwh / 12;
-
-  // Energía autoconsumida (solar que se consume directamente)
-  // Se limita al consumo mensual si el usuario lo ha introducido
-  let selfConsumedSolarMonthly = monthlySolarGeneration * (selfConsumptionPercent / 100);
-  let gridImportMonthly = 0;
-  let exportedSolarMonthly = 0;
-  let monthlyBillWithSolar = 0;
-  let monthlyBillWithoutSolar = 0;
-  let monthlySavings = 0;
-
-  if (monthlyConsumption !== null && monthlyConsumption > 0) {
-    // Autoconsumo no puede superar el consumo mensual
-    selfConsumedSolarMonthly = Math.min(selfConsumedSolarMonthly, monthlyConsumption);
-    // Energía comprada de la red
-    gridImportMonthly = Math.max(0, monthlyConsumption - selfConsumedSolarMonthly);
-    // Energía solar exportada (excedente no consumido)
-    exportedSolarMonthly = Math.max(0, monthlySolarGeneration - selfConsumedSolarMonthly);
-    // Factura con solar = standing charge + importación de red
-    monthlyBillWithSolar = standingCharge + (gridImportMonthly * importTariff);
-    // Factura sin solar (si no hubiera paneles)
-    monthlyBillWithoutSolar = standingCharge + (monthlyConsumption * importTariff);
-    monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
-  } else {
-    // Si no ha introducido consumo, mostrar valores como si no hubiera paneles
-    gridImportMonthly = 0;
-    exportedSolarMonthly = monthlySolarGeneration;
-    monthlyBillWithSolar = standingCharge;
-    monthlyBillWithoutSolar = standingCharge;
-    monthlySavings = 0;
-  }
-
-  // Cálculo de costes y beneficios anuales (para ROI, etc.)
-  const selfConsumedKwhAnnual = selfConsumedSolarMonthly * 12;
-  const exportedKwhAnnual = exportedSolarMonthly * 12;
-  const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
-  const annualExportIncome = exportedKwhAnnual * exportTariff;
+  // Cálculos financieros (para beneficio anual, ROI, payback)
+  const selfConsumedKwhAnnual = totalAnnualKwh * (selfConsumptionPercent / 100);
+  const exportedKwhAnnual = Math.max(0, totalAnnualKwh - selfConsumedKwhAnnual);
   const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
   const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwhAnnual);
   const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importTariff);
@@ -391,10 +357,19 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
   const totalPanelCost = totalPanelsCount * panelPricePerUnit;
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
+  const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
+  const annualExportIncome = exportedKwhAnnual * exportTariff;
   const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
   const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
   const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
+
+  // Valores mensuales para la nueva barra interactiva
+  const avgMonthlyGeneration = totalAnnualKwh / 12;
+  const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
+  const exportedKwhMonthly = avgMonthlyGeneration - selfConsumedKwhMonthly;
+  const gridPurchaseKwhMonthly = Math.max(0, monthlyConsumption - selfConsumedKwhMonthly);
+  const currencySymbol = electricityPricesByCountry[selectedCountry]?.currency === "€" ? "€" : "£";
 
   // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
@@ -462,6 +437,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
+  // Visualización inclinación
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: { tilt: number; onChange: (v: number) => void; enabled: boolean; setEnabled: (v: boolean) => void; label: string }) => {
     return (
       <div className="flex flex-col items-center">
@@ -488,10 +464,19 @@ const SolarPanelCalculator: React.FC = () => {
   };
 
   return (
-    <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
+    <div
+      ref={calculatorRef}
+      id="solar-calculator"
+      className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24"
+    >
+      {/* BOTÓN PARA VOLVER A TECHNOLOGY */}
       <div className="flex justify-start mb-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 transition-all duration-200 border border-gray-300 rounded-md hover:border-red-600">
-          <span className="text-lg">←</span> <span>Back to Technology</span>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 transition-all duration-200 border border-gray-300 rounded-md hover:border-red-600"
+        >
+          <span className="text-lg">←</span> 
+          <span>Back to Technology</span>
         </button>
       </div>
 
@@ -527,6 +512,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
         <div className="mt-4 p-3 bg-blue-50 rounded">
           <p className="text-sm font-semibold">🌦️ Climate factor for {selectedCountry}: <strong>{(climateFactor * 100).toFixed(0)}%</strong> (rain/cloud reduction)</p>
+          <p className="text-xs text-gray-600">Based on annual rainy days and cloud cover.</p>
           <div className="mt-2">
             <p className="font-semibold">📅 Seasonal production (after climate & shading):</p>
             <div className="grid grid-cols-4 gap-2 text-center text-sm">
@@ -648,9 +634,10 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS - NUEVA VERSIÓN */}
+      {/* ==================== LOCATION & FINANCIAL ANALYSIS – NUEVA BARRA INTERACTIVA ==================== */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
+        
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
             <label>Country:</label>
@@ -667,129 +654,95 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* NUEVO CAMPO: Consumo mensual */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium">Monthly household consumption (kWh):</label>
+        {/* Monthly consumption input */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium">Your average monthly consumption (kWh):</label>
           <input
             type="number"
             step="50"
-            placeholder="e.g., 350"
-            value={monthlyConsumption === null ? '' : monthlyConsumption}
-            onChange={(e) => setMonthlyConsumption(e.target.value === '' ? null : parseFloat(e.target.value))}
+            value={monthlyConsumption}
+            onChange={(e) => setMonthlyConsumption(parseFloat(e.target.value))}
             className="border p-2 rounded w-full mt-1"
           />
-          <p className="text-xs text-gray-500 mt-1">Enter your average monthly electricity consumption. Check your bill.</p>
+          <p className="text-xs text-gray-500 mt-1">Typical UK home: 250-450 kWh/month</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label>Self-consumption vs Export:</label>
-            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden my-1">
-              <div className="h-full text-center text-xs text-white font-medium" style={{ width: `${selfConsumptionPercent}%`, background: `linear-gradient(90deg, #22c55e, ${selfConsumptionPercent > 50 ? '#eab308' : '#ef4444'})` }}>
-                {selfConsumptionPercent}%
-              </div>
-            </div>
-            <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full" />
-            <p className="text-xs text-gray-500 mt-1">Percentage of your solar generation you consume directly</p>
+        {/* Self-Consumption vs Export slider bar */}
+        <div className="mb-6">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="font-medium text-green-700">Self-consumption (green)</span>
+            <span className="font-medium text-orange-600">Export (orange)</span>
           </div>
-          <div className="space-y-2">
+          
+          {/* Barra visual con degradado y punto deslizante */}
+          <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to right, #22c55e 0%, #22c55e ${selfConsumptionPercent}%, #f97316 ${selfConsumptionPercent}%, #f97316 100%)`
+              }}
+            />
+            <div 
+              className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-600 rounded-full shadow-lg border-2 border-white cursor-pointer"
+              style={{ left: `calc(${selfConsumptionPercent}% - 12px)` }}
+            />
+            <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold">
+              <span>{selfConsumptionPercent}%</span>
+              <span>{100 - selfConsumptionPercent}%</span>
+            </div>
+          </div>
+          
+          {/* Slider real (input range) – controla el porcentaje */}
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={selfConsumptionPercent}
+            onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))}
+            className="w-full mt-2"
+          />
+          
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>All self-consumed</span>
+            <span>All exported</span>
+          </div>
+        </div>
+
+        {/* Tres indicadores dinámicos (kWh) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-green-100 p-3 rounded-lg text-center">
+            <p className="text-sm text-green-800 font-semibold">⚡ Self-consumption</p>
+            <p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p>
+            <p className="text-xs text-green-600">Consumed directly from your solar</p>
+          </div>
+          <div className="bg-gray-200 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-800 font-semibold">🏭 Grid purchase (night/bad weather)</p>
+            <p className="text-2xl font-bold text-gray-700">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p>
+            <p className="text-xs text-gray-600">Needed when solar is insufficient</p>
+          </div>
+          <div className="bg-orange-100 p-3 rounded-lg text-center">
+            <p className="text-sm text-orange-800 font-semibold">💰 Export to grid</p>
+            <p className="text-2xl font-bold text-orange-600">{exportedKwhMonthly.toFixed(1)} kWh</p>
+            <p className="text-xs text-orange-600">Sold to electricity company</p>
+          </div>
+        </div>
+
+        {/* Impacto económico (facturas) */}
+        <div className="mt-2 p-3 bg-white/70 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <div className="flex justify-between">
-                <span>Import Tariff ({electricityPricesByCountry[selectedCountry]?.currency || "£"}/kWh):</span>
-                <input type="number" step="0.01" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" />
-              </div>
-              <p className="text-xs text-gray-500">Price you pay for grid electricity. Source: {electricityPricesByCountry[selectedCountry]?.importSource}</p>
+              <p className="text-gray-600">Monthly bill WITHOUT solar:</p>
+              <p className="text-xl font-semibold">{currencySymbol}{(monthlyConsumption * importTariff + standingCharge).toFixed(2)}</p>
             </div>
             <div>
-              <div className="flex justify-between">
-                <span>Export Tariff ({electricityPricesByCountry[selectedCountry]?.currency || "£"}/kWh):</span>
-                <input type="number" step="0.005" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" />
-              </div>
-              <p className="text-xs text-gray-500">Price you receive for surplus solar exported. Source: {electricityPricesByCountry[selectedCountry]?.exportSource}</p>
-            </div>
-            <div>
-              <div className="flex justify-between">
-                <span>Standing Charge ({electricityPricesByCountry[selectedCountry]?.currency || "£"}/month):</span>
-                <input type="number" step="1" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" />
-              </div>
-              <p className="text-xs text-gray-500">Fixed monthly charge regardless of consumption</p>
+              <p className="text-gray-600">Monthly bill WITH solar:</p>
+              <p className="text-xl font-semibold text-green-700">{currencySymbol}{((gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff)).toFixed(2)}</p>
             </div>
           </div>
         </div>
 
-        {/* VISUALIZACIÓN DEL BALANCE ENERGÉTICO */}
-        {monthlyConsumption !== null && monthlyConsumption > 0 && (
-          <div className="mt-6 pt-4 border-t border-green-200">
-            <h4 className="font-semibold text-md mb-3">📊 Your Monthly Energy Balance</h4>
-            
-            {/* Barra de consumo (verde = autoconsumo, gris = red) */}
-            <div className="mb-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span>Consumption coverage</span>
-                <span>{((selfConsumedSolarMonthly / monthlyConsumption) * 100).toFixed(1)}% from solar</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden flex">
-                <div
-                  className="bg-green-500 h-full text-xs text-white flex items-center justify-center"
-                  style={{ width: `${Math.min(100, (selfConsumedSolarMonthly / monthlyConsumption) * 100)}%` }}
-                >
-                  {selfConsumedSolarMonthly.toFixed(0)} kWh
-                </div>
-                <div
-                  className="bg-gray-500 h-full text-xs text-white flex items-center justify-center"
-                  style={{ width: `${Math.max(0, 100 - (selfConsumedSolarMonthly / monthlyConsumption) * 100)}%` }}
-                >
-                  {gridImportMonthly.toFixed(0)} kWh
-                </div>
-              </div>
-              <div className="flex justify-between text-xs mt-1">
-                <span className="text-green-700">✓ Self-consumed: {selfConsumedSolarMonthly.toFixed(0)} kWh</span>
-                <span className="text-gray-700">🛒 Grid import: {gridImportMonthly.toFixed(0)} kWh</span>
-              </div>
-            </div>
-
-            {/* Barra de excedente exportado */}
-            {exportedSolarMonthly > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Exported surplus</span>
-                  <span>{((exportedSolarMonthly / monthlySolarGeneration) * 100).toFixed(1)}% of generation</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                  <div
-                    className="bg-orange-400 h-full text-xs text-white flex items-center justify-center"
-                    style={{ width: `${Math.min(100, (exportedSolarMonthly / monthlySolarGeneration) * 100)}%` }}
-                  >
-                    {exportedSolarMonthly.toFixed(0)} kWh
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Energy sold to the grid at {exportTariff} {electricityPricesByCountry[selectedCountry]?.currency}/kWh</p>
-              </div>
-            )}
-
-            {/* Costes y ahorro */}
-            <div className="grid grid-cols-2 gap-4 mt-4 p-3 bg-white rounded-lg">
-              <div>
-                <p className="text-sm text-gray-600">Monthly bill WITHOUT solar:</p>
-                <p className="text-xl font-semibold">{electricityPricesByCountry[selectedCountry]?.currency}{monthlyBillWithoutSolar.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Monthly bill WITH solar:</p>
-                <p className="text-xl font-semibold text-green-700">{electricityPricesByCountry[selectedCountry]?.currency}{monthlyBillWithSolar.toFixed(2)}</p>
-              </div>
-            </div>
-            <div className="mt-2 text-right">
-              <p className="text-sm font-medium text-green-700">You save {electricityPricesByCountry[selectedCountry]?.currency}{monthlySavings.toFixed(2)} each month!</p>
-            </div>
-          </div>
-        )}
-
-        {(!monthlyConsumption || monthlyConsumption === 0) && (
-          <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-800">
-            ℹ️ Please enter your monthly consumption to see the energy balance and savings.
-          </div>
-        )}
-
+        {/* Fuentes de datos */}
         <div className="mt-3 text-right">
           <p className="text-[10px] text-gray-400 italic">
             ⓘ Energy price sources: {electricityPricesByCountry[selectedCountry]?.importSource} (import) | {electricityPricesByCountry[selectedCountry]?.exportSource} (export)
@@ -807,6 +760,7 @@ const SolarPanelCalculator: React.FC = () => {
           <p><strong>Installation cost:</strong> £{totalInstallCost.toFixed(0)}</p>
           <p><strong>Annual maintenance:</strong> £{totalAnnualMaintenanceCost.toFixed(1)} (cleaning: £{cleaningCostAnnual.toFixed(1)}, electrical: £{electricalInspectionAnnual.toFixed(1)}, inverter standby: £{inverterNetCost.toFixed(1)})</p>
           <p><strong>Annual benefit (net):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
+          <p><strong>New monthly bill:</strong> £{((gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff)).toFixed(2)} (saving £{(monthlyConsumption * importTariff + standingCharge) - ((gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff)).toFixed(2)}/month)</p>
           <p><strong>Payback period:</strong> {paybackYears.toFixed(1)} years</p>
           <p><strong className="text-3xl text-green-400">ROI: {roiPercent.toFixed(1)}%</strong>
             {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent</span>}
