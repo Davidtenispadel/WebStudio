@@ -292,41 +292,35 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // ==================== CÁLCULO CON STANDBY (CORREGIDO) ====================
-  // 1. Energía anual consumida por el inversor en standby (kWh)
-  const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
-  // 2. Energía solar autoconsumida anualmente (sin contar standby)
-  const originalSelfConsumedAnnual = totalAnnualKwh * (selfConsumptionPercent / 100);
-  // 3. Parte del standby que puede ser cubierta por la generación solar (máximo el autoconsumo original)
-  const solarCoveredStandby = Math.min(inverterAnnualKwh, originalSelfConsumedAnnual);
-  // 4. Parte del standby que debe tomarse de la red (lo que no cubre el sol)
-  const standbyFromGrid = Math.max(0, inverterAnnualKwh - solarCoveredStandby);
-  // 5. Nuevo autoconsumo total = autoconsumo original + la parte del standby cubierta por el sol
-  const totalSelfConsumedAnnual = originalSelfConsumedAnnual + solarCoveredStandby;
+  // ==================== CÁLCULO DEL STANDBY (CORREGIDO) ====================
+  // Potencia standby en kW
+  const standbyPowerKw = standbyPowerW / 1000;
+  // Energía mensual consumida por el inversor en standby (kWh/mes)
+  const standbyMonthlyKwh = standbyPowerKw * 24 * 30;   // 24h/día * 30 días
 
-  // Valores mensuales
+  // Generación solar media mensual
   const avgMonthlyGeneration = totalAnnualKwh / 12 || 0;
-  const greenKwhMonthly = totalSelfConsumedAnnual / 12;
-  const standbyFromGridMonthly = standbyFromGrid / 12;
 
-  // Parte inevitable proporcional al verde (ej. 20% del nuevo autoconsumo)
+  // Autoconsumo solar (verde) sin tener en cuenta el standby (solo la energía que consumes directamente de tus placas)
+  const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
+
+  // Compra de red inevitable (por noche, mal tiempo) = 20% del autoconsumo
   const RED_FACTOR = 0.2;
-  const inevitableGridMonthly = greenKwhMonthly * RED_FACTOR;
+  const inevitableGridMonthly = selfConsumedKwhMonthly * RED_FACTOR;
 
-  // Compra de red total = inevitable + standby no cubierto
-  let totalGridPurchaseKwhMonthly = inevitableGridMonthly + standbyFromGridMonthly;
+  // Compra de red total = inevitable + standby (el standby siempre va a la red)
+  let totalGridPurchaseKwhMonthly = inevitableGridMonthly + standbyMonthlyKwh;
 
   // Convertir a porcentaje sobre la generación mensual
   let redPercent = (totalGridPurchaseKwhMonthly / avgMonthlyGeneration) * 100;
-  const greenPercent = (greenKwhMonthly / avgMonthlyGeneration) * 100;
+  const greenPercent = selfConsumptionPercent;
 
-  // Ajustar para que verde + rojo no supere 100%
+  // Ajustar para que verde + rojo no supere el 100% (si ocurre, se reduce rojo y se pierde parte del standby)
   if (redPercent > (100 - greenPercent)) {
     redPercent = 100 - greenPercent;
     totalGridPurchaseKwhMonthly = avgMonthlyGeneration * (redPercent / 100);
   }
 
-  const selfConsumedKwhMonthly = greenKwhMonthly;
   let exportedKwhMonthly = avgMonthlyGeneration - selfConsumedKwhMonthly - totalGridPurchaseKwhMonthly;
   if (exportedKwhMonthly < 0) exportedKwhMonthly = 0;
 
@@ -340,13 +334,13 @@ const SolarPanelCalculator: React.FC = () => {
 
   // Cálculos financieros anuales (ROI, payback)
   const exportedKwhAnnual = exportedKwhMonthly * 12;
-  const inverterNetCost = standbyFromGrid * importTariff;
+  const inverterNetCost = standbyMonthlyKwh * 12 * importTariff;
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
   const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
   const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
   const totalPanelCost = totalPanelsCount * panelPricePerUnit;
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
-  const annualSavingFromSelf = totalSelfConsumedAnnual * importTariff;
+  const annualSavingFromSelf = selfConsumedKwhMonthly * 12 * importTariff;
   const annualExportIncome = exportedKwhAnnual * exportTariff;
   const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
   const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
@@ -355,7 +349,7 @@ const SolarPanelCalculator: React.FC = () => {
 
   const maxGreen = 100 / (1 + RED_FACTOR); // límite superior para el slider
 
-  // Handlers obstáculos (igual)
+  // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
     if (roof === 'A') setObstaclesA([...obstaclesA, { x: 1.5, z: 2.0 }]);
     else setObstaclesB([...obstaclesB, { x: 1.5, z: 2.0 }]);
@@ -365,7 +359,7 @@ const SolarPanelCalculator: React.FC = () => {
     else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
   };
 
-  // Funciones de renderizado (SVG, brújula, inclinación) – se mantienen igual
+  // Funciones de renderizado (SVG, brújula, inclinación) – igual que antes
   const renderSVG = (layout: any, widthM: number, lengthM: number, obstacles: Obstacle[], title: string) => {
     if (!layout || layout.totalPanels === 0) return <p className="text-sm text-gray-500">No panels fit (check dimensions or obstacles)</p>;
     const scale = 15;
@@ -454,7 +448,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* TEJADO A (mismo código de antes) */}
+      {/* TEJADO A (mismo código de siempre) */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -515,7 +509,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS – BARRA TRICOLOR CON STANDBY INCORPORADO */}
+      {/* LOCATION & FINANCIAL ANALYSIS – CON STANDBY DIRECTAMENTE EN ROJO */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -526,7 +520,7 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red)</span>
+            <span className="font-medium text-red-600">Grid purchase (red, incl. standby)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
           <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
@@ -557,9 +551,10 @@ const SolarPanelCalculator: React.FC = () => {
             className="w-full mt-2"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Adjust green (self‑consumption). Red includes unavoidable grid (20% of green) plus <strong>{standbyFromGridMonthly.toFixed(2)} kWh/month</strong> from inverter standby.  
-            Total red = {totalGridPurchaseKwhMonthly.toFixed(1)} kWh/month.  
-            <strong>Note:</strong> The standby power also adds {solarCoveredStandby / 12} kWh/month to the green bar.
+            Adjust green (self‑consumption). Red includes:
+            <br />- Inevitable grid purchase: {inevitableGridMonthly.toFixed(1)} kWh (20% of green)
+            <br />- <strong>Inverter standby: {standbyMonthlyKwh.toFixed(2)} kWh/month</strong> (always from grid)
+            <br />Total red = {totalGridPurchaseKwhMonthly.toFixed(1)} kWh/month.
           </p>
         </div>
 
@@ -567,12 +562,12 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="bg-green-100 p-3 rounded-lg text-center">
             <p className="text-sm text-green-800 font-semibold">🌞 Self-consumed</p>
             <p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p>
-            <p className="text-xs text-green-600">Includes {solarCoveredStandby / 12} kWh from standby</p>
+            <p className="text-xs text-green-600">From your solar panels</p>
           </div>
           <div className="bg-red-100 p-3 rounded-lg text-center">
             <p className="text-sm text-red-800 font-semibold">🏭 Grid purchase</p>
             <p className="text-2xl font-bold text-red-600">{totalGridPurchaseKwhMonthly.toFixed(1)} kWh</p>
-            <p className="text-xs text-red-600">Standby adds {standbyFromGridMonthly.toFixed(2)} kWh</p>
+            <p className="text-xs text-red-600">Standby adds {standbyMonthlyKwh.toFixed(2)} kWh</p>
           </div>
           <div className="bg-blue-100 p-3 rounded-lg text-center">
             <p className="text-sm text-blue-800 font-semibold">💰 Exported</p>
