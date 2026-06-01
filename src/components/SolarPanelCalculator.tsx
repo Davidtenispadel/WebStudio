@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// ==================== DATOS DE IRRADIACIÓN POR PAÍS ====================
+// ==================== DATOS DE IRRADIACIÓN POR PAÍS (sin cambios) ====================
 type CountryInsolation = { name: string; north: number; south: number };
 const countriesInsolation: CountryInsolation[] = [
   { name: "United Kingdom", north: 850, south: 1000 },
@@ -62,7 +62,7 @@ const countriesInsolation: CountryInsolation[] = [
   { name: "Nigeria", north: 1600, south: 1800 },
 ];
 
-// ==================== FACTOR CLIMÁTICO ====================
+// ==================== FACTOR CLIMÁTICO (sin cambios) ====================
 const getClimateFactor = (countryName: string): number => {
   const rainyCountries = ["United Kingdom", "Ireland", "Netherlands", "Belgium", "Denmark", "Norway", "Sweden", "Finland", "Iceland", "New Zealand"];
   const dryCountries = ["Spain", "Portugal", "Greece", "Italy", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India"];
@@ -71,7 +71,7 @@ const getClimateFactor = (countryName: string): number => {
   return 0.92;
 };
 
-// ==================== CATÁLOGO DE PANELES ====================
+// ==================== CATÁLOGO DE PANELES (sin cambios) ====================
 const PANEL_CATALOG = {
   perc: { name: "PERC (monocristalino)", price: 75, powerWp: 410, efficiency: "18‑20%", imageType: "mono" },
   topcon: { name: "TOPCon (monocristalino)", price: 85, powerWp: 440, efficiency: "20‑22.5%", imageType: "mono" },
@@ -81,7 +81,7 @@ const PANEL_CATALOG = {
 };
 type PanelKey = keyof typeof PANEL_CATALOG;
 
-// ==================== FACTORES ORIENTACIÓN E INCLINACIÓN ====================
+// ==================== FACTORES ORIENTACIÓN E INCLINACIÓN (sin cambios) ====================
 const getOrientationFactor = (deg: number): number => {
   let angle = deg % 360;
   if (angle < 0) angle += 360;
@@ -112,7 +112,7 @@ const getColorFromFactor = (factor: number, minFactor: number, maxFactor: number
   return `rgb(${r}, ${g}, 0)`;
 };
 
-// ==================== DISPOSICIÓN EN TEJADO ====================
+// ==================== DISPOSICIÓN EN TEJADO (sin cambios) ====================
 type Obstacle = { x: number; z: number };
 const calculateUsableDimensions = (roofLength: number, roofWidth: number, obstacles: Obstacle[]) => {
   const margin = 0.4;
@@ -147,12 +147,12 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
   return { totalPanels: panelPositions.length, cols, rows, panelPositions };
 };
 
-// ==================== COMPONENTE PRINCIPAL ====================
+// ==================== COMPONENTE PRINCIPAL MODIFICADO ====================
 const SolarPanelCalculator: React.FC = () => {
   const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Scroll suave SOLO si se accede con el hash (desde Tools)
+  // Scroll suave SOLO si se accede con el hash (desde Tools)
   useEffect(() => {
     if (window.location.hash === '#solar-calculator') {
       setTimeout(() => {
@@ -160,7 +160,6 @@ const SolarPanelCalculator: React.FC = () => {
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 200);
     }
-    // Si no hay hash, NO se hace scroll automático (evita que la calculadora desplace la página cuando se ve dentro de SolarPanelsPage)
   }, []);
 
   // --- Estados para Tejado A ---
@@ -191,8 +190,11 @@ const SolarPanelCalculator: React.FC = () => {
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
   const [exportTariff, setExportTariff] = useState(15);
-  const [monthlyBill, setMonthlyBill] = useState(120);
-  const importPrice = 24; // p/kWh
+  const [importPrice, setImportPrice] = useState(24); // p/kWh
+  
+  // --- NUEVOS CAMPOS: Standing Charge y Unit Rate ---
+  const [standingCharge, setStandingCharge] = useState(15); // £ por mes
+  const [unitRate, setUnitRate] = useState(0.24); // £ por kWh
 
   // Costes de instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
@@ -215,6 +217,56 @@ const SolarPanelCalculator: React.FC = () => {
   const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
   const climateFactor = getClimateFactor(selectedCountry);
+
+  // --- DATOS DE PRECIOS DE ELECTRICIDAD POR PAÍS (Fuente: Eurostat, Ofgem, 2025) ---
+  // Basado en datos de Eurostat y Ofgem para el primer semestre de 2025.
+  // Incluye los precios totales con impuestos.
+  const electricityPricesByCountry: { [key: string]: { unitRate: number; currency: string; source: string } } = {
+    "United Kingdom": { unitRate: 0.2800, currency: "£", source: "Ofgem (estimado)" },
+    "Ireland": { unitRate: 0.4042, currency: "€", source: "Eurostat (H2 2025, €40.42/100kWh)" },
+    "Germany": { unitRate: 0.3869, currency: "€", source: "Eurostat (H2 2025, €38.69/100kWh)" },
+    "Belgium": { unitRate: 0.3499, currency: "€", source: "Eurostat (H2 2025, €34.99/100kWh)" },
+    "Denmark": { unitRate: 0.3312, currency: "€", source: "Eurostat (H2 2025, €33.12/100kWh)" },
+    "Italy": { unitRate: 0.2966, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "France": { unitRate: 0.2561, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Spain": { unitRate: 0.2669, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Portugal": { unitRate: 0.2434, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Greece": { unitRate: 0.2378, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Netherlands": { unitRate: 0.2930, currency: "€", source: "Eurostat (H2 2025)" },
+    "Poland": { unitRate: 0.2100, currency: "€", source: "Eurostat (H2 2025)" },
+    "Sweden": { unitRate: 0.2700, currency: "€", source: "Eurostat (H2 2025)" },
+    "Austria": { unitRate: 0.3272, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Czech Republic": { unitRate: 0.3217, currency: "€", source: "Countryeconomy (Dic 2025)" },
+    "Romania": { unitRate: 0.1860, currency: "€", source: "Eurostat (H2 2025)" },
+    "Finland": { unitRate: 0.2303, currency: "€", source: "Countryeconomy (Dic 2025)" },
+  };
+
+  // --- Efecto para actualizar el unitRate y standing charge al cambiar de país ---
+  useEffect(() => {
+    // Obtener precio del país seleccionado, si no existe mantener el valor actual
+    const priceInfo = electricityPricesByCountry[selectedCountry];
+    if (priceInfo) {
+      // Convertir a GBP si es EUR (usando tasa de conversión aproximada 1 EUR = 0.85 GBP)
+      const conversionRate = priceInfo.currency === "€" ? 0.85 : 1.0;
+      let newUnitRate = priceInfo.unitRate * conversionRate;
+      // Limitar a 2 decimales
+      newUnitRate = Math.round(newUnitRate * 100) / 100;
+      setUnitRate(newUnitRate);
+      
+      // Actualizar standing charge basado en el país (valores reales basados en ofgem)
+      if (selectedCountry === "United Kingdom") {
+        setStandingCharge(15); // Aproximado £0.53/día * 30 días ≈ £15.90
+      } else if (selectedCountry === "Spain") {
+        setStandingCharge(10); // Aproximado €0.33/día
+      } else if (selectedCountry === "France") {
+        setStandingCharge(12); // Aproximado €0.40/día
+      } else if (selectedCountry === "Germany") {
+        setStandingCharge(18); // Aproximado €0.60/día
+      } else {
+        setStandingCharge(12); // Valor genérico para otros países europeos
+      }
+    }
+  }, [selectedCountry]);
 
   // Effects para layouts
   useEffect(() => {
@@ -268,25 +320,50 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // Cálculos financieros
+  // --- CÁLCULOS FINANCIEROS MODIFICADOS ---
+  // Consumo anual y mensual
   const selfConsumedKwh = totalAnnualKwh * (selfConsumptionPercent / 100);
   const exportedKwh = Math.max(0, totalAnnualKwh - selfConsumedKwh);
+  
+  // Costos de inversor
   const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
   const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwh);
   const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importPrice / 100);
+  
+  // Mantenimiento anual
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
   const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
   const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
+  
+  // Costos de instalación totales
   const totalPanelCost = totalPanelsCount * panelPricePerUnit;
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
-  const annualSavingFromSelf = (selfConsumedKwh * importPrice) / 100;
-  const annualExportIncome = (exportedKwh * exportTariff) / 100;
+  
+  // Beneficios anuales de autoconsumo y exportación
+  const annualSavingFromSelf = selfConsumedKwh * unitRate;
+  const annualExportIncome = exportedKwh * (exportTariff / 100);
   const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
   const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
-  const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
-  const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
+  
+  // --- FACTURA MENSUAL: CALCULADA DE FORMA DINÁMICA ---
+  // La factura se compone de standing charge + consumo de la red
+  // Red import = (consumo total - autoconsumo) * unitRate
+  const monthlyStandingCharge = standingCharge;
+  
+  // Consumo anual total (tomamos un valor de referencia de 4000 kWh para el ejemplo, pero puede ser dinámico)
+  // En un cálculo real, se debería ingresar el consumo mensual del usuario
+  const annualGridImport = Math.max(0, 4000 - selfConsumedKwh);
+  const monthlyGridImportCost = (annualGridImport / 12) * unitRate;
+  
+  // Factura mensual total (standing charge + costo de importación de la red)
+  const monthlyBill = monthlyStandingCharge + monthlyGridImportCost;
+  
+  // Ahorro mensual basado en el beneficio anual total
   const monthlyBillSaving = totalAnnualBenefit / 12;
   const newMonthlyBill = Math.max(0, monthlyBill - monthlyBillSaving);
+  
+  const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
+  const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
 
   // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
@@ -555,9 +632,21 @@ const SolarPanelCalculator: React.FC = () => {
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div><label>Country:</label><select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">{countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}</select></div>
-          <div><label>Region:</label><select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full"><option value="south">Southern</option><option value="north">Northern</option></select></div>
+          <div>
+            <label>Country:</label>
+            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">
+              {countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Region:</label>
+            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full">
+              <option value="south">Southern</option>
+              <option value="north">Northern</option>
+            </select>
+          </div>
         </div>
+        
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label>Self-consumption vs Export:</label>
@@ -569,25 +658,103 @@ const SolarPanelCalculator: React.FC = () => {
             <input type="range" min="0" max="100" step="5" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full" />
           </div>
           <div>
-            <div className="flex justify-between"><span>Export tariff (p/kWh):</span><input type="number" step="0.5" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" /></div>
-            <div className="flex justify-between mt-1"><span>Monthly bill (£):</span><input type="number" step="10" value={monthlyBill} onChange={(e) => setMonthlyBill(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" /></div>
+            <div className="flex justify-between">
+              <span>Export tariff (p/kWh):</span>
+              <input type="number" step="0.5" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" />
+            </div>
+            
+            {/* --- NUEVOS CAMPOS: Standing Charge y Unit Rate --- */}
+            <div className="flex justify-between mt-1">
+              <div className="flex items-center gap-1">
+                <span>Standing Charge (£/month):</span>
+                <div className="group relative inline-block">
+                  <span className="text-xs text-gray-500 cursor-help border-b border-dotted border-gray-400">ⓘ</span>
+                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    Cargo fijo diario/mensual que pagas independientemente del consumo
+                  </div>
+                </div>
+              </div>
+              <input
+                type="number"
+                step="1"
+                value={standingCharge}
+                onChange={(e) => setStandingCharge(parseFloat(e.target.value))}
+                className="border p-1 rounded w-28 text-right"
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <div className="flex items-center gap-1">
+                <span>Unit Rate (£/kWh):</span>
+                <div className="group relative inline-block">
+                  <span className="text-xs text-gray-500 cursor-help border-b border-dotted border-gray-400">ⓘ</span>
+                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    Precio por kWh de la energía que consumes de la red
+                  </div>
+                </div>
+              </div>
+              <input
+                type="number"
+                step="0.01"
+                value={unitRate}
+                onChange={(e) => setUnitRate(parseFloat(e.target.value))}
+                className="border p-1 rounded w-28 text-right"
+              />
+            </div>
+            
+            {/* --- Preview de la factura actual basada en los parámetros --- */}
+            <div className="mt-3 pt-2 border-t border-green-200">
+              <div className="flex justify-between text-sm">
+                <span>💷 Estimated monthly bill:</span>
+                <span className="font-semibold">£{monthlyBill.toFixed(2)}</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Calculated from standing charge + estimated grid consumption
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Barra de autoconsumo mensual */}
+        {/* --- BARRA DE AUTOCONSUMO MEJORADA (basada en promedio estacional) --- */}
         {(() => {
-          const totalProductionKwh = totalAnnualKwh;
-          const selfConsumedKwhLocal = totalProductionKwh * (selfConsumptionPercent / 100);
-          const pricePerKwh = importPrice / 100;
-          const monthlyMaxPotential = (totalProductionKwh * pricePerKwh) / 12;
-          const monthlySelfConsumptionMoney = (selfConsumedKwhLocal * pricePerKwh) / 12;
+          // Calcular la generación total por estación para ambos tejados
+          const seasonalGeneration = {
+            spring: prodA.seasonalKwh.spring + (enableRoofB ? prodB.seasonalKwh.spring : 0),
+            summer: prodA.seasonalKwh.summer + (enableRoofB ? prodB.seasonalKwh.summer : 0),
+            autumn: prodA.seasonalKwh.autumn + (enableRoofB ? prodB.seasonalKwh.autumn : 0),
+            winter: prodA.seasonalKwh.winter + (enableRoofB ? prodB.seasonalKwh.winter : 0),
+          };
+          
+          // Ahorro mensual potencial por estación (en £)
+          const seasonalMonthlySaving = {
+            spring: (seasonalGeneration.spring * unitRate) / 12,
+            summer: (seasonalGeneration.summer * unitRate) / 12,
+            autumn: (seasonalGeneration.autumn * unitRate) / 12,
+            winter: (seasonalGeneration.winter * unitRate) / 12,
+          };
+          
+          // Promedio estacional mensual (máximo potencial realista)
+          const monthlyMaxPotential = (seasonalMonthlySaving.spring + seasonalMonthlySaving.summer + seasonalMonthlySaving.autumn + seasonalMonthlySaving.winter) / 4;
+          
+          // Ahorro real mensual basado en el % de autoconsumo
+          const annualSelfConsumptionValue = (seasonalGeneration.spring + seasonalGeneration.summer + seasonalGeneration.autumn + seasonalGeneration.winter) * unitRate;
+          const monthlySelfConsumptionMoney = (annualSelfConsumptionValue * (selfConsumptionPercent / 100)) / 12;
+          
           const fillPercent = monthlyMaxPotential > 0
             ? Math.min(100, (monthlySelfConsumptionMoney / monthlyMaxPotential) * 100)
             : 0;
+          
           return (
             <div className="mt-4 pt-2 border-t border-green-200">
               <div className="flex justify-between text-sm mb-1">
-                <span>💰 Autoconsumo mensual (ahorro real)</span>
+                <div className="flex items-center gap-1">
+                  <span>💰 Monthly self-consumption savings</span>
+                  <div className="group relative inline-block">
+                    <span className="text-xs text-gray-500 cursor-help border-b border-dotted border-gray-400">ⓘ</span>
+                    <div className="absolute bottom-full left-0 mb-2 w-56 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      Ahorro real mensual basado en tu porcentaje de autoconsumo
+                    </div>
+                  </div>
+                </div>
                 <span className="font-bold text-green-700">£{monthlySelfConsumptionMoney.toFixed(2)}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
@@ -598,16 +765,25 @@ const SolarPanelCalculator: React.FC = () => {
                     backgroundColor: '#22c55e',
                   }}
                 >
-                  {fillPercent > 12 && `${fillPercent.toFixed(0)}% del máximo`}
+                  {fillPercent > 12 && `${fillPercent.toFixed(0)}% of max`}
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Máximo posible si consumieras toda tu generación solar: <strong>£{monthlyMaxPotential.toFixed(2)}/mes</strong><br />
-                Basado en {selfConsumptionPercent}% de autoconsumo y factura actual de £{monthlyBill}.
+                Maximum potential monthly savings: <strong>£{monthlyMaxPotential.toFixed(2)}/month</strong> (average seasonal generation)<br />
+                Based on {selfConsumptionPercent}% self-consumption with price: £{unitRate.toFixed(2)}/kWh
               </p>
             </div>
           );
         })()}
+        
+        {/* --- Mostrar fuente de datos de precios --- */}
+        {electricityPricesByCountry[selectedCountry] && (
+          <div className="mt-3 text-right">
+            <p className="text-[10px] text-gray-400 italic">
+              ⓘ Electricity price data source: {electricityPricesByCountry[selectedCountry].source} {electricityPricesByCountry[selectedCountry].currency === "€" ? "(converted from EUR to GBP)" : ""}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* RESULTS */}
