@@ -171,6 +171,7 @@ const SolarPanelCalculator: React.FC = () => {
   const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
+  // Scroll al cargar con hash
   useEffect(() => {
     if (window.location.hash === '#solar-calculator') {
       setTimeout(() => {
@@ -180,7 +181,7 @@ const SolarPanelCalculator: React.FC = () => {
     }
   }, []);
 
-  // --- Tejado A ---
+  // --- Estados Tejado A ---
   const [roofALength, setRoofALength] = useState(8);
   const [roofAWidth, setRoofAWidth] = useState(5);
   const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
@@ -191,7 +192,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [shadingPercentA, setShadingPercentA] = useState(0);
   const [layoutA, setLayoutA] = useState<any>(null);
 
-  // --- Tejado B ---
+  // --- Estados Tejado B ---
   const [enableRoofB, setEnableRoofB] = useState(true);
   const [roofBLength, setRoofBLength] = useState(6);
   const [roofBWidth, setRoofBWidth] = useState(4);
@@ -207,12 +208,12 @@ const SolarPanelCalculator: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
-  
-  // Tarifas (se actualizan al cambiar país)
+
+  // Tarifas energía (import/export)
   const [importTariff, setImportTariff] = useState(0.2800);
   const [exportTariff, setExportTariff] = useState(0.0900);
   const [standingCharge, setStandingCharge] = useState(15);
-  
+
   // Costes instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
   const [inverterType, setInverterType] = useState<'string' | 'micro' | 'hybrid'>('string');
@@ -245,7 +246,7 @@ const SolarPanelCalculator: React.FC = () => {
     }
   }, [selectedCountry]);
 
-  // Layouts effects
+  // Layout effects
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
     if (roofALength > 0 && roofAWidth > 0) {
@@ -269,7 +270,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(invPrices[inverterType]);
   }, [inverterType]);
 
-  // Producción
+  // Cálculo producción
   const getRoofProduction = (layout: any, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 } };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -297,17 +298,17 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // ==================== NUEVA LÓGICA DE BARRA TRICOLOR ====================
-  const INEVITABLE_GRID_KWH = 200; // kWh/mes fijos (noche y mal tiempo)
+  // ==================== NUEVA LÓGICA TRICOLOR CON PORCENTAJE FIJO DE INEVITABLE ====================
+  const INEVITABLE_PERCENT = 20; // 20% de la generación solar se considera compra de red inevitable (noche / mal tiempo)
   const avgMonthlyGeneration = totalAnnualKwh / 12;
+
+  // Cálculo de kWh
+  const gridPurchaseKwhMonthly = avgMonthlyGeneration * (INEVITABLE_PERCENT / 100);
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
-  // El rojo es fijo: siempre compras 200 kWh de la red
-  const gridPurchaseKwhMonthly = INEVITABLE_GRID_KWH;
-  // El azul es el excedente: generación - autoconsumo - compra red (si da negativo, no exportas)
   let exportedKwhMonthly = avgMonthlyGeneration - selfConsumedKwhMonthly - gridPurchaseKwhMonthly;
   if (exportedKwhMonthly < 0) exportedKwhMonthly = 0;
 
-  // Consumo total del hogar = autoconsumo + compra red (inevitable)
+  // El consumo total del hogar = autoconsumo + compra de red inevitable
   const totalConsumption = selfConsumedKwhMonthly + gridPurchaseKwhMonthly;
 
   // Facturas
@@ -315,24 +316,16 @@ const SolarPanelCalculator: React.FC = () => {
   const monthlyBillWithSolar = (gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
   const monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
 
-  // Cálculos financieros anuales (para ROI, payback)
-  const selfConsumedKwhAnnual = selfConsumedKwhMonthly * 12;
-  const exportedKwhAnnual = exportedKwhMonthly * 12;
-  const gridPurchaseKwhAnnual = gridPurchaseKwhMonthly * 12;
-  const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
-  const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwhAnnual);
-  const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importTariff);
-  const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
-  const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
-  const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
-  const totalPanelCost = totalPanelsCount * panelPricePerUnit;
-  const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
-  const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
-  const annualExportIncome = exportedKwhAnnual * exportTariff;
-  const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
-  const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
-  const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
-  const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
+  // Porcentajes para la barra
+  const greenPercent = selfConsumptionPercent; // %
+  const redPercent = INEVITABLE_PERCENT; // %
+  const bluePercent = Math.max(0, 100 - greenPercent - redPercent); // %
+
+  // Posición del punto azul (al final del rojo)
+  const dotPosition = redPercent + greenPercent; // %
+
+  // Límite máximo del slider (no puede invadir el rojo)
+  const maxSelfConsumption = 100 - redPercent;
 
   // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
@@ -426,6 +419,24 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
+  // Cálculos financieros anuales para ROI y payback
+  const selfConsumedKwhAnnual = selfConsumedKwhMonthly * 12;
+  const exportedKwhAnnual = exportedKwhMonthly * 12;
+  const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
+  const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwhAnnual);
+  const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importTariff);
+  const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
+  const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
+  const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
+  const totalPanelCost = totalPanelsCount * panelPricePerUnit;
+  const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
+  const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
+  const annualExportIncome = exportedKwhAnnual * exportTariff;
+  const totalAnnualBenefitBeforeMaintenance = annualSavingFromSelf + annualExportIncome;
+  const totalAnnualBenefit = Math.max(0, totalAnnualBenefitBeforeMaintenance - totalAnnualMaintenanceCost);
+  const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
+  const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
+
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
@@ -496,7 +507,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS - NUEVA BARRA TRICOLOR */}
+      {/* LOCATION & FINANCIAL ANALYSIS - NUEVA BARRA TRICOLOR CON INEVITABLE COMO % FIJO */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -508,38 +519,39 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red, fixed 200 kWh)</span>
+            <span className="font-medium text-red-600">Grid purchase (inevitable, {INEVITABLE_PERCENT}% of generation)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
           <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
             <div className="absolute inset-0" style={{
               background: `linear-gradient(to right, 
                 #22c55e 0%, 
-                #22c55e ${selfConsumptionPercent}%, 
-                #ef4444 ${selfConsumptionPercent}%, 
-                #ef4444 ${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}%, 
-                #3b82f6 ${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}%, 
+                #22c55e ${greenPercent}%, 
+                #ef4444 ${greenPercent}%, 
+                #ef4444 ${greenPercent + redPercent}%, 
+                #3b82f6 ${greenPercent + redPercent}%, 
                 #3b82f6 100%)`
             }} />
             <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-800 rounded-full shadow-lg border-2 border-white cursor-pointer"
-              style={{ left: `calc(${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}% - 12px)` }} />
+              style={{ left: `calc(${greenPercent + redPercent}% - 12px)` }} />
             <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold">
-              <span>{selfConsumptionPercent}%</span>
-              <span>{(INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100).toFixed(1)}%</span>
-              <span>{Math.max(0, 100 - selfConsumptionPercent - (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)).toFixed(1)}%</span>
+              <span>{greenPercent}%</span>
+              <span>{redPercent}%</span>
+              <span>{bluePercent}%</span>
             </div>
           </div>
           <input
             type="range"
             min="0"
-            max={Math.max(0, 100 - (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100))}
+            max={maxSelfConsumption}
             step="1"
             value={selfConsumptionPercent}
             onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))}
             className="w-full mt-2"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Adjust the slider to change your self-consumption (green). Red is a fixed {INEVITABLE_GRID_KWH} kWh/month (night + rainy days). Blue is the surplus exported.
+            Adjust the slider to change your self-consumption (green). Red is fixed at {INEVITABLE_PERCENT}% of your monthly solar generation (night + rainy days). Blue is the surplus exported.
+            When green is at {maxSelfConsumption}%, export = 0; when green = 0%, export = {100 - redPercent}% (all surplus).
           </p>
         </div>
 
@@ -553,7 +565,7 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="bg-red-100 p-3 rounded-lg text-center">
             <p className="text-sm text-red-800 font-semibold">🏭 Grid purchase (inevitable)</p>
             <p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p>
-            <p className="text-xs text-red-600">Necessary for night & bad weather</p>
+            <p className="text-xs text-red-600">Fixed {INEVITABLE_PERCENT}% of generation</p>
           </div>
           <div className="bg-blue-100 p-3 rounded-lg text-center">
             <p className="text-sm text-blue-800 font-semibold">💰 Exported to grid</p>
