@@ -204,7 +204,7 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Parámetros comunes ---
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
-  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50); // verde
+  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
 
   // Tarifas energía
   const [importTariff, setImportTariff] = useState(0.2800);
@@ -293,46 +293,29 @@ const SolarPanelCalculator: React.FC = () => {
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
   // ==================== CÁLCULO DEL STANDBY (CORREGIDO) ====================
-  // Potencia standby en kW
   const standbyPowerKw = standbyPowerW / 1000;
-  // Energía mensual consumida por el inversor en standby (kWh/mes)
-  const standbyMonthlyKwh = standbyPowerKw * 24 * 30;   // 24h/día * 30 días
+  const standbyMonthlyKwh = standbyPowerKw * 24 * 30;
 
-  // Generación solar media mensual
   const avgMonthlyGeneration = totalAnnualKwh / 12 || 0;
-
-  // Autoconsumo solar (verde) sin tener en cuenta el standby (solo la energía que consumes directamente de tus placas)
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
-
-  // Compra de red inevitable (por noche, mal tiempo) = 20% del autoconsumo
   const RED_FACTOR = 0.2;
   const inevitableGridMonthly = selfConsumedKwhMonthly * RED_FACTOR;
-
-  // Compra de red total = inevitable + standby (el standby siempre va a la red)
   let totalGridPurchaseKwhMonthly = inevitableGridMonthly + standbyMonthlyKwh;
-
-  // Convertir a porcentaje sobre la generación mensual
   let redPercent = (totalGridPurchaseKwhMonthly / avgMonthlyGeneration) * 100;
   const greenPercent = selfConsumptionPercent;
-
-  // Ajustar para que verde + rojo no supere el 100% (si ocurre, se reduce rojo y se pierde parte del standby)
   if (redPercent > (100 - greenPercent)) {
     redPercent = 100 - greenPercent;
     totalGridPurchaseKwhMonthly = avgMonthlyGeneration * (redPercent / 100);
   }
-
   let exportedKwhMonthly = avgMonthlyGeneration - selfConsumedKwhMonthly - totalGridPurchaseKwhMonthly;
   if (exportedKwhMonthly < 0) exportedKwhMonthly = 0;
-
   const bluePercent = 100 - greenPercent - redPercent;
 
-  // Facturas mensuales
   const totalConsumption = selfConsumedKwhMonthly + totalGridPurchaseKwhMonthly;
   const monthlyBillWithoutSolar = (totalConsumption * importTariff) + standingCharge;
   const monthlyBillWithSolar = (totalGridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
   const monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
 
-  // Cálculos financieros anuales (ROI, payback)
   const exportedKwhAnnual = exportedKwhMonthly * 12;
   const inverterNetCost = standbyMonthlyKwh * 12 * importTariff;
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
@@ -347,7 +330,7 @@ const SolarPanelCalculator: React.FC = () => {
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
   const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
 
-  const maxGreen = 100 / (1 + RED_FACTOR); // límite superior para el slider
+  const maxGreen = 100 / (1 + RED_FACTOR);
 
   // Handlers obstáculos
   const addObstacle = (roof: 'A' | 'B') => {
@@ -359,7 +342,7 @@ const SolarPanelCalculator: React.FC = () => {
     else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
   };
 
-  // Funciones de renderizado (SVG, brújula, inclinación) – igual que antes
+  // Funciones de renderizado (SVG, brújula, inclinación)
   const renderSVG = (layout: any, widthM: number, lengthM: number, obstacles: Obstacle[], title: string) => {
     if (!layout || layout.totalPanels === 0) return <p className="text-sm text-gray-500">No panels fit (check dimensions or obstacles)</p>;
     const scale = 15;
@@ -439,6 +422,34 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
+  // ==================== NUEVA FUNCIÓN: DESCRIPCIÓN DE COBERTURA ====================
+  const getCoverageDescription = (selfConsumedKwh: number): string => {
+    if (selfConsumedKwh < 180) {
+      return `🔹 Con ${selfConsumedKwh.toFixed(0)} kWh/mes de autoconsumo:
+• Vivienda 1‑2 hab → electrificación media (cocina eléctrica, sin calefacción eléctrica, sin coche)
+• Vivienda 3‑4 hab → electrificación baja (solo cocina eléctrica, calefacción de gas)
+• Vivienda 5 hab → electrificación muy baja (solo iluminación y electrodomésticos básicos)`;
+    } 
+    else if (selfConsumedKwh < 300) {
+      return `🔸 Con ${selfConsumedKwh.toFixed(0)} kWh/mes de autoconsumo:
+• Vivienda 1‑2 hab → electrificación alta (cocina eléctrica, calefacción eléctrica, coche pequeño 55 kWh)
+• Vivienda 3‑4 hab → electrificación media (cocina eléctrica, calefacción de gas, sin coche)
+• Vivienda 5 hab → electrificación baja (cocina eléctrica, calefacción de gas)`;
+    }
+    else if (selfConsumedKwh < 450) {
+      return `🔹 Con ${selfConsumedKwh.toFixed(0)} kWh/mes de autoconsumo:
+• Vivienda 1‑2 hab → electrificación muy alta (todo eléctrico + coche grande 90 kWh)
+• Vivienda 3‑4 hab → electrificación alta (todo eléctrico + coche pequeño)
+• Vivienda 5 hab → electrificación media (cocina eléctrica, calefacción eléctrica, sin coche)`;
+    }
+    else {
+      return `✅ Con ${selfConsumedKwh.toFixed(0)} kWh/mes de autoconsumo:
+• Vivienda 1‑2 hab → 100% cubierta (incluso con alta demanda)
+• Vivienda 3‑4 hab → electrificación muy alta (todo eléctrico + 2 coches)
+• Vivienda 5 hab → electrificación alta (todo eléctrico + coche grande)`;
+    }
+  };
+
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
@@ -448,7 +459,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* TEJADO A (mismo código de siempre) */}
+      {/* TEJADO A */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -607,6 +618,19 @@ const SolarPanelCalculator: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* ========== NUEVA SECCIÓN: COBERTURA DE VIVIENDA ========== */}
+      {selfConsumedKwhMonthly > 0 && (
+        <div className="mt-6 p-5 bg-white border border-gray-300 rounded-lg shadow-md">
+          <h3 className="font-bold text-xl text-gray-800 mb-3">🏡 ¿Qué tipo de vivienda puedes alimentar con tu autoconsumo?</h3>
+          <pre className="text-sm whitespace-pre-wrap font-sans text-gray-700 bg-gray-50 p-3 rounded-md">
+            {getCoverageDescription(selfConsumedKwhMonthly)}
+          </pre>
+          <p className="text-xs text-gray-500 mt-2">
+            * Basado en consumos típicos para cada nivel de electrificación. El autoconsumo es la energía solar que usas directamente.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
