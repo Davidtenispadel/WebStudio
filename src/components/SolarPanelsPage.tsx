@@ -1,32 +1,22 @@
-// src/components/SolarPanelsPage.tsx
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import SolarPanelCalculator from './SolarPanelCalculator';
+import SolarCoverageTable from './SolarCoverageTable'; // si lo tienes, opcional
 
 const SolarPanelsPage: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // ✅ Scroll al principio del contenido cuando se monta el componente
-  useEffect(() => {
-    if (containerRef.current) {
-      // Pequeño retraso para asegurar que el DOM esté listo
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    }
-  }, []);
-
   return (
-    <div ref={containerRef} className="text-black max-w-6xl mx-auto px-4">
+    <div className="text-black max-w-6xl mx-auto px-4 sm:px-10">
       <h2 className="text-3xl md:text-4xl font-light mb-6">
         <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
       </h2>
 
+      {/* Párrafo introductorio con imágenes centradas y datos reales después de la segunda imagen */}
       <p className="text-lg mb-6">
         Photovoltaic solar panels convert sunlight into electricity and today stand among the most profitable investments for homeowners. In this guide, you'll discover when solar panels were first developed, how much they used to cost, and how much they cost now after a price drop of more than 90%.
         <br /><br />
         <strong>But the real question is: are they truly a good investment?</strong>
       </p>
 
+      {/* Imagen 1 centrada */}
       <div className="flex justify-center my-4">
         <img 
           src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" 
@@ -37,9 +27,10 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       <p className="text-lg mb-6">
-        You will also see what real returns they offer compared to other investments: a bank deposit yields around 3%, the stock market can reach 10%, but solar panels achieve between 12% and 18% annually. However, this depends on your home's consumption, your generation capacity, and how the electricity company compensates you for surplus energy. Additionally, you will learn how to use a simple formula to calculate how many years it will take to recoup your investment, without batteries. You can enter your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell surplus energy back to the electricity company, you will know exactly when your electricity will become completely free. Is the investment profitable then? Could it even be more profitable than investing in the stock market? <strong>Using the interactive calculator below, you can determine your personalized annual ROI (Return on Investment) percentage based on your specific data.</strong>
+        You will also see what real returns they offer compared to other investments: a bank deposit yields around <strong>3%</strong>, the stock market can reach <strong>10%</strong>, but solar panels achieve between <strong>12%</strong> and <strong>18%</strong> annually, depending on your home and your consumption. Additionally, you will learn how to calculate with a simple formula how many years it will take to recoup your investment without batteries, by entering your own data: orientation, location, number of panels, roof pitch, installation costs, and your average consumption. If you sell the surplus to the electricity company, you will know exactly when your energy will become completely free.
       </p>
 
+      {/* Imagen 2 centrada */}
       <div className="flex justify-center my-4">
         <img 
           src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" 
@@ -49,12 +40,38 @@ const SolarPanelsPage: React.FC = () => {
         />
       </div>
 
+      {/* DATOS REALES DE CONSUMO (insertados después de la segunda imagen) */}
+      <div className="my-8 p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-2xl border border-blue-200 shadow-md">
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">📊 Real example: monthly energy balance (4 kWp system, UK)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold text-green-600">251.1 kWh</div>
+            <div className="text-sm text-gray-500">Self-consumed</div>
+            <div className="text-xs text-gray-400 mt-1">Includes 43.8 kWh from standby</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold text-red-500">50.2 kWh</div>
+            <div className="text-sm text-gray-500">Grid purchase</div>
+            <div className="text-xs text-gray-400 mt-1">Standby adds 0.00 kWh</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="text-3xl font-bold text-blue-600">290.9 kWh</div>
+            <div className="text-sm text-gray-500">Exported</div>
+            <div className="text-xs text-gray-400 mt-1">Surplus sold to utility</div>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-4 text-center">
+          This real monitoring data shows how a typical home uses solar energy: more than half is self-consumed, 
+          and the rest is exported, generating income via the Smart Export Guarantee (SEG).
+        </p>
+      </div>
+
       <p className="text-lg mb-6">
         Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
       </p>
 
       {/* ============================================================ */}
-      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES */}
+      {/* 1. EXTENDED HISTORY + ANALYSIS OF MONO vs POLY + TABLES FROM POINTS 3 & 4 */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         1. Origins and evolution of solar panels – from 19th century to today's technology
@@ -68,6 +85,7 @@ const SolarPanelsPage: React.FC = () => {
         <strong>1‑2%</strong> – revolutionary in concept but not practical for large‑scale electricity.
       </p>
 
+      {/* TWO IMAGES IN PARALLEL */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
         <div className="flex justify-center">
           <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
@@ -264,7 +282,9 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
             <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
@@ -277,7 +297,9 @@ const SolarPanelsPage: React.FC = () => {
       {/* ============================================================ */}
       {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">2. The near future: new solar technologies (2026‑2035)</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">
+        2. The near future: new solar technologies (2026‑2035)
+      </h3>
       <p className="mb-2">
         Although today's panels are already very efficient, science continues to advance. Here are
         the technologies that will reach rooftops in the coming years.
@@ -338,6 +360,7 @@ const SolarPanelsPage: React.FC = () => {
         </ul>
       </div>
 
+      {/* Back-Contact section */}
       <div className="bg-gray-50 p-5 rounded-md border-l-4 border-blue-500 my-6">
         <h4 className="text-xl font-semibold mb-3">🔘 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
         <p className="mb-2">
@@ -567,11 +590,13 @@ const SolarPanelsPage: React.FC = () => {
       </ul>
 
       {/* ============================================================ */}
-      {/* 12. INTERACTIVE CALCULATOR – AL FINAL DE LA PÁGINA */}
+      {/* 12. INTERACTIVE CALCULATOR */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">📊 12. Interactive ROI Calculator</h3>
+      <h3 className="text-2xl font-semibold mt-12 mb-4">12. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
-        Enter your roof dimensions, orientation, location, and other parameters to calculate your personalized return on investment.
+        Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
+        It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
+        and shows a 3D preview.
       </p>
       <SolarPanelCalculator />
 
