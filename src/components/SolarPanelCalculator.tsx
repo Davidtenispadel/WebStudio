@@ -426,28 +426,80 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // ==================== FUNCIÓN PARA NIVEL DE ELECTRIFICACIÓN DINÁMICO ====================
-  const getElectrificationLevel = (selfKwh: number, size: string): string => {
+  // ==================== FUNCIÓN DETALLADA POR PAÍS (ELECTRIFICACIÓN) ====================
+  const getDetailedElectrification = (selfKwh: number, size: string, country: string): string => {
+    const hotCountries = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
+    const isHot = hotCountries.includes(country);
+    const isUk = country === "United Kingdom";
+    
+    // Determine level based on selfKwh and size
+    let level = 0;
     if (size === '1-2') {
-      if (selfKwh < 150) return "electrificación baja (cocina de gas, calefacción de gas, sin coche eléctrico)";
-      if (selfKwh < 350) return "electrificación media (cocina eléctrica de inducción ~18 kWh/mes, frigorífico eficiente ~15 kWh/mes, termo eléctrico ~150 kWh/mes, lavadora)";
-      if (selfKwh < 750) return "electrificación alta (añade calefacción eléctrica: un calefactor de 1.500W funcionando 8h/día suma ~360 kWh/mes)";
-      if (selfKwh < 1000) return "electrificación muy alta (añade coche eléctrico pequeño 55 kWh: ~165 kWh/mes para 12.000 km/año)";
-      return "electrificación extrema (añade coche eléctrico grande 90 kWh: ~210 kWh/mes, o dos coches eléctricos)";
+      if (selfKwh < 150) level = 1;
+      else if (selfKwh < 350) level = 2;
+      else if (selfKwh < 750) level = 3;
+      else if (selfKwh < 1000) level = 4;
+      else level = 5;
+    } else if (size === '3-4') {
+      if (selfKwh < 150) level = 1;
+      else if (selfKwh < 350) level = 2;
+      else if (selfKwh < 750) level = 3;
+      else if (selfKwh < 1000) level = 4;
+      else level = 5;
+    } else {
+      if (selfKwh < 150) level = 1;
+      else if (selfKwh < 350) level = 2;
+      else if (selfKwh < 750) level = 3;
+      else if (selfKwh < 1000) level = 4;
+      else level = 5;
     }
-    if (size === '3-4') {
-      if (selfKwh < 150) return "electrificación muy baja (solo iluminación LED y electrodomésticos esenciales: nevera, TV, pequeños electrodomésticos)";
-      if (selfKwh < 350) return "electrificación baja (cocina vitrocerámica ~22 kWh/mes, frigorífico combi estándar ~42 kWh/mes, termo eléctrico grande ~200 kWh/mes)";
-      if (selfKwh < 750) return "electrificación media (añade bomba de calor aerotermia: 250‑375 kWh/mes para calefacción + ACS en casa de 3-4 hab en UK/España)";
-      if (selfKwh < 1000) return "electrificación alta (añade coche eléctrico pequeño 55 kWh ~165 kWh/mes sobre base de bomba de calor)";
-      return "electrificación muy alta (añade segundo coche eléctrico o coche grande 90 kWh ~210 kWh/mes)";
+    
+    const levelDesc: Record<number, string> = {
+      1: "Very low electrification (basic appliances only, no electric heating, no EV)",
+      2: "Low electrification (electric cooking, gas heating, no EV)",
+      3: "Medium electrification (adds electric heating or heat pump – underfloor heating optional)",
+      4: "High electrification (adds small EV 55 kWh, plus full electric heating/cooling)",
+      5: "Very high electrification (adds second EV or large EV 80‑90 kWh, plus optional pool heat pump)"
+    };
+    let description = levelDesc[level];
+    
+    // Heating/cooling by country
+    if (level >= 3) {
+      if (isUk) {
+        description += " Recommended heating: air-to-water heat pump (underfloor heating or radiators) – 250‑375 kWh/month in winter. Cooling: not typical, but portable AC units possible (~150 kWh/month).";
+      } else if (isHot) {
+        description += " Recommended: reversible air-to-air heat pump (AC + heating) – 200‑300 kWh/month in winter; underfloor heating optional. Essential: Inverter air conditioning for summer – adds 150‑250 kWh/month. If you have a swimming pool, consider a pool heat pump (300‑500 kWh/month during season).";
+      } else {
+        description += " Recommended: heat pump (air-to-water or geothermal) – 250‑400 kWh/month. Optional: reversible AC for cooling (~200 kWh/month in summer).";
+      }
+    } else {
+      description += " Not enough self-consumption for electric heating – use gas/oil boiler or improve insulation. Cooling not feasible with current solar production.";
     }
-    // size === '5+'
-    if (selfKwh < 150) return "electrificación muy baja (solo electrodomésticos básicos: frigorífico, iluminación, TV)";
-    if (selfKwh < 350) return "electrificación baja (cocina eléctrica, frigorífico grande ~50 kWh/mes, termo eléctrico grande ~250 kWh/mes, lavadora y lavavajillas)";
-    if (selfKwh < 750) return "electrificación media (añade calefacción eléctrica resistiva o bomba de calor sobredimensionada para casa grande)";
-    if (selfKwh < 1000) return "electrificación alta (añade coche eléctrico pequeño ~165 kWh/mes más termo eléctrico adicional)";
-    return "electrificación muy alta (añade coche eléctrico grande ~210 kWh/mes y posiblemente climatización de piscina o sistemas adicionales)";
+    
+    // EV options
+    if (level >= 4) {
+      description += " EV: small EV (55 kWh battery, ~165 kWh/month) – you can charge mostly with solar.";
+      if (level >= 5) {
+        description += " Upgrade to large EV (80‑90 kWh, ~210‑250 kWh/month) or add a second small EV. Your self-consumption covers high mileage.";
+      } else {
+        description += " A second EV would require higher self-consumption or additional grid imports.";
+      }
+    } else {
+      description += " EV charging not recommended with current self-consumption – would increase grid purchase significantly.";
+    }
+    
+    // Inverter sizing based on totalPanelsCount
+    if (totalPanelsCount > 12) {
+      if (totalPanelsCount > 20) {
+        description += " Inverter recommendation: dual inverter setup (2x 3.68 kW) costing approx £2,200-2,800 to handle peak production without clipping.";
+      } else {
+        description += " Inverter recommendation: consider a second inverter (add £1,200-1,600) for >12 panels to avoid power clipping.";
+      }
+    } else {
+      description += " Inverter: single inverter (3.68‑5 kW) is sufficient (approx £900-1,600 depending on type).";
+    }
+    
+    return description;
   };
 
   // ==================== JSX PRINCIPAL ====================
@@ -599,9 +651,9 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">ⓘ Energy price sources: {electricityPricesByCountry[selectedCountry]?.importSource} (import) | {electricityPricesByCountry[selectedCountry]?.exportSource} (export)</p></div>
       </div>
 
-      {/* RESULTS */}
+      {/* ==================== ANALYSIS RESULTS ==================== */}
       <div className="bg-gray-800 text-white p-6 rounded-lg">
-        <h3 className="font-bold text-2xl mb-4">📊 RESULTS (Combined)</h3>
+        <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="text-lg space-y-2">
           <p><strong>Total panels:</strong> {totalPanelsCount}</p>
           <p><strong>Total power:</strong> {totalWp.toFixed(0)} Wp</p>
@@ -609,6 +661,22 @@ const SolarPanelCalculator: React.FC = () => {
           <p><strong>Installation cost:</strong> £{totalInstallCost.toFixed(0)}</p>
           <p><strong>Annual maintenance:</strong> £{totalAnnualMaintenanceCost.toFixed(1)} (cleaning: £{cleaningCostAnnual.toFixed(1)}, electrical: £{electricalInspectionAnnual.toFixed(1)}, inverter standby: £{inverterNetCost.toFixed(1)})</p>
           <p><strong>Annual benefit (net):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
+          <hr className="my-2 border-gray-600" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="bg-gray-700 p-3 rounded">
+              <p className="text-sm text-gray-300">Monthly bill WITHOUT solar</p>
+              <p className="text-2xl font-bold text-red-400">£{monthlyBillWithoutSolar.toFixed(2)}</p>
+            </div>
+            <div className="bg-gray-700 p-3 rounded">
+              <p className="text-sm text-gray-300">Monthly bill WITH solar</p>
+              <p className="text-2xl font-bold text-green-400">£{monthlyBillWithSolar.toFixed(2)}</p>
+            </div>
+            <div className="bg-gray-700 p-3 rounded">
+              <p className="text-sm text-gray-300">Monthly savings</p>
+              <p className="text-2xl font-bold text-green-400">£{monthlySavings.toFixed(2)}</p>
+            </div>
+          </div>
+          <hr className="my-2 border-gray-600" />
           <p><strong>New monthly bill:</strong> £{monthlyBillWithSolar.toFixed(2)} (saving £{monthlySavings.toFixed(2)}/month)</p>
           <p><strong>Payback period:</strong> {paybackYears.toFixed(1)} years</p>
           <p><strong className="text-3xl text-green-400">ROI: {roiPercent.toFixed(1)}%</strong>
@@ -620,31 +688,32 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== NIVEL DE ELECTRIFICACIÓN DINÁMICO ==================== */}
+      {/* ==================== ELECTRIFICATION LEVEL BY HOUSEHOLD SIZE (DYNAMIC) ==================== */}
       {selfConsumedKwhMonthly > 0 && (
-        <div className="mt-8 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <h3 className="text-xl font-bold text-gray-800 mb-3">
-            🏡 ¿Qué nivel de electrificación puedes alcanzar según tu autoconsumo?
-          </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Autoconsumo mensual: <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.
+        <div className="mt-8 p-5 bg-gray-800 text-white rounded-lg shadow-lg">
+          <h3 className="text-xl font-bold mb-3">🏡 What level of electrification can you achieve based on your self‑consumption?</h3>
+          <p className="text-sm text-gray-300 mb-4">
+            Monthly self‑consumption: <strong className="text-white">{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.
           </p>
-          <div className="space-y-3">
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="font-semibold">🏠 Vivienda 1‑2 habitaciones</p>
-              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '1-2')}</p>
+          <div className="space-y-4">
+            <div className="border-l-4 border-blue-400 pl-4 bg-gray-700/30 p-3 rounded">
+              <p className="font-bold text-lg">🏠 1‑2 bedroom home</p>
+              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '1-2', selectedCountry)}</p>
             </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <p className="font-semibold">🏡 Vivienda 3‑4 habitaciones</p>
-              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '3-4')}</p>
+            <div className="border-l-4 border-green-400 pl-4 bg-gray-700/30 p-3 rounded">
+              <p className="font-bold text-lg">🏡 3‑4 bedroom home</p>
+              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '3-4', selectedCountry)}</p>
             </div>
-            <div className="bg-yellow-50 p-3 rounded-lg">
-              <p className="font-semibold">🏘️ Vivienda 5 o más habitaciones</p>
-              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '5+')}</p>
+            <div className="border-l-4 border-yellow-400 pl-4 bg-gray-700/30 p-3 rounded">
+              <p className="font-bold text-lg">🏘️ 5+ bedroom home</p>
+              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '5+', selectedCountry)}</p>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              * Rangos basados en consumos típicos medios (fuentes: IDAE, CNMC, Ofgem).<br />
-              Los valores son orientativos y pueden variar según el aislamiento, clima y hábitos de uso.
+          </div>
+          <div className="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
+            <p>* Recommendations based on typical consumption patterns in <strong>{selectedCountry}</strong>.<br />
+            Heating/cooling: heat pump (air-to-water or reversible AC), underfloor heating, pool heat pump for hot climates.<br />
+            EV options: small EV (55 kWh, ~165 kWh/month), second small EV, or large EV (80‑90 kWh, ~210‑250 kWh/month).<br />
+            Inverter sizing: {totalPanelsCount > 12 ? (totalPanelsCount > 20 ? 'Dual inverter (2x 3.68 kW) ~£2,200-2,800 recommended' : 'Optional second inverter (add £1,200-1,600) for >12 panels') : 'Single inverter (3.68‑5 kW) sufficient (~£900-1,600)'}.
             </p>
           </div>
         </div>
