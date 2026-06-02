@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// -------------------- IRRADIACIÓN Y DEMÁS CONSTANTES (igual que antes) --------------------
+// -------------------- IRRADIACIÓN Y DEMÁS CONSTANTES --------------------
 type CountryInsolation = { name: string; north: number; south: number };
 const countriesInsolation: CountryInsolation[] = [
   { name: "United Kingdom", north: 850, south: 1000 },
@@ -210,7 +210,7 @@ const SolarPanelCalculator: React.FC = () => {
 
   // Costes de instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
-  const [inverterType, setInverterType] = useState<string>('string_3.68');
+  const [inverterType, setInverterType] = useState<string>('string_3_68');
   const [inverterCost, setInverterCost] = useState(900);
   const [mountingCost, setMountingCost] = useState(450);
   const [scaffoldingCost, setScaffoldingCost] = useState(600);
@@ -262,15 +262,15 @@ const SolarPanelCalculator: React.FC = () => {
     } else setLayoutB(null);
   }, [enableRoofB, roofBLength, roofBWidth, obstaclesB]);
 
-  // Precios de inversores (individuales y por pares)
+  // Precios de inversores (individuales y por pares) – claves SIN PUNTOS
   const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number }> = {
-    string_3.68: { single: 900, dual: 1700, name: "String 3.68 kW (single‑phase)", power: 3.68 },
+    string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW (single‑phase)", power: 3.68 },
     string_5: { single: 1100, dual: 2100, name: "String 5.0 kW (single‑phase)", power: 5.0 },
     string_6: { single: 1300, dual: 2500, name: "String 6.0 kW (single‑phase)", power: 6.0 },
-    hybrid_3.68: { single: 1600, dual: 3000, name: "Hybrid 3.68 kW (battery ready)", power: 3.68 },
+    hybrid_3_68: { single: 1600, dual: 3000, name: "Hybrid 3.68 kW (battery ready)", power: 3.68 },
     hybrid_5: { single: 1900, dual: 3600, name: "Hybrid 5.0 kW (battery ready)", power: 5.0 },
     hybrid_6: { single: 2200, dual: 4200, name: "Hybrid 6.0 kW (battery ready)", power: 6.0 },
-    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel system)", power: 3.68 } // precio aproximado para 10 paneles
+    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel system)", power: 3.68 }
   };
 
   useEffect(() => {
@@ -473,7 +473,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* Roof A (completo) */}
+      {/* Roof A */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -490,7 +490,7 @@ const SolarPanelCalculator: React.FC = () => {
         {renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, `Roof A layout`)}
       </div>
 
-      {/* Roof B (completo) */}
+      {/* Roof B */}
       <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center"><h3 className="font-bold text-xl mb-2">🏠 Roof B</h3><label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label></div>
         {enableRoofB && (
@@ -511,17 +511,17 @@ const SolarPanelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* INVERTER con múltiples opciones y dual inverter */}
+      {/* INVERTER with multiple options and dual inverter checkbox */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">⚡ Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium">Inverter type & power:</label>
             <select value={inverterType} onChange={(e) => setInverterType(e.target.value)} className="border p-2 rounded w-full">
-              <option value="string_3.68">String 3.68 kW – £{inverterPrices.string_3.68.single}</option>
+              <option value="string_3_68">String 3.68 kW – £{inverterPrices.string_3_68.single}</option>
               <option value="string_5">String 5.0 kW – £{inverterPrices.string_5.single}</option>
               <option value="string_6">String 6.0 kW – £{inverterPrices.string_6.single}</option>
-              <option value="hybrid_3.68">Hybrid 3.68 kW (battery ready) – £{inverterPrices.hybrid_3.68.single}</option>
+              <option value="hybrid_3_68">Hybrid 3.68 kW (battery ready) – £{inverterPrices.hybrid_3_68.single}</option>
               <option value="hybrid_5">Hybrid 5.0 kW – £{inverterPrices.hybrid_5.single}</option>
               <option value="hybrid_6">Hybrid 6.0 kW – £{inverterPrices.hybrid_6.single}</option>
               <option value="micro">Microinverter system – £{inverterPrices.micro.single}</option>
@@ -535,11 +535,25 @@ const SolarPanelCalculator: React.FC = () => {
               </label>
             </div>
           )}
-          <div><label>Standby power (0‑60 W):</label> ... (igual que antes)</div>
+          <div><label>Standby power (0‑60 W):</label>
+            <div className="flex gap-2 items-center">
+              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded">
+                <option value="preset">Preset</option><option value="custom">Custom</option>
+              </select>
+              {standbySource === 'preset' ? (
+                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded">
+                  <option value="0">0 W (ideal)</option><option value="2">2 W</option><option value="3">3 W</option><option value="5">5 W</option>
+                  <option value="10">10 W</option><option value="20">20 W</option><option value="40">40 W</option><option value="60">60 W</option>
+                </select>
+              ) : (
+                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* COST ESTIMATE & MAINTENANCE (íntegro) */}
+      {/* COST ESTIMATE & MAINTENANCE */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
         <div className="grid md:grid-cols-3 gap-3 text-sm">
@@ -558,7 +572,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS (con barra tricolor) */}
+      {/* LOCATION & FINANCIAL ANALYSIS (with tricolor bar) */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -596,7 +610,7 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">ⓘ Energy price sources: {electricityPricesByCountry[selectedCountry]?.importSource} (import) | {electricityPricesByCountry[selectedCountry]?.exportSource} (export)</p></div>
       </div>
 
-      {/* ANALYSIS RESULTS (con los tres valores mensuales) */}
+      {/* ANALYSIS RESULTS */}
       <div className="bg-gray-800 text-white p-6 rounded-lg">
         <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="text-lg space-y-2">
