@@ -297,7 +297,7 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // ==================== NUEVA LÓGICA DE BARRA TRICOLOR ====================
+  // ==================== LÓGICA DE BARRA TRICOLOR ====================
   const INEVITABLE_GRID_KWH = 200; // kWh/mes fijos (noche y mal tiempo)
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
@@ -426,6 +426,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
+  // ==================== JSX PRINCIPAL ====================
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
@@ -496,7 +497,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS - NUEVA BARRA TRICOLOR */}
+      {/* LOCATION & FINANCIAL ANALYSIS - BARRA TRICOLOR */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -508,7 +509,7 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red, fixed 200 kWh)</span>
+            <span className="font-medium text-red-600">Grid purchase (red, fixed {INEVITABLE_GRID_KWH} kWh)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
           <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
@@ -594,6 +595,54 @@ const SolarPanelCalculator: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* ==================== NUEVA TABLA DE COBERTURA ==================== */}
+      {selfConsumedKwhMonthly > 0 && (
+        <div className="mt-8 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <h3 className="text-xl font-bold text-gray-800 mb-3">
+            🏡 ¿Qué tipo de vivienda puedes alimentar con tu autoconsumo?
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Autoconsumo mensual: <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.<br />
+            La siguiente tabla muestra qué fracción de cada tipo de vivienda (según su consumo típico) podría cubrirse con esa energía.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse border border-gray-300 text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-3 text-left">Tipo de vivienda</th>
+                  <th className="border p-3 text-left">Consumo típico mensual (kWh)</th>
+                  <th className="border p-3 text-left">Proporción que puedes alimentar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { size: '1‑2 habitaciones', monthlyKwh: 450 },
+                  { size: '3‑4 habitaciones', monthlyKwh: 750 },
+                  { size: '5 o más habitaciones', monthlyKwh: 1100 },
+                ].map((type) => {
+                  const fraction = selfConsumedKwhMonthly / type.monthlyKwh;
+                  const percentage = (fraction * 100).toFixed(1);
+                  return (
+                    <tr key={type.size} className={fraction >= 1 ? 'bg-green-50' : 'bg-white'}>
+                      <td className="border p-3 font-medium">{type.size}</td>
+                      <td className="border p-3">{type.monthlyKwh} kWh</td>
+                      <td className="border p-3">
+                        {fraction >= 1
+                          ? `✅ 100% (cubre totalmente)`
+                          : `${percentage}% (${fraction.toFixed(2)} viviendas)`}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            * Consumos típicos orientativos. Valores reales dependen del nivel de electrificación, climatización, vehículos eléctricos, etc.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
