@@ -297,17 +297,16 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // ==================== LÓGICA DE BARRA TRICOLOR ====================
-  const INEVITABLE_GRID_KWH = 200; // kWh/mes fijos (noche y mal tiempo)
+  // ==================== LÓGICA DE BARRA TRICOLOR (grid purchase = 20% del autoconsumo) ====================
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
-  // El rojo es fijo: siempre compras 200 kWh de la red
-  const gridPurchaseKwhMonthly = INEVITABLE_GRID_KWH;
-  // El azul es el excedente: generación - autoconsumo - compra red (si da negativo, no exportas)
+  // Grid purchase (inevitable) = 20% of self-consumed (always)
+  const gridPurchaseKwhMonthly = selfConsumedKwhMonthly * 0.2;
+  // Exported = generation - selfConsumed - gridPurchase (if negative, zero)
   let exportedKwhMonthly = avgMonthlyGeneration - selfConsumedKwhMonthly - gridPurchaseKwhMonthly;
   if (exportedKwhMonthly < 0) exportedKwhMonthly = 0;
 
-  // Consumo total del hogar = autoconsumo + compra red (inevitable)
+  // Consumo total del hogar = autoconsumo + compra red
   const totalConsumption = selfConsumedKwhMonthly + gridPurchaseKwhMonthly;
 
   // Facturas
@@ -315,7 +314,7 @@ const SolarPanelCalculator: React.FC = () => {
   const monthlyBillWithSolar = (gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
   const monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
 
-  // Cálculos financieros anuales (para ROI, payback)
+  // Cálculos financieros anuales
   const selfConsumedKwhAnnual = selfConsumedKwhMonthly * 12;
   const exportedKwhAnnual = exportedKwhMonthly * 12;
   const gridPurchaseKwhAnnual = gridPurchaseKwhMonthly * 12;
@@ -426,13 +425,12 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // ==================== FUNCIÓN DETALLADA POR PAÍS (ELECTRIFICACIÓN) ====================
-  const getDetailedElectrification = (selfKwh: number, size: string, country: string): string => {
+  // ==================== FUNCIÓN RESUMIDA DE ELECTRIFICACIÓN ====================
+  const getElectrificationSummary = (selfKwh: number, size: string, country: string): string => {
     const hotCountries = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
     const isHot = hotCountries.includes(country);
     const isUk = country === "United Kingdom";
     
-    // Determine level based on selfKwh and size
     let level = 0;
     if (size === '1-2') {
       if (selfKwh < 150) level = 1;
@@ -454,52 +452,23 @@ const SolarPanelCalculator: React.FC = () => {
       else level = 5;
     }
     
-    const levelDesc: Record<number, string> = {
-      1: "Very low electrification (basic appliances only, no electric heating, no EV)",
-      2: "Low electrification (electric cooking, gas heating, no EV)",
-      3: "Medium electrification (adds electric heating or heat pump – underfloor heating optional)",
-      4: "High electrification (adds small EV 55 kWh, plus full electric heating/cooling)",
-      5: "Very high electrification (adds second EV or large EV 80‑90 kWh, plus optional pool heat pump)"
-    };
-    let description = levelDesc[level];
-    
-    // Heating/cooling by country
+    const base = (level === 1 ? "Very low" : level === 2 ? "Low" : level === 3 ? "Medium" : level === 4 ? "High" : "Very high") + " electrification";
+    let detail = "";
     if (level >= 3) {
-      if (isUk) {
-        description += " Recommended heating: air-to-water heat pump (underfloor heating or radiators) – 250‑375 kWh/month in winter. Cooling: not typical, but portable AC units possible (~150 kWh/month).";
-      } else if (isHot) {
-        description += " Recommended: reversible air-to-air heat pump (AC + heating) – 200‑300 kWh/month in winter; underfloor heating optional. Essential: Inverter air conditioning for summer – adds 150‑250 kWh/month. If you have a swimming pool, consider a pool heat pump (300‑500 kWh/month during season).";
-      } else {
-        description += " Recommended: heat pump (air-to-water or geothermal) – 250‑400 kWh/month. Optional: reversible AC for cooling (~200 kWh/month in summer).";
-      }
+      if (isUk) detail = "Heat pump (air-to-water) + optional underfloor heating.";
+      else if (isHot) detail = "Reversible AC (heat/cool), underfloor heating possible. Pool heat pump if needed.";
+      else detail = "Heat pump (air-to-water or geothermal).";
     } else {
-      description += " Not enough self-consumption for electric heating – use gas/oil boiler or improve insulation. Cooling not feasible with current solar production.";
+      detail = "Not enough for electric heating – use gas/oil.";
     }
-    
-    // EV options
-    if (level >= 4) {
-      description += " EV: small EV (55 kWh battery, ~165 kWh/month) – you can charge mostly with solar.";
-      if (level >= 5) {
-        description += " Upgrade to large EV (80‑90 kWh, ~210‑250 kWh/month) or add a second small EV. Your self-consumption covers high mileage.";
-      } else {
-        description += " A second EV would require higher self-consumption or additional grid imports.";
-      }
-    } else {
-      description += " EV charging not recommended with current self-consumption – would increase grid purchase significantly.";
-    }
-    
-    // Inverter sizing based on totalPanelsCount
+    if (level >= 4) detail += " Small EV (55 kWh) possible.";
+    if (level >= 5) detail += " Upgrade to large EV (80‑90 kWh) or second EV.";
     if (totalPanelsCount > 12) {
-      if (totalPanelsCount > 20) {
-        description += " Inverter recommendation: dual inverter setup (2x 3.68 kW) costing approx £2,200-2,800 to handle peak production without clipping.";
-      } else {
-        description += " Inverter recommendation: consider a second inverter (add £1,200-1,600) for >12 panels to avoid power clipping.";
-      }
+      detail += totalPanelsCount > 20 ? " Dual inverter required." : " Second inverter recommended.";
     } else {
-      description += " Inverter: single inverter (3.68‑5 kW) is sufficient (approx £900-1,600 depending on type).";
+      detail += " Single inverter sufficient.";
     }
-    
-    return description;
+    return `${base}. ${detail}`;
   };
 
   // ==================== JSX PRINCIPAL ====================
@@ -512,7 +481,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* TEJADO A */}
+      {/* TEJADO A (sin cambios) */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -529,7 +498,7 @@ const SolarPanelCalculator: React.FC = () => {
         {renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, `Roof A layout`)}
       </div>
 
-      {/* TEJADO B */}
+      {/* TEJADO B (sin cambios) */}
       <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center"><h3 className="font-bold text-xl mb-2">🏠 Roof B</h3><label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label></div>
         {enableRoofB && (<>
@@ -545,7 +514,7 @@ const SolarPanelCalculator: React.FC = () => {
         </>)}
       </div>
 
-      {/* INVERTER */}
+      {/* INVERTER (sin cambios) */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">⚡ Inverter</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -554,7 +523,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* COST ESTIMATE & MAINTENANCE */}
+      {/* COST ESTIMATE & MAINTENANCE (sin cambios) */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
         <div className="grid md:grid-cols-3 gap-3 text-sm">
@@ -573,7 +542,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS - BARRA TRICOLOR */}
+      {/* LOCATION & FINANCIAL ANALYSIS - BARRA TRICOLOR (actualizada con grid purchase dinámico) */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -581,46 +550,48 @@ const SolarPanelCalculator: React.FC = () => {
           <div><label>Region:</label><select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full"><option value="south">Southern</option><option value="north">Northern</option></select></div>
         </div>
 
-        {/* Barra tricolor */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red, fixed {INEVITABLE_GRID_KWH} kWh)</span>
+            <span className="font-medium text-red-600">Grid purchase (red, 20% of self‑consumed)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
           <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
+            {/* Calculate percentages for the bar */}
+            const greenPct = selfConsumptionPercent;
+            const redPct = (gridPurchaseKwhMonthly / avgMonthlyGeneration) * 100;
+            const bluePct = Math.max(0, 100 - greenPct - redPct);
             <div className="absolute inset-0" style={{
               background: `linear-gradient(to right, 
                 #22c55e 0%, 
-                #22c55e ${selfConsumptionPercent}%, 
-                #ef4444 ${selfConsumptionPercent}%, 
-                #ef4444 ${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}%, 
-                #3b82f6 ${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}%, 
+                #22c55e ${greenPct}%, 
+                #ef4444 ${greenPct}%, 
+                #ef4444 ${greenPct + redPct}%, 
+                #3b82f6 ${greenPct + redPct}%, 
                 #3b82f6 100%)`
             }} />
             <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-800 rounded-full shadow-lg border-2 border-white cursor-pointer"
-              style={{ left: `calc(${selfConsumptionPercent + (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)}% - 12px)` }} />
+              style={{ left: `calc(${greenPct + redPct}% - 12px)` }} />
             <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold">
-              <span>{selfConsumptionPercent}%</span>
-              <span>{(INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100).toFixed(1)}%</span>
-              <span>{Math.max(0, 100 - selfConsumptionPercent - (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100)).toFixed(1)}%</span>
+              <span>{greenPct.toFixed(0)}%</span>
+              <span>{redPct.toFixed(1)}%</span>
+              <span>{bluePct.toFixed(1)}%</span>
             </div>
           </div>
           <input
             type="range"
             min="0"
-            max={Math.max(0, 100 - (INEVITABLE_GRID_KWH / avgMonthlyGeneration * 100))}
+            max={100 - redPct}
             step="1"
             value={selfConsumptionPercent}
             onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))}
             className="w-full mt-2"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Adjust the slider to change your self-consumption (green). Red is a fixed {INEVITABLE_GRID_KWH} kWh/month (night + rainy days). Blue is the surplus exported.
+            Adjust green (self‑consumption). Red is always 20% of green (night & grid losses). Blue is the surplus exported.
           </p>
         </div>
 
-        {/* Tres indicadores en kWh */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-green-100 p-3 rounded-lg text-center">
             <p className="text-sm text-green-800 font-semibold">🌞 Self-consumed</p>
@@ -628,9 +599,9 @@ const SolarPanelCalculator: React.FC = () => {
             <p className="text-xs text-green-600">From your solar panels</p>
           </div>
           <div className="bg-red-100 p-3 rounded-lg text-center">
-            <p className="text-sm text-red-800 font-semibold">🏭 Grid purchase (inevitable)</p>
+            <p className="text-sm text-red-800 font-semibold">🏭 Grid purchase (20% of self‑consumed)</p>
             <p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p>
-            <p className="text-xs text-red-600">Necessary for night & bad weather</p>
+            <p className="text-xs text-red-600">Inevitable from grid</p>
           </div>
           <div className="bg-blue-100 p-3 rounded-lg text-center">
             <p className="text-sm text-blue-800 font-semibold">💰 Exported to grid</p>
@@ -639,11 +610,10 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* Facturas */}
         <div className="mt-4 p-3 bg-white/70 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><p className="text-gray-600">Monthly bill WITHOUT solar:</p><p className="text-xl font-semibold">£{monthlyBillWithoutSolar.toFixed(2)}</p></div>
-            <div><p className="text-gray-600">Monthly bill WITH solar:</p><p className="text-xl font-semibold text-green-700">£{monthlyBillWithSolar.toFixed(2)}</p></div>
+            <div><p className="text-gray-600">Monthly bill WITH solar:</p><p className="text-xl font-semibold text-yellow-400">£{monthlyBillWithSolar.toFixed(2)}</p></div>
           </div>
           <p className="text-center text-sm mt-2">You save <strong className="text-green-700">£{monthlySavings.toFixed(2)}</strong> per month</p>
         </div>
@@ -651,7 +621,7 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">ⓘ Energy price sources: {electricityPricesByCountry[selectedCountry]?.importSource} (import) | {electricityPricesByCountry[selectedCountry]?.exportSource} (export)</p></div>
       </div>
 
-      {/* ==================== ANALYSIS RESULTS ==================== */}
+      {/* RESULTS (Analysis Results) */}
       <div className="bg-gray-800 text-white p-6 rounded-lg">
         <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="text-lg space-y-2">
@@ -669,7 +639,7 @@ const SolarPanelCalculator: React.FC = () => {
             </div>
             <div className="bg-gray-700 p-3 rounded">
               <p className="text-sm text-gray-300">Monthly bill WITH solar</p>
-              <p className="text-2xl font-bold text-green-400">£{monthlyBillWithSolar.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-yellow-400">£{monthlyBillWithSolar.toFixed(2)}</p>
             </div>
             <div className="bg-gray-700 p-3 rounded">
               <p className="text-sm text-gray-300">Monthly savings</p>
@@ -688,33 +658,29 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== ELECTRIFICATION LEVEL BY HOUSEHOLD SIZE (DYNAMIC) ==================== */}
+      {/* Electrification summary */}
       {selfConsumedKwhMonthly > 0 && (
         <div className="mt-8 p-5 bg-gray-800 text-white rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold mb-3">🏡 What level of electrification can you achieve based on your self‑consumption?</h3>
+          <h3 className="text-xl font-bold mb-3">🏡 Electrification potential by household size</h3>
           <p className="text-sm text-gray-300 mb-4">
             Monthly self‑consumption: <strong className="text-white">{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.
           </p>
           <div className="space-y-4">
             <div className="border-l-4 border-blue-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏠 1‑2 bedroom home</p>
-              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '1-2', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏠 1‑2 bedroom</p>
+              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '1-2', selectedCountry)}</p>
             </div>
             <div className="border-l-4 border-green-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏡 3‑4 bedroom home</p>
-              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '3-4', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏡 3‑4 bedroom</p>
+              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '3-4', selectedCountry)}</p>
             </div>
             <div className="border-l-4 border-yellow-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏘️ 5+ bedroom home</p>
-              <p className="text-sm">{getDetailedElectrification(selfConsumedKwhMonthly, '5+', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏘️ 5+ bedroom</p>
+              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '5+', selectedCountry)}</p>
             </div>
           </div>
           <div className="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
-            <p>* Recommendations based on typical consumption patterns in <strong>{selectedCountry}</strong>.<br />
-            Heating/cooling: heat pump (air-to-water or reversible AC), underfloor heating, pool heat pump for hot climates.<br />
-            EV options: small EV (55 kWh, ~165 kWh/month), second small EV, or large EV (80‑90 kWh, ~210‑250 kWh/month).<br />
-            Inverter sizing: {totalPanelsCount > 12 ? (totalPanelsCount > 20 ? 'Dual inverter (2x 3.68 kW) ~£2,200-2,800 recommended' : 'Optional second inverter (add £1,200-1,600) for >12 panels') : 'Single inverter (3.68‑5 kW) sufficient (~£900-1,600)'}.
-            </p>
+            * Recommendations for <strong>{selectedCountry}</strong>. Heating: heat pump (air‑to‑water or reversible AC). Cooling: AC for hot countries. EVs: small (55 kWh) or large (80‑90 kWh). Inverter: {totalPanelsCount > 12 ? (totalPanelsCount > 20 ? 'dual required' : 'second recommended') : 'single sufficient'}.
           </div>
         </div>
       )}
