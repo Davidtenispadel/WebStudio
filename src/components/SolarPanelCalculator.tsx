@@ -426,6 +426,30 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
+  // ==================== FUNCIÓN PARA NIVEL DE ELECTRIFICACIÓN DINÁMICO ====================
+  const getElectrificationLevel = (selfKwh: number, size: string): string => {
+    if (size === '1-2') {
+      if (selfKwh < 150) return "electrificación baja (cocina de gas, calefacción de gas, sin coche eléctrico)";
+      if (selfKwh < 350) return "electrificación media (cocina eléctrica de inducción ~18 kWh/mes, frigorífico eficiente ~15 kWh/mes, termo eléctrico ~150 kWh/mes, lavadora)";
+      if (selfKwh < 750) return "electrificación alta (añade calefacción eléctrica: un calefactor de 1.500W funcionando 8h/día suma ~360 kWh/mes)";
+      if (selfKwh < 1000) return "electrificación muy alta (añade coche eléctrico pequeño 55 kWh: ~165 kWh/mes para 12.000 km/año)";
+      return "electrificación extrema (añade coche eléctrico grande 90 kWh: ~210 kWh/mes, o dos coches eléctricos)";
+    }
+    if (size === '3-4') {
+      if (selfKwh < 150) return "electrificación muy baja (solo iluminación LED y electrodomésticos esenciales: nevera, TV, pequeños electrodomésticos)";
+      if (selfKwh < 350) return "electrificación baja (cocina vitrocerámica ~22 kWh/mes, frigorífico combi estándar ~42 kWh/mes, termo eléctrico grande ~200 kWh/mes)";
+      if (selfKwh < 750) return "electrificación media (añade bomba de calor aerotermia: 250‑375 kWh/mes para calefacción + ACS en casa de 3-4 hab en UK/España)";
+      if (selfKwh < 1000) return "electrificación alta (añade coche eléctrico pequeño 55 kWh ~165 kWh/mes sobre base de bomba de calor)";
+      return "electrificación muy alta (añade segundo coche eléctrico o coche grande 90 kWh ~210 kWh/mes)";
+    }
+    // size === '5+'
+    if (selfKwh < 150) return "electrificación muy baja (solo electrodomésticos básicos: frigorífico, iluminación, TV)";
+    if (selfKwh < 350) return "electrificación baja (cocina eléctrica, frigorífico grande ~50 kWh/mes, termo eléctrico grande ~250 kWh/mes, lavadora y lavavajillas)";
+    if (selfKwh < 750) return "electrificación media (añade calefacción eléctrica resistiva o bomba de calor sobredimensionada para casa grande)";
+    if (selfKwh < 1000) return "electrificación alta (añade coche eléctrico pequeño ~165 kWh/mes más termo eléctrico adicional)";
+    return "electrificación muy alta (añade coche eléctrico grande ~210 kWh/mes y posiblemente climatización de piscina o sistemas adicionales)";
+  };
+
   // ==================== JSX PRINCIPAL ====================
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
@@ -596,51 +620,33 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== NUEVA TABLA DE COBERTURA ==================== */}
+      {/* ==================== NIVEL DE ELECTRIFICACIÓN DINÁMICO ==================== */}
       {selfConsumedKwhMonthly > 0 && (
         <div className="mt-8 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
           <h3 className="text-xl font-bold text-gray-800 mb-3">
-            🏡 ¿Qué tipo de vivienda puedes alimentar con tu autoconsumo?
+            🏡 ¿Qué nivel de electrificación puedes alcanzar según tu autoconsumo?
           </h3>
           <p className="text-sm text-gray-600 mb-4">
-            Autoconsumo mensual: <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.<br />
-            La siguiente tabla muestra qué fracción de cada tipo de vivienda (según su consumo típico) podría cubrirse con esa energía.
+            Autoconsumo mensual: <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.
           </p>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse border border-gray-300 text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border p-3 text-left">Tipo de vivienda</th>
-                  <th className="border p-3 text-left">Consumo típico mensual (kWh)</th>
-                  <th className="border p-3 text-left">Proporción que puedes alimentar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { size: '1‑2 habitaciones', monthlyKwh: 450 },
-                  { size: '3‑4 habitaciones', monthlyKwh: 750 },
-                  { size: '5 o más habitaciones', monthlyKwh: 1100 },
-                ].map((type) => {
-                  const fraction = selfConsumedKwhMonthly / type.monthlyKwh;
-                  const percentage = (fraction * 100).toFixed(1);
-                  return (
-                    <tr key={type.size} className={fraction >= 1 ? 'bg-green-50' : 'bg-white'}>
-                      <td className="border p-3 font-medium">{type.size}</td>
-                      <td className="border p-3">{type.monthlyKwh} kWh</td>
-                      <td className="border p-3">
-                        {fraction >= 1
-                          ? `✅ 100% (cubre totalmente)`
-                          : `${percentage}% (${fraction.toFixed(2)} viviendas)`}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="font-semibold">🏠 Vivienda 1‑2 habitaciones</p>
+              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '1-2')}</p>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg">
+              <p className="font-semibold">🏡 Vivienda 3‑4 habitaciones</p>
+              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '3-4')}</p>
+            </div>
+            <div className="bg-yellow-50 p-3 rounded-lg">
+              <p className="font-semibold">🏘️ Vivienda 5 o más habitaciones</p>
+              <p>→ {getElectrificationLevel(selfConsumedKwhMonthly, '5+')}</p>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              * Rangos basados en consumos típicos medios (fuentes: IDAE, CNMC, Ofgem).<br />
+              Los valores son orientativos y pueden variar según el aislamiento, clima y hábitos de uso.
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-3">
-            * Consumos típicos orientativos. Valores reales dependen del nivel de electrificación, climatización, vehículos eléctricos, etc.
-          </p>
         </div>
       )}
     </div>
