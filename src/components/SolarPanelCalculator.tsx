@@ -84,7 +84,7 @@ const getGridDependencyFactor = (countryName: string): number => {
     "Venezuela": 0.38, "Kenya": 0.35, "Nigeria": 0.40,
   };
   let factor = map[countryName] ?? 0.45;
-  return Math.min(factor, 0.55); // never exceed 55%
+  return Math.min(factor, 0.55);
 };
 
 const PANEL_CATALOG = {
@@ -274,7 +274,7 @@ const SolarPanelCalculator: React.FC = () => {
     } else setLayoutB(null);
   }, [enableRoofB, roofBLength, roofBWidth, obstaclesB]);
 
-  // Inverter catalog – keys without dots
+  // Inverter catalog
   const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number; hybrid: boolean; island?: boolean }> = {
     string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW", power: 3.68, hybrid: false, island: false },
     string_5: { single: 1100, dual: 2100, name: "String 5.0 kW", power: 5.0, hybrid: false, island: false },
@@ -304,7 +304,7 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(dualInverter ? (inverterPrices[inverterType]?.dual || price * 2) : price);
   }, [inverterType, dualInverter]);
 
-  // Production calculations
+  // Production calculations (including seasonal for each roof)
   const getRoofProduction = (layout: any, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 } };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -331,11 +331,14 @@ const SolarPanelCalculator: React.FC = () => {
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
 
+  // Seasonal breakdown for each roof (for display)
+  const seasonalA = prodA.seasonalKwh;
+  const seasonalB = prodB.seasonalKwh;
+
   // -------------------- FINANCIAL MODEL (red = gridFactor * green, capped at 55% of green) --------------------
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
   let redPct = gridFactor * greenPct;
-  // Cap red to avoid negative blue (red cannot exceed 100 - green)
   if (redPct > 100 - greenPct) redPct = 100 - greenPct;
   const bluePct = 100 - greenPct - redPct;
   
@@ -699,6 +702,12 @@ const SolarPanelCalculator: React.FC = () => {
     return text;
   };
 
+  // Calculate optimal green for 30% export (blue = 30%)
+  // blue = 100 - green - red = 30 => green + red = 70 => green*(1+gridFactor) = 70 => green = 70/(1+gridFactor)
+  const optimalGreen = 70 / (1 + gridFactor);
+  const optimalGreenDisplay = optimalGreen.toFixed(0);
+  const blueAtOptimal = (100 - optimalGreen - gridFactor * optimalGreen).toFixed(0);
+
   // -------------------- RENDER --------------------
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
@@ -739,6 +748,13 @@ const SolarPanelCalculator: React.FC = () => {
             <div><OrientationCompass orientation={orientationDegA} onChange={setOrientationDegA} label="Orientation A" /></div>
             <div><PitchVisualization tilt={tiltDegA} onChange={setTiltDegA} enabled={enablePitchA} setEnabled={setEnablePitchA} label="pitch A" /></div>
           </div>
+          {/* Seasonal production for Roof A */}
+          <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-blue-50 p-2 rounded">
+            <div>🌱 Spring<br/>{seasonalA.spring.toFixed(0)} kWh</div>
+            <div>☀️ Summer<br/>{seasonalA.summer.toFixed(0)} kWh</div>
+            <div>🍂 Autumn<br/>{seasonalA.autumn.toFixed(0)} kWh</div>
+            <div>❄️ Winter<br/>{seasonalA.winter.toFixed(0)} kWh</div>
+          </div>
           <div className="mt-2 text-sm">{renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, "Roof A layout")}</div>
         </div>
         {/* Roof B optional */}
@@ -755,6 +771,13 @@ const SolarPanelCalculator: React.FC = () => {
               <div><button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
               <div><OrientationCompass orientation={orientationDegB} onChange={setOrientationDegB} label="Orientation B" /></div>
               <div><PitchVisualization tilt={tiltDegB} onChange={setTiltDegB} enabled={enablePitchB} setEnabled={setEnablePitchB} label="pitch B" /></div>
+            </div>
+            {/* Seasonal production for Roof B */}
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-green-50 p-2 rounded">
+              <div>🌱 Spring<br/>{seasonalB.spring.toFixed(0)} kWh</div>
+              <div>☀️ Summer<br/>{seasonalB.summer.toFixed(0)} kWh</div>
+              <div>🍂 Autumn<br/>{seasonalB.autumn.toFixed(0)} kWh</div>
+              <div>❄️ Winter<br/>{seasonalB.winter.toFixed(0)} kWh</div>
             </div>
             <div className="mt-2 text-sm">{renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, "Roof B layout")}</div>
           </div>
@@ -836,6 +859,14 @@ const SolarPanelCalculator: React.FC = () => {
             }
           }}>
             <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
+            {/* Target marker for optimal point (blue = 30%) */}
+            {bluePct !== 30 && (
+              <div
+                className="absolute top-1/2 transform -translate-y-1/2 w-1 h-8 bg-yellow-400 rounded-full z-5"
+                style={{ left: `calc(${100 - 30}% - 0.5px)`, pointerEvents: "none" }}
+                title="Optimal point (30% exported)"
+              />
+            )}
             <div
               className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10"
               style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }}
@@ -848,12 +879,12 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
           <div className="flex justify-between text-xs text-gray-600 mt-1">
             <span>0% (export all)</span>
-            <span className="text-green-600 font-semibold">🎯 Optimal: 70% (leave 30% for future EV)</span>
+            <span className="text-green-600 font-semibold">🎯 Optimal: {optimalGreenDisplay}% green → {blueAtOptimal}% exported (30% recommended)</span>
             <span>100% (consume all)</span>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            📊 <strong>Grid purchase rule:</strong> For <strong>{selectedCountry}</strong>, red (grid) = <strong>{Math.round(gridFactor*100)}%</strong> of green (self‑consumed), <strong>never exceeding 55% of green</strong>. Capped to leave space for blue.<br />
-            🔍 This reflects typical night consumption. Without batteries, you will always need some grid energy.
+            📊 <strong>Grid purchase rule:</strong> For <strong>{selectedCountry}</strong>, red (grid) = <strong>{Math.round(gridFactor*100)}%</strong> of green (self‑consumed), <strong>never exceeding 55% of green</strong>.<br />
+            🔍 <strong>Optimal point:</strong> Move the draggable circle until the blue (export) is exactly 30% – this leaves a 30% margin for future electric vehicle or increased consumption, which is the recommended design target for your solar panel system.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
