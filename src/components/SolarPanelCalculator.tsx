@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 // -------------------- DATA --------------------
 type CountryInsolation = { name: string; north: number; south: number };
@@ -174,7 +173,6 @@ const defaultPricesByCountry: { [key: string]: { importRate: number; exportRate:
 
 // -------------------- MAIN COMPONENT --------------------
 const SolarPanelCalculator: React.FC = () => {
-  const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -712,7 +710,7 @@ const SolarPanelCalculator: React.FC = () => {
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md">
+        <button onClick={() => window.history.back()} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md">
           ← Back to Technology
         </button>
       </div>
@@ -748,7 +746,6 @@ const SolarPanelCalculator: React.FC = () => {
             <div><OrientationCompass orientation={orientationDegA} onChange={setOrientationDegA} label="Orientation A" /></div>
             <div><PitchVisualization tilt={tiltDegA} onChange={setTiltDegA} enabled={enablePitchA} setEnabled={setEnablePitchA} label="pitch A" /></div>
           </div>
-          {/* Seasonal production for Roof A */}
           <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-blue-50 p-2 rounded">
             <div>🌱 Spring<br/>{seasonalA.spring.toFixed(0)} kWh</div>
             <div>☀️ Summer<br/>{seasonalA.summer.toFixed(0)} kWh</div>
@@ -772,7 +769,6 @@ const SolarPanelCalculator: React.FC = () => {
               <div><OrientationCompass orientation={orientationDegB} onChange={setOrientationDegB} label="Orientation B" /></div>
               <div><PitchVisualization tilt={tiltDegB} onChange={setTiltDegB} enabled={enablePitchB} setEnabled={setEnablePitchB} label="pitch B" /></div>
             </div>
-            {/* Seasonal production for Roof B */}
             <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-green-50 p-2 rounded">
               <div>🌱 Spring<br/>{seasonalB.spring.toFixed(0)} kWh</div>
               <div>☀️ Summer<br/>{seasonalB.summer.toFixed(0)} kWh</div>
