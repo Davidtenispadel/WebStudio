@@ -254,14 +254,16 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
             <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
             <tr><td className="border p-2">HJT</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.24%/°C</td><td className="border p-2">450‑480</td><td className="border p-2">21‑24</td><td className="border p-2">£450‑600</td><td className="border p-2">35‑45</td></tr>
-            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590<td><td className="border p-2">25‑30</td></tr>
+            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590</td><td className="border p-2">25‑30</td></tr>
           </tbody>
-        </table>
+        <table>
       </div>
 
       {/* ============================================================ */}
@@ -299,7 +301,9 @@ const SolarPanelsPage: React.FC = () => {
       <h4 className="text-xl font-semibold mt-6 mb-2">✨ Visual timeline of key milestones</h4>
       <div className="overflow-x-auto mb-6">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Year</th><th className="border p-2">Milestone</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Year</th><th className="border p-2">Milestone</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">1839</td><td className="border p-2">Becquerel discovers photovoltaic effect</td></tr>
             <tr><td className="border p-2">1883</td><td className="border p-2">Fritts builds first selenium cell (~1‑2%)</td></tr>
@@ -328,7 +332,9 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">PERC</td><td className="border p-2">Dark blue/black</td><td className="border p-2">9‑12 thick</td><td className="border p-2">Visible "ribs"</td></tr>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">Intense black</td><td className="border p-2">12‑16 very thin</td><td className="border p-2">Clean, minimal reflections</td></tr>
@@ -360,7 +366,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 6. INTERACTIVE CALCULATOR (restaurada) */}
+      {/* 6. INTERACTIVE CALCULATOR */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">
         6. Design your own layout – interactive 3D tool
