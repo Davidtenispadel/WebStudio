@@ -3,6 +3,7 @@ import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
+import SolarPanelCalculator from './components/SolarPanelCalculator'; // <-- Importamos la calculadora
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 
@@ -11,23 +12,28 @@ const App: React.FC = () => {
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
 
-  /* ------------------------
-     CATEGORY SYNC
-  ------------------------ */
-  useEffect(() => {
-    setActiveCategory(CATEGORIES[currentCategoryIndex]);
-  }, [currentCategoryIndex]);
+  // Comprobar si estamos en la ruta de la calculadora
+  const isCalculatorRoute = window.location.pathname === '/solar-calculator';
 
   /* ------------------------
-     DEBUG (para confirmar problema real)
+     CATEGORY SYNC (solo si no estamos en la calculadora)
   ------------------------ */
   useEffect(() => {
-    console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
-    console.log("ACTIVE CATEGORY:", activeCategory.name);
-  }, [activeCategory]);
+    if (!isCalculatorRoute) {
+      setActiveCategory(CATEGORIES[currentCategoryIndex]);
+    }
+  }, [currentCategoryIndex, isCalculatorRoute]);
+
+  // Efecto de depuración (opcional)
+  useEffect(() => {
+    if (!isCalculatorRoute) {
+      console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
+      console.log("ACTIVE CATEGORY:", activeCategory.name);
+    }
+  }, [activeCategory, isCalculatorRoute]);
 
   /* ------------------------
-     CUSTOM CURSOR
+     CUSTOM CURSOR (se mantiene)
   ------------------------ */
   useEffect(() => {
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
@@ -57,9 +63,10 @@ const App: React.FC = () => {
   }, []);
 
   /* ------------------------
-     NAVIGATION HANDLERS
+     NAVIGATION HANDLERS (solo si no estamos en calculadora)
   ------------------------ */
   const handleNavClick = useCallback((sectionName: string) => {
+    if (isCalculatorRoute) return; // No hacer nada si estamos en la calculadora
     console.log("NAV CLICK:", sectionName);
     console.log("MATCHING:", CATEGORIES.map(c => c.name));
 
@@ -73,20 +80,22 @@ const App: React.FC = () => {
       setCurrentCategoryIndex(index);
       setSelectedProject(null);
     }
-  }, []);
+  }, [isCalculatorRoute]);
 
   const handleGoHome = useCallback(() => {
+    if (isCalculatorRoute) return;
     setCurrentCategoryIndex(0);
     setSelectedProject(null);
-  }, []);
+  }, [isCalculatorRoute]);
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
+      if (isCalculatorRoute) return;
       if (activeCategory.name !== StudioSection.STRUCTURE) {
         setSelectedProject(project);
       }
     },
-    [activeCategory.name]
+    [activeCategory.name, isCalculatorRoute]
   );
 
   /* ------------------------
@@ -97,10 +106,12 @@ const App: React.FC = () => {
     activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
 
-  /* ------------------------
-     UI
-  ------------------------ */
+  // Si estamos en la ruta de la calculadora, renderizamos solo la calculadora
+  if (isCalculatorRoute) {
+    return <SolarPanelCalculator />;
+  }
 
+  // Renderizado normal del portfolio
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
@@ -111,14 +122,10 @@ const App: React.FC = () => {
             : 'bg-white'}
         text-black overflow-hidden relative z-0`}
     >
-
-      {/* SEO TITLE */}
       <h1 className="sr-only">
         DB+ Architecture | Expert Design, BIM & Planning Services
       </h1>
 
-      {/* ⛔ HERO REMOVED  
-          ⭐ ONLY VIDEO BACKGROUND FOR HOME */}
       {isHome && (
         <VideoBackground
           videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
