@@ -73,13 +73,10 @@ const getClimateFactor = (countryName: string): number => {
 // Grid dependency factor: fraction of self-consumed that comes from grid (red). Range 0.20 to 0.55 (max 55% of green).
 const getGridDependencyFactor = (countryName: string): number => {
   const map: Record<string, number> = {
-    // Northern / cloudy (higher, up to 0.55)
     "United Kingdom": 0.52, "Ireland": 0.55, "Netherlands": 0.53, "Belgium": 0.52, "Denmark": 0.55,
     "Norway": 0.55, "Sweden": 0.54, "Finland": 0.55, "Iceland": 0.55, "Germany": 0.50,
-    // Central / temperate (moderate)
     "France": 0.45, "Austria": 0.46, "Switzerland": 0.45, "Poland": 0.48, "Czech Republic": 0.48,
     "Hungary": 0.46, "Romania": 0.45, "Bulgaria": 0.44, "Slovakia": 0.46, "Slovenia": 0.45,
-    // Southern / sunny (lower)
     "Spain": 0.35, "Portugal": 0.36, "Italy": 0.36, "Greece": 0.34, "Turkey": 0.38, "Cyprus": 0.32,
     "Malta": 0.30, "Egypt": 0.30, "Morocco": 0.33, "South Africa": 0.35, "Mexico": 0.34,
     "Australia": 0.34, "New Zealand": 0.42, "USA": 0.40, "Canada": 0.50, "India": 0.38, "China": 0.42,
@@ -87,8 +84,7 @@ const getGridDependencyFactor = (countryName: string): number => {
     "Venezuela": 0.38, "Kenya": 0.35, "Nigeria": 0.40,
   };
   let factor = map[countryName] ?? 0.45;
-  // Cap at 0.55 (max 55% of green)
-  return Math.min(factor, 0.55);
+  return Math.min(factor, 0.55); // never exceed 55%
 };
 
 const PANEL_CATALOG = {
@@ -278,7 +274,7 @@ const SolarPanelCalculator: React.FC = () => {
     } else setLayoutB(null);
   }, [enableRoofB, roofBLength, roofBWidth, obstaclesB]);
 
-  // Inverter catalog
+  // Inverter catalog – keys without dots
   const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number; hybrid: boolean; island?: boolean }> = {
     string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW", power: 3.68, hybrid: false, island: false },
     string_5: { single: 1100, dual: 2100, name: "String 5.0 kW", power: 5.0, hybrid: false, island: false },
@@ -335,12 +331,11 @@ const SolarPanelCalculator: React.FC = () => {
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
 
-  // -------------------- FINANCIAL MODEL (red = gridFactor * green, capped at 0.55 of green) --------------------
+  // -------------------- FINANCIAL MODEL (red = gridFactor * green, capped at 55% of green) --------------------
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
-  // Red as percentage of generation = gridFactor * greenPct, but cannot exceed 55% of greenPct (already ensured by gridFactor <=0.55)
   let redPct = gridFactor * greenPct;
-  // Additional cap: red cannot take more than 100 - green (otherwise blue negative)
+  // Cap red to avoid negative blue (red cannot exceed 100 - green)
   if (redPct > 100 - greenPct) redPct = 100 - greenPct;
   const bluePct = 100 - greenPct - redPct;
   
@@ -472,7 +467,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- ORIENTATION COMPASS --------------------
+  // -------------------- ORIENTATION COMPASS (smooth drag) --------------------
   const OrientationCompass = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
     const pointColor = factor >= 0.85 ? "#22c55e" : factor >= 0.6 ? "#eab308" : "#ef4444";
@@ -575,7 +570,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- PITCH VISUALIZATION --------------------
+  // -------------------- PITCH VISUALIZATION WITH DRAGGABLE POINT --------------------
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
