@@ -263,84 +263,56 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
+      {/* 2. FUTURE TECHNOLOGIES (2026-2035) - REORGANIZED */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
         2. The near future: new solar technologies (2026‑2035)
       </h3>
-      <p className="mb-2">
+      <p className="mb-4">
         Although today's panels are already very efficient, science continues to advance. Here are
         the technologies that will reach rooftops in the coming years.
       </p>
-      <h4 className="text-xl font-semibold mt-6 mb-2">🔬 The tandem revolution: Perovskite + Silicon</h4>
-      <p className="mb-2">
-        <strong>What is it?</strong> Stacking a top perovskite cell (captures blue light) and a bottom
-        silicon cell (captures red light) to capture a broader solar spectrum.
-      </p>
-      <p className="mb-2">
-        <strong>Expected efficiency:</strong> Already above 30% in labs, commercial modules expected
-        to reach 35% by 2030.
-      </p>
-      <p className="mb-2">
-        <strong>Availability:</strong> 2026‑2027. Oxford PV and others plan commercial products with
-        20‑25 year warranties.
-      </p>
-      <p className="mb-2">
-        Today’s comparison between Oxford PV’s perovskite tandem panels and standard monocrystalline 
-        technology highlights a clear trade-off between performance and market maturity. Monocrystalline 
-        panels—the current industry standard—typically cost around <strong>£0.20–£0.32/W</strong>, supported by large-scale 
-        global manufacturing, proven lifespans exceeding 25 years, and efficiencies in the 20–23% range 
-        (up to ~25% with advanced designs). In contrast, Oxford PV’s panels achieve higher efficiencies of 
-        around <strong>24–25%</strong>, but come with estimated production costs of $0.29–0.42/W, likely higher in commercial
-        agreements due to their early-stage positioning and limited scale. Importantly, the company only 
-        began commercial sales in <strong>September 2024</strong>, with its first shipment delivered to a U.S. utility-scale 
-        project, marking the world’s first deployment of this technology.
-      </p>
-      <p className="mb-2">
-        From a market perspective, Oxford PV is not yet competing in the mainstream solar segment. Its panels 
-        are currently sold through select, <strong>large-scale (utility) projects and pilot applications</strong>, rather than 
-        open commercial distribution, with plans to expand into residential and broader markets in the future. 
-        This means that while Oxford PV offers superior energy output per square meter, it does not yet 
-        outperform monocrystalline panels on a cost-risk basis. Monocrystalline remains cheaper, widely 
-        available, and fully bankable, whereas Oxford PV is still an emerging, high-efficiency solution with 
-        greater uncertainty—positioned less as an immediate replacement and more as a potential 
-        next-generation technology if it successfully scales and proves long-term reliability.
-      </p>
-      <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
-      <p className="mb-2">
-        Back‑Contact (BC) technology moves all metal contacts to the rear, increasing efficiency by
-        2‑3% but at higher cost. Analysts predict BC will reach cost parity with TOPCon between
-        2028 and 2030. By 2035, tandem panels (perovskite‑silicon) may replace both.
-      </p>
-      <div className="bg-gray-50 p-4 rounded-md mb-6">
-        <p className="font-semibold">✨ Visual timeline of key milestones:</p>
-        <ul className="list-disc pl-6 mt-2">
-          <li>1839: Becquerel discovers photovoltaic effect</li>
-          <li>1883: Fritts builds first selenium cell (~1‑2%)</li>
-          <li>1954: Bell Labs creates first practical silicon cell (6%)</li>
-          <li>1959: Hoffman Electronics achieves 10% efficiency for satellites</li>
-          <li>1970s‑2000: First rooftops, polycrystalline and monocrystalline coexist</li>
-          <li>2000‑2015: China scales production, prices collapse from $5/W to $0.70/W</li>
-          <li>2023‑2025: TOPCon becomes dominant (≈97% of new mono‑crystalline installs)</li>
-          <li>2026‑2028: First commercial Perovskite‑Silicon tandem panels</li>
-          <li>2028‑2030: Back‑Contact (BC) reaches cost parity with TOPCon</li>
-          <li>2030‑2035: Tandem panels become mainstream, efficiency &gt;30‑35%</li>
-        </ul>
-      </div>
 
-      {/* Back-Contact section */}
-      <div className="bg-gray-50 p-5 rounded-md border-l-4 border-blue-500 my-6">
-        <h4 className="text-xl font-semibold mb-3">🔘 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
-        <p className="mb-2">
-          Back-Contact (BC) is a solar cell technology in which all electrical contacts are placed on the rear side
-          of the cell, leaving the entire front surface fully exposed to sunlight and eliminating shading losses
-          caused by metal gridlines. This design improves light capture and boosts efficiency compared to conventional
-          panels, while also delivering a uniform, all-black appearance. As a result, BC technology is particularly
-          suited for high-end residential installations and architecturally sensitive applications, where visual
-          quality and design integration are key and the solar system becomes part of the property’s aesthetic
-          distinction. However, its more complex manufacturing process and higher cost limit its adoption in mass
-          markets, meaning it is likely to remain a premium solution rather than a mainstream standard.
-        </p>
+      <h4 className="text-xl font-semibold mt-6 mb-2">2.1 The tandem revolution: Perovskite + Silicon</h4>
+      <p className="mb-2"><strong>What is it?</strong> Stacking a top perovskite cell (captures blue light) and a bottom silicon cell (captures red light) to capture a broader solar spectrum.</p>
+      <p className="mb-2"><strong>Expected efficiency:</strong> Already above 30% in labs, commercial modules expected to reach 35% by 2030.</p>
+      <p className="mb-2"><strong>Availability:</strong> 2026‑2027. Oxford PV and others plan commercial products with 20‑25 year warranties.</p>
+      <p className="mb-2">
+        Today’s comparison between Oxford PV’s perovskite tandem panels and standard monocrystalline technology highlights a clear trade-off between performance and market maturity. Monocrystalline panels—the current industry standard—typically cost around <strong>£0.20–£0.32/W</strong>, supported by large-scale global manufacturing, proven lifespans exceeding 25 years, and efficiencies in the 20–23% range (up to ~25% with advanced designs). In contrast, Oxford PV’s panels achieve higher efficiencies of around <strong>24–25%</strong>, but come with estimated production costs of $0.29–0.42/W, likely higher in commercial agreements due to their early-stage positioning and limited scale. The company only began commercial sales in <strong>September 2024</strong>, with its first shipment delivered to a U.S. utility-scale project, marking the world’s first deployment of this technology.
+      </p>
+      <p className="mb-4">
+        From a market perspective, Oxford PV is not yet competing in the mainstream solar segment. Its panels are currently sold through select, large-scale (utility) projects and pilot applications, rather than open commercial distribution, with plans to expand into residential and broader markets in the future. This means that while Oxford PV offers superior energy output per square meter, it does not yet outperform monocrystalline panels on a cost-risk basis. Monocrystalline remains cheaper, widely available, and fully bankable, whereas Oxford PV is still an emerging, high-efficiency solution with greater uncertainty—positioned less as an immediate replacement and more as a potential next-generation technology if it successfully scales and proves long-term reliability.
+      </p>
+
+      <h4 className="text-xl font-semibold mt-6 mb-2">2.2 Back‑Contact (BC) technology – the premium choice for aesthetics and efficiency</h4>
+      <p className="mb-2">
+        Back-Contact (BC) is a solar cell technology in which all electrical contacts are placed on the rear side of the cell, leaving the entire front surface fully exposed to sunlight and eliminating shading losses caused by metal gridlines. This design improves light capture and boosts efficiency compared to conventional panels, while also delivering a uniform, all-black appearance. As a result, BC technology is particularly suited for high-end residential installations and architecturally sensitive applications, where visual quality and design integration are key and the solar system becomes part of the property’s aesthetic distinction. However, its more complex manufacturing process and higher cost limit its adoption in mass markets, meaning it is likely to remain a premium solution rather than a mainstream standard.
+      </p>
+
+      <h4 className="text-xl font-semibold mt-6 mb-2">⚔️ TOPCon vs. Back-Contact (BC): the next decade's battle</h4>
+      <p className="mb-4">
+        Back‑Contact (BC) moves all metal contacts to the rear, increasing efficiency by 2‑3% but at higher cost. Analysts predict BC will reach cost parity with TOPCon between <strong>2028 and 2030</strong>. By 2035, tandem panels (perovskite‑silicon) may replace both.
+      </p>
+
+      <h4 className="text-xl font-semibold mt-6 mb-2">✨ Visual timeline of key milestones</h4>
+      <div className="overflow-x-auto mb-6">
+        <table className="min-w-full border-collapse border border-gray-300 text-sm">
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Year</th><th className="border p-2">Milestone</th></tr>
+          </thead>
+          <tbody>
+            <tr><td className="border p-2">1839</td><td className="border p-2">Becquerel discovers photovoltaic effect</td></tr>
+            <tr><td className="border p-2">1883</td><td className="border p-2">Fritts builds first selenium cell (~1‑2%)</td></tr>
+            <tr><td className="border p-2">1954</td><td className="border p-2">Bell Labs creates first practical silicon cell (6%)</td></tr>
+            <tr><td className="border p-2">1959</td><td className="border p-2">Hoffman Electronics achieves 10% efficiency for satellites</td></tr>
+            <tr><td className="border p-2">1970s‑2000</td><td className="border p-2">First rooftops, polycrystalline and monocrystalline coexist</td></tr>
+            <tr><td className="border p-2">2000‑2015</td><td className="border p-2">China scales production, prices collapse from $5/W to $0.70/W</td></tr>
+            <tr><td className="border p-2">2023‑2025</td><td className="border p-2">TOPCon becomes dominant (≈97% of new mono‑crystalline installs)</td></tr>
+            <tr><td className="border p-2">2026‑2028</td><td className="border p-2">First commercial Perovskite‑Silicon tandem panels</td></tr>
+            <tr><td className="border p-2">2028‑2030</td><td className="border p-2">Back‑Contact (BC) reaches cost parity with TOPCon</td></tr>
+            <tr><td className="border p-2">2030‑2035</td><td className="border p-2">Tandem panels become mainstream, efficiency &gt;30‑35%</td></tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ============================================================ */}
