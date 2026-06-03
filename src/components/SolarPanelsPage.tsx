@@ -318,81 +318,10 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 4. UK WINTER PERFORMANCE */}
+      {/* 4. VISUAL IDENTIFICATION GUIDE (renumerada) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
-        4. UK winter performance: solar production vs household demand (with EV and heat pump)
-      </h3>
-      <p className="mb-2">
-        The UK government is phasing out gas boilers; new homes after 2025 must use low‑carbon heating
-        (heat pumps). Many households also own an electric vehicle (EV) like a Tesla Model 3. Without
-        a battery, most solar energy generated in winter is self‑consumed immediately, but a
-        significant fraction is exported or curtailed. The analysis below uses realistic assumptions.
-      </p>
-      <h4 className="text-lg font-semibold mt-4 mb-2">🔢 Assumptions for a typical UK home (4 bedrooms, 2 adults, EV, heat pump):</h4>
-      <ul className="list-disc pl-6 mb-4">
-        <li>Solar system: 4 kWp, south, 35° tilt – December production ≈ 2‑3 kWh/day (only 15% of June peak).</li>
-        <li>Base load (lights, appliances, fridge, always‑on): ~8 kWh/day.</li>
-        <li>Heat pump (air‑to‑water, COP=3): heating demand in December ≈ 30 kWh heat → 10 kWh electricity/day.</li>
-        <li>EV (Tesla Model 3, 15,000 miles/year): average ~12 kWh/day but winter shorter trips → 8 kWh/day.</li>
-        <li><strong>Total daily consumption in December:</strong> 8 + 10 + 8 = <strong>26 kWh/day</strong>.</li>
-        <li>Solar production in December: <strong>2‑3 kWh/day</strong>.</li>
-      </ul>
-      <div className="bg-gray-100 p-4 rounded-md mb-4">
-        <p className="font-semibold">📉 The mismatch: solar covers only <strong>8‑11%</strong> of December demand. The rest (≈23 kWh/day) comes from the grid.</p>
-        <p className="mt-1">Without a battery, almost all solar energy is used immediately (self‑consumption &gt;90% in winter), but the absolute amount is tiny. In summer, solar generates ~20 kWh/day while consumption drops (no heating, less car charging), leading to large exports or curtailment.</p>
-      </div>
-      <h4 className="text-xl font-semibold mt-6 mb-3">📊 Monthly generation vs self‑consumption (no battery, 4 kWp system)</h4>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Month</th><th className="border p-2">Solar generation (kWh)</th><th className="border p-2">Self‑consumed (kWh)</th><th className="border p-2">Exported / Curtailed (kWh)</th><th className="border p-2">% of demand covered</th></tr></thead>
-          <tbody>
-            <tr><td className="border p-2">December</td><td className="border p-2">75</td><td className="border p-2">70</td><td className="border p-2">5</td><td className="border p-2">~9%</td></tr>
-            <tr><td className="border p-2">March</td><td className="border p-2">300</td><td className="border p-2">180</td><td className="border p-2">120</td><td className="border p-2">~25%</td></tr>
-            <tr><td className="border p-2">June</td><td className="border p-2">550</td><td className="border p-2">220</td><td className="border p-2">330</td><td className="border p-2">~30%</td></tr>
-            <tr><td className="border p-2">Annual total</td><td className="border p-2">3,400</td><td className="border p-2">1,800</td><td className="border p-2">1,600</td><td className="border p-2">~19%</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p className="text-sm text-gray-600 mt-2">
-        *Exported energy is paid via SEG (3‑5 p/kWh). Curtailment occurs if export is capped. Without a battery,
-        <strong> more than half of annual solar energy is not used by the home</strong> – it is exported or lost.
-      </p>
-      <div className="mt-6 mb-8">
-        <p className="font-semibold">📊 December daily balance (kWh) – visual:</p>
-        <div className="space-y-2">
-          <div><span className="inline-block w-32">Solar:</span><div className="inline-block bg-yellow-500 h-6" style={{width: '8%'}}></div><span className="ml-2">2‑3 kWh</span></div>
-          <div><span className="inline-block w-32">Consumption:</span><div className="inline-block bg-red-500 h-6" style={{width: '100%'}}></div><span className="ml-2">26 kWh</span></div>
-          <div><span className="inline-block w-32">Grid import:</span><div className="inline-block bg-gray-500 h-6" style={{width: '92%'}}></div><span className="ml-2">~23 kWh</span></div>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">Bars scaled to consumption (100% = 26 kWh). Solar covers less than 10% in winter.</p>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 5. ROOF ORIENTATION, PITCH AND SHADING */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        5. Roof orientation, pitch, and shading – why north is a problem
-      </h3>
-      <p className="mb-2">
-        In the northern hemisphere, a south‑facing roof at about 35° tilt receives the maximum annual
-        solar radiation. Deviations cause significant losses. The following guide shows expected
-        production relative to a perfect south‑facing array.
-      </p>
-      <ul className="list-disc pl-6 mb-4">
-        <li><strong>South‑east / South‑west:</strong> 90‑95% of optimal</li>
-        <li><strong>East / West (flat pitch 10‑20°):</strong> 70‑80%</li>
-        <li><strong>East / West (steep 40‑50°):</strong> 60‑70%</li>
-        <li><strong>Flat roof (5‑10°) with south orientation:</strong> 85‑90% (use tilt frames to improve)</li>
-        <li><strong>North (any pitch):</strong> <span className="font-bold text-red-700">45‑55% – generally not recommended</span></li>
-      </ul>
-      <p className="mb-4">Partial shading from chimneys, trees, or neighbouring buildings can slash output by 30‑70%. Microinverters or power optimisers help but add 10‑20% to system cost.</p>
-
-      {/* ============================================================ */}
-      {/* 6. VISUAL IDENTIFICATION GUIDE */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        6. Visual identification guide – spot the technology at a glance
+        4. Visual identification guide – spot the technology at a glance
       </h3>
       <p className="mb-2">
         You can often identify the type of solar cell by looking at the colour and the pattern of
@@ -412,33 +341,10 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 7. CLIMATE ZONE RECOMMENDATIONS */}
+      {/* 5. TIMBER ROOF (renumerada) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
-        7. Climate zone recommendations – choose by where you live
-      </h3>
-      <p className="mb-2">
-        Different technologies perform better in different climates. HJT panels have the best
-        temperature coefficient, making them ideal for hot southern Europe. TOPCon excels in
-        low‑light conditions, perfect for the UK and central Europe. The table below summarises
-        the best choice for each climate zone.
-      </p>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Climate zone</th><th className="border p-2">Countries</th><th className="border p-2">Best technology</th><th className="border p-2">Why</th><th className="border p-2">4 kWp cost (installed)</th></tr></thead>
-          <tbody>
-            <tr><td className="border p-2">☀️ Hot</td><td className="border p-2">Spain, Italy, Greece</td><td className="border p-2">HJT</td><td className="border p-2">Best temp coefficient</td><td className="border p-2">£6,500‑8,500</td></tr>
-            <tr><td className="border p-2">🌦️ Temperate</td><td className="border p-2">UK, Netherlands, Germany</td><td className="border p-2">TOPCon</td><td className="border p-2">Low‑light excellence</td><td className="border p-2">£5,500‑7,500</td></tr>
-            <tr><td className="border p-2">❄️ Cold</td><td className="border p-2">Norway, Sweden, Finland</td><td className="border p-2">TOPCon N‑type</td><td className="border p-2">Diffuse light specialist</td><td className="border p-2">£6,000‑8,500</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 8. TIMBER ROOF */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        8. Special advice for UK timber roofs – weight matters
+        5. Special advice for UK timber roofs – weight matters
       </h3>
       <p className="mb-2">
         Many British homes have timber roof structures that may not support heavy loads. A typical
@@ -456,70 +362,10 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 9. COST BREAKDOWN */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        9. Cost breakdown – solar installation in the UK (2025‑2026)
-      </h3>
-      <p className="mb-2">
-        The total cost of a solar installation includes not only the panels but also the inverter,
-        mounting system, scaffolding, electrical components, labour, and administrative fees.
-        The table below shows a typical breakdown for a 4 kWp TOPCon system installed in southern
-        England. All prices include 0% VAT (valid until March 2027).
-      </p>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm mb-4">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Component</th><th className="border p-2">Estimated cost (£)</th></tr></thead>
-          <tbody>
-            <tr><td className="border p-2">10 x TOPCon panels (430 Wp)</td><td className="border p-2">£3,650‑4,600</td></tr>
-            <tr><td className="border p-2">Inverter (3.68 kW string)</td><td className="border p-2">£600‑1,200</td></tr>
-            <tr><td className="border p-2">Mounting system</td><td className="border p-2">£300‑600</td></tr>
-            <tr><td className="border p-2">Scaffolding</td><td className="border p-2">£400‑800</td></tr>
-            <tr><td className="border p-2">Electrical components</td><td className="border p-2">£200‑500</td></tr>
-            <tr><td className="border p-2">Labour (MCS)</td><td className="border p-2">£800‑1,500</td></tr>
-            <tr><td className="border p-2">MCS / DNO admin</td><td className="border p-2">£100‑250</td></tr>
-            <tr className="bg-gray-100 font-semibold"><td className="border p-2">Total 4 kWp installed (0% VAT)</td><td className="border p-2">£5,500‑7,500</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p className="mb-4">Annual savings + SEG income: <strong>£700‑£950</strong> → payback <strong>7‑10 years</strong>.</p>
-
-      {/* ============================================================ */}
-      {/* 10. PERMITTED DEVELOPMENT & MCS */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        10. Permitted development & MCS (UK)
-      </h3>
-      <p className="mb-2">
-        In most cases, installing solar panels on a residential roof in the UK is considered
-        <strong>permitted development</strong>, meaning you do not need planning permission as long as
-        certain conditions are met. However, listed buildings and conservation areas have stricter rules.
-      </p>
-      <ul className="list-disc pl-6 mb-4">
-        <li>Panels must project ≤200 mm from the roof slope.</li>
-        <li>They cannot exceed the highest part of the roof (excluding chimneys).</li>
-        <li>Listed buildings and conservation areas require full planning permission.</li>
-        <li><strong>MCS certification</strong> (Microgeneration Certification Scheme) is required to access the Smart Export Guarantee (SEG), which pays you for exported electricity.</li>
-      </ul>
-
-      {/* ============================================================ */}
-      {/* 11. INTERACTIVE CALCULATOR */}
+      {/* 6. BIBLIOGRAPHY (renumerada) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">
-        11. Design your own layout – interactive 3D tool
-      </h3>
-      <p className="mb-6">
-        Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
-        It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
-        and shows a 3D preview.
-      </p>
-      <SolarPanelCalculator />
-
-      {/* ============================================================ */}
-      {/* 12. BIBLIOGRAPHY */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">
-        12. References & further reading
+        6. References & further reading
       </h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
         <p>1. UNSW (2023) – "Long‑term degradation rates of 11,000 PV systems", <em>Progress in Photovoltaics</em>.</p>
