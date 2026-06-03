@@ -70,7 +70,6 @@ const getClimateFactor = (countryName: string): number => {
   return 0.92;
 };
 
-// Estimated grid dependency per country (optimistic habits, high daytime consumption)
 const getEstimatedGridDependency = (countryName: string): number => {
   const map: Record<string, number> = {
     "United Kingdom": 28, "Ireland": 30, "Netherlands": 30, "Belgium": 30, "Denmark": 32,
@@ -209,9 +208,9 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Common parameters ---
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
-  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70); // Optimal 70%
+  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70);
 
-  // Tariffs (editable, but default from country)
+  // Tariffs
   const [importTariff, setImportTariff] = useState(defaultPricesByCountry["United Kingdom"].importRate);
   const [exportTariff, setExportTariff] = useState(defaultPricesByCountry["United Kingdom"].exportRate);
   const [standingCharge, setStandingCharge] = useState(defaultPricesByCountry["United Kingdom"].standingCharge);
@@ -328,7 +327,7 @@ const SolarPanelCalculator: React.FC = () => {
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
 
-  // Financial calculations with grid purchase = 20% of self-consumption
+  // Financial calculations
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
   const gridPurchaseKwhMonthly = selfConsumedKwhMonthly * 0.2;
@@ -364,7 +363,7 @@ const SolarPanelCalculator: React.FC = () => {
   const redPct = Math.min((gridPurchaseKwhMonthly / avgMonthlyGeneration) * 100, 100 - greenPct);
   const bluePct = Math.max(0, 100 - greenPct - redPct);
 
-  // Draggable thumb for the tricolor bar
+  // Draggable thumb for financial bar
   const barRef = useRef<HTMLDivElement>(null);
   const [isDraggingThumb, setIsDraggingThumb] = useState(false);
   
@@ -462,16 +461,16 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- IMPROVED ORIENTATION COMPASS --------------------
+  // -------------------- IMPROVED ORIENTATION COMPASS WITH SMOOTH DRAG --------------------
   const OrientationCompass = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
     const pointColor = factor >= 0.85 ? "#22c55e" : factor >= 0.6 ? "#eab308" : "#ef4444";
     const compassRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const dragRef = useRef(false);
 
-    // Convert mouse/touch position to angle (degrees)
     const getAngleFromEvent = (clientX: number, clientY: number): number => {
-      if (!compassRef.current) return 0;
+      if (!compassRef.current) return orientation;
       const rect = compassRef.current.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
@@ -480,68 +479,49 @@ const SolarPanelCalculator: React.FC = () => {
       return Math.round(angle);
     };
 
-    const handleClick = (e: React.MouseEvent) => {
-      const angle = getAngleFromEvent(e.clientX, e.clientY);
-      onChange(angle);
-    };
-
-    const handleTouchClick = (e: React.TouchEvent) => {
-      e.preventDefault();
-      if (e.touches.length) {
-        const angle = getAngleFromEvent(e.touches[0].clientX, e.touches[0].clientY);
-        onChange(angle);
-      }
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!dragRef.current) return;
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const newAngle = getAngleFromEvent(clientX, clientY);
+      onChange(newAngle);
     };
 
     const startDrag = (e: React.MouseEvent | React.TouchEvent) => {
       e.preventDefault();
-      setIsDragging(true);
+      dragRef.current = true;
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      const angle = getAngleFromEvent(clientX, clientY);
-      onChange(angle);
+      const newAngle = getAngleFromEvent(clientX, clientY);
+      onChange(newAngle);
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', stopDrag);
+      window.addEventListener('touchmove', handleMove);
+      window.addEventListener('touchend', stopDrag);
     };
 
-    const onDragMove = (e: MouseEvent | TouchEvent) => {
-      if (!isDragging) return;
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      const angle = getAngleFromEvent(clientX, clientY);
-      onChange(angle);
+    const stopDrag = () => {
+      dragRef.current = false;
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', stopDrag);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', stopDrag);
     };
 
-    const onDragEnd = () => {
-      setIsDragging(false);
-      window.removeEventListener('mousemove', onDragMove);
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('touchmove', onDragMove);
-      window.removeEventListener('touchend', onDragEnd);
+    // Click on compass to set angle
+    const handleClick = (e: React.MouseEvent) => {
+      const newAngle = getAngleFromEvent(e.clientX, e.clientY);
+      onChange(newAngle);
     };
-
-    useEffect(() => {
-      if (isDragging) {
-        window.addEventListener('mousemove', onDragMove);
-        window.addEventListener('mouseup', onDragEnd);
-        window.addEventListener('touchmove', onDragMove);
-        window.addEventListener('touchend', onDragEnd);
-      }
-      return () => {
-        window.removeEventListener('mousemove', onDragMove);
-        window.removeEventListener('mouseup', onDragEnd);
-        window.removeEventListener('touchmove', onDragMove);
-        window.removeEventListener('touchend', onDragEnd);
-      };
-    }, [isDragging]);
 
     return (
       <div className="flex flex-col items-center">
         <div
           ref={compassRef}
           className="relative w-40 h-40 mb-2 cursor-grab active:cursor-grabbing"
-          onClick={handleClick}
-          onTouchStart={handleTouchClick}
           onMouseDown={startDrag}
           onTouchStart={startDrag}
+          onClick={handleClick}
         >
           <div className="absolute inset-0 rounded-full border-2 border-gray-600"></div>
           {/* Cardinal lines */}
@@ -571,7 +551,7 @@ const SolarPanelCalculator: React.FC = () => {
               }}
             />
           </div>
-          {/* Draggable circle thumb */}
+          {/* Draggable circle */}
           <div
             className="absolute w-5 h-5 rounded-full shadow-lg border-2 border-white"
             style={{
@@ -589,28 +569,96 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => (
-    <div className="flex flex-col items-center">
-      <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={enabled} onChange={() => setEnabled(!enabled)} /> Custom {label}</label>
-      {enabled ? (
-        <>
-          <svg width="200" height="100" viewBox="0 0 200 100" className="my-2">
-            <line x1="20" y1="80" x2="180" y2="80" stroke="#666" strokeWidth="1.5" />
-            <g transform={`translate(100, 80) rotate(${-tilt})`}>
-              <rect x="-25" y="-45" width="50" height="8" fill="#4A90D9" stroke="#333" strokeWidth="1" />
-              <rect x="-25" y="-45" width="50" height="3" fill="#FFD700" opacity="0.6" />
-            </g>
-            <path d={`M 75 80 A 25 25 0 0 1 ${100 - 25 * Math.sin(tilt * Math.PI / 180)} ${80 - 25 * Math.cos(tilt * Math.PI / 180)}`} fill="none" stroke="#888" strokeWidth="1" strokeDasharray="3" />
-            <text x="75" y="70" fontSize="10" fill="#333">{tilt}°</text>
-          </svg>
-          <input type="range" min="0" max="90" step="1" value={tilt} onChange={(e) => onChange(parseInt(e.target.value))} className="w-full max-w-xs" />
-          <p className="text-xs">Factor: {getTiltFactor(tilt).toFixed(2)}</p>
-        </>
-      ) : (
-        <p className="text-sm text-gray-600">Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>
-      )}
-    </div>
-  );
+  // -------------------- PITCH VISUALIZATION WITH DRAGGABLE POINT --------------------
+  const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
+    const svgRef = useRef<SVGSVGElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const getTiltFromEvent = (clientX: number, clientY: number): number => {
+      if (!svgRef.current) return tilt;
+      const rect = svgRef.current.getBoundingClientRect();
+      // The pivot is at (100, 80) in SVG coordinates (width 200, height 100)
+      const pivotX = rect.left + 100;
+      const pivotY = rect.top + 80;
+      let dx = clientX - pivotX;
+      let dy = clientY - pivotY;
+      // angle from vertical: rotate from -90 to +90 (0 = vertical, but our visual shows tilt from horizontal)
+      // Actually we want tilt angle: 0° = horizontal, 90° = vertical.
+      // Our arrow rotates from 0° (flat) to 90° (vertical). The rotation is -tilt degrees.
+      // So we need to compute tilt = atan2(dy, dx) but with proper mapping.
+      // Simpler: compute angle between the line (pivot to mouse) and the horizontal axis.
+      let angleRad = Math.atan2(-dy, dx); // because y increases downwards
+      let angleDeg = angleRad * 180 / Math.PI;
+      angleDeg = Math.min(90, Math.max(0, angleDeg));
+      return Math.round(angleDeg);
+    };
+
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const newTilt = getTiltFromEvent(clientX, clientY);
+      onChange(newTilt);
+    };
+
+    const startDrag = (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const newTilt = getTiltFromEvent(clientX, clientY);
+      onChange(newTilt);
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', () => setIsDragging(false));
+      window.addEventListener('touchmove', handleMove);
+      window.addEventListener('touchend', () => setIsDragging(false));
+    };
+
+    return (
+      <div className="flex flex-col items-center">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input type="checkbox" checked={enabled} onChange={() => setEnabled(!enabled)} /> Custom {label}
+        </label>
+        {enabled ? (
+          <>
+            <svg
+              ref={svgRef}
+              width="200"
+              height="100"
+              viewBox="0 0 200 100"
+              className="my-2 cursor-grab active:cursor-grabbing"
+              onMouseDown={startDrag}
+              onTouchStart={startDrag}
+            >
+              <line x1="20" y1="80" x2="180" y2="80" stroke="#666" strokeWidth="1.5" />
+              <g transform={`translate(100, 80) rotate(${-tilt})`}>
+                <rect x="-25" y="-45" width="50" height="8" fill="#4A90D9" stroke="#333" strokeWidth="1" />
+                <rect x="-25" y="-45" width="50" height="3" fill="#FFD700" opacity="0.6" />
+              </g>
+              <circle cx="100" cy="80" r="5" fill="#ff0000" />
+              <path
+                d={`M 75 80 A 25 25 0 0 1 ${100 - 25 * Math.sin(tilt * Math.PI / 180)} ${80 - 25 * Math.cos(tilt * Math.PI / 180)}`}
+                fill="none" stroke="#888" strokeWidth="1" strokeDasharray="3"
+              />
+              <text x="75" y="70" fontSize="10" fill="#333">{tilt}°</text>
+            </svg>
+            <input
+              type="range"
+              min="0"
+              max="90"
+              step="1"
+              value={tilt}
+              onChange={(e) => onChange(parseInt(e.target.value))}
+              className="w-full max-w-xs"
+            />
+            <p className="text-xs">Factor: {getTiltFactor(tilt).toFixed(2)}</p>
+          </>
+        ) : (
+          <p className="text-sm text-gray-600">Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>
+        )}
+      </div>
+    );
+  };
 
   // Recommendation function (simplified)
   const getDetailedRecommendation = (selfKwh: number, size: string, country: string): string => {
@@ -698,7 +746,7 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
           <div className="mt-2 text-sm">{renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, "Roof A layout")}</div>
         </div>
-        {/* Roof B (optional) */}
+        {/* Roof B optional */}
         <div className="mb-2">
           <label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label>
         </div>
