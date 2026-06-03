@@ -572,7 +572,7 @@ const SolarPanelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* INVERTER CONFIGURATION (con opciones dual forzado) */}
+      {/* INVERTER CONFIGURATION (con opciones dual forzado) - CORREGIDO: >12 reemplazado por &gt;12 */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">⚡ Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -606,7 +606,7 @@ const SolarPanelCalculator: React.FC = () => {
               />
               <label htmlFor="dualInverter" className="text-sm">
                 Use dual inverters (2 units)
-                {forceDual && <span className="text-red-600 ml-2">(Required: mixed orientations or >12 panels)</span>}
+                {forceDual && <span className="text-red-600 ml-2">(Required: mixed orientations or &gt;12 panels)</span>}
                 <br />
                 <span className="text-xs text-gray-600">Price: £{inverterPrices[inverterType]?.dual || (inverterPrices[inverterType]?.single * 2)}</span>
               </label>
@@ -638,7 +638,6 @@ const SolarPanelCalculator: React.FC = () => {
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
         
-        {/* Costes por tejado (paneles, montaje proporcional) */}
         <div className="mb-4 border-b pb-2">
           <div className="font-semibold">Roof A</div>
           <div className="grid grid-cols-2 gap-2 text-sm ml-4">
@@ -673,7 +672,6 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         )}
         
-        {/* Costes compartidos */}
         <div className="mt-2">
           <div className="font-semibold">Shared costs</div>
           <div className="grid grid-cols-2 gap-2 text-sm ml-4">
@@ -716,7 +714,6 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
         
-        {/* Tarifas editables */}
         <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-white/50 rounded">
           <div>
             <label className="block text-sm font-medium">Import tariff (£/kWh)</label>
@@ -732,7 +729,6 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
         </div>
         
-        {/* Barra tricolor y resto de análisis (sin cambios) */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
