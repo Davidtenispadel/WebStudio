@@ -70,24 +70,25 @@ const getClimateFactor = (countryName: string): number => {
   return 0.92;
 };
 
-// Updated grid dependency: realistic range without batteries (40-70%)
-// Higher for northern/cloudy countries, lower for sunny southern countries.
-const getEstimatedGridDependency = (countryName: string): number => {
+// Grid dependency factor: fraction of self-consumed that comes from grid (red). Range 0.20 to 0.55 (max 55% of green).
+const getGridDependencyFactor = (countryName: string): number => {
   const map: Record<string, number> = {
-    // Northern / cloudy (65-75%)
-    "United Kingdom": 68, "Ireland": 70, "Netherlands": 70, "Belgium": 68, "Denmark": 72,
-    "Norway": 75, "Sweden": 72, "Finland": 75, "Iceland": 78, "Germany": 62,
-    // Central / temperate (55-65%)
-    "France": 58, "Austria": 60, "Switzerland": 58, "Poland": 65, "Czech Republic": 64,
-    "Hungary": 62, "Romania": 60, "Bulgaria": 58, "Slovakia": 62, "Slovenia": 60,
-    // Southern (40-55%)
-    "Spain": 45, "Portugal": 48, "Italy": 48, "Greece": 44, "Turkey": 50, "Cyprus": 42,
-    "Malta": 40, "Egypt": 40, "Morocco": 45, "South Africa": 48, "Mexico": 45,
-    "Australia": 45, "New Zealand": 55, "USA": 52, "Canada": 65, "India": 52, "China": 55,
-    "Japan": 58, "Brazil": 52, "Argentina": 55, "Chile": 48, "Peru": 48, "Colombia": 55,
-    "Venezuela": 52, "Kenya": 48, "Nigeria": 52,
+    // Northern / cloudy (higher, up to 0.55)
+    "United Kingdom": 0.52, "Ireland": 0.55, "Netherlands": 0.53, "Belgium": 0.52, "Denmark": 0.55,
+    "Norway": 0.55, "Sweden": 0.54, "Finland": 0.55, "Iceland": 0.55, "Germany": 0.50,
+    // Central / temperate (moderate)
+    "France": 0.45, "Austria": 0.46, "Switzerland": 0.45, "Poland": 0.48, "Czech Republic": 0.48,
+    "Hungary": 0.46, "Romania": 0.45, "Bulgaria": 0.44, "Slovakia": 0.46, "Slovenia": 0.45,
+    // Southern / sunny (lower)
+    "Spain": 0.35, "Portugal": 0.36, "Italy": 0.36, "Greece": 0.34, "Turkey": 0.38, "Cyprus": 0.32,
+    "Malta": 0.30, "Egypt": 0.30, "Morocco": 0.33, "South Africa": 0.35, "Mexico": 0.34,
+    "Australia": 0.34, "New Zealand": 0.42, "USA": 0.40, "Canada": 0.50, "India": 0.38, "China": 0.42,
+    "Japan": 0.44, "Brazil": 0.38, "Argentina": 0.42, "Chile": 0.35, "Peru": 0.35, "Colombia": 0.42,
+    "Venezuela": 0.38, "Kenya": 0.35, "Nigeria": 0.40,
   };
-  return map[countryName] ?? 58; // default 58%
+  let factor = map[countryName] ?? 0.45;
+  // Cap at 0.55 (max 55% of green)
+  return Math.min(factor, 0.55);
 };
 
 const PANEL_CATALOG = {
@@ -215,8 +216,7 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Common parameters ---
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
-  // selfConsumptionPercent is the percentage of solar generation that is self-consumed (green)
-  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70); // Optimal 70%
+  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70); // green % of generation
 
   // Tariffs
   const [importTariff, setImportTariff] = useState(defaultPricesByCountry["United Kingdom"].importRate);
@@ -247,7 +247,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [dualInverter, setDualInverter] = useState(false);
 
   const climateFactor = getClimateFactor(selectedCountry);
-  const gridDependencyPercent = getEstimatedGridDependency(selectedCountry); // e.g., 68% for UK
+  const gridFactor = getGridDependencyFactor(selectedCountry); // between 0.20 and 0.55
 
   // Update tariffs on country change
   useEffect(() => {
@@ -335,19 +335,19 @@ const SolarPanelCalculator: React.FC = () => {
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
 
-  // -------------------- NEW FINANCIAL MODEL --------------------
-  // Solar generation (monthly average)
+  // -------------------- FINANCIAL MODEL (red = gridFactor * green, capped at 0.55 of green) --------------------
   const avgMonthlyGeneration = totalAnnualKwh / 12;
-  // Self-consumed from solar (based on user slider)
-  const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
-  // Grid purchase: derived from the estimated grid dependency percentage for the country.
-  // Formula: gridPurchase = (gridDep * selfConsumed) / (100 - gridDep)
-  // This ensures that total consumption = selfConsumed + gridPurchase, and gridPurchase / totalConsumption = gridDep/100.
-  const gridPurchaseKwhMonthly = (gridDependencyPercent * selfConsumedKwhMonthly) / (100 - gridDependencyPercent);
-  // Exported solar = generation minus self-consumed (all excess goes to grid)
-  const exportedKwhMonthly = Math.max(0, avgMonthlyGeneration - selfConsumedKwhMonthly);
+  const greenPct = selfConsumptionPercent;
+  // Red as percentage of generation = gridFactor * greenPct, but cannot exceed 55% of greenPct (already ensured by gridFactor <=0.55)
+  let redPct = gridFactor * greenPct;
+  // Additional cap: red cannot take more than 100 - green (otherwise blue negative)
+  if (redPct > 100 - greenPct) redPct = 100 - greenPct;
+  const bluePct = 100 - greenPct - redPct;
   
-  // Total consumption (self + grid)
+  // Actual kWh values
+  const selfConsumedKwhMonthly = avgMonthlyGeneration * (greenPct / 100);
+  const gridPurchaseKwhMonthly = avgMonthlyGeneration * (redPct / 100);
+  const exportedKwhMonthly = avgMonthlyGeneration * (bluePct / 100);
   const totalConsumption = selfConsumedKwhMonthly + gridPurchaseKwhMonthly;
   
   // Bills and savings
@@ -376,11 +376,6 @@ const SolarPanelCalculator: React.FC = () => {
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
   const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
 
-  // Percentages for the tricolor bar (based on generation)
-  const greenPct = selfConsumptionPercent; // already %
-  const redPct = Math.min((gridPurchaseKwhMonthly / avgMonthlyGeneration) * 100, 100 - greenPct);
-  const bluePct = Math.max(0, 100 - greenPct - redPct);
-
   // Draggable thumb for the financial bar
   const barRef = useRef<HTMLDivElement>(null);
   const [isDraggingThumb, setIsDraggingThumb] = useState(false);
@@ -398,11 +393,9 @@ const SolarPanelCalculator: React.FC = () => {
     const rect = barRef.current.getBoundingClientRect();
     let x = clientX - rect.left;
     x = Math.max(0, Math.min(x, rect.width));
-    const percent = (x / rect.width) * 100;
-    const maxAllowed = 100 - redPct;
-    let newVal = Math.min(percent, maxAllowed);
-    newVal = Math.max(0, newVal);
-    setSelfConsumptionPercent(Math.round(newVal));
+    let newGreenPct = (x / rect.width) * 100;
+    newGreenPct = Math.min(100, Math.max(0, newGreenPct));
+    setSelfConsumptionPercent(Math.round(newGreenPct));
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -484,7 +477,6 @@ const SolarPanelCalculator: React.FC = () => {
     const factor = getOrientationFactor(orientation);
     const pointColor = factor >= 0.85 ? "#22c55e" : factor >= 0.6 ? "#eab308" : "#ef4444";
     const compassRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
     const dragRef = useRef(false);
 
     const getAngleFromEvent = (clientX: number, clientY: number): number => {
@@ -583,7 +575,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- PITCH VISUALIZATION WITH DRAGGABLE POINT --------------------
+  // -------------------- PITCH VISUALIZATION --------------------
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -668,7 +660,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Recommendation function (simplified)
+  // Recommendation function (unchanged)
   const getDetailedRecommendation = (selfKwh: number, size: string, country: string): string => {
     const hotCountries = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
     const isHot = hotCountries.includes(country);
@@ -836,7 +828,7 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red, {gridDependencyPercent}% of total consumption)</span>
+            <span className="font-medium text-red-600">Grid purchase (red, {Math.round(gridFactor*100)}% of green, max 55%)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
           <div ref={barRef} className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer" onClick={(e) => {
@@ -844,14 +836,17 @@ const SolarPanelCalculator: React.FC = () => {
             if (rect) {
               const x = e.clientX - rect.left;
               const percent = (x / rect.width) * 100;
-              const maxAllowed = 100 - redPct;
-              let newVal = Math.min(percent, maxAllowed);
-              newVal = Math.max(0, newVal);
-              setSelfConsumptionPercent(Math.round(newVal));
+              let newGreen = Math.min(100, Math.max(0, percent));
+              setSelfConsumptionPercent(Math.round(newGreen));
             }
           }}>
             <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
-            <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10" style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }} onMouseDown={startDrag} onTouchStart={startDrag} />
+            <div
+              className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10"
+              style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }}
+              onMouseDown={startDrag}
+              onTouchStart={startDrag}
+            />
             <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold pointer-events-none">
               <span>{greenPct.toFixed(0)}%</span><span>{redPct.toFixed(1)}%</span><span>{bluePct.toFixed(1)}%</span>
             </div>
@@ -862,13 +857,13 @@ const SolarPanelCalculator: React.FC = () => {
             <span>100% (consume all)</span>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            📊 <strong>Grid dependency for {selectedCountry}:</strong> <span className="font-bold">{gridDependencyPercent}%</span> of your total consumption comes from the grid (without batteries).<br />
-            🔍 This is based on average consumption patterns (night usage, winter, etc.). A small battery could reduce this by half.
+            📊 <strong>Grid purchase rule:</strong> For <strong>{selectedCountry}</strong>, red (grid) = <strong>{Math.round(gridFactor*100)}%</strong> of green (self‑consumed), <strong>never exceeding 55% of green</strong>. Capped to leave space for blue.<br />
+            🔍 This reflects typical night consumption. Without batteries, you will always need some grid energy.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self-consumed (solar)</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
-          <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase (from utility)</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
           <div className="bg-blue-100 p-3 rounded-lg text-center"><p className="text-sm text-blue-800 font-semibold">💰 Exported to grid</p><p className="text-2xl font-bold text-blue-600">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
         </div>
         <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">Energy price sources: based on country selection (overridable). Climate factor already included in production.</p></div>
