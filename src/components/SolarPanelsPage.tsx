@@ -40,9 +40,7 @@ const SolarPanelsPage: React.FC = () => {
         Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
       </p>
 
-      {/* ============================================================ */}
-      {/* 1. ORIGINS AND EVOLUTION */}
-      {/* ============================================================ */}
+      {/* ========== 1. HISTORY ========== */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         1. Origins and evolution of solar panels – from 19th century to today's technology
       </h3>
@@ -58,20 +56,12 @@ const SolarPanelsPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
         <div className="flex justify-center">
           <div className="w-full max-w-md rounded-lg overflow-hidden shadow-md">
-            <img 
-              src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952585/4218c5e2-e86e-4093-b8c4-21aa628fbd49.png" 
-              alt="Diagram 1" 
-              className="w-full h-auto object-cover"
-            />
+            <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952585/4218c5e2-e86e-4093-b8c4-21aa628fbd49.png" alt="Diagram 1" className="w-full h-auto object-cover" />
           </div>
         </div>
         <div className="flex justify-center">
           <div className="w-full max-w-xs rounded-lg overflow-hidden shadow-md">
-            <img 
-              src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" 
-              alt="Diagram 2" 
-              className="w-full h-auto object-cover"
-            />
+            <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" alt="Diagram 2" className="w-full h-auto object-cover" />
           </div>
         </div>
       </div>
@@ -84,11 +74,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       <div className="flex justify-center my-6">
-        <img 
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952879/4396d0fd-a82f-424e-bcac-dcf41e8911d6.png" 
-          alt="Solar panel diagram" 
-          className="w-full max-w-md rounded-lg shadow-md"
-        />
+        <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952879/4396d0fd-a82f-424e-bcac-dcf41e8911d6.png" alt="Solar panel diagram" className="w-full max-w-md rounded-lg shadow-md" />
       </div>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🚀 The Space Race (late 1950s – 1960s)</h4>
@@ -100,11 +86,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       <div className="flex justify-center my-6">
-        <img 
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779956789/1703e28d-97a4-4f98-a2d2-69166a1c8755.png" 
-          alt="Space race solar panel diagram" 
-          className="w-full max-w-md rounded-lg shadow-md"
-        />
+        <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779956789/1703e28d-97a4-4f98-a2d2-69166a1c8755.png" alt="Space race solar panel diagram" className="w-full max-w-md rounded-lg shadow-md" />
       </div>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">🏠 First Rooftops (1970 – 2000)</h4>
@@ -114,23 +96,13 @@ const SolarPanelsPage: React.FC = () => {
         efficient than monocrystalline. During this period, two main types of silicon panels emerged:
       </p>
       <ul className="list-disc pl-6 mb-4">
-        <li><strong>Monocrystalline silicon (mono‑Si):</strong> Made from a single crystal, higher
-        efficiency (15‑20%), uniform dark colour, but more expensive.</li>
+        <li><strong>Monocrystalline silicon (mono‑Si):</strong> Made from a single crystal, higher efficiency (15‑20%), uniform dark colour, but more expensive.</li>
         <div className="flex justify-center my-4">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png" 
-            alt="Monocrystalline silicon panel" 
-            className="w-full max-w-md rounded-lg shadow-md"
-          />
+          <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779970838/Monocristaline_imbvt7.png" alt="Monocrystalline silicon panel" className="w-full max-w-md rounded-lg shadow-md" />
         </div>
-        <li><strong>Polycrystalline silicon (poly‑Si):</strong> Made from melted fragments, lower
-        efficiency (13‑16%), speckled blue appearance, cheaper to manufacture.</li>
+        <li><strong>Polycrystalline silicon (poly‑Si):</strong> Made from melted fragments, lower efficiency (13‑16%), speckled blue appearance, cheaper to manufacture.</li>
         <div className="flex justify-center my-4">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png" 
-            alt="Polycrystalline silicon panel" 
-            className="w-full max-w-md rounded-lg shadow-md"
-          />
+          <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779971127/afbc2e44-892f-4e87-83f4-b19cc739626d.png" alt="Polycrystalline silicon panel" className="w-full max-w-md rounded-lg shadow-md" />
         </div>
         <div className="bg-gray-100 p-4 rounded-md my-6">
           <p className="font-semibold text-lg mb-2">Visual Differences: Monocrystalline vs Polycrystalline Solar Panels</p>
@@ -176,16 +148,10 @@ const SolarPanelsPage: React.FC = () => {
         the cheapest electricity source in history.
       </p>
 
-      {/* ============================================================ */}
-      {/* 2. ACTUAL SOLAR TECHNOLOGIES */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        2. Actual Solar Technologies
-      </h3>
+      {/* ========== 2. ACTUAL SOLAR TECHNOLOGIES ========== */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">2. Actual Solar Technologies</h3>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        📊 Monocrystalline panels dominate; polycrystalline is losing relevance
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">📊 Monocrystalline panels dominate; polycrystalline is losing relevance</h4>
       <p className="mb-2">
         <strong>Do manufacturers still make polycrystalline panels?</strong> Yes, but they are rapidly
         disappearing. In 2025, <strong>over 97% of new residential installations use monocrystalline
@@ -204,9 +170,7 @@ const SolarPanelsPage: React.FC = () => {
         homeowners, unless you have extreme budget constraints and plenty of space.
       </p>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        🔬 How long do panels really last? (Degradation and durability)
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">🔬 How long do panels really last? (Degradation and durability)</h4>
       <p className="mb-2">
         All solar panels degrade over time. The main causes are UV radiation, thermal cycling,
         humidity, and mechanical stress. A landmark University of New South Wales (UNSW) study of
@@ -223,13 +187,7 @@ const SolarPanelsPage: React.FC = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100">
-            <tr>
-              <th className="border p-2">Technology</th>
-              <th className="border p-2">1st year loss</th>
-              <th className="border p-2">Annual loss (years 2‑25)</th>
-              <th className="border p-2">Power at 25 years</th>
-              <th className="border p-2">Typical lifespan (years)</th>
-            </tr>
+            <tr><th className="border p-2">Technology</th><th className="border p-2">1st year loss</th><th className="border p-2">Annual loss (years 2‑25)</th><th className="border p-2">Power at 25 years</th><th className="border p-2">Typical lifespan (years)</th></tr>
           </thead>
           <tbody>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">1%</td><td className="border p-2">0.35‑0.40%</td><td className="border p-2">≈89‑91%</td><td className="border p-2">35‑40</td></tr>
@@ -241,9 +199,7 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      <h4 className="text-xl font-semibold mt-6 mb-2">
-        ⚙️ Detailed comparison of modern monocrystalline technologies
-      </h4>
+      <h4 className="text-xl font-semibold mt-6 mb-2">⚙️ Detailed comparison of modern monocrystalline technologies</h4>
       <p className="mb-2">
         Today, the market offers several variations of monocrystalline panels: <strong>PERC</strong>
         (the previous standard), <strong>TOPCon</strong> (the new mainstream), <strong>HJT</strong>
@@ -263,15 +219,11 @@ const SolarPanelsPage: React.FC = () => {
             <tr><td className="border p-2">HJT</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.24%/°C</td><td className="border p-2">450‑480</td><td className="border p-2">21‑24</td><td className="border p-2">£450‑600</td><td className="border p-2">35‑45</td></tr>
             <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590</td><td className="border p-2">25‑30</td></tr>
           </tbody>
-        <table>
+        </table>
       </div>
 
-      {/* ============================================================ */}
-      {/* 3. THE NEAR FUTURE: NEW SOLAR TECHNOLOGIES (2026‑2035) */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        3. The near future: new solar technologies (2026‑2035)
-      </h3>
+      {/* ========== 3. THE NEAR FUTURE ========== */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">3. The near future: new solar technologies (2026‑2035)</h3>
       <p className="mb-4">
         Although today's panels are already very efficient, science continues to advance. Here are
         the technologies that will reach rooftops in the coming years.
@@ -301,9 +253,7 @@ const SolarPanelsPage: React.FC = () => {
       <h4 className="text-xl font-semibold mt-6 mb-2">✨ Visual timeline of key milestones</h4>
       <div className="overflow-x-auto mb-6">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
-            <tr><th className="border p-2">Year</th><th className="border p-2">Milestone</th></tr>
-          </thead>
+          <thead className="bg-gray-100"><tr><th className="border p-2">Year</th><th className="border p-2">Milestone</th></tr></thead>
           <tbody>
             <tr><td className="border p-2">1839</td><td className="border p-2">Becquerel discovers photovoltaic effect</td></tr>
             <tr><td className="border p-2">1883</td><td className="border p-2">Fritts builds first selenium cell (~1‑2%)</td></tr>
@@ -319,12 +269,8 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ============================================================ */}
-      {/* 4. VISUAL IDENTIFICATION GUIDE */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        4. Visual identification guide – spot the technology at a glance
-      </h3>
+      {/* ========== 4. VISUAL IDENTIFICATION ========== */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">4. Visual identification guide – spot the technology at a glance</h3>
       <p className="mb-2">
         You can often identify the type of solar cell by looking at the colour and the pattern of
         thin metal lines (busbars) on the front of the panel. The table below summarises the visual
@@ -332,9 +278,7 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
-            <tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr>
-          </thead>
+          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr></thead>
           <tbody>
             <tr><td className="border p-2">PERC</td><td className="border p-2">Dark blue/black</td><td className="border p-2">9‑12 thick</td><td className="border p-2">Visible "ribs"</td></tr>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">Intense black</td><td className="border p-2">12‑16 very thin</td><td className="border p-2">Clean, minimal reflections</td></tr>
@@ -344,12 +288,8 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ============================================================ */}
-      {/* 5. TIMBER ROOF */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">
-        5. Special advice for UK timber roofs – weight matters
-      </h3>
+      {/* ========== 5. TIMBER ROOF ========== */}
+      <h3 className="text-2xl font-semibold mt-10 mb-4">5. Special advice for UK timber roofs – weight matters</h3>
       <p className="mb-2">
         Many British homes have timber roof structures that may not support heavy loads. A typical
         solar array adds 15‑25 kg/m². Unreinforced roofs often have a safe limit of around 20 kg/m².
@@ -365,12 +305,8 @@ const SolarPanelsPage: React.FC = () => {
         </ol>
       </div>
 
-      {/* ============================================================ */}
-      {/* 6. INTERACTIVE CALCULATOR */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">
-        6. Design your own layout – interactive 3D tool
-      </h3>
+      {/* ========== 6. INTERACTIVE CALCULATOR ========== */}
+      <h3 className="text-2xl font-semibold mt-12 mb-4">6. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
         Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
         It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
@@ -378,12 +314,8 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <SolarPanelCalculator />
 
-      {/* ============================================================ */}
-      {/* 7. BIBLIOGRAPHY */}
-      {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-12 mb-4">
-        7. References & further reading
-      </h3>
+      {/* ========== 7. BIBLIOGRAPHY ========== */}
+      <h3 className="text-2xl font-semibold mt-12 mb-4">7. References & further reading</h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
         <p>1. UNSW (2023) – "Long‑term degradation rates of 11,000 PV systems", <em>Progress in Photovoltaics</em>.</p>
         <p>2. NREL (2025) – "Best Research‑Cell Efficiency Chart".</p>
