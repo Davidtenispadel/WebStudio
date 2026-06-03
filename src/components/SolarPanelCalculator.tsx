@@ -352,11 +352,86 @@ const SolarPanelCalculator: React.FC = () => {
   const paybackYears = totalInstallCost > 0 && totalAnnualBenefit > 0 ? totalInstallCost / totalAnnualBenefit : 0;
   const roiPercent = totalInstallCost > 0 ? (totalAnnualBenefit / totalInstallCost) * 100 : 0;
 
+  // Cálculo de porcentajes para la barra tricolor
   const greenPct = selfConsumptionPercent;
   const redPct = Math.min((gridPurchaseKwhMonthly / avgMonthlyGeneration) * 100, 100 - greenPct);
   const bluePct = Math.max(0, 100 - greenPct - redPct);
 
-  // Handlers obstáculos
+  // ==================== NUEVA LÓGICA PARA EL PUNTO ARRASTRABLE Y COLOR ====================
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Color del punto según proximidad al 70% (óptimo)
+  const getThumbColor = () => {
+    const val = selfConsumptionPercent;
+    if (val === 70) return "#22c55e"; // verde perfecto
+    if (val >= 65 && val <= 75) return "#84cc16"; // verde claro (cerca)
+    if (val > 50 && val < 90) return "#eab308"; // amarillo
+    return "#ef4444"; // rojo en extremos
+  };
+
+  // Función para actualizar el porcentaje desde la posición del mouse
+  const updateFromMouse = (clientX: number) => {
+    if (!barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    let x = clientX - rect.left;
+    x = Math.max(0, Math.min(x, rect.width));
+    const percent = (x / rect.width) * 100;
+    // El máximo valor posible es 100 - redPct, pero redPct depende del greenPct y del cálculo.
+    // Para simplificar, permitimos hasta 100% pero redPct se ajustará solo.
+    const maxAllowed = 100 - redPct;
+    let newVal = Math.min(percent, maxAllowed);
+    newVal = Math.max(0, newVal);
+    setSelfConsumptionPercent(Math.round(newVal));
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      updateFromMouse(e.clientX);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+  };
+  
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    updateFromMouse(clientX);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
+  };
+  
+  const handleTouchMove = (e: TouchEvent) => {
+    if (isDragging) {
+      updateFromMouse(e.touches[0].clientX);
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchEnd);
+  };
+  
+  // Limpieza de eventos
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging]);
+
+  // Handlers obstáculos (sin cambios)
   const addObstacle = (roof: 'A' | 'B') => {
     if (roof === 'A') setObstaclesA([...obstaclesA, { x: 1.5, z: 2.0 }]);
     else setObstaclesB([...obstaclesB, { x: 1.5, z: 2.0 }]);
@@ -572,7 +647,7 @@ const SolarPanelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* INVERTER CONFIGURATION (con opciones dual forzado) - CORREGIDO: >12 reemplazado por &gt;12 */}
+      {/* INVERTER CONFIGURATION (con opciones dual forzado y tabla de standby) */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">⚡ Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -615,8 +690,8 @@ const SolarPanelCalculator: React.FC = () => {
               <p className="text-xs text-red-500 mt-1">Due to different roof orientations or high panel count, a single inverter would cause power clipping. Dual inverters are forced.</p>
             )}
           </div>
-          <div>
-            <label>Standby power (0‑60 W):</label>
+          <div className="col-span-2">
+            <label className="block font-medium mb-1">Standby power (0‑60 W)</label>
             <div className="flex gap-2 items-center">
               <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded">
                 <option value="preset">Preset</option><option value="custom">Custom</option>
@@ -630,11 +705,16 @@ const SolarPanelCalculator: React.FC = () => {
                 <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
               )}
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              📌 Standby power is the energy consumed by the inverter when not generating (e.g., at night). 
+              Typical values: String inverters 5‑15W, Hybrid 15‑50W, Microinverters 2‑5W each. 
+              This consumption is always drawn from the grid, increasing your bill.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* COST ESTIMATE con desglose por tejado */}
+      {/* COST ESTIMATE con desglose por tejado (sin cambios estructurales) */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
         
@@ -695,7 +775,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS con inputs editables de tarifas */}
+      {/* LOCATION & FINANCIAL ANALYSIS con barra tricolor interactiva y punto óptimo */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -735,21 +815,60 @@ const SolarPanelCalculator: React.FC = () => {
             <span className="font-medium text-red-600">Grid purchase (red, 20% of green)</span>
             <span className="font-medium text-blue-600">Exported (blue)</span>
           </div>
-          <div className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden">
-            <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
-            <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-800 rounded-full shadow-lg border-2 border-white cursor-pointer" style={{ left: `calc(${greenPct + redPct}% - 12px)` }} />
-            <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold">
-              <span>{greenPct.toFixed(0)}%</span><span>{redPct.toFixed(1)}%</span><span>{bluePct.toFixed(1)}%</span>
+          {/* Barra con el punto arrastrable */}
+          <div 
+            ref={barRef}
+            className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer"
+            onClick={(e) => {
+              const rect = barRef.current?.getBoundingClientRect();
+              if (rect) {
+                const x = e.clientX - rect.left;
+                const percent = (x / rect.width) * 100;
+                const maxAllowed = 100 - redPct;
+                let newVal = Math.min(percent, maxAllowed);
+                newVal = Math.max(0, newVal);
+                setSelfConsumptionPercent(Math.round(newVal));
+              }
+            }}
+          >
+            <div className="absolute inset-0" style={{
+              background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)`
+            }} />
+            {/* Punto arrastrable */}
+            <div
+              ref={thumbRef}
+              className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10"
+              style={{
+                left: `calc(${greenPct + redPct}% - 12px)`,
+                backgroundColor: getThumbColor(),
+                transition: isDragging ? 'none' : 'background-color 0.2s'
+              }}
+              onMouseDown={handleDragStart}
+              onTouchStart={handleDragStart}
+            />
+            <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold pointer-events-none">
+              <span>{greenPct.toFixed(0)}%</span>
+              <span>{redPct.toFixed(1)}%</span>
+              <span>{bluePct.toFixed(1)}%</span>
             </div>
           </div>
-          <input type="range" min="0" max={100 - redPct} step="1" value={selfConsumptionPercent} onChange={(e) => setSelfConsumptionPercent(parseInt(e.target.value))} className="w-full mt-2" />
-          <p className="text-xs text-gray-500 mt-1">Adjust green (self‑consumption). Red is always 20% of green.</p>
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>0% (export all)</span>
+            <span className="text-green-600 font-semibold">🎯 Optimal: 70% (leave 30% for future EV)</span>
+            <span>100% (consume all)</span>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Adjust green (self‑consumption). Red is always 20% of green (night & grid losses). 
+            The <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span> <strong>green thumb</strong> indicates the optimal 70% setting – it leaves a 30% export margin for future electric vehicle or increased consumption.
+          </p>
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self-consumed</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
           <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase (inevitable)</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
           <div className="bg-blue-100 p-3 rounded-lg text-center"><p className="text-sm text-blue-800 font-semibold">💰 Exported to grid</p><p className="text-2xl font-bold text-blue-600">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
         </div>
+        
         <div className="mt-4 p-3 bg-white/70 rounded-lg">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><p className="text-gray-600">Monthly bill WITHOUT solar:</p><p className="text-xl font-semibold">£{monthlyBillWithoutSolar.toFixed(2)}</p></div>
