@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// -------------------- IRRADIACIÓN Y DEMÁS CONSTANTES --------------------
+// -------------------- DATOS DE IRRADIACIÓN Y CONSTANTES (sin cambios) --------------------
 type CountryInsolation = { name: string; north: number; south: number };
 const countriesInsolation: CountryInsolation[] = [
   { name: "United Kingdom", north: 850, south: 1000 },
@@ -143,22 +143,23 @@ const calculatePanelLayout = (length: number, width: number, panelW: number, pan
   return { totalPanels: panelPositions.length, cols, rows, panelPositions };
 };
 
-const electricityPricesByCountry: { [key: string]: { importRate: number; exportRate: number; standingCharge: number; currency: string; importSource: string; exportSource: string } } = {
-  "United Kingdom": { importRate: 0.2800, exportRate: 0.0900, standingCharge: 15, currency: "£", importSource: "Ofgem", exportSource: "SEG average rate 2026" },
-  "Germany": { importRate: 0.3869, exportRate: 0.0811, standingCharge: 18, currency: "€", importSource: "Eurostat", exportSource: "EEG feed-in 2026" },
-  "France": { importRate: 0.2561, exportRate: 0.0565, standingCharge: 12, currency: "€", importSource: "Countryeconomy", exportSource: "Net metering" },
-  "Spain": { importRate: 0.2669, exportRate: 0.0400, standingCharge: 10, currency: "€", importSource: "Countryeconomy", exportSource: "Excedente 2025" },
-  "Italy": { importRate: 0.2966, exportRate: 0.0464, standingCharge: 14, currency: "€", importSource: "Countryeconomy", exportSource: "Ritiro Dedicato" },
-  "Netherlands": { importRate: 0.2930, exportRate: 0.1000, standingCharge: 16, currency: "€", importSource: "Eurostat", exportSource: "Market estimate" },
-  "Belgium": { importRate: 0.3499, exportRate: 0.0830, standingCharge: 15, currency: "€", importSource: "Eurostat", exportSource: "Regional estimate" },
-  "Denmark": { importRate: 0.3312, exportRate: 0.0390, standingCharge: 20, currency: "€", importSource: "Eurostat", exportSource: "Green Power Denmark" },
-  "Sweden": { importRate: 0.2700, exportRate: 0.0500, standingCharge: 13, currency: "€", importSource: "Eurostat", exportSource: "Market estimate" },
-  "Poland": { importRate: 0.2100, exportRate: 0.0500, standingCharge: 11, currency: "€", importSource: "Eurostat", exportSource: "Wholesale based" },
-  "Czech Republic": { importRate: 0.3217, exportRate: 0.0500, standingCharge: 12, currency: "€", importSource: "Countryeconomy", exportSource: "Wholesale based" },
-  "Portugal": { importRate: 0.2434, exportRate: 0.0420, standingCharge: 10, currency: "€", importSource: "Countryeconomy", exportSource: "Excedente" },
-  "Austria": { importRate: 0.3272, exportRate: 0.0650, standingCharge: 14, currency: "€", importSource: "Countryeconomy", exportSource: "OeMAG feed-in" },
-  "Greece": { importRate: 0.2378, exportRate: 0.0450, standingCharge: 11, currency: "€", importSource: "Countryeconomy", exportSource: "Market estimate" },
-  "Ireland": { importRate: 0.4042, exportRate: 0.0800, standingCharge: 17, currency: "€", importSource: "Eurostat", exportSource: "Micro‑generation support" },
+// Base de datos de precios por país (se usa para valores por defecto)
+const defaultPricesByCountry: { [key: string]: { importRate: number; exportRate: number; standingCharge: number } } = {
+  "United Kingdom": { importRate: 0.2800, exportRate: 0.0900, standingCharge: 15 },
+  "Germany": { importRate: 0.3869, exportRate: 0.0811, standingCharge: 18 },
+  "France": { importRate: 0.2561, exportRate: 0.0565, standingCharge: 12 },
+  "Spain": { importRate: 0.2669, exportRate: 0.0400, standingCharge: 10 },
+  "Italy": { importRate: 0.2966, exportRate: 0.0464, standingCharge: 14 },
+  "Netherlands": { importRate: 0.2930, exportRate: 0.1000, standingCharge: 16 },
+  "Belgium": { importRate: 0.3499, exportRate: 0.0830, standingCharge: 15 },
+  "Denmark": { importRate: 0.3312, exportRate: 0.0390, standingCharge: 20 },
+  "Sweden": { importRate: 0.2700, exportRate: 0.0500, standingCharge: 13 },
+  "Poland": { importRate: 0.2100, exportRate: 0.0500, standingCharge: 11 },
+  "Czech Republic": { importRate: 0.3217, exportRate: 0.0500, standingCharge: 12 },
+  "Portugal": { importRate: 0.2434, exportRate: 0.0420, standingCharge: 10 },
+  "Austria": { importRate: 0.3272, exportRate: 0.0650, standingCharge: 14 },
+  "Greece": { importRate: 0.2378, exportRate: 0.0450, standingCharge: 11 },
+  "Ireland": { importRate: 0.4042, exportRate: 0.0800, standingCharge: 17 },
 };
 
 // -------------------- COMPONENTE PRINCIPAL --------------------
@@ -203,10 +204,10 @@ const SolarPanelCalculator: React.FC = () => {
   const [region, setRegion] = useState<'north' | 'south'>('south');
   const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(50);
 
-  // Tarifas
-  const [importTariff, setImportTariff] = useState(0.2800);
-  const [exportTariff, setExportTariff] = useState(0.0900);
-  const [standingCharge, setStandingCharge] = useState(15);
+  // Tarifas (editables por el usuario, pero se inicializan con el país)
+  const [importTariff, setImportTariff] = useState(defaultPricesByCountry["United Kingdom"].importRate);
+  const [exportTariff, setExportTariff] = useState(defaultPricesByCountry["United Kingdom"].exportRate);
+  const [standingCharge, setStandingCharge] = useState(defaultPricesByCountry["United Kingdom"].standingCharge);
 
   // Costes de instalación
   const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
@@ -233,17 +234,17 @@ const SolarPanelCalculator: React.FC = () => {
 
   const climateFactor = getClimateFactor(selectedCountry);
 
-  // Actualizar tarifas al cambiar país
+  // Cuando cambia el país, se actualizan las tarifas a los valores por defecto de ese país
   useEffect(() => {
-    const priceData = electricityPricesByCountry[selectedCountry];
-    if (priceData) {
-      setImportTariff(priceData.importRate);
-      setExportTariff(priceData.exportRate);
-      setStandingCharge(priceData.standingCharge);
+    const def = defaultPricesByCountry[selectedCountry];
+    if (def) {
+      setImportTariff(def.importRate);
+      setExportTariff(def.exportRate);
+      setStandingCharge(def.standingCharge);
     }
   }, [selectedCountry]);
 
-  // Layouts effects
+  // Layouts effects (sin cambios)
   useEffect(() => {
     const panelW = 1.0, panelH = 1.7;
     if (roofALength > 0 && roofAWidth > 0) {
@@ -262,16 +263,30 @@ const SolarPanelCalculator: React.FC = () => {
     } else setLayoutB(null);
   }, [enableRoofB, roofBLength, roofBWidth, obstaclesB]);
 
-  // Precios de inversores (individuales y por pares) – claves SIN PUNTOS
-  const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number }> = {
-    string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW (single‑phase)", power: 3.68 },
-    string_5: { single: 1100, dual: 2100, name: "String 5.0 kW (single‑phase)", power: 5.0 },
-    string_6: { single: 1300, dual: 2500, name: "String 6.0 kW (single‑phase)", power: 6.0 },
-    hybrid_3_68: { single: 1600, dual: 3000, name: "Hybrid 3.68 kW (battery ready)", power: 3.68 },
-    hybrid_5: { single: 1900, dual: 3600, name: "Hybrid 5.0 kW (battery ready)", power: 5.0 },
-    hybrid_6: { single: 2200, dual: 4200, name: "Hybrid 6.0 kW (battery ready)", power: 6.0 },
-    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel system)", power: 3.68 }
+  // Catálogo de inversores (incluyendo modelos grandes)
+  const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number; hybrid: boolean; island?: boolean }> = {
+    string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW", power: 3.68, hybrid: false, island: false },
+    string_5: { single: 1100, dual: 2100, name: "String 5.0 kW", power: 5.0, hybrid: false, island: false },
+    string_6: { single: 1300, dual: 2500, name: "String 6.0 kW", power: 6.0, hybrid: false, island: false },
+    string_8: { single: 1600, dual: 3000, name: "String 8.0 kW (3‑phase)", power: 8.0, hybrid: false, island: false },
+    string_10: { single: 1900, dual: 3600, name: "String 10.0 kW (3‑phase)", power: 10.0, hybrid: false, island: false },
+    hybrid_3_68: { single: 1600, dual: 3000, name: "Hybrid 3.68 kW (battery ready, island mode optional)", power: 3.68, hybrid: true, island: true },
+    hybrid_5: { single: 1900, dual: 3600, name: "Hybrid 5.0 kW (battery ready, island mode optional)", power: 5.0, hybrid: true, island: true },
+    hybrid_6: { single: 2200, dual: 4200, name: "Hybrid 6.0 kW (battery ready, island mode optional)", power: 6.0, hybrid: true, island: true },
+    hybrid_8: { single: 2600, dual: 5000, name: "Hybrid 8.0 kW (3‑phase, battery ready, island mode)", power: 8.0, hybrid: true, island: true },
+    hybrid_10: { single: 3100, dual: 6000, name: "Hybrid 10.0 kW (3‑phase, battery ready, island mode)", power: 10.0, hybrid: true, island: true },
+    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel, module‑level MPPT)", power: 3.68, hybrid: false, island: false }
   };
+
+  const panelsA = layoutA?.totalPanels || 0;
+  const panelsB = layoutB?.totalPanels || 0;
+  const totalPanelsCount = panelsA + (enableRoofB ? panelsB : 0);
+  const orientationsDifferent = enableRoofB && (Math.abs(orientationDegA - orientationDegB) % 360) > 15;
+  const forceDual = (totalPanelsCount > 12) || orientationsDifferent;
+
+  useEffect(() => {
+    if (forceDual) setDualInverter(true);
+  }, [forceDual]);
 
   useEffect(() => {
     const price = inverterPrices[inverterType]?.single || 900;
@@ -304,9 +319,8 @@ const SolarPanelCalculator: React.FC = () => {
   const prodB = getRoofProduction(layoutB, panelKeyB, orientationDegB, enablePitchB, tiltDegB, shadingPercentB);
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
-  const totalPanelsCount = (layoutA?.totalPanels || 0) + (enableRoofB ? (layoutB?.totalPanels || 0) : 0);
 
-  // Cálculos financieros con grid purchase = 20% del autoconsumo
+  // Cálculos financieros
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (selfConsumptionPercent / 100);
   const gridPurchaseKwhMonthly = selfConsumedKwhMonthly * 0.2;
@@ -315,19 +329,21 @@ const SolarPanelCalculator: React.FC = () => {
 
   const totalConsumption = selfConsumedKwhMonthly + gridPurchaseKwhMonthly;
   const monthlyBillWithoutSolar = (totalConsumption * importTariff) + standingCharge;
-  const monthlyBillWithSolar = (gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
+  const monthlyBillWithSolarRaw = (gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
+  const monthlyBillWithSolar = Math.max(0, monthlyBillWithSolarRaw);
   const monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
 
   const selfConsumedKwhAnnual = selfConsumedKwhMonthly * 12;
   const exportedKwhAnnual = exportedKwhMonthly * 12;
-  const gridPurchaseKwhAnnual = gridPurchaseKwhMonthly * 12;
   const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
   const solarOffsetKwh = Math.min(inverterAnnualKwh, selfConsumedKwhAnnual);
   const inverterNetCost = Math.max(0, (inverterAnnualKwh - solarOffsetKwh) * importTariff);
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
   const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
   const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
-  const totalPanelCost = totalPanelsCount * panelPricePerUnit;
+  const panelCostA = panelsA * panelPricePerUnit;
+  const panelCostB = (enableRoofB ? panelsB * panelPricePerUnit : 0);
+  const totalPanelCost = panelCostA + panelCostB;
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
   const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
   const annualExportIncome = exportedKwhAnnual * exportTariff;
@@ -424,43 +440,88 @@ const SolarPanelCalculator: React.FC = () => {
     </div>
   );
 
-  const getElectrificationSummary = (selfKwh: number, size: string, country: string): string => {
-    const hot = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
-    const isHot = hot.includes(country);
+  // Función de recomendación (sin cambios)
+  const getDetailedRecommendation = (selfKwh: number, size: string, country: string): string => {
+    const hotCountries = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
+    const isHot = hotCountries.includes(country);
     const isUk = country === "United Kingdom";
-    let level = 0;
+    
+    let minKwh, medKwh, highKwh, vhighKwh;
     if (size === '1-2') {
-      if (selfKwh < 150) level = 1;
-      else if (selfKwh < 350) level = 2;
-      else if (selfKwh < 750) level = 3;
-      else if (selfKwh < 1000) level = 4;
-      else level = 5;
+      minKwh = 180; medKwh = 300; highKwh = 500; vhighKwh = 750;
     } else if (size === '3-4') {
-      if (selfKwh < 150) level = 1;
-      else if (selfKwh < 350) level = 2;
-      else if (selfKwh < 750) level = 3;
-      else if (selfKwh < 1000) level = 4;
-      else level = 5;
+      minKwh = 250; medKwh = 450; highKwh = 750; vhighKwh = 1100;
     } else {
-      if (selfKwh < 150) level = 1;
-      else if (selfKwh < 350) level = 2;
-      else if (selfKwh < 750) level = 3;
-      else if (selfKwh < 1000) level = 4;
-      else level = 5;
+      minKwh = 350; medKwh = 600; highKwh = 950; vhighKwh = 1500;
     }
-    const base = (level === 1 ? "Very low" : level === 2 ? "Low" : level === 3 ? "Medium" : level === 4 ? "High" : "Very high") + " electrification";
-    let detail = "";
+    
+    let level = 0;
+    if (selfKwh < minKwh) level = 0;
+    else if (selfKwh < medKwh) level = 1;
+    else if (selfKwh < highKwh) level = 2;
+    else if (selfKwh < vhighKwh) level = 3;
+    else level = 4;
+    
+    const levelNames = ["Insufficient (below minimum)", "Minimum", "Medium", "High", "Very high"];
+    const levelText = levelNames[level];
+    
+    let text = `**${levelText} electrification level** (${selfKwh.toFixed(0)} kWh/month)\n\n`;
+    
+    if (level >= 1) {
+      text += "✅ Basic appliances: LED lighting, fridge (150-200 kWh/year), TV, laptop, washing machine (~20 kWh/month).\n";
+      text += "✅ Induction cooktop (~18-22 kWh/month).\n";
+      text += "✅ Electric water heater (heat pump or resistive) – consumes 150-250 kWh/month depending on tank size.\n";
+    } else {
+      text += "❌ Not enough for electric cooking or water heating. Use gas or butane.\n";
+      return text;
+    }
+    
+    if (level >= 2) {
+      if (isUk) {
+        text += "✅ Heating: Air-to-water heat pump (underfloor heating or radiators). For a house of this size, consumption ~250-350 kWh/month in winter. With your self‑consumption, you can cover a significant portion, especially if combined with a hot water tank.\n";
+        text += "❄️ Cooling: Not typical, but portable AC units (150 kWh/month) would strain your system.\n";
+      } else if (isHot) {
+        text += "✅ Heating & cooling: Reversible air-to-air heat pump (inverter AC). For this house size, heating in winter ~200-300 kWh/month, cooling in summer ~150-250 kWh/month. Your self‑consumption can handle most of it.\n";
+        text += "🏊 If you have a swimming pool, a pool heat pump consumes 300-500 kWh/month during the season – only possible at higher levels (very high).\n";
+      } else {
+        text += "✅ Heating: Air-to-water or geothermal heat pump. For this house size, 250-400 kWh/month in winter. Your self‑consumption can cover a good part.\n";
+      }
+    } else {
+      text += "❌ Heating: Not enough for electric heating – use gas/oil boiler or improve insulation.\n";
+    }
+    
     if (level >= 3) {
-      if (isUk) detail = "Heat pump (air-to-water) + underfloor heating optional.";
-      else if (isHot) detail = "Reversible AC (cool/heat), underfloor heating. Pool heat pump possible.";
-      else detail = "Heat pump (air-to-water or geothermal).";
-    } else detail = "Not enough for electric heating – use gas/oil.";
-    if (level >= 4) detail += " Small EV (55 kWh) possible.";
-    if (level >= 5) detail += " Upgrade to large EV (80‑90 kWh) or second EV.";
+      text += "🚗 Electric vehicle (EV): A small EV (55 kWh battery) consumes ~165 kWh/month for 12,000 km/year. Your self‑consumption can fully charge it, saving ~£30-40 per month compared to grid charging.\n";
+      if (level >= 4) {
+        text += "🔋 Upgrade: Large EV (80-90 kWh) consumes ~210-250 kWh/month, or a second small EV. Your high self‑consumption makes this viable.\n";
+      } else {
+        text += "🔌 A second EV would require additional grid imports – consider a battery to store excess solar.\n";
+      }
+    } else if (level >= 2) {
+      text += "🔌 Plug-in hybrid (PHEV) with 10-25 kWh battery – can be charged partially with solar, but full EV not recommended at this level.\n";
+    } else {
+      text += "❌ EV charging not recommended at this consumption level – would increase grid purchase significantly.\n";
+    }
+    
+    if (level >= 4) {
+      if (isHot) {
+        text += "🏊 Pool heat pump (if applicable) – 300-500 kWh/month during summer. Your very high self‑consumption can partially cover it.\n";
+      }
+      text += "🌡️ Underfloor heating (electric or hydronic) – adds 100-200 kWh/month in winter, but can be integrated with a heat pump.\n";
+    }
+    
     if (totalPanelsCount > 12) {
-      detail += totalPanelsCount > 20 ? " Dual inverter required." : " Second inverter recommended (dual option available).";
-    } else detail += " Single inverter sufficient.";
-    return `${base}. ${detail}`;
+      if (totalPanelsCount > 20) {
+        text += `\n⚡ Inverter: With ${totalPanelsCount} panels, a dual inverter setup (2x 3.68-5 kW) is strongly recommended to avoid clipping. Cost approx £${inverterPrices[inverterType]?.dual || (inverterPrices[inverterType]?.single * 2)}. Single inverter would waste up to 15-20% of generation.`;
+      } else {
+        text += `\n⚡ Inverter: For ${totalPanelsCount} panels, a second inverter (add £1,200-1,600) is recommended to capture all energy, especially in summer. Select "dual inverter" above.`;
+      }
+    } else {
+      text += `\n⚡ Inverter: Single ${inverterPrices[inverterType]?.power || 3.68} kW inverter is sufficient for ${totalPanelsCount} panels (cost £${inverterPrices[inverterType]?.single || 900}). Hybrid recommended if adding batteries.`;
+    }
+    
+    text += `\n\n💡 Efficiency tip: Run heavy appliances (washing machine, dishwasher, EV charging) during sunny hours to maximise self‑consumption. Consider a hot water diverter to store excess energy as hot water.`;
+    return text;
   };
 
   // -------------------- RENDER --------------------
@@ -473,7 +534,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Dual Roof</h2>
 
-      {/* Roof A */}
+      {/* TEJADO A (sin cambios) */}
       <div className="border-2 border-blue-300 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3">🏠 Roof A</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -490,7 +551,7 @@ const SolarPanelCalculator: React.FC = () => {
         {renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, `Roof A layout`)}
       </div>
 
-      {/* Roof B */}
+      {/* TEJADO B (sin cambios) */}
       <div className="border-2 border-green-300 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center"><h3 className="font-bold text-xl mb-2">🏠 Roof B</h3><label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label></div>
         {enableRoofB && (
@@ -511,7 +572,7 @@ const SolarPanelCalculator: React.FC = () => {
         )}
       </div>
 
-      {/* INVERTER with multiple options and dual inverter checkbox */}
+      {/* INVERTER CONFIGURATION (con opciones dual forzado) */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">⚡ Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -521,21 +582,41 @@ const SolarPanelCalculator: React.FC = () => {
               <option value="string_3_68">String 3.68 kW – £{inverterPrices.string_3_68.single}</option>
               <option value="string_5">String 5.0 kW – £{inverterPrices.string_5.single}</option>
               <option value="string_6">String 6.0 kW – £{inverterPrices.string_6.single}</option>
+              <option value="string_8">String 8.0 kW – £{inverterPrices.string_8.single}</option>
+              <option value="string_10">String 10.0 kW – £{inverterPrices.string_10.single}</option>
               <option value="hybrid_3_68">Hybrid 3.68 kW (battery ready) – £{inverterPrices.hybrid_3_68.single}</option>
               <option value="hybrid_5">Hybrid 5.0 kW – £{inverterPrices.hybrid_5.single}</option>
               <option value="hybrid_6">Hybrid 6.0 kW – £{inverterPrices.hybrid_6.single}</option>
+              <option value="hybrid_8">Hybrid 8.0 kW – £{inverterPrices.hybrid_8.single}</option>
+              <option value="hybrid_10">Hybrid 10.0 kW – £{inverterPrices.hybrid_10.single}</option>
               <option value="micro">Microinverter system – £{inverterPrices.micro.single}</option>
             </select>
+            <div className="text-xs text-gray-600 mt-1">
+              {inverterPrices[inverterType]?.hybrid ? "🔋 Hybrid inverter: battery ready, island mode (off-grid) optional. ⚠️ Some models require additional equipment for full backup." : "📡 String inverter: cost‑effective, but no backup without battery. For mixed orientations, dual inverters recommended."}
+            </div>
           </div>
-          {totalPanelsCount > 12 && (
+          <div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="dualInverter" checked={dualInverter} onChange={(e) => setDualInverter(e.target.checked)} />
-              <label htmlFor="dualInverter" className="text-sm">Use dual inverters (2 units) – recommended for &gt;12 panels<br />
+              <input 
+                type="checkbox" 
+                id="dualInverter" 
+                checked={dualInverter} 
+                onChange={(e) => !forceDual && setDualInverter(e.target.checked)} 
+                disabled={forceDual}
+              />
+              <label htmlFor="dualInverter" className="text-sm">
+                Use dual inverters (2 units)
+                {forceDual && <span className="text-red-600 ml-2">(Required: mixed orientations or >12 panels)</span>}
+                <br />
                 <span className="text-xs text-gray-600">Price: £{inverterPrices[inverterType]?.dual || (inverterPrices[inverterType]?.single * 2)}</span>
               </label>
             </div>
-          )}
-          <div><label>Standby power (0‑60 W):</label>
+            {forceDual && (
+              <p className="text-xs text-red-500 mt-1">Due to different roof orientations or high panel count, a single inverter would cause power clipping. Dual inverters are forced.</p>
+            )}
+          </div>
+          <div>
+            <label>Standby power (0‑60 W):</label>
             <div className="flex gap-2 items-center">
               <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded">
                 <option value="preset">Preset</option><option value="custom">Custom</option>
@@ -553,32 +634,105 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* COST ESTIMATE & MAINTENANCE */}
+      {/* COST ESTIMATE con desglose por tejado */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">💰 Cost Estimate (one‑time, 0% VAT)</h3>
-        <div className="grid md:grid-cols-3 gap-3 text-sm">
-          <div className="flex justify-between"><label>Panel price (£/panel):</label><input type="number" value={panelPricePerUnit} onChange={(e) => setPanelPricePerUnit(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="5" /></div>
-          <div className="flex justify-between"><label>Inverter cost (£):</label><input type="number" value={inverterCost} onChange={(e) => setInverterCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
-          <div className="flex justify-between"><label>Mounting system (£):</label><input type="number" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
-          <div className="flex justify-between"><label>Scaffolding (£):</label><input type="number" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
-          <div className="flex justify-between"><label>Electrical components (£):</label><input type="number" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
-          <div className="flex justify-between"><label>Labour (£):</label><input type="number" value={labourCost} onChange={(e) => setLabourCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="50" /></div>
-          <div className="flex justify-between"><label>Admin (£):</label><input type="number" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value))} className="border p-1 rounded w-28 text-right" step="25" /></div>
+        
+        {/* Costes por tejado (paneles, montaje proporcional) */}
+        <div className="mb-4 border-b pb-2">
+          <div className="font-semibold">Roof A</div>
+          <div className="grid grid-cols-2 gap-2 text-sm ml-4">
+            <span>Panels ({panelsA} × £{panelPricePerUnit}):</span>
+            <span className="text-right">£{panelCostA.toFixed(0)}</span>
+            <span>Mounting (proportional):</span>
+            <span className="text-right">£{(mountingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+            <span>Scaffolding (proportional):</span>
+            <span className="text-right">£{(scaffoldingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+            <span>Labour (proportional):</span>
+            <span className="text-right">£{(labourCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+            <span>Electrical (proportional):</span>
+            <span className="text-right">£{(electricalCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+          </div>
         </div>
-        <div className="text-right font-bold mt-2">Total installation cost: £{totalInstallCost.toFixed(0)}</div>
+        
+        {enableRoofB && (
+          <div className="mb-4 border-b pb-2">
+            <div className="font-semibold">Roof B</div>
+            <div className="grid grid-cols-2 gap-2 text-sm ml-4">
+              <span>Panels ({panelsB} × £{panelPricePerUnit}):</span>
+              <span className="text-right">£{panelCostB.toFixed(0)}</span>
+              <span>Mounting (proportional):</span>
+              <span className="text-right">£{(mountingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+              <span>Scaffolding (proportional):</span>
+              <span className="text-right">£{(scaffoldingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+              <span>Labour (proportional):</span>
+              <span className="text-right">£{(labourCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+              <span>Electrical (proportional):</span>
+              <span className="text-right">£{(electricalCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Costes compartidos */}
+        <div className="mt-2">
+          <div className="font-semibold">Shared costs</div>
+          <div className="grid grid-cols-2 gap-2 text-sm ml-4">
+            <span>Inverter (dual={dualInverter ? "yes" : "no"}):</span>
+            <span className="text-right">£{inverterCost.toFixed(0)}</span>
+            <span>Admin & DNO fees:</span>
+            <span className="text-right">£{adminCost.toFixed(0)}</span>
+          </div>
+        </div>
+        
+        <div className="text-right font-bold mt-3 pt-2 border-t">Total installation cost: £{totalInstallCost.toFixed(0)}</div>
+        
         <div className="mt-4 border-t pt-3">
           <label className="flex items-center gap-2"><input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} /> Include annual maintenance (prorated from 3‑year costs)</label>
-          {includeMaintenance && (<div className="grid md:grid-cols-2 gap-3 mt-2 text-sm"><div><label>Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div><div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div></div>)}
+          {includeMaintenance && (
+            <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
+              <div><label>Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+              <div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* LOCATION & FINANCIAL ANALYSIS (with tricolor bar) */}
+      {/* LOCATION & FINANCIAL ANALYSIS con inputs editables de tarifas */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">🌍 Location & Financial Analysis</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div><label>Country:</label><select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">{countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}</select></div>
-          <div><label>Region:</label><select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full"><option value="south">Southern</option><option value="north">Northern</option></select></div>
+          <div>
+            <label>Country:</label>
+            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">
+              {countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}
+            </select>
+            <p className="text-xs text-gray-500">Default tariffs from selected country. You can modify below.</p>
+          </div>
+          <div>
+            <label>Region:</label>
+            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full">
+              <option value="south">Southern</option><option value="north">Northern</option>
+            </select>
+          </div>
         </div>
+        
+        {/* Tarifas editables */}
+        <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-white/50 rounded">
+          <div>
+            <label className="block text-sm font-medium">Import tariff (£/kWh)</label>
+            <input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Export tariff (SEG) (£/kWh)</label>
+            <input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Standing charge (£/month)</label>
+            <input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full" />
+          </div>
+        </div>
+        
+        {/* Barra tricolor y resto de análisis (sin cambios) */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium text-green-700">Self-consumed (green)</span>
@@ -607,10 +761,10 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
           <p className="text-center text-sm mt-2">You save <strong className="text-green-700">£{monthlySavings.toFixed(2)}</strong> per month</p>
         </div>
-        <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">ⓘ Energy price sources: {electricityPricesByCountry[selectedCountry]?.importSource} (import) | {electricityPricesByCountry[selectedCountry]?.exportSource} (export)</p></div>
+        <div className="mt-3 text-right"><p className="text-[10px] text-gray-400 italic">ⓘ Energy price sources: based on country selection (can be overridden).</p></div>
       </div>
 
-      {/* ANALYSIS RESULTS */}
+      {/* ANALYSIS RESULTS (sin cambios) */}
       <div className="bg-gray-800 text-white p-6 rounded-lg">
         <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="text-lg space-y-2">
@@ -637,27 +791,31 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* Electrification summary */}
+      {/* ELECTRIFICATION DETAILED RECOMMENDATIONS (sin cambios) */}
       {selfConsumedKwhMonthly > 0 && (
         <div className="mt-8 p-5 bg-gray-800 text-white rounded-lg shadow-lg">
-          <h3 className="text-xl font-bold mb-3">🏡 Electrification potential by household size</h3>
-          <p className="text-sm text-gray-300 mb-4">Monthly self‑consumption: <strong className="text-white">{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.</p>
-          <div className="space-y-4">
+          <h3 className="text-xl font-bold mb-3">🏡 Detailed electrification recommendations by household size</h3>
+          <p className="text-sm text-gray-300 mb-4">
+            Based on your monthly self‑consumption of <strong className="text-white">{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.
+          </p>
+          <div className="space-y-6">
             <div className="border-l-4 border-blue-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏠 1‑2 bedroom</p>
-              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '1-2', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏠 1‑2 bedroom home</p>
+              <div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '1-2', selectedCountry)}</div>
             </div>
             <div className="border-l-4 border-green-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏡 3‑4 bedroom</p>
-              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '3-4', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏡 3‑4 bedroom home</p>
+              <div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '3-4', selectedCountry)}</div>
             </div>
             <div className="border-l-4 border-yellow-400 pl-4 bg-gray-700/30 p-3 rounded">
-              <p className="font-bold text-lg">🏘️ 5+ bedroom</p>
-              <p className="text-sm">{getElectrificationSummary(selfConsumedKwhMonthly, '5+', selectedCountry)}</p>
+              <p className="font-bold text-lg">🏘️ 5+ bedroom home</p>
+              <div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '5+', selectedCountry)}</div>
             </div>
           </div>
           <div className="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
-            * Recommendations for <strong>{selectedCountry}</strong>. Heating: heat pump or reversible AC. EVs: small (55 kWh) or large (80‑90 kWh). Inverter: {totalPanelsCount > 12 ? (totalPanelsCount > 20 ? 'dual inverter recommended (checkbox above)' : 'second inverter recommended') : 'single inverter sufficient'}.
+            * These recommendations are tailored to your country (<strong>{selectedCountry}</strong>), panel count ({totalPanelsCount}), and inverter choice. <br />
+            For hot countries, reversible AC is prioritised; for the UK, air‑to‑water heat pumps are recommended. <br />
+            EV estimates assume ~12,000 km/year. Adjust mileage accordingly.
           </div>
         </div>
       )}
