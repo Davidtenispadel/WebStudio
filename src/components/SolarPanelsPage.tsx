@@ -15,10 +15,10 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       <div className="flex justify-center my-4">
-        <img 
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" 
-          alt="Investment" 
-          className="w-auto" 
+        <img
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png"
+          alt="Investment"
+          className="w-auto"
           style={{ height: '13.2rem' }}
         />
       </div>
@@ -28,10 +28,10 @@ const SolarPanelsPage: React.FC = () => {
       </p>
 
       <div className="flex justify-center my-4">
-        <img 
-          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" 
-          alt="Inversion" 
-          className="w-auto" 
+        <img
+          src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png"
+          alt="Inversion"
+          className="w-auto"
           style={{ height: '13.2rem' }}
         />
       </div>
@@ -40,7 +40,6 @@ const SolarPanelsPage: React.FC = () => {
         Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
       </p>
 
-      {/* ========== 1. HISTORY ========== */}
       <h3 className="text-2xl font-semibold mt-8 mb-4">
         1. Origins and evolution of solar panels – from 19th century to today's technology
       </h3>
@@ -148,7 +147,6 @@ const SolarPanelsPage: React.FC = () => {
         the cheapest electricity source in history.
       </p>
 
-      {/* ========== 2. ACTUAL SOLAR TECHNOLOGIES ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">2. Actual Solar Technologies</h3>
 
       <h4 className="text-xl font-semibold mt-6 mb-2">📊 Monocrystalline panels dominate; polycrystalline is losing relevance</h4>
@@ -205,8 +203,7 @@ const SolarPanelsPage: React.FC = () => {
         (the previous standard), <strong>TOPCon</strong> (the new mainstream), <strong>HJT</strong>
         (high‑efficiency, best temperature coefficient), and <strong>Lightweight TOPCon</strong>
         (reduced weight for timber roofs). The table below compares their efficiency, temperature
-        coefficient, power, weight, price per panel, and expected lifespan. Use it to choose the
-        right panel for your specific needs.
+        coefficient, power, weight, price per panel, and expected lifespan.
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
@@ -222,7 +219,6 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ========== 3. THE NEAR FUTURE ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">3. The near future: new solar technologies (2026‑2035)</h3>
       <p className="mb-4">
         Although today's panels are already very efficient, science continues to advance. Here are
@@ -269,7 +265,6 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ========== 4. VISUAL IDENTIFICATION ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">4. Visual identification guide – spot the technology at a glance</h3>
       <p className="mb-2">
         You can often identify the type of solar cell by looking at the colour and the pattern of
@@ -288,7 +283,6 @@ const SolarPanelsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* ========== 5. TIMBER ROOF ========== */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">5. Special advice for UK timber roofs – weight matters</h3>
       <p className="mb-2">
         Many British homes have timber roof structures that may not support heavy loads. A typical
@@ -305,7 +299,6 @@ const SolarPanelsPage: React.FC = () => {
         </ol>
       </div>
 
-      {/* ========== 6. INTERACTIVE CALCULATOR ========== */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">6. Design your own layout – interactive 3D tool</h3>
       <p className="mb-6">
         Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
@@ -314,7 +307,6 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <SolarPanelCalculator />
 
-      {/* ========== 7. BIBLIOGRAPHY ========== */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">7. References & further reading</h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
         <p>1. UNSW (2023) – "Long‑term degradation rates of 11,000 PV systems", <em>Progress in Photovoltaics</em>.</p>
