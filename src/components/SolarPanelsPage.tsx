@@ -254,14 +254,12 @@ const SolarPanelsPage: React.FC = () => {
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
-            <tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr>
-          </thead>
+          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Efficiency</th><th className="border p-2">Temp coef</th><th className="border p-2">Power (Wp)</th><th className="border p-2">Weight (kg)</th><th className="border p-2">Price per panel (£)</th><th className="border p-2">Lifespan</th></tr></thead>
           <tbody>
             <tr><td className="border p-2">PERC mono</td><td className="border p-2">18‑20%</td><td className="border p-2">-0.35%/°C</td><td className="border p-2">390‑420</td><td className="border p-2">19‑22</td><td className="border p-2">£275‑355</td><td className="border p-2">25‑30</td></tr>
             <tr><td className="border p-2">TOPCon (standard)</td><td className="border p-2">20‑22.5%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">430‑460</td><td className="border p-2">20‑23</td><td className="border p-2">£365‑460</td><td className="border p-2">35‑40</td></tr>
             <tr><td className="border p-2">HJT</td><td className="border p-2">21‑23%</td><td className="border p-2">-0.24%/°C</td><td className="border p-2">450‑480</td><td className="border p-2">21‑24</td><td className="border p-2">£450‑600</td><td className="border p-2">35‑45</td></tr>
-            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590</td><td className="border p-2">25‑30</td></tr>
+            <tr><td className="border p-2">Lightweight TOPCon</td><td className="border p-2">20‑22%</td><td className="border p-2">-0.30%/°C</td><td className="border p-2">380‑420</td><td className="border p-2">11‑13</td><td className="border p-2">£420‑590<td><td className="border p-2">25‑30</td></tr>
           </tbody>
         </table>
       </div>
@@ -318,7 +316,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 4. VISUAL IDENTIFICATION GUIDE (renumerada) */}
+      {/* 4. VISUAL IDENTIFICATION GUIDE */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
         4. Visual identification guide – spot the technology at a glance
@@ -341,7 +339,7 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 5. TIMBER ROOF (renumerada) */}
+      {/* 5. TIMBER ROOF */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">
         5. Special advice for UK timber roofs – weight matters
@@ -362,10 +360,23 @@ const SolarPanelsPage: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* 6. BIBLIOGRAPHY (renumerada) */}
+      {/* 6. INTERACTIVE CALCULATOR (restaurada) */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-12 mb-4">
-        6. References & further reading
+        6. Design your own layout – interactive 3D tool
+      </h3>
+      <p className="mb-6">
+        Use the tool below to define your roof dimensions, choose panel type, and add obstacles such as chimneys.
+        It respects <strong>UK MCS clearances</strong> (400 mm from edges and ridge, 20 mm gap between panels)
+        and shows a 3D preview.
+      </p>
+      <SolarPanelCalculator />
+
+      {/* ============================================================ */}
+      {/* 7. BIBLIOGRAPHY */}
+      {/* ============================================================ */}
+      <h3 className="text-2xl font-semibold mt-12 mb-4">
+        7. References & further reading
       </h3>
       <div className="text-sm text-gray-700 space-y-1 border-t pt-4">
         <p>1. UNSW (2023) – "Long‑term degradation rates of 11,000 PV systems", <em>Progress in Photovoltaics</em>.</p>
