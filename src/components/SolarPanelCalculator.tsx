@@ -85,7 +85,6 @@ const getGridDependencyFactor = (countryName: string): number => {
   return Math.min(factor, 0.55);
 };
 
-// Country price multiplier for panel catalogue
 const getCountryPriceMultiplier = (country: string): number => {
   const cheap = ["Spain", "Portugal", "Greece", "Turkey", "Egypt", "Morocco", "India", "China", "Mexico", "Brazil", "South Africa"];
   const expensive = ["United Kingdom", "Ireland", "Denmark", "Norway", "Sweden", "Finland", "Iceland", "Switzerland"];
@@ -364,10 +363,8 @@ const SolarPanelCalculator: React.FC = () => {
   const seasonalA = prodA.seasonalKwh;
   const seasonalB = prodB.seasonalKwh;
 
-  // Total installation cost (panels + inverter + other)
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + labourCost + electricalCost + adminCost;
 
-  // Financial model
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
   let redPct = gridFactor * greenPct;
@@ -458,7 +455,6 @@ const SolarPanelCalculator: React.FC = () => {
     };
   }, [isDraggingThumb]);
 
-  // Obstacle handlers
   const addObstacle = (roof: 'A' | 'B') => {
     if (roof === 'A') setObstaclesA([...obstaclesA, { x: 1.5, z: 2.0 }]);
     else setObstaclesB([...obstaclesB, { x: 1.5, z: 2.0 }]);
@@ -495,7 +491,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- ORIENTATION CONTROL WITH SLIDER (same as shading) --------------------
+  // -------------------- ORIENTATION CONTROL WITH SLIDER --------------------
   const OrientationControl = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
     const getAdvice = (f: number): string => {
@@ -600,7 +596,6 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">🏠</div>
         </div>
         <label className="text-sm font-medium">{label}</label>
-        {/* Slider identical to shading slider */}
         <input
           type="range"
           min="0"
@@ -615,7 +610,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Pitch visualization (unchanged)
+  // Pitch visualization
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -747,7 +742,6 @@ const SolarPanelCalculator: React.FC = () => {
   const optimalGreenDisplay = optimalGreen.toFixed(0);
   const blueAtOptimal = (100 - optimalGreen - gridFactor * optimalGreen).toFixed(0);
 
-  // -------------------- RENDER --------------------
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
@@ -766,7 +760,7 @@ const SolarPanelCalculator: React.FC = () => {
             <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">
               {countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}
             </select>
-            <p className="text-xs text-gray-500 mt-1">🌦️ <strong>Climate factor</strong> adjusts production for cloud/rain. Panel prices are adjusted by country (cheaper in sunny regions).</p>
+            <p className="text-xs text-gray-500 mt-1">🌦️ Climate factor adjusts production. Panel prices are country‑adjusted.</p>
           </div>
           <div>
             <label>Region:</label>
@@ -776,11 +770,264 @@ const SolarPanelCalculator: React.FC = () => {
             </select>
           </div>
         </div>
+
         {/* Roof A */}
         <div className="mb-4 border-b pb-2">
           <div className="font-semibold text-blue-700">🏠 Roof A</div>
           <div className="grid md:grid-cols-2 gap-4 mt-2">
-            <div><label>Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp, base £{v.price}</option>)}</select></div>
+            <div><label>Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
             <div><label>Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div></div>
             <div><label>Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" /><p className="text-sm">{shadingPercentA}% reduction</p></div>
-            <div><button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1
+            <div><button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
+            <div><OrientationControl orientation={orientationDegA} onChange={setOrientationDegA} label="Orientation A" /></div>
+            <div><PitchVisualization tilt={tiltDegA} onChange={setTiltDegA} enabled={enablePitchA} setEnabled={setEnablePitchA} label="pitch A" /></div>
+          </div>
+          <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-blue-50 p-2 rounded">
+            <div>🌱 Spring<br/>{seasonalA.spring.toFixed(0)} kWh</div>
+            <div>☀️ Summer<br/>{seasonalA.summer.toFixed(0)} kWh</div>
+            <div>🍂 Autumn<br/>{seasonalA.autumn.toFixed(0)} kWh</div>
+            <div>❄️ Winter<br/>{seasonalA.winter.toFixed(0)} kWh</div>
+          </div>
+          <div className="mt-2 text-sm">{renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, "Roof A layout")}</div>
+        </div>
+
+        <div className="mb-2">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label>
+        </div>
+        {enableRoofB && (
+          <div className="border-t pt-3">
+            <div className="font-semibold text-green-700">🏠 Roof B</div>
+            <div className="grid md:grid-cols-2 gap-4 mt-2">
+              <div><label>Panel type:</label><select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
+              <div><label>Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div></div>
+              <div><label>Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" /><p className="text-sm">{shadingPercentB}% reduction</p></div>
+              <div><button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
+              <div><OrientationControl orientation={orientationDegB} onChange={setOrientationDegB} label="Orientation B" /></div>
+              <div><PitchVisualization tilt={tiltDegB} onChange={setTiltDegB} enabled={enablePitchB} setEnabled={setEnablePitchB} label="pitch B" /></div>
+            </div>
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-green-50 p-2 rounded">
+              <div>🌱 Spring<br/>{seasonalB.spring.toFixed(0)} kWh</div>
+              <div>☀️ Summer<br/>{seasonalB.summer.toFixed(0)} kWh</div>
+              <div>🍂 Autumn<br/>{seasonalB.autumn.toFixed(0)} kWh</div>
+              <div>❄️ Winter<br/>{seasonalB.winter.toFixed(0)} kWh</div>
+            </div>
+            <div className="mt-2 text-sm">{renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, "Roof B layout")}</div>
+          </div>
+        )}
+        <div className="mt-3 text-sm text-gray-600">
+          💡 Estimated annual production: <strong>{totalAnnualKwh.toFixed(0)} kWh</strong> from <strong>{totalWp.toFixed(0)} Wp</strong>.
+        </div>
+      </div>
+
+      {/* ==================== 2. MANUAL PANEL COST OVERRIDE ==================== */}
+      <div className="bg-amber-50 p-4 rounded-lg mb-6">
+        <h3 className="font-bold text-xl mb-3">2. Panel Cost Configuration</h3>
+        <div className="flex items-center gap-4 mb-3">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={useManualPanelPrice} onChange={(e) => setUseManualPanelPrice(e.target.checked)} />
+            Override automatic country‑adjusted price
+          </label>
+          <span className="text-xs text-gray-500">Multiplier: {getCountryPriceMultiplier(selectedCountry).toFixed(2)}</span>
+        </div>
+        {useManualPanelPrice ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Minimum price per panel (£)</label>
+              <input type="number" step="5" min="100" value={minPanelPrice} onChange={(e) => setMinPanelPrice(Math.max(100, parseInt(e.target.value) || 200))} className="border p-2 rounded w-full" />
+              <p className="text-xs text-gray-500">Base cost for the first panel.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Incremental cost per additional panel (£)</label>
+              <input type="number" step="5" min="0" value={incrementalCostPerPanel} onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))} className="border p-2 rounded w-full" />
+              <p className="text-xs text-gray-500">Extra cost for each panel beyond the first.</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600">Using catalogue prices adjusted for {selectedCountry}.</p>
+        )}
+        <div className="mt-3 p-3 bg-white rounded-md">
+          <p><strong>Total panels:</strong> {totalPanelsCount}</p>
+          <p><strong>Panel cost per unit (Roof A):</strong> £{panelPriceA.toFixed(2)} &nbsp;| <strong>Roof B:</strong> £{panelPriceB.toFixed(2)}</p>
+          <p><strong>Total panels cost:</strong> £{totalPanelCost.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* ==================== 3. INVERTER CONFIGURATION ==================== */}
+      <div className="bg-indigo-50 p-4 rounded-lg mb-6">
+        <h3 className="font-bold text-xl mb-3">3. Inverter Configuration</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium">Inverter type & power:</label>
+            <select value={inverterType} onChange={(e) => setInverterType(e.target.value)} className="border p-2 rounded w-full">
+              {Object.entries(inverterPrices).map(([key, val]) => (<option key={key} value={key}>{val.name} – £{val.single} (dual: £{val.dual})</option>))}
+            </select>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="dualInverter" checked={dualInverter} onChange={(e) => !forceDual && setDualInverter(e.target.checked)} disabled={forceDual} />
+              <label htmlFor="dualInverter" className="text-sm">Use dual inverters {forceDual && <span className="text-red-600 ml-2">(Required)</span>}<br /><span className="text-xs text-gray-600">Price: £{inverterPrices[inverterType]?.dual || (inverterPrices[inverterType]?.single * 2)}</span></label>
+            </div>
+          </div>
+          <div className="col-span-2">
+            <label className="block font-medium mb-1">Standby power (0‑60 W)</label>
+            <div className="flex gap-2 items-center">
+              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded"><option value="preset">Preset</option><option value="custom">Custom</option></select>
+              {standbySource === 'preset' ? (
+                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded">
+                  <option value="0">0 W</option><option value="2">2 W</option><option value="3">3 W</option><option value="5">5 W</option>
+                  <option value="10">10 W</option><option value="20">20 W</option><option value="40">40 W</option><option value="60">60 W</option>
+                </select>
+              ) : (
+                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ==================== 4. INSTALLATION COST BREAKDOWN (SINGLE FIELD) ==================== */}
+      <div className="bg-amber-50 p-4 rounded-lg mb-6">
+        <h3 className="font-bold text-xl mb-3">4. Installation Cost Breakdown</h3>
+        <div className="mb-4">
+          <label className="block text-sm font-medium">Total installation cost (excl. panels & inverter) – £</label>
+          <input type="number" step="50" min="500" value={totalInstallCostExclPanelsInverter} onChange={(e) => setTotalInstallCostExclPanelsInverter(Math.max(500, parseFloat(e.target.value) || 0))} className="border p-2 rounded w-full md:w-1/2" />
+          <p className="text-xs text-gray-500 mt-1">Auto‑split: mounting 25%, scaffolding 15%, labour 40%, electrical 10%, admin 10%.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border rounded p-2 bg-white">
+            <div className="font-semibold text-blue-700">Roof A (proportional)</div>
+            <div className="grid grid-cols-2 gap-1 text-sm">
+              <span>Mounting:</span><span className="text-right">£{(mountingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+              <span>Scaffolding:</span><span className="text-right">£{(scaffoldingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+              <span>Labour:</span><span className="text-right">£{(labourCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+              <span>Electrical:</span><span className="text-right">£{(electricalCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+              <span>Admin:</span><span className="text-right">£{(adminCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
+            </div>
+          </div>
+          {enableRoofB && (
+            <div className="border rounded p-2 bg-white">
+              <div className="font-semibold text-green-700">Roof B (proportional)</div>
+              <div className="grid grid-cols-2 gap-1 text-sm">
+                <span>Mounting:</span><span className="text-right">£{(mountingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+                <span>Scaffolding:</span><span className="text-right">£{(scaffoldingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+                <span>Labour:</span><span className="text-right">£{(labourCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+                <span>Electrical:</span><span className="text-right">£{(electricalCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+                <span>Admin:</span><span className="text-right">£{(adminCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="mt-3 border-t pt-2">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <span className="font-semibold">Total (excl. panels & inverter):</span><span className="text-right">£{totalInstallCostExclPanelsInverter.toFixed(0)}</span>
+            <span>+ Inverter:</span><span className="text-right">£{inverterCost.toFixed(0)}</span>
+            <span>+ Panels:</span><span className="text-right">£{totalPanelCost.toFixed(0)}</span>
+            <span className="font-bold">= Total system cost:</span><span className="text-right font-bold">£{totalInstallCost.toFixed(0)}</span>
+          </div>
+        </div>
+        <div className="mt-3">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} />
+            Include annual maintenance
+          </label>
+          {includeMaintenance && (
+            <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
+              <div><label>Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+              <div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ==================== 5. FINANCIAL ANALYSIS ==================== */}
+      <div className="bg-green-50 p-4 rounded-lg mb-6">
+        <h3 className="font-bold text-xl mb-3">5. Financial Analysis</h3>
+        <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-white/50 rounded">
+          <div><label>Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Standing charge (£/month)</label><input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="font-medium text-green-700">Self‑consumed (green)</span>
+            <span className="font-medium text-red-600">Grid purchase (red, {Math.round(gridFactor*100)}% of green)</span>
+            <span className="font-medium text-blue-600">Exported (blue)</span>
+          </div>
+          <div ref={barRef} className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer" onClick={(e) => {
+            const rect = barRef.current?.getBoundingClientRect();
+            if (rect) {
+              const x = e.clientX - rect.left;
+              const percent = (x / rect.width) * 100;
+              setSelfConsumptionPercent(Math.round(Math.min(100, Math.max(0, percent))));
+            }
+          }}>
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
+            {bluePct !== 30 && <div className="absolute top-1/2 transform -translate-y-1/2 w-1 h-8 bg-yellow-400 rounded-full z-5" style={{ left: `calc(${100 - 30}% - 0.5px)`, pointerEvents: "none" }} title="Optimal point (30% exported)" />}
+            <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10" style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }} onMouseDown={startDrag} onTouchStart={startDrag} />
+            <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold pointer-events-none">
+              <span>{greenPct.toFixed(0)}%</span><span>{redPct.toFixed(1)}%</span><span>{bluePct.toFixed(1)}%</span>
+            </div>
+          </div>
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>0% (export all)</span>
+            <span className="text-green-600 font-semibold">🎯 Optimal: {optimalGreenDisplay}% green → {blueAtOptimal}% exported (30% recommended)</span>
+            <span>100% (consume all)</span>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            📊 Grid purchase = {Math.round(gridFactor*100)}% of self‑consumed (max 55%). Move the circle until blue = 30%.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self‑consumed</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-blue-100 p-3 rounded-lg text-center"><p className="text-sm text-blue-800 font-semibold">💰 Exported</p><p className="text-2xl font-bold text-blue-600">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
+        </div>
+      </div>
+
+      {/* ==================== ANALYSIS RESULTS ==================== */}
+      <div className="bg-gray-800 text-white p-6 rounded-lg">
+        <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
+        <div className="mb-6">
+          <h4 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3">1. Data analysis</h4>
+          <div className="space-y-2 text-lg">
+            <p><strong>Total panels:</strong> {totalPanelsCount}</p>
+            <p><strong>Total power:</strong> {totalWp.toFixed(0)} Wp</p>
+            <p><strong>Annual generation:</strong> {totalAnnualKwh.toFixed(0)} kWh</p>
+            <p><strong>Installation cost:</strong> £{totalInstallCost.toFixed(0)}</p>
+            <p><strong>Annual maintenance:</strong> £{totalAnnualMaintenanceCost.toFixed(1)}</p>
+            <p><strong>Annual benefit (net):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
+            <hr className="my-2 border-gray-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly bill WITHOUT solar</p><p className="text-2xl font-bold text-red-400">£{monthlyBillWithoutSolar.toFixed(2)}</p></div>
+              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly bill WITH solar</p><p className="text-2xl font-bold text-yellow-400">£{monthlyBillWithSolar.toFixed(2)}</p></div>
+              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly savings</p><p className="text-2xl font-bold text-green-400">£{monthlySavings.toFixed(2)}</p></div>
+            </div>
+            <hr className="my-2 border-gray-600" />
+            <p><strong>Payback period:</strong> {paybackYears.toFixed(1)} years</p>
+            <p><strong className="text-3xl text-green-400">ROI: {roiPercent.toFixed(1)}%</strong>
+              {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent</span>}
+              {roiPercent >= 6 && roiPercent < 12 && <span className="ml-2 text-yellow-300">👍 Good</span>}
+              {roiPercent < 6 && roiPercent > 0 && <span className="ml-2 text-red-300">⚠️ Low</span>}
+              {roiPercent <= 0 && <span className="ml-2 text-red-400">❌ Not profitable</span>}
+            </p>
+          </div>
+        </div>
+        {selfConsumedKwhMonthly > 0 && (
+          <div>
+            <h4 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3">2. Electrification recommendations</h4>
+            <p className="text-sm text-gray-300 mb-4">Based on monthly self‑consumption of <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.</p>
+            <div className="space-y-4">
+              <div className="border-l-4 border-blue-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏠 1‑2 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '1-2', selectedCountry)}</div></div>
+              <div className="border-l-4 border-green-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏡 3‑4 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '3-4', selectedCountry)}</div></div>
+              <div className="border-l-4 border-yellow-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏘️ 5+ bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '5+', selectedCountry)}</div></div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SolarPanelCalculator;
