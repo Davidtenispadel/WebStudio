@@ -1,6 +1,6 @@
 export enum StudioSection {
   HOME = "Home",
-  TECHNOLOGY = "Technology",
+  TECHNOLOGY = "Plan Your Project",
   PROJECT_JOURNEY = "Project Journey",
   ARCHITECTURE = "Architecture",
   DESIGN = "Design & Management",
