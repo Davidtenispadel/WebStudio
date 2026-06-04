@@ -4,6 +4,12 @@ import SolarPanelCalculator from './SolarPanelCalculator';
 const SolarPanelsPage: React.FC = () => {
   return (
     <div className="text-black max-w-6xl mx-auto px-4">
+      <div className="flex justify-start mb-4">
+        <button onClick={() => window.history.back()} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md">
+          ← Back to Plan Your Project
+        </button>
+      </div>
+
       <h2 className="text-3xl md:text-4xl font-light mb-6">Plan Your Project</h2>
 
       <p className="text-lg mb-4">
@@ -274,7 +280,9 @@ const SolarPanelsPage: React.FC = () => {
       <h3 className="text-2xl font-semibold mt-10 mb-4">7. Visual identification guide – spot the technology at a glance</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Technology</th><th className="border p-2">Colour</th><th className="border p-2">Front busbars</th><th className="border p-2">Appearance</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">PERC</td><td className="border p-2">Dark blue/black</td><td className="border p-2">9‑12 thick</td><td className="border p-2">Visible "ribs"</td></tr>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">Intense black</td><td className="border p-2">12‑16 very thin</td><td className="border p-2">Clean, minimal reflections</td></tr>
@@ -290,7 +298,9 @@ const SolarPanelsPage: React.FC = () => {
       <h3 className="text-2xl font-semibold mt-10 mb-4">8. Climate zone recommendations – choose by where you live</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Climate zone</th><th className="border p-2">Countries</th><th className="border p-2">Best technology</th><th className="border p-2">Why</th><th className="border p-2">4 kWp cost (installed)</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Climate zone</th><th className="border p-2">Countries</th><th className="border p-2">Best technology</th><th className="border p-2">Why</th><th className="border p-2">4 kWp cost (installed)</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">☀️ Hot</td><td className="border p-2">Spain, Italy, Greece</td><td className="border p-2">HJT</td><td className="border p-2">Best temp coefficient</td><td className="border p-2">£6,500‑8,500</td></tr>
             <tr><td className="border p-2">🌦️ Temperate</td><td className="border p-2">UK, Netherlands, Germany</td><td className="border p-2">TOPCon</td><td className="border p-2">Low‑light excellence</td><td className="border p-2">£5,500‑7,500</td></tr>
@@ -319,7 +329,9 @@ const SolarPanelsPage: React.FC = () => {
       <h3 className="text-2xl font-semibold mt-10 mb-4">10. Cost breakdown – solar installation in the UK (2025‑2026)</h3>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm mb-4">
-          <thead className="bg-gray-100"><tr><th className="border p-2">Component</th><th className="border p-2">Estimated cost (£)</th></tr></thead>
+          <thead className="bg-gray-100">
+            <tr><th className="border p-2">Component</th><th className="border p-2">Estimated cost (£)</th></tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">10 x TOPCon panels (430 Wp)</td><td className="border p-2">£3,650‑4,600</td></tr>
             <tr><td className="border p-2">Inverter (3.68 kW string)</td><td className="border p-2">£600‑1,200</td></tr>
