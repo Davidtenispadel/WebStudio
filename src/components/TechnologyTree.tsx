@@ -10,26 +10,26 @@ interface TreeNode {
 }
 
 const technologyData: TreeNode = {
-  id: 'technology',
-  name: 'Technology',
-  slug: 'technology',
+  id: 'Plan Your Project',
+  name: 'Plan Your Project',
+  slug: 'Plan Your Project',
   children: [
     {
       id: 'green-energy',
       name: 'Green Energy',
-      slug: 'technology/green-energy',
+      slug: 'Plan Your Project/green-energy',
       children: [
-        { id: 'solar-panels', name: 'Solar panels', slug: 'technology/green-energy/solar-panels' },
-        { id: 'solar', name: 'Solar Energy', slug: 'technology/green-energy/solar' },
-        { id: 'wind', name: 'Wind Energy', slug: 'technology/green-energy/wind' },
-        { id: 'geothermal', name: 'Geothermal', slug: 'technology/green-energy/geothermal' },
-        { id: 'biomass', name: 'Biomass', slug: 'technology/green-energy/biomass' },
+        { id: 'solar-panels', name: 'Solar panels', slug: 'Plan Your Project/green-energy/solar-panels' },
+        { id: 'solar', name: 'Solar Energy', slug: 'Plan Your Project/green-energy/solar' },
+        { id: 'wind', name: 'Wind Energy', slug: 'Plan Your Project/green-energy/wind' },
+        { id: 'geothermal', name: 'Geothermal', slug: 'Plan Your Project/green-energy/geothermal' },
+        { id: 'biomass', name: 'Biomass', slug: 'Plan Your Project/green-energy/biomass' },
       ]
     },
     {
       id: 'tools',
       name: 'Tools',
-      slug: 'technology/tools',
+      slug: 'Plan Your Project/tools',
       icon: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1780249527/Hero_horizontal_2560_d7r0ik.png',
       children: [
         {
@@ -70,8 +70,8 @@ const technologyData: TreeNode = {
 
 const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onNavigate }) => {
   const navigate = useNavigate();
-  // ✅ IMPORTANTE: Añadimos 'tools' al Set para que aparezca expandido
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['technology', 'green-energy', 'tools']));
+  // ✅ Cambiado: expandir el nodo raíz 'Plan Your Project' junto con 'green-energy' y 'tools'
+  const [expanded, setExpanded] = useState<Set<string>>(new Set(['Plan Your Project', 'green-energy', 'tools']));
 
   const toggle = (id: string) => {
     setExpanded(prev => {
@@ -128,7 +128,7 @@ const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onN
 
   return (
     <div className="bg-white p-4 rounded shadow">
-      <h3 className="text-xl font-semibold mb-3">Content Tree</h3>
+      <h3 className="text-xl font-semibold mb-3">Project Explorer</h3>
       {renderNode(technologyData)}
       <p className="text-xs text-gray-400 mt-3">Click any topic – content will grow here.</p>
     </div>
