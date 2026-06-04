@@ -238,7 +238,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [mountingCost, setMountingCost] = useState(450);
   const [scaffoldingCost, setScaffoldingCost] = useState(600);
   const [electricalCost, setElectricalCost] = useState(350);
-  const [adminCost, setAdminCost] = useState(175); // "Otros"
+  const [adminCost, setAdminCost] = useState(175);
 
   // Maintenance
   const [includeMaintenance, setIncludeMaintenance] = useState(false);
@@ -306,13 +306,11 @@ const SolarPanelCalculator: React.FC = () => {
     if (forceDual) setDualInverter(true);
   }, [forceDual]);
 
-  // Auto inverter cost based on selection
   const autoInverterCost = () => {
     const base = inverterPrices[inverterType]?.single || 900;
     return dualInverter ? (inverterPrices[inverterType]?.dual || base * 2) : base;
   };
 
-  // If manual cost not set, use auto; when inverter type or dual changes, update manual cost to auto (unless user has manually changed it? We'll reset only if manual cost is null or the user hasn't touched it. Simpler: always set manual cost to auto when type/dual changes, but allow user to override. That's fine.)
   const currentInverterCost = manualInverterCost !== null ? manualInverterCost : autoInverterCost();
 
   const getPanelUnitPrice = (panelKey: PanelKey): number => {
@@ -360,7 +358,6 @@ const SolarPanelCalculator: React.FC = () => {
 
   const totalInstallCost = totalPanelCost + currentInverterCost + mountingCost + scaffoldingCost + electricalCost + adminCost;
 
-  // Financial model (unchanged)
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
   let redPct = gridFactor * greenPct;
@@ -487,7 +484,6 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Orientation control (same as before)
   const OrientationControl = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
     const getAdvice = (f: number): string => {
@@ -591,7 +587,7 @@ const SolarPanelCalculator: React.FC = () => {
           />
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">🏠</div>
         </div>
-        <label className="text-sm font-medium">{label}</label>
+        <label className="text-sm font-medium text-white">{label}</label>
         <input
           type="range"
           min="0"
@@ -601,12 +597,11 @@ const SolarPanelCalculator: React.FC = () => {
           onChange={(e) => onChange(parseInt(e.target.value))}
           className="w-full max-w-xs mt-2"
         />
-        <p className="text-xs mt-1">Factor: {factor.toFixed(2)} – {advice}</p>
+        <p className="text-xs mt-1 text-gray-300">Factor: {factor.toFixed(2)} – {advice}</p>
       </div>
     );
   };
 
-  // Pitch visualization (unchanged)
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -647,7 +642,7 @@ const SolarPanelCalculator: React.FC = () => {
 
     return (
       <div className="flex flex-col items-center">
-        <label className="flex items-center gap-2 text-sm font-medium">
+        <label className="flex items-center gap-2 text-sm font-medium text-white">
           <input type="checkbox" checked={enabled} onChange={() => setEnabled(!enabled)} /> Custom {label}
         </label>
         {enabled ? (
@@ -682,10 +677,10 @@ const SolarPanelCalculator: React.FC = () => {
               onChange={(e) => onChange(parseInt(e.target.value))}
               className="w-full max-w-xs"
             />
-            <p className="text-xs">Factor: {getTiltFactor(tilt).toFixed(2)}</p>
+            <p className="text-xs text-gray-300">Factor: {getTiltFactor(tilt).toFixed(2)}</p>
           </>
         ) : (
-          <p className="text-sm text-gray-600">Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>
+          <p className="text-sm text-gray-300">Using optimal 35° (factor {getTiltFactor(35).toFixed(2)})</p>
         )}
       </div>
     );
@@ -748,20 +743,20 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Single & Dual Roof</h2>
 
-      {/* ==================== 1. LOCATION & PANEL COUNT ==================== */}
-      <div className="border-2 border-gray-400 rounded-lg p-4 mb-6">
-        <h3 className="font-bold text-xl mb-3">1. Location & Panel Count</h3>
+      {/* Section 1: Location & Panel Count - Dark grey background */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3 text-white">1. Location & Panel Count</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label>Country:</label>
-            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full">
+            <label className="text-white">Country:</label>
+            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full bg-white">
               {countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}
             </select>
-            <p className="text-xs text-gray-500 mt-1">🌦️ Climate factor adjusts production. Panel prices are country‑adjusted.</p>
+            <p className="text-xs text-gray-300 mt-1">🌦️ Climate factor adjusts production. Panel prices are country‑adjusted.</p>
           </div>
           <div>
-            <label>Region:</label>
-            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full">
+            <label className="text-white">Region:</label>
+            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full bg-white">
               <option value="south">South (higher irradiation)</option>
               <option value="north">North (lower irradiation)</option>
             </select>
@@ -769,100 +764,99 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
 
         {/* Roof A */}
-        <div className="mb-4 border-b pb-2">
-          <div className="font-semibold text-blue-700">🏠 Roof A</div>
+        <div className="mb-4 border-b border-gray-600 pb-2">
+          <div className="font-semibold text-blue-300">🏠 Roof A</div>
           <div className="grid md:grid-cols-2 gap-4 mt-2">
-            <div><label>Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
-            <div><label>Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div></div>
-            <div><label>Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" /><p className="text-sm">{shadingPercentA}% reduction</p></div>
+            <div><label className="text-white">Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-white">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
+            <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-white" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-white" /></div></div>
+            <div><label className="text-white">Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" /><p className="text-sm text-gray-300">{shadingPercentA}% reduction</p></div>
             <div><button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
             <div><OrientationControl orientation={orientationDegA} onChange={setOrientationDegA} label="Orientation A" /></div>
             <div><PitchVisualization tilt={tiltDegA} onChange={setTiltDegA} enabled={enablePitchA} setEnabled={setEnablePitchA} label="pitch A" /></div>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-blue-50 p-2 rounded">
+          <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-gray-700 p-2 rounded text-white">
             <div>🌱 Spring<br/>{seasonalA.spring.toFixed(0)} kWh</div>
             <div>☀️ Summer<br/>{seasonalA.summer.toFixed(0)} kWh</div>
             <div>🍂 Autumn<br/>{seasonalA.autumn.toFixed(0)} kWh</div>
             <div>❄️ Winter<br/>{seasonalA.winter.toFixed(0)} kWh</div>
           </div>
-          <div className="mt-2 text-sm">{renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, "Roof A layout")}</div>
+          <div className="mt-2 text-sm text-gray-300">{renderSVG(layoutA, roofAWidth, roofALength, obstaclesA, "Roof A layout")}</div>
         </div>
 
         <div className="mb-2">
-          <label className="flex items-center gap-2"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label>
+          <label className="flex items-center gap-2 text-white"><input type="checkbox" checked={enableRoofB} onChange={(e) => setEnableRoofB(e.target.checked)} /> Enable Roof B</label>
         </div>
         {enableRoofB && (
-          <div className="border-t pt-3">
-            <div className="font-semibold text-green-700">🏠 Roof B</div>
+          <div className="border-t border-gray-600 pt-3">
+            <div className="font-semibold text-green-300">🏠 Roof B</div>
             <div className="grid md:grid-cols-2 gap-4 mt-2">
-              <div><label>Panel type:</label><select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
-              <div><label>Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2" /></div></div>
-              <div><label>Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" /><p className="text-sm">{shadingPercentB}% reduction</p></div>
+              <div><label className="text-white">Panel type:</label><select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-white">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
+              <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-white" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-white" /></div></div>
+              <div><label className="text-white">Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" /><p className="text-sm text-gray-300">{shadingPercentB}% reduction</p></div>
               <div><button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
               <div><OrientationControl orientation={orientationDegB} onChange={setOrientationDegB} label="Orientation B" /></div>
               <div><PitchVisualization tilt={tiltDegB} onChange={setTiltDegB} enabled={enablePitchB} setEnabled={setEnablePitchB} label="pitch B" /></div>
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-green-50 p-2 rounded">
+            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-sm bg-gray-700 p-2 rounded text-white">
               <div>🌱 Spring<br/>{seasonalB.spring.toFixed(0)} kWh</div>
               <div>☀️ Summer<br/>{seasonalB.summer.toFixed(0)} kWh</div>
               <div>🍂 Autumn<br/>{seasonalB.autumn.toFixed(0)} kWh</div>
               <div>❄️ Winter<br/>{seasonalB.winter.toFixed(0)} kWh</div>
             </div>
-            <div className="mt-2 text-sm">{renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, "Roof B layout")}</div>
+            <div className="mt-2 text-sm text-gray-300">{renderSVG(layoutB, roofBWidth, roofBLength, obstaclesB, "Roof B layout")}</div>
           </div>
         )}
-        <div className="mt-3 text-sm text-gray-600">
+        <div className="mt-3 text-sm text-gray-300">
           💡 Estimated annual production: <strong>{totalAnnualKwh.toFixed(0)} kWh</strong> from <strong>{totalWp.toFixed(0)} Wp</strong>.
         </div>
       </div>
 
-      {/* ==================== 2. PANEL COST CONFIGURATION ==================== */}
-      <div className="bg-amber-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">2. Panel Cost Configuration</h3>
+      {/* Section 2: Panel Cost Configuration - Dark grey background */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3 text-white">2. Panel Cost Configuration</h3>
         <div className="flex items-center gap-4 mb-3">
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-white">
             <input type="checkbox" checked={useManualPanelPrice} onChange={(e) => setUseManualPanelPrice(e.target.checked)} />
             Override automatic country‑adjusted price
           </label>
-          <span className="text-xs text-gray-500">Multiplier: {getCountryPriceMultiplier(selectedCountry).toFixed(2)}</span>
+          <span className="text-xs text-gray-300">Multiplier: {getCountryPriceMultiplier(selectedCountry).toFixed(2)}</span>
         </div>
         {useManualPanelPrice ? (
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium">Minimum price per panel (£)</label>
-              <input type="number" step="5" min="100" value={minPanelPrice} onChange={(e) => setMinPanelPrice(Math.max(100, parseInt(e.target.value) || 200))} className="border p-2 rounded w-full" />
-              <p className="text-xs text-gray-500">Base cost for the first panel.</p>
+              <label className="block text-sm font-medium text-white">Minimum price per panel (£)</label>
+              <input type="number" step="5" min="100" value={minPanelPrice} onChange={(e) => setMinPanelPrice(Math.max(100, parseInt(e.target.value) || 200))} className="border p-2 rounded w-full bg-white" />
+              <p className="text-xs text-gray-300">Base cost for the first panel.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium">Incremental cost per additional panel (£)</label>
-              <input type="number" step="5" min="0" value={incrementalCostPerPanel} onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))} className="border p-2 rounded w-full" />
-              <p className="text-xs text-gray-500">Extra cost for each panel beyond the first.</p>
+              <label className="block text-sm font-medium text-white">Incremental cost per additional panel (£)</label>
+              <input type="number" step="5" min="0" value={incrementalCostPerPanel} onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))} className="border p-2 rounded w-full bg-white" />
+              <p className="text-xs text-gray-300">Extra cost for each panel beyond the first.</p>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-gray-600">Using catalogue prices adjusted for {selectedCountry}.</p>
+          <p className="text-sm text-gray-300">Using catalogue prices adjusted for {selectedCountry}.</p>
         )}
-        <div className="mt-3 p-3 bg-white rounded-md">
-          <p><strong>Total panels:</strong> {totalPanelsCount}</p>
-          <p><strong>Panel cost per unit (Roof A):</strong> £{panelPriceA.toFixed(2)} &nbsp;| <strong>Roof B:</strong> £{panelPriceB.toFixed(2)}</p>
-          <p><strong>Total panels cost:</strong> £{totalPanelCost.toFixed(2)}</p>
+        <div className="mt-3 p-3 bg-gray-700 rounded-md">
+          <p className="text-white"><strong>Total panels:</strong> {totalPanelsCount}</p>
+          <p className="text-white"><strong>Panel cost per unit (Roof A):</strong> £{panelPriceA.toFixed(2)} &nbsp;| <strong>Roof B:</strong> £{panelPriceB.toFixed(2)}</p>
+          <p className="text-white"><strong>Total panels cost:</strong> £{totalPanelCost.toFixed(2)}</p>
         </div>
       </div>
 
-      {/* ==================== 3. INVERTER CONFIGURATION (with manual override) ==================== */}
-      <div className="bg-indigo-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">3. Inverter Configuration</h3>
+      {/* Section 3: Inverter Configuration - Dark grey background */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3 text-white">3. Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block font-medium">Inverter type & power:</label>
+            <label className="block font-medium text-white">Inverter type & power:</label>
             <select
               value={inverterType}
               onChange={(e) => {
                 setInverterType(e.target.value);
-                // Reset manual cost to auto when type changes
                 setManualInverterCost(null);
               }}
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded w-full bg-white"
             >
               {Object.entries(inverterPrices).map(([key, val]) => (<option key={key} value={key}>{val.name} – £{val.single} (dual: £{val.dual})</option>))}
             </select>
@@ -870,93 +864,93 @@ const SolarPanelCalculator: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="dualInverter" checked={dualInverter} onChange={(e) => { setDualInverter(e.target.checked); setManualInverterCost(null); }} disabled={forceDual} />
-              <label htmlFor="dualInverter" className="text-sm">Use dual inverters {forceDual && <span className="text-red-600 ml-2">(Required)</span>}<br /><span className="text-xs text-gray-600">Auto price: £{autoInverterCost()}</span></label>
+              <label htmlFor="dualInverter" className="text-sm text-white">Use dual inverters {forceDual && <span className="text-red-400 ml-2">(Required)</span>}<br /><span className="text-xs text-gray-300">Auto price: £{autoInverterCost()}</span></label>
             </div>
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium">Inverter cost (£) – manual override</label>
+            <label className="block text-sm font-medium text-white">Inverter cost (£) – manual override</label>
             <input
               type="number"
               step="10"
               min="0"
               value={currentInverterCost}
               onChange={(e) => setManualInverterCost(parseFloat(e.target.value) || 0)}
-              className="border p-2 rounded w-full md:w-1/2"
+              className="border p-2 rounded w-full md:w-1/2 bg-white"
             />
-            <p className="text-xs text-gray-500">Auto‑calculated based on type and dual selection. Edit this field to override.</p>
+            <p className="text-xs text-gray-300">Auto‑calculated based on type and dual selection. Edit this field to override.</p>
           </div>
           <div className="col-span-2">
-            <label className="block font-medium mb-1">Standby power (0‑60 W)</label>
+            <label className="block font-medium mb-1 text-white">Standby power (0‑60 W)</label>
             <div className="flex gap-2 items-center">
-              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded"><option value="preset">Preset</option><option value="custom">Custom</option></select>
+              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded bg-white"><option value="preset">Preset</option><option value="custom">Custom</option></select>
               {standbySource === 'preset' ? (
-                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded">
+                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded bg-white">
                   <option value="0">0 W</option><option value="2">2 W</option><option value="3">3 W</option><option value="5">5 W</option>
                   <option value="10">10 W</option><option value="20">20 W</option><option value="40">40 W</option><option value="60">60 W</option>
                 </select>
               ) : (
-                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
+                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24 bg-white" />
               )}
             </div>
-            <p className="text-xs text-gray-500">Inverter consumption when not generating (night). Always drawn from grid.</p>
+            <p className="text-xs text-gray-300">Inverter consumption when not generating (night). Always drawn from grid.</p>
           </div>
         </div>
       </div>
 
-      {/* ==================== 4. OTHER INSTALLATION COSTS (manual editable) ==================== */}
-      <div className="bg-amber-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">4. Other Installation Costs</h3>
+      {/* Section 4: Other Installation Costs - Dark grey background */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3 text-white">4. Other Installation Costs</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium">Mounting system (£)</label>
-            <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+            <label className="block text-sm font-medium text-white">Mounting system (£)</label>
+            <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Scaffolding (£)</label>
-            <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+            <label className="block text-sm font-medium text-white">Scaffolding (£)</label>
+            <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Electrical components (£)</label>
-            <input type="number" step="10" min="0" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+            <label className="block text-sm font-medium text-white">Electrical components (£)</label>
+            <input type="number" step="10" min="0" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
           </div>
           <div>
-            <label className="block text-sm font-medium">Admin & DNO fees (£)</label>
-            <input type="number" step="10" min="0" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+            <label className="block text-sm font-medium text-white">Admin & DNO fees (£)</label>
+            <input type="number" step="10" min="0" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
           </div>
         </div>
-        <div className="mt-3 border-t pt-2">
-          <div className="text-right font-bold text-lg">Total installation cost (panels + inverter + others): £{totalInstallCost.toFixed(0)}</div>
+        <div className="mt-3 border-t border-gray-600 pt-2">
+          <div className="text-right font-bold text-lg text-white">Total installation cost (panels + inverter + others): £{totalInstallCost.toFixed(0)}</div>
         </div>
         <div className="mt-3">
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-white">
             <input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} />
             Include annual maintenance (prorated from 3‑year costs)
           </label>
           {includeMaintenance && (
             <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
-              <div><label>Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
-              <div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+              <div><label className="text-white">Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
+              <div><label className="text-white">Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ==================== 5. FINANCIAL ANALYSIS ==================== */}
-      <div className="bg-green-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">5. Financial Analysis</h3>
-        <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-white/50 rounded">
-          <div><label>Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
-          <div><label>Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
-          <div><label>Standing charge (£/month)</label><input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+      {/* Section 5: Financial Analysis - Dark grey background */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+        <h3 className="font-bold text-xl mb-3 text-white">5. Financial Analysis</h3>
+        <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-gray-700 rounded">
+          <div><label className="block text-sm font-medium text-white">Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
+          <div><label className="block text-sm font-medium text-white">Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
+          <div><label className="block text-sm font-medium text-white">Standing charge (£/month)</label><input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
         </div>
 
         <div className="mb-6">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="font-medium text-green-700">Self‑consumed (green)</span>
-            <span className="font-medium text-red-600">Grid purchase (red, {Math.round(gridFactor*100)}% of green)</span>
-            <span className="font-medium text-blue-600">Exported (blue)</span>
+          <div className="flex justify-between text-sm mb-1 text-white">
+            <span className="font-medium text-green-300">Self‑consumed (green)</span>
+            <span className="font-medium text-red-300">Grid purchase (red, {Math.round(gridFactor*100)}% of green)</span>
+            <span className="font-medium text-blue-300">Exported (blue)</span>
           </div>
-          <div ref={barRef} className="relative h-12 w-full bg-gray-200 rounded-lg overflow-hidden cursor-pointer" onClick={(e) => {
+          <div ref={barRef} className="relative h-12 w-full bg-gray-700 rounded-lg overflow-hidden cursor-pointer" onClick={(e) => {
             const rect = barRef.current?.getBoundingClientRect();
             if (rect) {
               const x = e.clientX - rect.left;
@@ -971,28 +965,28 @@ const SolarPanelCalculator: React.FC = () => {
               <span>{greenPct.toFixed(0)}%</span><span>{redPct.toFixed(1)}%</span><span>{bluePct.toFixed(1)}%</span>
             </div>
           </div>
-          <div className="flex justify-between text-xs text-gray-600 mt-1">
+          <div className="flex justify-between text-xs text-gray-300 mt-1">
             <span>0% (export all)</span>
-            <span className="text-green-600 font-semibold">🎯 Optimal: {optimalGreenDisplay}% green → {blueAtOptimal}% exported (30% recommended)</span>
+            <span className="text-green-300 font-semibold">🎯 Optimal: {optimalGreenDisplay}% green → {blueAtOptimal}% exported (30% recommended)</span>
             <span>100% (consume all)</span>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-300 mt-2">
             📊 Grid purchase = {Math.round(gridFactor*100)}% of self‑consumed (max 55%). Move the circle until blue = 30%.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self‑consumed (monthly)</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
-          <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
-          <div className="bg-blue-100 p-3 rounded-lg text-center"><p className="text-sm text-blue-800 font-semibold">💰 Exported</p><p className="text-2xl font-bold text-blue-600">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-gray-700 p-3 rounded-lg text-center"><p className="text-sm text-gray-300">🌞 Self‑consumed (monthly)</p><p className="text-2xl font-bold text-green-400">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-gray-700 p-3 rounded-lg text-center"><p className="text-sm text-gray-300">🏭 Grid purchase</p><p className="text-2xl font-bold text-red-400">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-gray-700 p-3 rounded-lg text-center"><p className="text-sm text-gray-300">💰 Exported</p><p className="text-2xl font-bold text-blue-400">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
         </div>
       </div>
 
-      {/* ==================== ANALYSIS RESULTS ==================== */}
-      <div className="bg-gray-800 text-white p-6 rounded-lg">
+      {/* Section 6: Analysis Results - Pure black background */}
+      <div className="bg-black text-white p-6 rounded-lg">
         <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="mb-6">
-          <h4 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3">1. Data analysis</h4>
+          <h4 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-3">1. Data analysis</h4>
           <div className="space-y-2 text-lg">
             <p><strong>Total panels:</strong> {totalPanelsCount}</p>
             <p><strong>Total power:</strong> {totalWp.toFixed(0)} Wp</p>
@@ -1000,13 +994,13 @@ const SolarPanelCalculator: React.FC = () => {
             <p><strong>Installation cost:</strong> £{totalInstallCost.toFixed(0)}</p>
             <p><strong>Annual maintenance:</strong> £{totalAnnualMaintenanceCost.toFixed(1)}</p>
             <p><strong>Annual benefit (net):</strong> £{totalAnnualBenefit.toFixed(0)}</p>
-            <hr className="my-2 border-gray-600" />
+            <hr className="my-2 border-gray-700" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly bill WITHOUT solar</p><p className="text-2xl font-bold text-red-400">£{monthlyBillWithoutSolar.toFixed(2)}</p></div>
-              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly bill WITH solar</p><p className="text-2xl font-bold text-yellow-400">£{monthlyBillWithSolar.toFixed(2)}</p></div>
-              <div className="bg-gray-700 p-3 rounded"><p className="text-sm text-gray-300">Monthly savings</p><p className="text-2xl font-bold text-green-400">£{monthlySavings.toFixed(2)}</p></div>
+              <div className="bg-gray-900 p-3 rounded"><p className="text-sm text-gray-400">Monthly bill WITHOUT solar</p><p className="text-2xl font-bold text-red-400">£{monthlyBillWithoutSolar.toFixed(2)}</p></div>
+              <div className="bg-gray-900 p-3 rounded"><p className="text-sm text-gray-400">Monthly bill WITH solar</p><p className="text-2xl font-bold text-yellow-400">£{monthlyBillWithSolar.toFixed(2)}</p></div>
+              <div className="bg-gray-900 p-3 rounded"><p className="text-sm text-gray-400">Monthly savings</p><p className="text-2xl font-bold text-green-400">£{monthlySavings.toFixed(2)}</p></div>
             </div>
-            <hr className="my-2 border-gray-600" />
+            <hr className="my-2 border-gray-700" />
             <p><strong>Payback period:</strong> {paybackYears.toFixed(1)} years</p>
             <p><strong className="text-3xl text-green-400">ROI: {roiPercent.toFixed(1)}%</strong>
               {roiPercent >= 12 && <span className="ml-2 text-green-300">✨ Excellent</span>}
@@ -1018,12 +1012,12 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
         {selfConsumedKwhMonthly > 0 && (
           <div>
-            <h4 className="text-xl font-semibold border-b border-gray-600 pb-2 mb-3">2. Electrification recommendations</h4>
+            <h4 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-3">2. Electrification recommendations</h4>
             <p className="text-sm text-gray-300 mb-4">Based on monthly self‑consumption of <strong>{selfConsumedKwhMonthly.toFixed(1)} kWh</strong>.</p>
             <div className="space-y-4">
-              <div className="border-l-4 border-blue-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏠 1‑2 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '1-2', selectedCountry)}</div></div>
-              <div className="border-l-4 border-green-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏡 3‑4 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '3-4', selectedCountry)}</div></div>
-              <div className="border-l-4 border-yellow-400 pl-4 bg-gray-700/30 p-3 rounded"><p className="font-bold text-lg">🏘️ 5+ bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '5+', selectedCountry)}</div></div>
+              <div className="border-l-4 border-blue-400 pl-4 bg-gray-900 p-3 rounded"><p className="font-bold text-lg">🏠 1‑2 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '1-2', selectedCountry)}</div></div>
+              <div className="border-l-4 border-green-400 pl-4 bg-gray-900 p-3 rounded"><p className="font-bold text-lg">🏡 3‑4 bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '3-4', selectedCountry)}</div></div>
+              <div className="border-l-4 border-yellow-400 pl-4 bg-gray-900 p-3 rounded"><p className="font-bold text-lg">🏘️ 5+ bedroom</p><div className="text-sm whitespace-pre-line">{getDetailedRecommendation(selfConsumedKwhMonthly, '5+', selectedCountry)}</div></div>
             </div>
           </div>
         )}
