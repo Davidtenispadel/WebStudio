@@ -69,7 +69,6 @@ const getClimateFactor = (countryName: string): number => {
   return 0.92;
 };
 
-// Grid dependency factor: fraction of self-consumed that comes from grid (red). Range 0.20 to 0.55 (max 55% of green).
 const getGridDependencyFactor = (countryName: string): number => {
   const map: Record<string, number> = {
     "United Kingdom": 0.52, "Ireland": 0.55, "Netherlands": 0.53, "Belgium": 0.52, "Denmark": 0.55,
@@ -210,15 +209,31 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Common parameters ---
   const [selectedCountry, setSelectedCountry] = useState("United Kingdom");
   const [region, setRegion] = useState<'north' | 'south'>('south');
-  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70); // green % of generation
+  const [selfConsumptionPercent, setSelfConsumptionPercent] = useState(70);
 
   // Tariffs
   const [importTariff, setImportTariff] = useState(defaultPricesByCountry["United Kingdom"].importRate);
   const [exportTariff, setExportTariff] = useState(defaultPricesByCountry["United Kingdom"].exportRate);
   const [standingCharge, setStandingCharge] = useState(defaultPricesByCountry["United Kingdom"].standingCharge);
 
+  // --- NEW: Manual cost estimator ---
+  const [useManualPanelPrice, setUseManualPanelPrice] = useState(false);
+  const [minPanelPrice, setMinPanelPrice] = useState(275);  // minimum cost per panel (e.g., PERC)
+  const [incrementalCostPerPanel, setIncrementalCostPerPanel] = useState(10); // extra per panel beyond the first
+
+  // If manual mode is off, we use the catalogue price from the selected panel type
+  const getPanelPricePerUnit = (panelKey: PanelKey): number => {
+    if (useManualPanelPrice) {
+      // total cost = minPrice + (numberOfPanels - 1) * incrementalCost
+      const panels = totalPanelsCount;
+      if (panels === 0) return minPanelPrice;
+      return minPanelPrice + (panels - 1) * incrementalCostPerPanel;
+    } else {
+      return PANEL_CATALOG[panelKey].price;
+    }
+  };
+
   // Installation costs
-  const [panelPricePerUnit, setPanelPricePerUnit] = useState(PANEL_CATALOG.topcon.price);
   const [inverterType, setInverterType] = useState<string>('string_3_68');
   const [inverterCost, setInverterCost] = useState(900);
   const [mountingCost, setMountingCost] = useState(450);
@@ -241,9 +256,8 @@ const SolarPanelCalculator: React.FC = () => {
   const [dualInverter, setDualInverter] = useState(false);
 
   const climateFactor = getClimateFactor(selectedCountry);
-  const gridFactor = getGridDependencyFactor(selectedCountry); // between 0.20 and 0.55
+  const gridFactor = getGridDependencyFactor(selectedCountry);
 
-  // Update tariffs on country change
   useEffect(() => {
     const def = defaultPricesByCountry[selectedCountry];
     if (def) {
@@ -302,7 +316,13 @@ const SolarPanelCalculator: React.FC = () => {
     setInverterCost(dualInverter ? (inverterPrices[inverterType]?.dual || price * 2) : price);
   }, [inverterType, dualInverter]);
 
-  // Production calculations (including seasonal for each roof)
+  // Panel costs using manual or catalogue price
+  const panelPricePerUnitA = useManualPanelPrice ? (totalPanelsCount > 0 ? minPanelPrice + (totalPanelsCount - 1) * incrementalCostPerPanel : minPanelPrice) : PANEL_CATALOG[panelKeyA].price;
+  const panelPricePerUnitB = useManualPanelPrice ? (totalPanelsCount > 0 ? minPanelPrice + (totalPanelsCount - 1) * incrementalCostPerPanel : minPanelPrice) : PANEL_CATALOG[panelKeyB].price;
+  const panelCostA = panelsA * panelPricePerUnitA;
+  const panelCostB = enableRoofB ? panelsB * panelPricePerUnitB : 0;
+  const totalPanelCost = panelCostA + panelCostB;
+
   const getRoofProduction = (layout: any, panelKey: PanelKey, orientation: number, enablePitch: boolean, tilt: number, shading: number) => {
     if (!layout) return { totalWp: 0, annualKwh: 0, seasonalKwh: { spring: 0, summer: 0, autumn: 0, winter: 0 } };
     const panelPower = PANEL_CATALOG[panelKey].powerWp;
@@ -328,31 +348,26 @@ const SolarPanelCalculator: React.FC = () => {
   const prodB = getRoofProduction(layoutB, panelKeyB, orientationDegB, enablePitchB, tiltDegB, shadingPercentB);
   const totalWp = prodA.totalWp + (enableRoofB ? prodB.totalWp : 0);
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
-
-  // Seasonal breakdown for each roof (for display)
   const seasonalA = prodA.seasonalKwh;
   const seasonalB = prodB.seasonalKwh;
 
-  // -------------------- FINANCIAL MODEL (red = gridFactor * green, capped at 55% of green) --------------------
+  // Financial model
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
   let redPct = gridFactor * greenPct;
   if (redPct > 100 - greenPct) redPct = 100 - greenPct;
   const bluePct = 100 - greenPct - redPct;
   
-  // Actual kWh values
   const selfConsumedKwhMonthly = avgMonthlyGeneration * (greenPct / 100);
   const gridPurchaseKwhMonthly = avgMonthlyGeneration * (redPct / 100);
   const exportedKwhMonthly = avgMonthlyGeneration * (bluePct / 100);
   const totalConsumption = selfConsumedKwhMonthly + gridPurchaseKwhMonthly;
   
-  // Bills and savings
   const monthlyBillWithoutSolar = (totalConsumption * importTariff) + standingCharge;
   const monthlyBillWithSolarRaw = (gridPurchaseKwhMonthly * importTariff) + standingCharge - (exportedKwhMonthly * exportTariff);
   const monthlyBillWithSolar = Math.max(0, monthlyBillWithSolarRaw);
   const monthlySavings = monthlyBillWithoutSolar - monthlyBillWithSolar;
   
-  // Annual figures for ROI, etc.
   const selfConsumedKwhAnnual = selfConsumedKwhMonthly * 12;
   const exportedKwhAnnual = exportedKwhMonthly * 12;
   const inverterAnnualKwh = (standbyPowerW * 24 * 365) / 1000;
@@ -361,9 +376,6 @@ const SolarPanelCalculator: React.FC = () => {
   const cleaningCostAnnual = includeMaintenance ? cleaningCost3Years / 3 : 0;
   const electricalInspectionAnnual = includeMaintenance ? electricalInspection3Years / 3 : 0;
   const totalAnnualMaintenanceCost = cleaningCostAnnual + electricalInspectionAnnual + inverterNetCost;
-  const panelCostA = panelsA * panelPricePerUnit;
-  const panelCostB = (enableRoofB ? panelsB * panelPricePerUnit : 0);
-  const totalPanelCost = panelCostA + panelCostB;
   const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + electricalCost + labourCost + adminCost;
   const annualSavingFromSelf = selfConsumedKwhAnnual * importTariff;
   const annualExportIncome = exportedKwhAnnual * exportTariff;
@@ -468,9 +480,17 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- ORIENTATION COMPASS (smooth drag) --------------------
+  // -------------------- IMPROVED ORIENTATION COMPASS (with text line and colour circle) --------------------
   const OrientationCompass = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
+    const getAdvice = (f: number): string => {
+      if (f >= 0.9) return "✅ Ideal South (100% optimum)";
+      if (f >= 0.8) return "✅ Good South‑east / South‑west (90‑95%)";
+      if (f >= 0.7) return "⚠️ Acceptable East / West (70‑80%)";
+      if (f >= 0.6) return "⚠️ Poor East/West steep (60‑70%)";
+      return "❌ North – not recommended (45‑55% loss)";
+    };
+    const advice = getAdvice(factor);
     const pointColor = factor >= 0.85 ? "#22c55e" : factor >= 0.6 ? "#eab308" : "#ef4444";
     const compassRef = useRef<HTMLDivElement>(null);
     const dragRef = useRef(false);
@@ -555,23 +575,22 @@ const SolarPanelCalculator: React.FC = () => {
             />
           </div>
           <div
-            className="absolute w-5 h-5 rounded-full shadow-lg border-2 border-white"
+            className="absolute w-5 h-5 rounded-full shadow-lg border-2 border-white transition-all duration-75"
             style={{
               backgroundColor: pointColor,
               left: `calc(50% + ${Math.sin(orientation * Math.PI / 180) * 60}px - 10px)`,
               top: `calc(50% - ${Math.cos(orientation * Math.PI / 180) * 60}px - 10px)`,
-              transform: 'translate(0, 0)'
             }}
           />
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl">🏠</div>
         </div>
         <label className="text-sm font-medium">{label}</label>
-        <p className="text-xs mt-1">Factor: {factor.toFixed(2)}</p>
+        <p className="text-xs mt-1">Factor: {factor.toFixed(2)} – {advice}</p>
       </div>
     );
   };
 
-  // -------------------- PITCH VISUALIZATION WITH DRAGGABLE POINT --------------------
+  // Pitch visualization (unchanged)
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -656,7 +675,6 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Recommendation function (unchanged)
   const getDetailedRecommendation = (selfKwh: number, size: string, country: string): string => {
     const hotCountries = ["Spain", "Portugal", "Italy", "Greece", "Turkey", "Cyprus", "Malta", "Egypt", "Morocco", "South Africa", "Mexico", "Australia", "Chile", "Peru", "India", "USA"];
     const isHot = hotCountries.includes(country);
@@ -700,8 +718,6 @@ const SolarPanelCalculator: React.FC = () => {
     return text;
   };
 
-  // Calculate optimal green for 30% export (blue = 30%)
-  // blue = 100 - green - red = 30 => green + red = 70 => green*(1+gridFactor) = 70 => green = 70/(1+gridFactor)
   const optimalGreen = 70 / (1 + gridFactor);
   const optimalGreenDisplay = optimalGreen.toFixed(0);
   const blueAtOptimal = (100 - optimalGreen - gridFactor * optimalGreen).toFixed(0);
@@ -783,9 +799,55 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== 2. INVERTER CONFIGURATION ==================== */}
+      {/* ==================== 2. MANUAL COST ESTIMATOR (NEW) ==================== */}
+      <div className="bg-amber-50 p-4 rounded-lg mb-6">
+        <h3 className="font-bold text-xl mb-3">2. Manual Panel Cost Estimator</h3>
+        <div className="flex flex-wrap items-center gap-4 mb-3">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={useManualPanelPrice} onChange={(e) => setUseManualPanelPrice(e.target.checked)} />
+            Override automatic panel price
+          </label>
+        </div>
+        {useManualPanelPrice ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Minimum price per panel (£)</label>
+              <input
+                type="number"
+                step="5"
+                min="200"
+                value={minPanelPrice}
+                onChange={(e) => setMinPanelPrice(Math.max(200, parseInt(e.target.value) || 275))}
+                className="border p-2 rounded w-full"
+              />
+              <p className="text-xs text-gray-500">Base cost for the first panel (e.g., PERC starts at £275).</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Incremental cost per additional panel (£)</label>
+              <input
+                type="number"
+                step="5"
+                min="0"
+                value={incrementalCostPerPanel}
+                onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))}
+                className="border p-2 rounded w-full"
+              />
+              <p className="text-xs text-gray-500">Extra cost for each panel beyond the first (e.g., £10).</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-600">Using catalogue prices from panel selection above.</p>
+        )}
+        <div className="mt-3 p-3 bg-white rounded-md">
+          <p><strong>Total panels:</strong> {totalPanelsCount}</p>
+          <p><strong>Panel cost per unit:</strong> £{useManualPanelPrice ? (totalPanelsCount > 0 ? (minPanelPrice + (totalPanelsCount - 1) * incrementalCostPerPanel).toFixed(2) : minPanelPrice.toFixed(2)) : panelPricePerUnitA.toFixed(2)}</p>
+          <p><strong>Total panels cost:</strong> £{totalPanelCost.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* ==================== 3. INVERTER CONFIGURATION ==================== */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">2. Inverter Configuration</h3>
+        <h3 className="font-bold text-xl mb-3">3. Inverter Configuration</h3>
         <p className="text-sm mb-3">Solar panels generate <strong>DC</strong>. The inverter converts it to <strong>AC</strong> for home use. Surplus energy can be <strong>exported to the grid</strong> or stored in <strong>batteries</strong> (if hybrid inverter).</p>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -820,20 +882,24 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== 3. COST ESTIMATE ==================== */}
+      {/* ==================== 4. OTHER INSTALLATION COSTS (unchanged) ==================== */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">3. Cost Estimate</h3>
-        <div className="mb-2"><div className="font-semibold">Roof A</div><div className="grid grid-cols-2 gap-2 text-sm ml-4"><span>Panels ({panelsA} × £{panelPricePerUnit}):</span><span className="text-right">£{panelCostA.toFixed(0)}</span><span>Mounting (proportional):</span><span className="text-right">£{(mountingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span><span>Scaffolding (proportional):</span><span className="text-right">£{(scaffoldingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span><span>Labour (proportional):</span><span className="text-right">£{(labourCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span><span>Electrical components (proportional):</span><span className="text-right">£{(electricalCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span></div></div>
-        {enableRoofB && (<div className="mt-2"><div className="font-semibold">Roof B</div><div className="grid grid-cols-2 gap-2 text-sm ml-4"><span>Panels ({panelsB} × £{panelPricePerUnit}):</span><span className="text-right">£{panelCostB.toFixed(0)}</span><span>Mounting (proportional):</span><span className="text-right">£{(mountingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span><span>Scaffolding (proportional):</span><span className="text-right">£{(scaffoldingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span><span>Labour (proportional):</span><span className="text-right">£{(labourCost * (panelsB / totalPanelsCount)).toFixed(0)}</span><span>Electrical components (proportional):</span><span className="text-right">£{(electricalCost * (panelsB / totalPanelsCount)).toFixed(0)}</span></div></div>)}
-        <div className="mt-2"><div className="font-semibold">Shared costs</div><div className="grid grid-cols-2 gap-2 text-sm ml-4"><span>Inverter (dual={dualInverter ? "yes" : "no"}):</span><span className="text-right">£{inverterCost.toFixed(0)}</span><span>Admin & DNO fees:</span><span className="text-right">£{adminCost.toFixed(0)}</span></div></div>
-        <div className="text-right font-bold mt-3 pt-2 border-t">Total installation cost: £{totalInstallCost.toFixed(0)}</div>
+        <h3 className="font-bold text-xl mb-3">4. Other Installation Costs</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div><label>Mounting system (£):</label><input type="number" step="10" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Scaffolding (£):</label><input type="number" step="10" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Electrical components (£):</label><input type="number" step="10" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Labour (MCS certified, £):</label><input type="number" step="10" value={labourCost} onChange={(e) => setLabourCost(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+          <div><label>Admin & DNO fees (£):</label><input type="number" step="10" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
+        </div>
         <div className="mt-3"><label className="flex items-center gap-2"><input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} /> Include annual maintenance (prorated from 3‑year costs)</label>
         {includeMaintenance && (<div className="grid md:grid-cols-2 gap-3 mt-2 text-sm"><div><label>Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div><div><label>Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div></div>)}</div>
+        <div className="text-right font-bold mt-3 pt-2 border-t">Total installation cost (panels + inverter + others): £{totalInstallCost.toFixed(0)}</div>
       </div>
 
-      {/* ==================== 4. FINANCIAL ANALYSIS ==================== */}
+      {/* ==================== 5. FINANCIAL ANALYSIS ==================== */}
       <div className="bg-green-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">4. Financial Analysis</h3>
+        <h3 className="font-bold text-xl mb-3">5. Financial Analysis</h3>
         <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-white/50 rounded">
           <div><label className="block text-sm font-medium">Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
           <div><label className="block text-sm font-medium">Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full" /></div>
@@ -855,7 +921,6 @@ const SolarPanelCalculator: React.FC = () => {
             }
           }}>
             <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
-            {/* Target marker for optimal point (blue = 30%) */}
             {bluePct !== 30 && (
               <div
                 className="absolute top-1/2 transform -translate-y-1/2 w-1 h-8 bg-yellow-400 rounded-full z-5"
