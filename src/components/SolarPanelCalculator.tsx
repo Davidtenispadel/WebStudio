@@ -749,14 +749,14 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="text-white">Country:</label>
-            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full bg-white">
+            <select value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value)} className="border p-2 rounded w-full bg-gray-100 text-gray-800">
               {countriesInsolation.map(c => <option key={c.name}>{c.name}</option>)}
             </select>
             <p className="text-xs text-gray-300 mt-1">🌦️ Climate factor adjusts production. Panel prices are country‑adjusted.</p>
           </div>
           <div>
             <label className="text-white">Region:</label>
-            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full bg-white">
+            <select value={region} onChange={(e) => setRegion(e.target.value as any)} className="border p-2 rounded w-full bg-gray-100 text-gray-800">
               <option value="south">South (higher irradiation)</option>
               <option value="north">North (lower irradiation)</option>
             </select>
@@ -767,8 +767,8 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="mb-4 border-b border-gray-600 pb-2">
           <div className="font-semibold text-blue-300">🏠 Roof A</div>
           <div className="grid md:grid-cols-2 gap-4 mt-2">
-            <div><label className="text-white">Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-white">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
-            <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-white" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-white" /></div></div>
+            <div><label className="text-white">Panel type:</label><select value={panelKeyA} onChange={(e) => setPanelKeyA(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-gray-100 text-gray-800">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
+            <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofALength} onChange={(e) => setRoofALength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-gray-100 text-gray-800" /><input type="number" step="0.5" value={roofAWidth} onChange={(e) => setRoofAWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-gray-100 text-gray-800" /></div></div>
             <div><label className="text-white">Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentA} onChange={(e) => setShadingPercentA(parseInt(e.target.value))} className="w-full" /><p className="text-sm text-gray-300">{shadingPercentA}% reduction</p></div>
             <div><button onClick={() => addObstacle('A')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesA.map((_, idx) => <button key={idx} onClick={() => removeObstacle('A', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
             <div><OrientationControl orientation={orientationDegA} onChange={setOrientationDegA} label="Orientation A" /></div>
@@ -790,8 +790,8 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="border-t border-gray-600 pt-3">
             <div className="font-semibold text-green-300">🏠 Roof B</div>
             <div className="grid md:grid-cols-2 gap-4 mt-2">
-              <div><label className="text-white">Panel type:</label><select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-white">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
-              <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-white" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-white" /></div></div>
+              <div><label className="text-white">Panel type:</label><select value={panelKeyB} onChange={(e) => setPanelKeyB(e.target.value as PanelKey)} className="border p-1 rounded w-full bg-gray-100 text-gray-800">{Object.entries(PANEL_CATALOG_BASE).map(([k, v]) => <option key={k} value={k}>{v.name} – {v.powerWp}Wp</option>)}</select></div>
+              <div><label className="text-white">Dimensions (m):</label><div className="flex gap-2"><input type="number" step="0.5" value={roofBLength} onChange={(e) => setRoofBLength(parseFloat(e.target.value))} placeholder="Length" className="border p-1 rounded w-1/2 bg-gray-100 text-gray-800" /><input type="number" step="0.5" value={roofBWidth} onChange={(e) => setRoofBWidth(parseFloat(e.target.value))} placeholder="Width" className="border p-1 rounded w-1/2 bg-gray-100 text-gray-800" /></div></div>
               <div><label className="text-white">Shading (%):</label><input type="range" min="0" max="50" step="1" value={shadingPercentB} onChange={(e) => setShadingPercentB(parseInt(e.target.value))} className="w-full" /><p className="text-sm text-gray-300">{shadingPercentB}% reduction</p></div>
               <div><button onClick={() => addObstacle('B')} className="bg-gray-500 text-white px-2 py-1 rounded text-sm">+ Add chimney</button>{obstaclesB.map((_, idx) => <button key={idx} onClick={() => removeObstacle('B', idx)} className="bg-red-500 text-white px-2 py-1 rounded text-sm ml-2">Remove {idx+1}</button>)}</div>
               <div><OrientationControl orientation={orientationDegB} onChange={setOrientationDegB} label="Orientation B" /></div>
@@ -825,12 +825,12 @@ const SolarPanelCalculator: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-white">Minimum price per panel (£)</label>
-              <input type="number" step="5" min="100" value={minPanelPrice} onChange={(e) => setMinPanelPrice(Math.max(100, parseInt(e.target.value) || 200))} className="border p-2 rounded w-full bg-white" />
+              <input type="number" step="5" min="100" value={minPanelPrice} onChange={(e) => setMinPanelPrice(Math.max(100, parseInt(e.target.value) || 200))} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
               <p className="text-xs text-gray-300">Base cost for the first panel.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-white">Incremental cost per additional panel (£)</label>
-              <input type="number" step="5" min="0" value={incrementalCostPerPanel} onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))} className="border p-2 rounded w-full bg-white" />
+              <input type="number" step="5" min="0" value={incrementalCostPerPanel} onChange={(e) => setIncrementalCostPerPanel(Math.max(0, parseInt(e.target.value) || 0))} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
               <p className="text-xs text-gray-300">Extra cost for each panel beyond the first.</p>
             </div>
           </div>
@@ -856,7 +856,7 @@ const SolarPanelCalculator: React.FC = () => {
                 setInverterType(e.target.value);
                 setManualInverterCost(null);
               }}
-              className="border p-2 rounded w-full bg-white"
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
             >
               {Object.entries(inverterPrices).map(([key, val]) => (<option key={key} value={key}>{val.name} – £{val.single} (dual: £{val.dual})</option>))}
             </select>
@@ -875,21 +875,21 @@ const SolarPanelCalculator: React.FC = () => {
               min="0"
               value={currentInverterCost}
               onChange={(e) => setManualInverterCost(parseFloat(e.target.value) || 0)}
-              className="border p-2 rounded w-full md:w-1/2 bg-white"
+              className="border p-2 rounded w-full md:w-1/2 bg-gray-100 text-gray-800"
             />
             <p className="text-xs text-gray-300">Auto‑calculated based on type and dual selection. Edit this field to override.</p>
           </div>
           <div className="col-span-2">
             <label className="block font-medium mb-1 text-white">Standby power (0‑60 W)</label>
             <div className="flex gap-2 items-center">
-              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded bg-white"><option value="preset">Preset</option><option value="custom">Custom</option></select>
+              <select value={standbySource} onChange={(e) => setStandbySource(e.target.value as any)} className="border p-1 rounded bg-gray-100 text-gray-800"><option value="preset">Preset</option><option value="custom">Custom</option></select>
               {standbySource === 'preset' ? (
-                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded bg-white">
+                <select value={standbyPowerW} onChange={(e) => setStandbyPowerW(parseInt(e.target.value))} className="border p-1 rounded bg-gray-100 text-gray-800">
                   <option value="0">0 W</option><option value="2">2 W</option><option value="3">3 W</option><option value="5">5 W</option>
                   <option value="10">10 W</option><option value="20">20 W</option><option value="40">40 W</option><option value="60">60 W</option>
                 </select>
               ) : (
-                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24 bg-white" />
+                <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24 bg-gray-100 text-gray-800" />
               )}
             </div>
             <p className="text-xs text-gray-300">Inverter consumption when not generating (night). Always drawn from grid.</p>
@@ -903,19 +903,19 @@ const SolarPanelCalculator: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-white">Mounting system (£)</label>
-            <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
+            <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
           <div>
             <label className="block text-sm font-medium text-white">Scaffolding (£)</label>
-            <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
+            <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
           <div>
             <label className="block text-sm font-medium text-white">Electrical components (£)</label>
-            <input type="number" step="10" min="0" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
+            <input type="number" step="10" min="0" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
           <div>
             <label className="block text-sm font-medium text-white">Admin & DNO fees (£)</label>
-            <input type="number" step="10" min="0" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-white" />
+            <input type="number" step="10" min="0" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
         </div>
         <div className="mt-3 border-t border-gray-600 pt-2">
@@ -928,8 +928,8 @@ const SolarPanelCalculator: React.FC = () => {
           </label>
           {includeMaintenance && (
             <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
-              <div><label className="text-white">Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
-              <div><label className="text-white">Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
+              <div><label className="text-white">Cleaning (every 3 years, £):</label><input type="number" step="10" value={cleaningCost3Years} onChange={(e) => setCleaningCost3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
+              <div><label className="text-white">Electrical inspection (every 3 years, £):</label><input type="number" step="10" value={electricalInspection3Years} onChange={(e) => setElectricalInspection3Years(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
             </div>
           )}
         </div>
@@ -939,9 +939,9 @@ const SolarPanelCalculator: React.FC = () => {
       <div className="bg-gray-800 rounded-lg p-4 mb-6">
         <h3 className="font-bold text-xl mb-3 text-white">5. Financial Analysis</h3>
         <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-gray-700 rounded">
-          <div><label className="block text-sm font-medium text-white">Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
-          <div><label className="block text-sm font-medium text-white">Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
-          <div><label className="block text-sm font-medium text-white">Standing charge (£/month)</label><input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-white" /></div>
+          <div><label className="block text-sm font-medium text-white">Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
+          <div><label className="block text-sm font-medium text-white">Export tariff (SEG) (£/kWh)</label><input type="number" step="0.001" value={exportTariff} onChange={(e) => setExportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
+          <div><label className="block text-sm font-medium text-white">Standing charge (£/month)</label><input type="number" step="0.5" value={standingCharge} onChange={(e) => setStandingCharge(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
         </div>
 
         <div className="mb-6">
