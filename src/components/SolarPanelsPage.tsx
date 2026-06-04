@@ -121,7 +121,14 @@ const SolarPanelsPage: React.FC = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-300 text-sm">
           <thead className="bg-gray-100">
-            <tr><th className="border p-2">Technology</th><th className="border p-2">1st year loss</th><th className="border p-2">Annual loss (years 2‑25)</th><th className="border p-2">Power at 25 years</th><th className="border p-2">Typical lifespan (years)</th></tr></thead>
+            <tr>
+              <th className="border p-2">Technology</th>
+              <th className="border p-2">1st year loss</th>
+              <th className="border p-2">Annual loss (years 2‑25)</th>
+              <th className="border p-2">Power at 25 years</th>
+              <th className="border p-2">Typical lifespan (years)</th>
+            </tr>
+          </thead>
           <tbody>
             <tr><td className="border p-2">TOPCon</td><td className="border p-2">1%</td><td className="border p-2">0.35‑0.40%</td><td className="border p-2">≈89‑91%</td><td className="border p-2">35‑40</td></tr>
             <tr><td className="border p-2">HJT</td><td className="border p-2">1%</td><td className="border p-2">0.25‑0.30%</td><td className="border p-2">≈91‑93%</td><td className="border p-2">35‑45</td></tr>
@@ -159,7 +166,9 @@ const SolarPanelsPage: React.FC = () => {
       {/* ============================================================ */}
       {/* 2. FUTURE TECHNOLOGIES (2026-2035) */}
       {/* ============================================================ */}
-      <h3 className="text-2xl font-semibold mt-10 mb-4">2. The near future: new solar technologies (2026‑2035)</h3>
+      <h3 className="text-2xl font-semibold mt-10 mb-4">
+        2. The near future: new solar technologies (2026‑2035)
+      </h3>
       <p className="mb-2">
         Although today's panels are already very efficient, science continues to advance. Here are
         the technologies that will reach rooftops in the coming years.
@@ -326,14 +335,60 @@ const SolarPanelsPage: React.FC = () => {
       <p className="mb-4">Annual savings + SEG income: <strong>£700‑£950</strong> → payback <strong>7‑10 years</strong>.</p>
 
       {/* ============================================================ */}
-      {/* 11. PERMITTED DEVELOPMENT & MCS (UK) */}
+      {/* 11. PERMITTED DEVELOPMENT & MCS (UK) - EXPANDED */}
       {/* ============================================================ */}
       <h3 className="text-2xl font-semibold mt-10 mb-4">11. Permitted development & MCS (UK)</h3>
+      <p className="mb-2">
+        In most cases, installing solar panels on a residential roof in the UK is considered
+        <strong> permitted development</strong>, meaning you do not need planning permission as long as
+        certain conditions are met. However, listed buildings and conservation areas have stricter rules.
+      </p>
       <ul className="list-disc pl-6 mb-4">
-        <li>Panels are generally permitted development if they project ≤200 mm from the roof slope and do not exceed the highest part of the roof.</li>
+        <li>Panels must project ≤200 mm from the roof slope.</li>
+        <li>They cannot exceed the highest part of the roof (excluding chimneys).</li>
         <li>Listed buildings and conservation areas require full planning permission.</li>
-        <li>MCS certification is needed to access the Smart Export Guarantee (SEG).</li>
+        <li>MCS certification is required to access the Smart Export Guarantee (SEG), which pays you for exported electricity.</li>
       </ul>
+
+      <div className="bg-green-50 p-4 rounded-md mb-4">
+        <p className="font-semibold">✅ Good news for most homeowners</p>
+        <p className="text-sm">
+          If your home is <strong>not a listed building</strong> and <strong>not in a conservation area</strong>,
+          you generally do not need to apply for planning permission. A reputable MCS‑certified installer will handle
+          all legalisation: notifying your Distribution Network Operator (DNO), submitting G98/G99 forms, and ensuring
+          the system complies with <strong>engineering recommendation G99</strong> for grid connection.
+        </p>
+        <p className="text-sm mt-2">
+          ⚡ <strong>Electrical safety is critical.</strong> Your installer must verify that the system has
+          <strong> anti‑islanding protection</strong> – it automatically shuts down during a grid power cut.
+          This prevents your panels from back‑feeding into the grid and endangering utility workers repairing the lines.
+        </p>
+      </div>
+
+      <div className="bg-yellow-50 p-4 rounded-md mb-4">
+        <p className="font-semibold">🏛️ If your home is listed or in a conservation area</p>
+        <p className="text-sm">
+          You <strong>will need full planning permission</strong>. Moreover, the installation must be sympathetic
+          to the architectural character of the building and its setting. This usually requires an
+          <strong> architect experienced in heritage projects</strong> to prepare drawings, a design statement,
+          and a planning application – in addition to a certified solar installer.
+        </p>
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded-md mb-4">
+        <p className="font-semibold">🔍 Check your property's constraints – official tools</p>
+        <p className="text-sm mb-2">Use these free government‑linked resources before you commit:</p>
+        <ul className="list-disc pl-6 text-sm">
+          <li><a href="https://planningconstraints.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">PlanningConstraints.com</a> – immediate check if your property has any planning constraints (listed status, conservation area, Article 4 direction).</li>
+          <li><a href="https://www.planwiser.co.uk/history" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">PlanWiser – History</a> – discover historical restrictions, tree preservation orders, or local design codes that may affect your roof.</li>
+          <li><a href="https://www.planningportal.co.uk/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Planning Portal (UK)</a> – official guide to permitted development rights and how to apply for full planning permission.</li>
+        </ul>
+        <p className="text-sm mt-2">
+          Still unsure? <strong>DB+ expert team</strong> can review your specific case. Use our
+          <a href="https://www.dbsdesigner.com/solar-calculator" target="_blank" rel="noopener noreferrer" className="text-blue-700 font-semibold underline ml-1"> contact form</a>
+          – we will help you understand what permits you need, whether you require an architect, and how to avoid costly mistakes before installation.
+        </p>
+      </div>
 
       {/* ============================================================ */}
       {/* 12. INTERACTIVE CALCULATOR */}
