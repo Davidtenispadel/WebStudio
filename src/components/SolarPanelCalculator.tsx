@@ -229,25 +229,16 @@ const SolarPanelCalculator: React.FC = () => {
   const [minPanelPrice, setMinPanelPrice] = useState(200);
   const [incrementalCostPerPanel, setIncrementalCostPerPanel] = useState(5);
 
-  // Simplified installation cost: single total editable value, then split by percentages
-  const [totalInstallCostExclPanelsInverter, setTotalInstallCostExclPanelsInverter] = useState(2700);
-  const costBreakdownPercent = {
-    mounting: 0.25,
-    scaffolding: 0.15,
-    labour: 0.40,
-    electrical: 0.10,
-    admin: 0.10,
-  };
-  const mountingCost = totalInstallCostExclPanelsInverter * costBreakdownPercent.mounting;
-  const scaffoldingCost = totalInstallCostExclPanelsInverter * costBreakdownPercent.scaffolding;
-  const labourCost = totalInstallCostExclPanelsInverter * costBreakdownPercent.labour;
-  const electricalCost = totalInstallCostExclPanelsInverter * costBreakdownPercent.electrical;
-  const adminCost = totalInstallCostExclPanelsInverter * costBreakdownPercent.admin;
-
-  // Inverter configuration
+  // Inverter configuration with manual override
   const [inverterType, setInverterType] = useState<string>('string_3_68');
-  const [inverterCost, setInverterCost] = useState(900);
+  const [manualInverterCost, setManualInverterCost] = useState<number | null>(null);
   const [dualInverter, setDualInverter] = useState(false);
+
+  // Individual installation costs (manual override allowed)
+  const [mountingCost, setMountingCost] = useState(450);
+  const [scaffoldingCost, setScaffoldingCost] = useState(600);
+  const [electricalCost, setElectricalCost] = useState(350);
+  const [adminCost, setAdminCost] = useState(175); // "Otros"
 
   // Maintenance
   const [includeMaintenance, setIncludeMaintenance] = useState(false);
@@ -315,10 +306,14 @@ const SolarPanelCalculator: React.FC = () => {
     if (forceDual) setDualInverter(true);
   }, [forceDual]);
 
-  useEffect(() => {
-    const price = inverterPrices[inverterType]?.single || 900;
-    setInverterCost(dualInverter ? (inverterPrices[inverterType]?.dual || price * 2) : price);
-  }, [inverterType, dualInverter]);
+  // Auto inverter cost based on selection
+  const autoInverterCost = () => {
+    const base = inverterPrices[inverterType]?.single || 900;
+    return dualInverter ? (inverterPrices[inverterType]?.dual || base * 2) : base;
+  };
+
+  // If manual cost not set, use auto; when inverter type or dual changes, update manual cost to auto (unless user has manually changed it? We'll reset only if manual cost is null or the user hasn't touched it. Simpler: always set manual cost to auto when type/dual changes, but allow user to override. That's fine.)
+  const currentInverterCost = manualInverterCost !== null ? manualInverterCost : autoInverterCost();
 
   const getPanelUnitPrice = (panelKey: PanelKey): number => {
     if (useManualPanelPrice) {
@@ -363,8 +358,9 @@ const SolarPanelCalculator: React.FC = () => {
   const seasonalA = prodA.seasonalKwh;
   const seasonalB = prodB.seasonalKwh;
 
-  const totalInstallCost = totalPanelCost + inverterCost + mountingCost + scaffoldingCost + labourCost + electricalCost + adminCost;
+  const totalInstallCost = totalPanelCost + currentInverterCost + mountingCost + scaffoldingCost + electricalCost + adminCost;
 
+  // Financial model (unchanged)
   const avgMonthlyGeneration = totalAnnualKwh / 12;
   const greenPct = selfConsumptionPercent;
   let redPct = gridFactor * greenPct;
@@ -491,7 +487,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // -------------------- ORIENTATION CONTROL WITH SLIDER --------------------
+  // Orientation control (same as before)
   const OrientationControl = ({ orientation, onChange, label }: { orientation: number; onChange: (v: number) => void; label: string }) => {
     const factor = getOrientationFactor(orientation);
     const getAdvice = (f: number): string => {
@@ -610,7 +606,7 @@ const SolarPanelCalculator: React.FC = () => {
     );
   };
 
-  // Pitch visualization
+  // Pitch visualization (unchanged)
   const PitchVisualization = ({ tilt, onChange, enabled, setEnabled, label }: any) => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -742,11 +738,12 @@ const SolarPanelCalculator: React.FC = () => {
   const optimalGreenDisplay = optimalGreen.toFixed(0);
   const blueAtOptimal = (100 - optimalGreen - gridFactor * optimalGreen).toFixed(0);
 
+  // -------------------- RENDER --------------------
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
         <button onClick={() => window.history.back()} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md">
-          ← Back to Technology
+          ← Back to Plan Your Project
         </button>
       </div>
       <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Single & Dual Roof</h2>
@@ -819,7 +816,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== 2. MANUAL PANEL COST OVERRIDE ==================== */}
+      {/* ==================== 2. PANEL COST CONFIGURATION ==================== */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">2. Panel Cost Configuration</h3>
         <div className="flex items-center gap-4 mb-3">
@@ -852,21 +849,41 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
       </div>
 
-      {/* ==================== 3. INVERTER CONFIGURATION ==================== */}
+      {/* ==================== 3. INVERTER CONFIGURATION (with manual override) ==================== */}
       <div className="bg-indigo-50 p-4 rounded-lg mb-6">
         <h3 className="font-bold text-xl mb-3">3. Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium">Inverter type & power:</label>
-            <select value={inverterType} onChange={(e) => setInverterType(e.target.value)} className="border p-2 rounded w-full">
+            <select
+              value={inverterType}
+              onChange={(e) => {
+                setInverterType(e.target.value);
+                // Reset manual cost to auto when type changes
+                setManualInverterCost(null);
+              }}
+              className="border p-2 rounded w-full"
+            >
               {Object.entries(inverterPrices).map(([key, val]) => (<option key={key} value={key}>{val.name} – £{val.single} (dual: £{val.dual})</option>))}
             </select>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="dualInverter" checked={dualInverter} onChange={(e) => !forceDual && setDualInverter(e.target.checked)} disabled={forceDual} />
-              <label htmlFor="dualInverter" className="text-sm">Use dual inverters {forceDual && <span className="text-red-600 ml-2">(Required)</span>}<br /><span className="text-xs text-gray-600">Price: £{inverterPrices[inverterType]?.dual || (inverterPrices[inverterType]?.single * 2)}</span></label>
+              <input type="checkbox" id="dualInverter" checked={dualInverter} onChange={(e) => { setDualInverter(e.target.checked); setManualInverterCost(null); }} disabled={forceDual} />
+              <label htmlFor="dualInverter" className="text-sm">Use dual inverters {forceDual && <span className="text-red-600 ml-2">(Required)</span>}<br /><span className="text-xs text-gray-600">Auto price: £{autoInverterCost()}</span></label>
             </div>
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium">Inverter cost (£) – manual override</label>
+            <input
+              type="number"
+              step="10"
+              min="0"
+              value={currentInverterCost}
+              onChange={(e) => setManualInverterCost(parseFloat(e.target.value) || 0)}
+              className="border p-2 rounded w-full md:w-1/2"
+            />
+            <p className="text-xs text-gray-500">Auto‑calculated based on type and dual selection. Edit this field to override.</p>
           </div>
           <div className="col-span-2">
             <label className="block font-medium mb-1">Standby power (0‑60 W)</label>
@@ -881,54 +898,39 @@ const SolarPanelCalculator: React.FC = () => {
                 <input type="number" min="0" max="60" step="1" value={customStandbyW} onChange={(e) => { setCustomStandbyW(parseInt(e.target.value)); setStandbyPowerW(parseInt(e.target.value)); }} className="border p-1 rounded w-24" />
               )}
             </div>
+            <p className="text-xs text-gray-500">Inverter consumption when not generating (night). Always drawn from grid.</p>
           </div>
         </div>
       </div>
 
-      {/* ==================== 4. INSTALLATION COST BREAKDOWN (SINGLE FIELD) ==================== */}
+      {/* ==================== 4. OTHER INSTALLATION COSTS (manual editable) ==================== */}
       <div className="bg-amber-50 p-4 rounded-lg mb-6">
-        <h3 className="font-bold text-xl mb-3">4. Installation Cost Breakdown</h3>
-        <div className="mb-4">
-          <label className="block text-sm font-medium">Total installation cost (excl. panels & inverter) – £</label>
-          <input type="number" step="50" min="500" value={totalInstallCostExclPanelsInverter} onChange={(e) => setTotalInstallCostExclPanelsInverter(Math.max(500, parseFloat(e.target.value) || 0))} className="border p-2 rounded w-full md:w-1/2" />
-          <p className="text-xs text-gray-500 mt-1">Auto‑split: mounting 25%, scaffolding 15%, labour 40%, electrical 10%, admin 10%.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border rounded p-2 bg-white">
-            <div className="font-semibold text-blue-700">Roof A (proportional)</div>
-            <div className="grid grid-cols-2 gap-1 text-sm">
-              <span>Mounting:</span><span className="text-right">£{(mountingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
-              <span>Scaffolding:</span><span className="text-right">£{(scaffoldingCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
-              <span>Labour:</span><span className="text-right">£{(labourCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
-              <span>Electrical:</span><span className="text-right">£{(electricalCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
-              <span>Admin:</span><span className="text-right">£{(adminCost * (panelsA / (totalPanelsCount || 1))).toFixed(0)}</span>
-            </div>
+        <h3 className="font-bold text-xl mb-3">4. Other Installation Costs</h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium">Mounting system (£)</label>
+            <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
           </div>
-          {enableRoofB && (
-            <div className="border rounded p-2 bg-white">
-              <div className="font-semibold text-green-700">Roof B (proportional)</div>
-              <div className="grid grid-cols-2 gap-1 text-sm">
-                <span>Mounting:</span><span className="text-right">£{(mountingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
-                <span>Scaffolding:</span><span className="text-right">£{(scaffoldingCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
-                <span>Labour:</span><span className="text-right">£{(labourCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
-                <span>Electrical:</span><span className="text-right">£{(electricalCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
-                <span>Admin:</span><span className="text-right">£{(adminCost * (panelsB / totalPanelsCount)).toFixed(0)}</span>
-              </div>
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium">Scaffolding (£)</label>
+            <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Electrical components (£)</label>
+            <input type="number" step="10" min="0" value={electricalCost} onChange={(e) => setElectricalCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Admin & DNO fees (£)</label>
+            <input type="number" step="10" min="0" value={adminCost} onChange={(e) => setAdminCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full" />
+          </div>
         </div>
         <div className="mt-3 border-t pt-2">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <span className="font-semibold">Total (excl. panels & inverter):</span><span className="text-right">£{totalInstallCostExclPanelsInverter.toFixed(0)}</span>
-            <span>+ Inverter:</span><span className="text-right">£{inverterCost.toFixed(0)}</span>
-            <span>+ Panels:</span><span className="text-right">£{totalPanelCost.toFixed(0)}</span>
-            <span className="font-bold">= Total system cost:</span><span className="text-right font-bold">£{totalInstallCost.toFixed(0)}</span>
-          </div>
+          <div className="text-right font-bold text-lg">Total installation cost (panels + inverter + others): £{totalInstallCost.toFixed(0)}</div>
         </div>
         <div className="mt-3">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={includeMaintenance} onChange={(e) => setIncludeMaintenance(e.target.checked)} />
-            Include annual maintenance
+            Include annual maintenance (prorated from 3‑year costs)
           </label>
           {includeMaintenance && (
             <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
@@ -980,7 +982,7 @@ const SolarPanelCalculator: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self‑consumed</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
+          <div className="bg-green-100 p-3 rounded-lg text-center"><p className="text-sm text-green-800 font-semibold">🌞 Self‑consumed (monthly)</p><p className="text-2xl font-bold text-green-700">{selfConsumedKwhMonthly.toFixed(1)} kWh</p></div>
           <div className="bg-red-100 p-3 rounded-lg text-center"><p className="text-sm text-red-800 font-semibold">🏭 Grid purchase</p><p className="text-2xl font-bold text-red-600">{gridPurchaseKwhMonthly.toFixed(1)} kWh</p></div>
           <div className="bg-blue-100 p-3 rounded-lg text-center"><p className="text-sm text-blue-800 font-semibold">💰 Exported</p><p className="text-2xl font-bold text-blue-600">{exportedKwhMonthly.toFixed(1)} kWh</p></div>
         </div>
