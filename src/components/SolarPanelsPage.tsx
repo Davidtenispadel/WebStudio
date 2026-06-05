@@ -32,7 +32,7 @@ const SolarPanelsPage: React.FC = () => {
       </style>
       <div className="text-black max-w-6xl mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-light mb-6">
-          <strong>Solar panels: complete technical guide for homeowners (2025‑2026)</strong>
+          <strong>Solar panels: complete technical guide for homeowners 2026</strong>
         </h2>
 
         <p className="text-lg mb-6">
