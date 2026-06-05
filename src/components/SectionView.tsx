@@ -1,7 +1,7 @@
 /*
  * SECTIONVIEW.TSX — Versión completa y funcional
- * - Technology: Green Energy (Solar panels muestra SolarPanelsPage)
- * - Technology: Tools (Solar Panel Layout redirige a /solar-calculator)
+ * - Home Insight: Green Energy (Solar panels muestra SolarPanelsPage)
+ * - Home Insight: Tools (Solar Panel Layout redirige a /solar-calculator)
  * - Iconos grandes (h-64)
  */
 
@@ -57,9 +57,9 @@ const WindTurbinesPlaceholder: React.FC = () => (
 );
 
 // ============================
-// CONFIGURACIÓN DE LOS NODOS DE TECHNOLOGY (iconos grandes)
+// CONFIGURACIÓN DE LOS NODOS DE HOME INSIGHT (iconos grandes)
 // ============================
-const technologyRootNodes: TechNode[] = [
+const homeInsightRootNodes: TechNode[] = [
   {
     id: "green-energy",
     title: "Green Energy",
@@ -169,8 +169,8 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Estados para navegación en Technology
-  const [currentTechNodes, setCurrentTechNodes] = useState<TechNode[]>(technologyRootNodes);
+  // Estados para navegación en Home Insight
+  const [currentTechNodes, setCurrentTechNodes] = useState<TechNode[]>(homeInsightRootNodes);
   const [techHistory, setTechHistory] = useState<TechNode[][]>([]);
   const [activeArticle, setActiveArticle] = useState<React.ReactNode | null>(null);
 
@@ -236,18 +236,19 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
+  // Home Insight: al entrar, reseteamos la navegación
   useEffect(() => {
-    if (displayedCategory.name === StudioSection.TECHNOLOGY) {
+    if (displayedCategory.name === 'Home Insight') {
       setStage("gallery");
       setShowGalleryItems(true);
-      setCurrentTechNodes(technologyRootNodes);
+      setCurrentTechNodes(homeInsightRootNodes);
       setTechHistory([]);
       setActiveArticle(null);
     }
   }, [displayedCategory.name]);
 
   useEffect(() => {
-    if (displayedCategory.name !== StudioSection.TECHNOLOGY) {
+    if (displayedCategory.name !== 'Home Insight') {
       setActiveArticle(null);
     }
   }, [displayedCategory.name]);
@@ -263,7 +264,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const isStructureSection = displayedCategory.name === StudioSection.STRUCTURE;
   const isBehindDBSection = displayedCategory.name === StudioSection.BEHIND_DB;
   const isProjectJourney = displayedCategory.name === StudioSection.PROJECT_JOURNEY;
-  const isTechnology = displayedCategory.name === StudioSection.TECHNOLOGY;
+  const isHomeInsight = displayedCategory.name === 'Home Insight';
 
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
@@ -398,7 +399,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
-  // ========== NAVEGACIÓN EN TECHNOLOGY ==========
+  // ========== NAVEGACIÓN EN HOME INSIGHT ==========
   const handleTechNodeClick = (node: TechNode) => {
     if (node.externalLink) {
       navigate(node.externalLink);
@@ -423,7 +424,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         setTechHistory(techHistory.slice(0, -1));
         setActiveArticle(null);
       } else {
-        setCurrentTechNodes(technologyRootNodes);
+        setCurrentTechNodes(homeInsightRootNodes);
         setActiveArticle(null);
       }
     } else if (techHistory.length > 0) {
@@ -453,7 +454,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) */}
+      {/* HEADER (Aesthetic A) - sin cambios relevantes */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -656,8 +657,8 @@ const SectionView: React.FC<SectionViewProps> = ({
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* SECCIÓN TECHNOLOGY */}
-              {isTechnology && (
+              {/* SECCIÓN HOME INSIGHT (iconos grandes) */}
+              {isHomeInsight && (
                 <div className="mb-12">
                   <div
                     className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mb-8"
@@ -730,13 +731,13 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {isProjectJourney && (
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
-                  {!isProjectJourney && !isTechnology && (
+                  {!isProjectJourney && !isHomeInsight && (
                     <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}
                 </div>
               )}
 
-              {!isProjectJourney && !isTechnology && (
+              {!isProjectJourney && !isHomeInsight && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-4 sm:px-10">
                     {displayedCategory.projects.map((project) => (
