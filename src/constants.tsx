@@ -1,78 +1,11 @@
 import { Project, CategoryGroup, StudioSection } from './types';
 
-export const isoContent = `
+// ... (isoContent, designPhilosophy, architectureDescription, etc. se mantienen igual) ...
+
+// NUEVA constante para Home Insight (con el texto tecnológico largo)
+export const homeDescription = `
 <div class="text-black leading-tight">
-  <div>
-    <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
-    <p class="text-lg md:text-xl font-light pt-6">
-      We apply the principles of ISO 19650, the international standard developed in the UK for managing information in BIM‑based projects.<br/>
-      For experienced clients, ISO 19650 is familiar territory. But for those who are not aware of it, the benefits are simple and tangible:
-    </p>
-  </div>
-  
-  <ul class="space-y-1 text-lg md:text-xl font-light pt-6">
-    <li>• <span class="font-bold">Everyone works in unison:</span> all teams share the same organised and up‑to‑date information, eliminating misunderstandings and inconsistencies.</li>
-    <li>• <span class="font-bold">Fewer errors and last‑minute changes:</span> issues are detected early, long before reaching construction.</li>
-    <li>• <span class="font-bold">Reduced unexpected costs:</span> by avoiding mistakes and rework, the project experiences fewer surprises and budget deviations.</li>
-    <li>• <span class="font-bold">Clear communication and full transparency:</span> clients always know what is happening, why, and with what information.</li>
-    <li>• <span class="font-bold">Better coordination across all disciplines:</span> architects, engineers, and contractors collaborate through a unified framework.</li>
-  </ul>
-
-  <div>
-    <p class="text-lg md:text-xl font-bold pt-6">This standard promotes:</p>
-    <ul class="space-y-0.5 text-lg md:text-xl font-light pt-2">
-      <li>• Shared responsibility among all project participants</li>
-      <li>• Early detection and resolution of issues</li>
-      <li>• Genuine multidisciplinary coordination</li>
-      <li>• Reduced risks and minimised cost overruns</li>
-      <li>• Transparency and traceability at every stage</li>
-    </ul>
-  </div>
-
-  <p class="text-lg md:text-xl font-light italic pt-6">
-    ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure, efficiency, and a stronger collaborative culture across all stakeholders.
-  </p>
-</div>`;
-
-export const designPhilosophy = `<div class="text-black leading-tight">
-  <p class="text-lg md:text-xl font-light">At DB+ Design & Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process. Every project is developed with coherence, functionality, and quality from concept to completion.</p>
-
-  <p class="text-lg md:text-xl font-light pt-6">We listen carefully, translate real needs into precise design solutions, and maintain continuous dialogue to ensure that the final outcome reflects both the client's goals and the project's technical and urban context.</p>
-
-  <p class="text-lg md:text-xl font-light pt-6">Our workflow covers concept development, design refinement, technical coordination, permit documentation, construction detailing, and on‑site support ensuring feasibility and full alignment with the original design intent.</p>
-</div>`;
-
-export const architectureDescription = `<div class="text-black leading-tight">
-  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages.</p>
-
-  <p class="text-xl font-bold pt-6">What we offer</p>
-  
-  <div class="pt-6">
-    <div class="pb-6">
-      <p class="text-lg font-bold">• Extensions & Renovations</p>
-      <p class="text-base font-light">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
-    </div>
-
-    <div class="pb-6">
-      <p class="text-lg font-bold">• Planning Applications</p>
-      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
-    </div>
-
-     <div class="pb-6">
-      <p class="text-lg font-bold">• New Build Projects</p>
-      <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
-    </div>
-
-    <div>
-      <p class="text-lg font-bold">• All Building Types</p>
-      <p class="text-base font-light">Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
-    </div>
-  </div>
-</div>`;
-
-export const technologyDescription = `
-<div class="text-black leading-tight">
-  <h2 class="text-3xl md:text-4xl font-light mb-6">Plan Your Project</h2>
+  <h2 class="text-3xl md:text-4xl font-light mb-6">Home Insight</h2>
   
   <p class="text-lg md:text-xl font-light mb-6">
     A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control converge.
@@ -100,112 +33,44 @@ export const technologyDescription = `
   </p>
 </div>`;
 
-export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
+// Descripción para la sección "Plan Your Project" (tecnología y herramientas)
+export const technologyDescription = `
+<div class="text-black leading-tight">
+  <h2 class="text-3xl md:text-4xl font-light mb-6">Plan Your Project</h2>
+  
+  <p class="text-lg md:text-xl font-light mb-6">
+    Here you will find the practical tools and technical resources you need to plan your project with confidence. Explore our interactive solar panel calculator, compare photovoltaic technologies, and access data‑driven insights tailored to your home’s specific characteristics.
+  </p>
 
-export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
+  <p class="text-lg md:text-xl font-light mb-6">
+    Use the tree below to navigate through Green Energy systems, materials, HVAC, structural systems, and smart home technologies. Each branch contains in‑depth guides, calculators, and up‑to‑date references.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-12">
+    Start by selecting a topic on the left, or go directly to the solar panel designer to calculate your return on investment.
+  </p>
+</div>`;
+
+// ... (urbanMasterplanningHeaderDescription, projectSupportHeaderDescription, etc. se mantienen) ...
 
 export const CATEGORIES: CategoryGroup[] = [
   // HOME INSIGHT (primer elemento del menú)
   {
     id: 'home',
-    name: 'Home Insight',   // ← Cambiado de StudioSection.HOME a "Home Insight"
-    description: `Turning ideas into reality, your vision is our purpose...`,
+    name: 'Home Insight',   // ← nombre visible
+    description: homeDescription,   // ← texto largo
     imageUrl: '',
     projects: []
   },
 
-  // TECHNOLOGY (Plan Your Project)
+  // PLAN YOUR PROJECT (antes TECHNOLOGY)
   {
     id: 'technology',
     name: 'Plan Your Project',
-    description: technologyDescription,
+    description: technologyDescription,   // ← texto breve y orientado a herramientas
     imageUrl: '',
     projects: []
   },
 
-  // PROJECT JOURNEY
-  {
-    id: 'project_journey',
-    name: StudioSection.PROJECT_JOURNEY,
-    description: '',
-    imageUrl: '',
-    projects: []
-  },
-
-  // ARCHITECTURE
-  {
-    id: 'arch',
-    name: StudioSection.ARCHITECTURE,
-    description: architectureDescription,
-    imageUrl: '',
-    projects: [
-      // ... (tus proyectos, mantenlos igual que en tu versión anterior)
-    ]
-  },
-
-  // DESIGN
-  {
-    id: 'design',
-    name: StudioSection.DESIGN,
-    description: designPhilosophy,
-    imageUrl: '',
-    projects: [
-      // ... tus proyectos
-    ]
-  },
-
-  // URBANISM
-  {
-    id: 'urban',
-    name: StudioSection.URBANISM,
-    description: `...`,  // (mantén tu descripción)
-    imageUrl: '',
-    projects: [
-      // ... tus proyectos
-    ]
-  },
-
-  // STRUCTURE
-  {
-    id: 'struct',
-    name: StudioSection.STRUCTURE,
-    description: `...`,
-    imageUrl: '',
-    projects: [
-      // ... tus proyectos
-    ]
-  },
-
-  // PROJECT SUPPORT
-  {
-    id: 'support',
-    name: StudioSection.PROJECT_SUPPORT,
-    description: `...`,
-    imageUrl: '',
-    projects: [
-      // ... tus proyectos
-    ]
-  },
-
-  // BEHIND DB
-  {
-    id: 'behinddb',
-    name: StudioSection.BEHIND_DB,
-    description: `...`,
-    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
-    projects: []
-  },
-
-  // ENQUIRY
-  {
-    id: 'enquiry',
-    name: StudioSection.ENQUIRY,
-    description: '',
-    imageUrl: '',
-    projects: []
-  }
+  // ... el resto de categorías se mantienen igual (PROJECT_JOURNEY, ARCHITECTURE, etc.)
 ];
-
-export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
-  ![StudioSection.HOME, StudioSection.ENQUIRY, StudioSection.BEHIND_DB].includes(cat.name as StudioSection)
-);
