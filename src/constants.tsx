@@ -105,10 +105,10 @@ export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Plan
 export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
 
 export const CATEGORIES: CategoryGroup[] = [
-  // HOME
+  // HOME INSIGHT (primer elemento del menú)
   {
     id: 'home',
-    name: StudioSection.HOME,
+    name: 'Home Insight',   // ← Cambiado de StudioSection.HOME a "Home Insight"
     description: `Turning ideas into reality, your vision is our purpose...`,
     imageUrl: '',
     projects: []
@@ -117,7 +117,7 @@ export const CATEGORIES: CategoryGroup[] = [
   // TECHNOLOGY (Plan Your Project)
   {
     id: 'technology',
-    name: 'Plan Your Project',   // ← Nombre visible en el menú
+    name: 'Plan Your Project',
     description: technologyDescription,
     imageUrl: '',
     projects: []
@@ -138,7 +138,9 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.ARCHITECTURE,
     description: architectureDescription,
     imageUrl: '',
-    projects: [ /* ... mantén tus proyectos existentes ... */ ]
+    projects: [
+      // ... (tus proyectos, mantenlos igual que en tu versión anterior)
+    ]
   },
 
   // DESIGN
@@ -147,66 +149,49 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.DESIGN,
     description: designPhilosophy,
     imageUrl: '',
-    projects: [ /* ... mantén tus proyectos ... */ ]
+    projects: [
+      // ... tus proyectos
+    ]
   },
 
   // URBANISM
   {
     id: 'urban',
     name: StudioSection.URBANISM,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
-      <ul class="pt-6 space-y-3 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
-        <li>• <span class="font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments</li>
-        <li>• <span class="font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing</li>
-        <li>• <span class="font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations</li>
-      </ul>
-    </div>`,
+    description: `...`,  // (mantén tu descripción)
     imageUrl: '',
-    projects: [ /* ... mantén tus proyectos ... */ ]
+    projects: [
+      // ... tus proyectos
+    ]
   },
 
   // STRUCTURE
   {
     id: 'struct',
     name: StudioSection.STRUCTURE,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
-      <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
-        <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
-        <li>• <span class="font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
-        <li>• <span class="font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
-      </ul>
-    </div>`,
+    description: `...`,
     imageUrl: '',
-    projects: [ /* ... mantén tus proyectos ... */ ]
+    projects: [
+      // ... tus proyectos
+    ]
   },
 
   // PROJECT SUPPORT
   {
     id: 'support',
     name: StudioSection.PROJECT_SUPPORT,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Through companies such as Sir Robert McAlpine (Logistics & Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio.</p>
-      <p class="text-lg md:text-xl font-light pt-6">We specify mobile and fixed cranes for material delivery, site goods and personnel hoists, and prepare all necessary project documentation for windows and curtain wall systems.</p>
-    </div>`,
+    description: `...`,
     imageUrl: '',
-    projects: [ /* ... mantén tus proyectos ... */ ]
+    projects: [
+      // ... tus proyectos
+    ]
   },
 
   // BEHIND DB
   {
     id: 'behinddb',
     name: StudioSection.BEHIND_DB,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence.</p>
-      <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla doesn't just design buildings. He bridges the gap between creative vision and technical reality. Qualified as an Architect at Master's level (EQF 7 / RQF 7), registered with ARB and RIBA, and holding a UK Master's in BIM Management from Middlesex University, David brings both depth and breadth to every project.</p>
-      <p class="text-lg md:text-xl font-light pt-6">That multidisciplinary foundation means he can develop MEP systems for any building type, produce structural pre‑design calculations, and offer specialised urban planning input – all in‑house. The result? Clear, efficient, well‑coordinated solutions where design intent, technical performance, and your goals move forward together.</p>
-    </div>`,
+    description: `...`,
     imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
     projects: []
   },
