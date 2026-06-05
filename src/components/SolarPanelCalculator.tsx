@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';  // ← Importado para la navegación
 
 // -------------------- DATA --------------------
 type CountryInsolation = { name: string; north: number; south: number };
@@ -180,6 +181,7 @@ const defaultPricesByCountry: { [key: string]: { importRate: number; exportRate:
 
 // -------------------- MAIN COMPONENT --------------------
 const SolarPanelCalculator: React.FC = () => {
+  const navigate = useNavigate(); // Para redirigir a Plan Your Project
   const calculatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -737,7 +739,10 @@ const SolarPanelCalculator: React.FC = () => {
   return (
     <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
       <div className="flex justify-start mb-4">
-        <button onClick={() => window.history.back()} className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md">
+        <button 
+          onClick={() => navigate('/')}  // Redirige a la página principal (Plan Your Project)
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md"
+        >
           ← Back to Plan Your Project
         </button>
       </div>
@@ -960,7 +965,12 @@ const SolarPanelCalculator: React.FC = () => {
           }}>
             <div className="absolute inset-0" style={{ background: `linear-gradient(to right, #22c55e 0%, #22c55e ${greenPct}%, #ef4444 ${greenPct}%, #ef4444 ${greenPct + redPct}%, #3b82f6 ${greenPct + redPct}%, #3b82f6 100%)` }} />
             {bluePct !== 30 && <div className="absolute top-1/2 transform -translate-y-1/2 w-1 h-8 bg-yellow-400 rounded-full z-5" style={{ left: `calc(${100 - 30}% - 0.5px)`, pointerEvents: "none" }} title="Optimal point (30% exported)" />}
-            <div className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10" style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }} onMouseDown={startDrag} onTouchStart={startDrag} />
+            <div
+              className="absolute top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full shadow-lg border-2 border-white cursor-grab active:cursor-grabbing z-10"
+              style={{ left: `calc(${greenPct + redPct}% - 12px)`, backgroundColor: getThumbColor() }}
+              onMouseDown={startDrag}
+              onTouchStart={startDrag}
+            />
             <div className="absolute inset-0 flex justify-between items-center px-2 text-white text-xs font-bold pointer-events-none">
               <span>{greenPct.toFixed(0)}%</span><span>{redPct.toFixed(1)}%</span><span>{bluePct.toFixed(1)}%</span>
             </div>
@@ -972,6 +982,9 @@ const SolarPanelCalculator: React.FC = () => {
           </div>
           <p className="text-xs text-gray-300 mt-2">
             📊 Grid purchase = {Math.round(gridFactor*100)}% of self‑consumed (max 55%). Move the circle until blue = 30%.
+          </p>
+          <p className="text-xs text-yellow-300 mt-1 italic">
+            🔵 The draggable point (between red and blue) represents the optimal sizing where your solar array is oversized by 30% to accommodate future increased demand (e.g., EV, heat pump).
           </p>
         </div>
 
