@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';  // ← Importado para la navegación
+import { useNavigate } from 'react-router-dom';
 
 // -------------------- DATA --------------------
 type CountryInsolation = { name: string; north: number; south: number };
@@ -181,7 +181,7 @@ const defaultPricesByCountry: { [key: string]: { importRate: number; exportRate:
 
 // -------------------- MAIN COMPONENT --------------------
 const SolarPanelCalculator: React.FC = () => {
-  const navigate = useNavigate(); // Para redirigir a Plan Your Project
+  const navigate = useNavigate();
   const calculatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -236,7 +236,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [manualInverterCost, setManualInverterCost] = useState<number | null>(null);
   const [dualInverter, setDualInverter] = useState(false);
 
-  // Individual installation costs (manual override allowed)
+  // Individual installation costs
   const [mountingCost, setMountingCost] = useState(450);
   const [scaffoldingCost, setScaffoldingCost] = useState(600);
   const [electricalCost, setElectricalCost] = useState(350);
@@ -737,19 +737,23 @@ const SolarPanelCalculator: React.FC = () => {
 
   // -------------------- RENDER --------------------
   return (
-    <div ref={calculatorRef} id="solar-calculator" className="max-w-7xl mx-auto p-6 bg-white rounded-xl shadow-lg scroll-mt-24">
-      <div className="flex justify-start mb-4">
+    <div
+      ref={calculatorRef}
+      id="solar-calculator"
+      className="w-full bg-white shadow-lg scroll-mt-24 md:max-w-7xl md:mx-auto md:p-6 md:rounded-xl p-0 rounded-none"
+    >
+      <div className="flex justify-start mb-4 px-4 md:px-0 pt-4 md:pt-0">
         <button 
-          onClick={() => navigate('/')}  // Redirige a la página principal (Plan Your Project)
+          onClick={() => navigate('/technology')}  // Redirige a la página de Technology (Plan Your Project)
           className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md"
         >
           ← Back to Plan Your Project
         </button>
       </div>
-      <h2 className="text-3xl font-light mb-6 text-center">Solar Panel Designer – Single & Dual Roof</h2>
+      <h2 className="text-3xl font-light mb-6 text-center px-4 md:px-0">Solar Panel Designer – Single & Dual Roof</h2>
 
       {/* Section 1: Location & Panel Count - Dark grey background */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">1. Location & Panel Count</h3>
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div>
@@ -817,7 +821,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
 
       {/* Section 2: Panel Cost Configuration - Dark grey background */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">2. Panel Cost Configuration</h3>
         <div className="flex items-center gap-4 mb-3">
           <label className="flex items-center gap-2 text-white">
@@ -850,7 +854,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
 
       {/* Section 3: Inverter Configuration - Dark grey background */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">3. Inverter Configuration</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -903,7 +907,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
 
       {/* Section 4: Other Installation Costs - Dark grey background */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">4. Other Installation Costs</h3>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -941,7 +945,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
 
       {/* Section 5: Financial Analysis - Dark grey background */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-6">
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">5. Financial Analysis</h3>
         <div className="grid md:grid-cols-3 gap-4 mb-4 p-3 bg-gray-700 rounded">
           <div><label className="block text-sm font-medium text-white">Import tariff (£/kWh)</label><input type="number" step="0.001" value={importTariff} onChange={(e) => setImportTariff(parseFloat(e.target.value))} className="border p-1 rounded w-full bg-gray-100 text-gray-800" /></div>
@@ -996,7 +1000,7 @@ const SolarPanelCalculator: React.FC = () => {
       </div>
 
       {/* Section 6: Analysis Results - Pure black background */}
-      <div className="bg-black text-white p-6 rounded-lg">
+      <div className="bg-black text-white p-6 rounded-lg mx-4 md:mx-0">
         <h3 className="font-bold text-2xl mb-4">📊 Analysis Results</h3>
         <div className="mb-6">
           <h4 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-3">1. Data analysis</h4>
