@@ -1,138 +1,244 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Project, CategoryGroup, StudioSection } from './types';
 
-interface TreeNode {
-  id: string;
-  name: string;
-  slug: string;
-  icon?: string;
-  children?: TreeNode[];
-}
+export const isoContent = `
+<div class="text-black leading-tight">
+  <div>
+    <h3 class="text-xl md:text-2xl font-bold">ISO 19650: Collaborative Work, Clear Information Management, and Fewer Surprises</h3>
+    <p class="text-lg md:text-xl font-light pt-6">
+      We apply the principles of ISO 19650, the international standard developed in the UK for managing information in BIM‑based projects.<br/>
+      For experienced clients, ISO 19650 is familiar territory. But for those who are not aware of it, the benefits are simple and tangible:
+    </p>
+  </div>
+  
+  <ul class="space-y-1 text-lg md:text-xl font-light pt-6">
+    <li>• <span class="font-bold">Everyone works in unison:</span> all teams share the same organised and up‑to‑date information, eliminating misunderstandings and inconsistencies.</li>
+    <li>• <span class="font-bold">Fewer errors and last‑minute changes:</span> issues are detected early, long before reaching construction.</li>
+    <li>• <span class="font-bold">Reduced unexpected costs:</span> by avoiding mistakes and rework, the project experiences fewer surprises and budget deviations.</li>
+    <li>• <span class="font-bold">Clear communication and full transparency:</span> clients always know what is happening, why, and with what information.</li>
+    <li>• <span class="font-bold">Better coordination across all disciplines:</span> architects, engineers, and contractors collaborate through a unified framework.</li>
+  </ul>
 
-const technologyData: TreeNode = {
-  id: 'Plan Your Project',
-  name: 'Plan Your Project',
-  slug: 'Plan Your Project',
-  children: [
-    {
-      id: 'green-energy',
-      name: 'Green Energy',
-      slug: 'Plan Your Project/green-energy',
-      children: [
-        { id: 'solar-panels', name: 'Solar panels', slug: 'Plan Your Project/green-energy/solar-panels' },
-        { id: 'solar', name: 'Solar Energy', slug: 'Plan Your Project/green-energy/solar' },
-        { id: 'wind', name: 'Wind Energy', slug: 'Plan Your Project/green-energy/wind' },
-        { id: 'geothermal', name: 'Geothermal', slug: 'Plan Your Project/green-energy/geothermal' },
-        { id: 'biomass', name: 'Biomass', slug: 'Plan Your Project/green-energy/biomass' },
-      ]
-    },
-    {
-      id: 'tools',
-      name: 'Tools',
-      slug: 'Plan Your Project/tools',
-      icon: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1780249527/Hero_horizontal_2560_d7r0ik.png',
-      children: [
-        {
-          id: 'solar-panel-layout',
-          name: 'Solar Panel Layout',
-          slug: 'solar-calculator',
-          icon: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1780249738/Icono_minimalista_pa_dufmt7.png',
-        }
-      ]
-    },
-    {
-      id: 'materials',
-      name: 'Materials & Insulation',
-      slug: 'technology/materials',
-    },
-    {
-      id: 'hvac',
-      name: 'HVAC Systems',
-      slug: 'technology/hvac',
-    },
-    {
-      id: 'structural',
-      name: 'Structural Systems',
-      slug: 'technology/structural',
-    },
-    {
-      id: 'smart-home',
-      name: 'Smart Home',
-      slug: 'technology/smart-home',
-    },
-    {
-      id: 'digital-twin',
-      name: 'Digital Twin',
-      slug: 'technology/digital-twin',
-    },
-  ]
-};
+  <div>
+    <p class="text-lg md:text-xl font-bold pt-6">This standard promotes:</p>
+    <ul class="space-y-0.5 text-lg md:text-xl font-light pt-2">
+      <li>• Shared responsibility among all project participants</li>
+      <li>• Early detection and resolution of issues</li>
+      <li>• Genuine multidisciplinary coordination</li>
+      <li>• Reduced risks and minimised cost overruns</li>
+      <li>• Transparency and traceability at every stage</li>
+    </ul>
+  </div>
 
-const TechnologyTree: React.FC<{ onNavigate?: (slug: string) => void }> = ({ onNavigate }) => {
-  const navigate = useNavigate();
-  // ✅ Cambiado: expandir el nodo raíz 'Plan Your Project' junto con 'green-energy' y 'tools'
-  const [expanded, setExpanded] = useState<Set<string>>(new Set(['Plan Your Project', 'green-energy', 'tools']));
+  <p class="text-lg md:text-xl font-light italic pt-6">
+    ISO 19650 is mandatory in public‑sector projects and highly advantageous in private developments, bringing structure, efficiency, and a stronger collaborative culture across all stakeholders.
+  </p>
+</div>`;
 
-  const toggle = (id: string) => {
-    setExpanded(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) newSet.delete(id);
-      else newSet.add(id);
-      return newSet;
-    });
-  };
+export const designPhilosophy = `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light">At DB+ Design & Management, we combine a clear architectural vision, close client collaboration, and a rigorous end‑to‑end design process. Every project is developed with coherence, functionality, and quality from concept to completion.</p>
 
-  const handleNodeClick = (slug: string) => {
-    if (slug === 'solar-calculator') {
-      navigate('/solar-calculator');
-    } else {
-      if (onNavigate) onNavigate(slug);
-    }
-  };
+  <p class="text-lg md:text-xl font-light pt-6">We listen carefully, translate real needs into precise design solutions, and maintain continuous dialogue to ensure that the final outcome reflects both the client's goals and the project's technical and urban context.</p>
 
-  const renderNode = (node: TreeNode, level = 0) => {
-    const hasChildren = !!(node.children && node.children.length);
-    const isExpanded = expanded.has(node.id);
-    const paddingLeft = level * 20;
+  <p class="text-lg md:text-xl font-light pt-6">Our workflow covers concept development, design refinement, technical coordination, permit documentation, construction detailing, and on‑site support ensuring feasibility and full alignment with the original design intent.</p>
+</div>`;
 
-    return (
-      <div key={node.id} className="mb-1">
-        <div
-          className="flex items-center py-2 px-2 hover:bg-gray-100 rounded cursor-pointer"
-          style={{ paddingLeft: `${paddingLeft + 8}px` }}
-        >
-          {hasChildren && (
-            <button onClick={() => toggle(node.id)} className="w-5 mr-1 text-gray-600">
-              {isExpanded ? '▼' : '▶'}
-            </button>
-          )}
-          {!hasChildren && <span className="w-5 mr-1"></span>}
-          {node.icon && (
-            <img src={node.icon} alt={node.name} className="w-5 h-5 mr-2" loading="lazy" />
-          )}
-          <span
-            onClick={() => handleNodeClick(node.slug)}
-            className="text-base font-medium hover:text-red-600"
-          >
-            {node.name}
-          </span>
-        </div>
-        {hasChildren && isExpanded && (
-          <div className="ml-4 border-l border-gray-200">
-            {node.children!.map(child => renderNode(child, level + 1))}
-          </div>
-        )}
-      </div>
-    );
-  };
+export const architectureDescription = `<div class="text-black leading-tight">
+  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages.</p>
 
-  return (
-    <div className="bg-white p-4 rounded shadow">
-      <h3 className="text-xl font-semibold mb-3">Project Explorer</h3>
-      {renderNode(technologyData)}
-      <p className="text-xs text-gray-400 mt-3">Click any topic – content will grow here.</p>
+  <p class="text-xl font-bold pt-6">What we offer</p>
+  
+  <div class="pt-6">
+    <div class="pb-6">
+      <p class="text-lg font-bold">• Extensions & Renovations</p>
+      <p class="text-base font-light">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
     </div>
-  );
-};
 
-export default TechnologyTree;
+    <div class="pb-6">
+      <p class="text-lg font-bold">• Planning Applications</p>
+      <p class="text-base font-light">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
+    </div>
+
+     <div class="pb-6">
+      <p class="text-lg font-bold">• New Build Projects</p>
+      <p class="text-base font-light">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
+    </div>
+
+    <div>
+      <p class="text-lg font-bold">• All Building Types</p>
+      <p class="text-base font-light">Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
+    </div>
+  </div>
+</div>`;
+
+// ==================== DESCRIPCIÓN PARA HOME INSIGHT (todo el contenido técnico) ====================
+export const homeInsightDescription = `
+<div class="text-black leading-tight">
+  <h2 class="text-3xl md:text-4xl font-light mb-6">Home Insight</h2>
+  
+  <p class="text-lg md:text-xl font-light mb-6">
+    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control converge.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    This section is a living technical resource that will grow over time. Here you will find the latest advances, backed by scientific research and real‑world evidence, along with practical tools to make informed decisions. Above all, we will guide you to obtain the key information you need – from analysing your energy consumption and assessing your roof orientation, to calculating the return on investment of a photovoltaic installation or choosing the most efficient systems for your climate control.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    Our goal is to help you identify what your project requires based on your real needs, your budget, and the specific conditions of your home. We will provide clear data, objective comparisons, and a roadmap so you can plan with confidence.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    <strong>How can you improve your home, and what tools do you have to understand the real scope of those improvements?</strong><br />
+    Here you will discover practical methods to evaluate each intervention: from energy efficiency simulations to return-on-investment calculators. You will learn to prioritise actions, quantify the impact on your bills and comfort, and avoid decisions based on assumptions.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    As architects, we will continually update this space with new regulations, emerging research, and real-case insights. We want you to understand not only what works, but exactly how you can transform your home and measure the benefit of every step you take.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-6">
+    <strong>Practical tools:</strong> Explore our interactive solar panel calculator, compare photovoltaic technologies, and access data‑driven insights tailored to your home’s specific characteristics. Use the tree below to navigate through Green Energy systems, materials, HVAC, structural systems, and smart home technologies. Each branch contains in‑depth guides, calculators, and up‑to‑date references.
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-12">
+    Let’s build knowledge together, branch by branch.
+  </p>
+</div>`;
+
+export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
+export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
+
+export const CATEGORIES: CategoryGroup[] = [
+  // ==================== HOME INSIGHT (primer elemento, con tecnología) ====================
+  {
+    id: 'home-insight',
+    name: 'Home Insight',
+    description: homeInsightDescription,
+    imageUrl: '',
+    projects: []
+  },
+
+  // ==================== PROJECT JOURNEY ====================
+  {
+    id: 'project_journey',
+    name: StudioSection.PROJECT_JOURNEY,
+    description: '',
+    imageUrl: '',
+    projects: []
+  },
+
+  // ==================== ARCHITECTURE ====================
+  {
+    id: 'arch',
+    name: StudioSection.ARCHITECTURE,
+    description: architectureDescription,
+    imageUrl: '',
+    projects: [
+      // ... (tus proyectos de arquitectura, mantenlos igual que en tu versión original)
+      {
+        id: 'a8',
+        title: 'House Extension',
+        location: '',
+        year: '',
+        imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768934375/House_Extension_1_msdczt.png',
+        category: StudioSection.ARCHITECTURE,
+        description: 'A house extension that wraps around the existing structure...',
+        additionalImages: [/* ... */]
+      },
+      // ... resto de proyectos
+    ]
+  },
+
+  // ==================== DESIGN ====================
+  {
+    id: 'design',
+    name: StudioSection.DESIGN,
+    description: designPhilosophy,
+    imageUrl: '',
+    projects: [
+      { id: 'd1', title: '', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1768940290/Irsham_dumpx3.png', category: StudioSection.DESIGN },
+      { id: 'd2', title: 'Modern Architectural Vision', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769246957/Edit_the_previous_im_f8flks.png', category: StudioSection.DESIGN },
+      { id: 'd4', title: '', location: '', year: '', imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1769696194/Police_Station_2_p4fw4q.png', category: StudioSection.DESIGN }
+    ]
+  },
+
+  // ==================== URBANISM ====================
+  {
+    id: 'urban',
+    name: StudioSection.URBANISM,
+    description: `<div class="text-black leading-tight">
+      <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
+      <p class="text-xl font-bold pt-6">Our approach:</p>
+      <ul class="pt-6 space-y-3 text-base md:text-lg font-light">
+        <li>• <span class="font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
+        <li>• <span class="font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments</li>
+        <li>• <span class="font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing</li>
+        <li>• <span class="font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations</li>
+      </ul>
+    </div>`,
+    imageUrl: '',
+    projects: [
+      // ... tus proyectos de urbanismo
+    ]
+  },
+
+  // ==================== STRUCTURE ====================
+  {
+    id: 'struct',
+    name: StudioSection.STRUCTURE,
+    description: `<div class="text-black leading-tight">
+      <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
+      <p class="text-xl font-bold pt-6">Our approach:</p>
+      <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
+        <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
+        <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
+        <li>• <span class="font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
+        <li>• <span class="font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
+      </ul>
+    </div>`,
+    imageUrl: '',
+    projects: [
+      // ... tus proyectos de estructura
+    ]
+  },
+
+  // ==================== PROJECT SUPPORT ====================
+  {
+    id: 'support',
+    name: StudioSection.PROJECT_SUPPORT,
+    description: `<div class="text-black leading-tight">
+      <p class="text-lg md:text-xl font-light">Through companies such as Sir Robert McAlpine (Logistics & Engineering), Astraseal and Littleman Contracts, the practice has provided precise technical support across a diverse portfolio.</p>
+      <p class="text-lg md:text-xl font-light pt-6">We specify mobile and fixed cranes for material delivery, site goods and personnel hoists, and prepare all necessary project documentation for windows and curtain wall systems.</p>
+    </div>`,
+    imageUrl: '',
+    projects: [
+      // ... tus proyectos de project support
+    ]
+  },
+
+  // ==================== BEHIND DB ====================
+  {
+    id: 'behinddb',
+    name: StudioSection.BEHIND_DB,
+    description: `<div class="text-black leading-tight">
+      <p class="text-lg md:text-xl font-light">Meet the vision behind DB+ Studio – where architectural clarity meets technical excellence.</p>
+      <p class="text-lg md:text-xl font-light pt-6">Founder and Lead Architect David Bonilla doesn't just design buildings. He bridges the gap between creative vision and technical reality. Qualified as an Architect at Master's level (EQF 7 / RQF 7), registered with ARB and RIBA, and holding a UK Master's in BIM Management from Middlesex University, David brings both depth and breadth to every project.</p>
+      <p class="text-lg md:text-xl font-light pt-6">That multidisciplinary foundation means he can develop MEP systems for any building type, produce structural pre‑design calculations, and offer specialised urban planning input – all in‑house. The result? Clear, efficient, well‑coordinated solutions where design intent, technical performance, and your goals move forward together.</p>
+    </div>`,
+    imageUrl: 'https://res.cloudinary.com/dwealmbfi/image/upload/v1770747614/David_B_cytcwp.jpg',
+    projects: []
+  },
+
+  // ==================== ENQUIRY ====================
+  {
+    id: 'enquiry',
+    name: StudioSection.ENQUIRY,
+    description: '',
+    imageUrl: '',
+    projects: []
+  }
+];
+
+export const CORE_SERVICE_CATEGORIES = CATEGORIES.filter(cat => 
+  !['Enquiry', 'Behind DB+'].includes(cat.name)
+);
