@@ -120,20 +120,18 @@ const Header: React.FC<HeaderProps> = ({
             <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
-          {/* DESKTOP NAV - Solo las categorías, sin botón fijo "Technology" */}
+          {/* DESKTOP NAV - Mostrar todas las categorías excepto Enquiry */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
             {CATEGORIES.map((category) => {
-              // Ocultar Home y (opcionalmente) Technology si aún existe en constants
-              if (category.name === 'Home') return null;
-              // Si quieres ocultar también una posible categoría "Technology" (por si no la has renombrado)
-              // if (category.name === 'Technology') return null;
+              // Ocultamos 'Enquiry' (no se muestra en el menú)
+              if (category.name === 'Enquiry') return null;
               return (
                 <button
                   key={category.id}
                   onClick={() => handleMenuItemClick(category.name)}
                   className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
                 >
-                  {category.name === 'Project Journey' ? 'Plan Your Project' : category.name}
+                  {category.name}
                 </button>
               );
             })}
@@ -185,7 +183,7 @@ const Header: React.FC<HeaderProps> = ({
 
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
           {CATEGORIES.map((category) => {
-            if (category.name === 'Home') return null;
+            if (category.name === 'Enquiry') return null;
             return (
               <button
                 key={category.id}
@@ -195,7 +193,7 @@ const Header: React.FC<HeaderProps> = ({
                   WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
                 }}
               >
-                {category.name === 'Project Journey' ? 'Plan Your Project' : category.name}
+                {category.name}
               </button>
             );
           })}
