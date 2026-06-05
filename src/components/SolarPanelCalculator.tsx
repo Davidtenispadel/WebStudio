@@ -744,10 +744,10 @@ const SolarPanelCalculator: React.FC = () => {
     >
       <div className="flex justify-start mb-4 px-4 md:px-0 pt-4 md:pt-0">
         <button 
-          onClick={() => navigate('/technology')}  // Redirige a la página de Technology (Plan Your Project)
+          onClick={() => navigate('/')}  // Redirige a Home Insight (ruta raíz)
           className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md"
         >
-          ← Back to Plan Your Project
+          ← Back to Home Insight
         </button>
       </div>
       <h2 className="text-3xl font-light mb-6 text-center px-4 md:px-0">Solar Panel Designer – Single & Dual Roof</h2>
