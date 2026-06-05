@@ -1,7 +1,8 @@
 /*
- * SECTIONVIEW.TSX — Versión completa con TechnologyTree para Home Insight
- * - Home Insight muestra el árbol de tecnología (TechnologyTree)
- * - El resto de secciones (Architecture, Design, etc.) se mantienen igual
+ * SECTIONVIEW.TSX — Versión completa y funcional
+ * - Home Insight: Green Energy (Solar panels muestra SolarPanelsPage)
+ * - Home Insight: Tools (Solar Panel Layout redirige a /solar-calculator)
+ * - Iconos grandes (h-64)
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -25,7 +26,85 @@ import {
 } from "../constants";
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
-import TechnologyTree from "./TechnologyTree"; // 👈 Importamos el árbol
+import SolarPanelsPage from "./SolarPanelsPage";
+
+// ============================
+// TIPO PARA NODOS DE TECNOLOGÍA
+// ============================
+type TechNode = {
+  id: string;
+  title: string;
+  imageUrl: string;
+  description?: string;
+  children?: TechNode[];
+  articleComponent?: React.ReactNode;
+  externalLink?: string;
+};
+
+// Componentes placeholder
+const BatteriesPlaceholder: React.FC = () => (
+  <div className="p-8 bg-white rounded-2xl shadow-xl">
+    <h2 className="text-3xl font-light mb-4">Batteries</h2>
+    <p className="text-gray-600">Information about energy storage systems will appear here soon.</p>
+  </div>
+);
+
+const WindTurbinesPlaceholder: React.FC = () => (
+  <div className="p-8 bg-white rounded-2xl shadow-xl">
+    <h2 className="text-3xl font-light mb-4">Wind Turbines</h2>
+    <p className="text-gray-600">Information about wind energy systems will appear here soon.</p>
+  </div>
+);
+
+// ============================
+// CONFIGURACIÓN DE LOS NODOS DE HOME INSIGHT
+// ============================
+const homeInsightRootNodes: TechNode[] = [
+  {
+    id: "green-energy",
+    title: "Green Energy",
+    imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780075454/Greenenergy_lxlahz.png",
+    description: "Renewable energy systems for homes",
+    children: [
+      {
+        id: "solar-panels",
+        title: "Solar Panels",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780076711/66681c59-9afc-41e2-be6f-ef0f5d5af64d.png",
+        description: "Photovoltaic technology",
+        articleComponent: <SolarPanelsPage />,
+      },
+      {
+        id: "batteries",
+        title: "Batteries",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780078524/bater%C3%ADa_verde_con_ed_a8rxo8.png",
+        description: "Energy storage systems",
+        articleComponent: <BatteriesPlaceholder />,
+      },
+      {
+        id: "wind-turbines",
+        title: "Wind Turbines",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780079324/wind_Turbines_oft0q6.png",
+        description: "Wind energy generation",
+        articleComponent: <WindTurbinesPlaceholder />,
+      },
+    ],
+  },
+  {
+    id: "tools",
+    title: "Tools",
+    imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249527/Hero_horizontal_2560_d7r0ik.png",
+    description: "Utilities and calculators",
+    children: [
+      {
+        id: "solar-panel-layout",
+        title: "Solar Panel Layout",
+        imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780249738/Icono_minimalista_pa_dufmt7.png",
+        description: "Calculate ROI and design your solar array",
+        externalLink: "/solar-calculator",
+      },
+    ],
+  },
+];
 
 // ============================
 // TIPOS Y CONSTANTES PARA EL RESTO DE LA APP
@@ -90,6 +169,11 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Estados para navegación en Home Insight
+  const [currentTechNodes, setCurrentTechNodes] = useState<TechNode[]>(homeInsightRootNodes);
+  const [techHistory, setTechHistory] = useState<TechNode[][]>([]);
+  const [activeArticle, setActiveArticle] = useState<React.ReactNode | null>(null);
+
   // ========== ANIMACIONES (Aesthetic A) ==========
   const resetSequence = () => {
     setShowDB(false);
@@ -152,7 +236,22 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
-  // No necesitamos efectos específicos para "Home Insight" porque usaremos TechnologyTree
+  // Home Insight: al entrar, reseteamos la navegación
+  useEffect(() => {
+    if (displayedCategory.name === 'Home Insight') {
+      setStage("gallery");
+      setShowGalleryItems(true);
+      setCurrentTechNodes(homeInsightRootNodes);
+      setTechHistory([]);
+      setActiveArticle(null);
+    }
+  }, [displayedCategory.name]);
+
+  useEffect(() => {
+    if (displayedCategory.name !== 'Home Insight') {
+      setActiveArticle(null);
+    }
+  }, [displayedCategory.name]);
 
   if (!isActive) return null;
 
@@ -169,7 +268,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   const scaleTarget = typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
 
-  // ========== SUBIDA DE ARCHIVOS (Enquiry) - misma lógica que antes ==========
+  // ========== SUBIDA DE ARCHIVOS (Enquiry) ==========
   const uploadFiles = (files: File[]) => {
     if (!files?.length) return;
     setIsUploading(true);
@@ -300,6 +399,41 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
+  // ========== NAVEGACIÓN EN HOME INSIGHT ==========
+  const handleTechNodeClick = (node: TechNode) => {
+    if (node.externalLink) {
+      navigate(node.externalLink);
+      return;
+    }
+    if (node.articleComponent) {
+      setActiveArticle(node.articleComponent);
+      setTechHistory([...techHistory, currentTechNodes]);
+      setCurrentTechNodes([]);
+    } else if (node.children && node.children.length > 0) {
+      setTechHistory([...techHistory, currentTechNodes]);
+      setCurrentTechNodes(node.children);
+      setActiveArticle(null);
+    }
+  };
+
+  const handleTechGoBack = () => {
+    if (activeArticle) {
+      const previousNodes = techHistory[techHistory.length - 1];
+      if (previousNodes) {
+        setCurrentTechNodes(previousNodes);
+        setTechHistory(techHistory.slice(0, -1));
+        setActiveArticle(null);
+      } else {
+        setCurrentTechNodes(homeInsightRootNodes);
+        setActiveArticle(null);
+      }
+    } else if (techHistory.length > 0) {
+      const previousNodes = techHistory[techHistory.length - 1];
+      setCurrentTechNodes(previousNodes);
+      setTechHistory(techHistory.slice(0, -1));
+    }
+  };
+
   // ============================
   // RENDER PRINCIPAL
   // ============================
@@ -320,7 +454,7 @@ const SectionView: React.FC<SectionViewProps> = ({
         </div>
       )}
 
-      {/* HEADER (Aesthetic A) - sin cambios */}
+      {/* HEADER (Aesthetic A) */}
       <div
         className={`fixed z-[40] flex items-center transition-all ${
           stage === "intro"
@@ -445,18 +579,85 @@ const SectionView: React.FC<SectionViewProps> = ({
       >
         <div className={isProjectJourney ? "w-full h-full" : "max-w-7xl mx-auto px-4 sm:px-10 pb-48"}>
           {isEnquiry ? (
-            // SECCIÓN ENQUIRY (completa, igual que antes)
+            // SECCIÓN ENQUIRY (completa, como estaba)
             <div className="max-w-7xl mx-auto relative z-[50] px-10 py-20">
-              {/* ... (todo el contenido del formulario de enquiry sin cambios) ... */}
-              {/* Por brevedad no repito el código, pero debe ser idéntico al original */}
+              <div className="relative z-[60]">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+                  <aside className="bg-neutral-900/95 text-white rounded-2xl p-8 md:p-10 shadow-2xl border border-white/10">
+                    <h3 className="text-3xl md:text-4xl font-light leading-tight">Contact<br />Information</h3>
+                    <div className="mt-8 space-y-6 text-white/80">
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Office</div><div className="mt-2 text-base leading-6">108 Kestrel Road, Corby,<br />Northamptonshire, England</div></div>
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Telephone</div><div className="mt-2 text-base">+44 07955018937</div></div>
+                      <div><div className="text-[11px] tracking-[0.25em] text-white/50 uppercase">Email</div><a href="mailto:db@dbsdesigner.com" className="mt-2 block text-base text-red-400 hover:text-red-300">db@dbsdesigner.com</a></div>
+                    </div>
+                  </aside>
+                  <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
+                    <form onSubmit={handleEnquirySubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Full Name</label><input type="text" required placeholder="John Doe" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} disabled={isSending} /></div>
+                        <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Email Address</label><input type="email" required placeholder="john@example.com" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} disabled={isSending} /></div>
+                      </div>
+                      <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Project Brief</label><textarea required placeholder="Tell us about your architectural vision..." className="w-full h-44 bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} disabled={isSending} /></div>
+                      <div>
+                        <label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-3">Attachments</label>
+                        <div className={["rounded-xl border-2 border-dashed cursor-pointer", dragActive ? "border-red-500 bg-red-500/10" : "border-white/20 bg-neutral-700/40", "p-6 md:p-8 transition-colors"].join(" ")} onClick={() => !isSending && fileInputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }} onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }} onDrop={onDropFiles}>
+                          <div className="flex flex-col items-center text-center gap-3 pointer-events-none">
+                            <div className="p-3 rounded-full bg-white/10 border border-white/10"><Upload className="w-6 h-6 text-white/80" /></div>
+                            <div className="text-sm"><span className="text-white">Drag &amp; drop files here</span> <span className="text-white/60">or</span> <span className="text-red-400 underline">click to browse</span></div>
+                            <div className="text-xs text-white/50">Blueprints, PDFs, images… Large files supported.</div>
+                            {(isUploading || items.some((it) => it.status === "uploading")) && <div className="text-[11px] uppercase tracking-[0.25em] text-white/60 mt-2">Uploading…</div>}
+                          </div>
+                          <input ref={fileInputRef} type="file" className="hidden" multiple onChange={onSelectFiles} disabled={isSending} />
+                        </div>
+                        {items.length > 0 && (
+                          <div className="mt-5 space-y-3">
+                            {items.map((it) => (
+                              <div key={it.id} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="mt-0.5">{it.status === "uploaded" ? <CheckCircle className="w-4 h-4 text-green-400" /> : it.status === "error" ? <AlertCircle className="w-4 h-4 text-red-400" /> : <FileIcon className="w-4 h-4 text-white/70" />}</div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2"><div className="text-sm text-white/90 truncate">{it.name}</div><div className="text-[11px] text-white/50">· {formatBytes(it.size)}</div></div>
+                                    {it.status === "uploading" && (<div className="mt-2"><div className="w-full bg-white/10 rounded-full h-2 overflow-hidden"><div className="h-2 bg-red-500 transition-all" style={{ width: `${it.progress}%` }} /></div><div className="text-[11px] text-white/60 mt-1">{it.progress}%</div></div>)}
+                                    {it.status === "error" && <div className="text-xs text-red-400 mt-2">{it.error || "Upload failed"}</div>}
+                                    {it.status === "uploaded" && it.url && (<div className="mt-2 flex items-center gap-3"><a href={it.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs text-red-300 hover:text-red-200 underline"><Link2 className="w-3.5 h-3.5" />Open file</a><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(it.url!); } catch {} }} className="text-xs text-white/60 hover:text-white">Copy URL</button></div>)}
+                                  </div>
+                                  <button type="button" onClick={() => removeItem(it.id)} className="text-white/40 hover:text-red-400 transition-colors"><CloseIcon className="w-4 h-4" /></button>
+                                </div>
+                              </div>
+                            ))}
+                            {items.some((x) => x.status === "error") && (<div className="pt-1"><button type="button" onClick={clearErrored} className="text-xs text-white/60 hover:text-white underline">Clear failed uploads</button></div>)}
+                          </div>
+                        )}
+                      </div>
+                      <button type="submit" disabled={isSending || isUploading} className="flex items-center gap-6 mt-2 bg-white text-black px-10 py-4 rounded-full shadow-2xl hover:bg-red-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span className="text-xs font-bold tracking-[0.4em] uppercase">{isSending ? "Transmitting..." : isUploading ? "Uploading…" : "Submit to db+"}</span>
+                        {isSending || isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                      </button>
+                      {enquiryStep >= 4 && (
+                        <div className="py-16 flex flex-col items-center text-center space-y-6">
+                          <div className="p-5 bg-white rounded-full"><CheckCircle className="w-14 h-14 text-red-600" /></div>
+                          <div><h4 className="text-2xl font-light text-white">Vision Received</h4><p className="text-white/70 mt-2 leading-tight max-w-md">Your project details and documents have been submitted to <span className="text-red-400">db@dbsdesigner.com</span>. We will review your vision and contact you shortly.</p></div>
+                        </div>
+                      )}
+                    </form>
+                  </section>
+                </div>
+              </div>
             </div>
           ) : isBehindDBSection ? (
             <div className={`max-w-6xl mx-auto relative z-10 text-white pt-20 transition-opacity duration-1000 px-4 sm:px-10 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* ... Behind DB sin cambios ... */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start w-full">
+                <div className="md:col-span-1 p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
+                  <div className="text-base md:text-lg lg:text-xl font-light leading-tight text-justify" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                </div>
+                <div className="md:col-span-1 w-full overflow-hidden shadow-2xl rounded-2xl border border-white/10">
+                  <img src={displayedCategory.imageUrl} alt={displayedCategory.name} className="w-full h-auto object-cover" style={{ aspectRatio: typeof window !== "undefined" && window.innerWidth < 768 ? "1/1" : "unset" }} loading="lazy" />
+                </div>
+              </div>
             </div>
           ) : (
             <div className={`transition-opacity duration-1000 ${showGalleryItems ? "opacity-100" : "opacity-0"}`}>
-              {/* SECCIÓN HOME INSIGHT: muestra el árbol de tecnología */}
+              {/* SECCIÓN HOME INSIGHT (iconos grandes) */}
               {isHomeInsight && (
                 <div className="mb-12">
                   <div
@@ -464,7 +665,55 @@ const SectionView: React.FC<SectionViewProps> = ({
                     dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
                   />
                   <div className="px-4 sm:px-10">
-                    <TechnologyTree />
+                    {(techHistory.length > 0 || activeArticle) && (
+                      <button
+                        onClick={handleTechGoBack}
+                        className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 mb-6 transition-colors"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back</span>
+                      </button>
+                    )}
+
+                    {activeArticle && (
+                      <div className="mt-4">
+                        {activeArticle}
+                      </div>
+                    )}
+
+                    {!activeArticle && (
+                      <>
+                        {currentTechNodes.length === 0 ? (
+                          <p className="text-gray-500">No hay elementos en este nivel.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                            {currentTechNodes.map((node) => (
+                              <div
+                                key={node.id}
+                                onClick={() => handleTechNodeClick(node)}
+                                className="group cursor-pointer transition-transform duration-300 hover:scale-105"
+                              >
+                                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow">
+                                  <div className="w-full overflow-hidden bg-gray-50 flex items-center justify-center p-4" style={{ minHeight: '16rem' }}>
+                                    <img
+                                      src={node.imageUrl}
+                                      alt={node.title}
+                                      className="w-auto h-64 object-contain group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                  </div>
+                                  <div className="p-4 text-center">
+                                    <h4 className="font-medium text-lg text-gray-800">{node.title}</h4>
+                                    {node.description && (
+                                      <p className="text-sm text-gray-500 mt-1">{node.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               )}
