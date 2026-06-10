@@ -3,7 +3,8 @@ import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
-import SolarPanelCalculator from './components/SolarPanelCalculator'; // <-- Importamos la calculadora
+import SolarPanelCalculator from './components/SolarPanelCalculator';
+import BatteriesPage from './pages/BatteriesPage'; // <-- NUEVA IMPORTACIÓN
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 
@@ -12,25 +13,32 @@ const App: React.FC = () => {
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
 
-  // Comprobar si estamos en la ruta de la calculadora
+  // Comprobar rutas especiales
   const isCalculatorRoute = window.location.pathname === '/solar-calculator';
+  const isBatteriesRoute = window.location.pathname === '/batteries'; // <-- NUEVA RUTA
+
+  // Si estamos en la ruta de baterías, renderizamos la página completa de baterías
+  if (isBatteriesRoute) {
+    return <BatteriesPage />;
+  }
+
+  // Si estamos en la ruta de la calculadora, renderizamos solo la calculadora
+  if (isCalculatorRoute) {
+    return <SolarPanelCalculator />;
+  }
 
   /* ------------------------
-     CATEGORY SYNC (solo si no estamos en la calculadora)
+     CATEGORY SYNC (solo si no estamos en rutas especiales)
   ------------------------ */
   useEffect(() => {
-    if (!isCalculatorRoute) {
-      setActiveCategory(CATEGORIES[currentCategoryIndex]);
-    }
-  }, [currentCategoryIndex, isCalculatorRoute]);
+    setActiveCategory(CATEGORIES[currentCategoryIndex]);
+  }, [currentCategoryIndex]);
 
   // Efecto de depuración (opcional)
   useEffect(() => {
-    if (!isCalculatorRoute) {
-      console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
-      console.log("ACTIVE CATEGORY:", activeCategory.name);
-    }
-  }, [activeCategory, isCalculatorRoute]);
+    console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
+    console.log("ACTIVE CATEGORY:", activeCategory.name);
+  }, [activeCategory]);
 
   /* ------------------------
      CUSTOM CURSOR (se mantiene)
@@ -63,10 +71,9 @@ const App: React.FC = () => {
   }, []);
 
   /* ------------------------
-     NAVIGATION HANDLERS (solo si no estamos en calculadora)
+     NAVIGATION HANDLERS
   ------------------------ */
   const handleNavClick = useCallback((sectionName: string) => {
-    if (isCalculatorRoute) return; // No hacer nada si estamos en la calculadora
     console.log("NAV CLICK:", sectionName);
     console.log("MATCHING:", CATEGORIES.map(c => c.name));
 
@@ -80,22 +87,20 @@ const App: React.FC = () => {
       setCurrentCategoryIndex(index);
       setSelectedProject(null);
     }
-  }, [isCalculatorRoute]);
+  }, []);
 
   const handleGoHome = useCallback(() => {
-    if (isCalculatorRoute) return;
     setCurrentCategoryIndex(0);
     setSelectedProject(null);
-  }, [isCalculatorRoute]);
+  }, []);
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
-      if (isCalculatorRoute) return;
       if (activeCategory.name !== StudioSection.STRUCTURE) {
         setSelectedProject(project);
       }
     },
-    [activeCategory.name, isCalculatorRoute]
+    [activeCategory.name]
   );
 
   /* ------------------------
@@ -105,11 +110,6 @@ const App: React.FC = () => {
   const isDarkBackground =
     activeCategory.name === StudioSection.ENQUIRY ||
     activeCategory.name === StudioSection.HOME;
-
-  // Si estamos en la ruta de la calculadora, renderizamos solo la calculadora
-  if (isCalculatorRoute) {
-    return <SolarPanelCalculator />;
-  }
 
   // Renderizado normal del portfolio
   return (
