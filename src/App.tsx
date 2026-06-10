@@ -4,7 +4,7 @@ import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
 import SolarPanelCalculator from './components/SolarPanelCalculator';
-import BatteriesPage from './pages/BatteriesPage'; // <-- NUEVA IMPORTACIÓN
+import BatteriesPage from './components/BatteriesPage'; // <-- NUEVA IMPORTACIÓN
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
 
