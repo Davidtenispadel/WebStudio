@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // <-- NUEVA IMPORTACIÓN
 import { CATEGORIES } from '../constants';
 import { StudioSection } from '../types';
 
@@ -14,6 +15,7 @@ const Header: React.FC<HeaderProps> = ({
   onGoHomeClick,
   isDarkBackground,
 }) => {
+  const navigate = useNavigate(); // <-- NUEVO HOOK
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
@@ -62,9 +64,17 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
+  // Manejar clic en categorías del portfolio
   const handleMenuItemClick = (section: string) => {
     playClickSound();
     onNavClick(section);
+    setIsMenuOpen(false);
+  };
+
+  // Manejar clic en rutas independientes (Batteries, Solar Calculator)
+  const handleSpecialRouteClick = (path: string) => {
+    playClickSound();
+    navigate(path);
     setIsMenuOpen(false);
   };
 
@@ -120,10 +130,10 @@ const Header: React.FC<HeaderProps> = ({
             <span className="text-2xl font-thin text-gray-400">+</span>
           </div>
 
-          {/* DESKTOP NAV - Mostrar todas las categorías excepto Enquiry */}
+          {/* DESKTOP NAV - Mostrar categorías + rutas especiales */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
+            {/* Categorías del portfolio */}
             {CATEGORIES.map((category) => {
-              // Ocultamos 'Enquiry' (no se muestra en el menú)
               if (category.name === 'Enquiry') return null;
               return (
                 <button
@@ -135,6 +145,25 @@ const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
+            
+            {/* Separador visual (opcional) */}
+            <span className="text-gray-300">|</span>
+            
+            {/* Ruta especial: Solar Calculator */}
+            <button
+              onClick={() => handleSpecialRouteClick('/solar-calculator')}
+              className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+            >
+              Solar Calculator
+            </button>
+            
+            {/* Ruta especial: Batteries */}
+            <button
+              onClick={() => handleSpecialRouteClick('/batteries')}
+              className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+            >
+              Batteries
+            </button>
           </nav>
 
           {/* Botón hamburguesa móvil */}
@@ -182,6 +211,7 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
+          {/* Categorías del portfolio */}
           {CATEGORIES.map((category) => {
             if (category.name === 'Enquiry') return null;
             return (
@@ -197,6 +227,26 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             );
           })}
+          
+          {/* Separador visual en menú móvil */}
+          <div className="border-t border-gray-200 my-2"></div>
+          
+          {/* Ruta especial: Solar Calculator */}
+          <button
+            onClick={() => handleSpecialRouteClick('/solar-calculator')}
+            className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
+          >
+            Solar Calculator
+          </button>
+          
+          {/* Ruta especial: Batteries */}
+          <button
+            onClick={() => handleSpecialRouteClick('/batteries')}
+            className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
+          >
+            Batteries
+          </button>
+          
           <div style={{ height: isLandscape ? 15 : 20 }} />
         </nav>
       </div>
