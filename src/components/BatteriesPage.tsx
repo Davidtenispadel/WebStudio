@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './BatteriesPage.css'; // o tu sistema de estilos (Tailwind, CSS Modules, etc.)
+import './BatteriesPage.css'; // Opcional - ajusta a tu sistema de estilos
 
 const BatteriesPage: React.FC = () => {
   return (
     <div className="batteries-page">
-      {/* Header / Navegación - igual que en SolarPanelPage */}
+      {/* Header con navegación */}
       <header className="page-header">
-        <Link to="/" className="back-link">← Back</Link>
+        <Link to="/" className="back-link">← Back to Portfolio</Link>
         <h1>Batteries for Solar Panels</h1>
         <p className="subtitle">Energy storage systems · Smart automation · BIM integration · Future technologies</p>
       </header>
@@ -61,7 +61,7 @@ const BatteriesPage: React.FC = () => {
           <p>A 10 kWh battery that cost upwards of $10,000 a decade ago might now be installed for a third of that price. This dramatic drop, combined with rising electricity prices, has made solar-plus-battery systems a financially sound investment.</p>
         </section>
 
-        {/* SECCIÓN 3: TECNOLOGÍAS ACTUALES - TABLA */}
+        {/* SECCIÓN 3: TECNOLOGÍAS ACTUALES */}
         <section className="tech-section">
           <h2>3. Solar Battery Technologies Today: Which One is "Más en Boga"?</h2>
           
@@ -159,7 +159,7 @@ const BatteriesPage: React.FC = () => {
           </div>
         </section>
 
-        {/* SECCIÓN 6: AUTOMATIZACIÓN - VACIAR BATERÍAS */}
+        {/* SECCIÓN 6: AUTOMATIZACIÓN - VACIAR BATERÍAS CUANDO LLEGA SOL O VIENTO */}
         <section className="automation-section">
           <h2>6. Consumption Automation: Emptying Batteries When the Sun or Wind Returns</h2>
           
@@ -185,7 +185,7 @@ const BatteriesPage: React.FC = () => {
           </div>
         </section>
 
-        {/* SECCIÓN 7: DSM / PRECIO */}
+        {/* SECCIÓN 7: DSM - CARGAR CUANDO LA ENERGÍA ES MÁS BARATA */}
         <section className="dsm-section">
           <h2>7. Demand-Side Management (DG/DSM): Charging When Energy is Cheapest</h2>
           
@@ -230,7 +230,7 @@ const BatteriesPage: React.FC = () => {
           </div>
         </section>
 
-        {/* SECCIÓN 9: RECOMENDACIONES */}
+        {/* SECCIÓN 9: RECOMENDACIONES PRÁCTICAS */}
         <section className="recommendations-section">
           <h2>9. Practical Advice for Your Home</h2>
           <ol>
