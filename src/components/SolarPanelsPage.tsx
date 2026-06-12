@@ -1,13 +1,13 @@
+
 import React from 'react';
 import SolarPanelCalculator from './SolarPanelCalculator';
+import { ChevronRight } from "lucide-react";
 
 const SolarPanelsPage: React.FC = () => {
   return (
     <>
-      {/* Estilos para la barra de desplazamiento más ancha */}
       <style>
         {`
-          /* Para navegadores WebKit (Chrome, Edge, Safari) */
           ::-webkit-scrollbar {
             width: 16px;
             height: 16px;
@@ -23,14 +23,15 @@ const SolarPanelsPage: React.FC = () => {
           ::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
           }
-          /* Para Firefox */
           * {
             scrollbar-width: auto;
             scrollbar-color: #c1c1c1 #f1f1f1;
           }
         `}
       </style>
+
       <div className="text-black max-w-6xl mx-auto px-4">
+
         <h2 className="text-3xl md:text-4xl font-light mb-6">
           <strong>Solar panels: complete technical guide for homeowners 2026</strong>
         </h2>
@@ -485,6 +486,51 @@ const SolarPanelsPage: React.FC = () => {
           Use the tool below to define your roof dimensions, select the panel type, and add obstacles such as chimneys. It complies with UK MCS clearance requirements (400 mm from edges and ridge, 20 mm gap between panels) and provides a 3D preview. It will also estimate the necessary costs and profitability based on your current or projected energy consumption. You will be able to determine how long it will take to see a return on your investment, as well as understand what system capacity your demand can support, whether based on current or anticipated usage.
         </p>
         <SolarPanelCalculator />
+
+        {/* 🔥 NUEVO BLOQUE (AQUÍ ESTÁ EL ÚNICO CAMBIO REAL) */}
+
+        <div className="mt-16 max-w-4xl mx-auto p-8 bg-black/90 text-white rounded-2xl shadow-2xl border border-white/10">
+
+          <h3 className="text-2xl md:text-3xl font-light mb-4">
+            Your results are just the starting point
+          </h3>
+
+          <p className="text-white/80 mb-6 leading-relaxed">
+            This tool provides a simplified estimation based on general assumptions.
+            Every property is different, and factors such as roof orientation,
+            shading, structural constraints and system configuration can significantly
+            affect the final performance and return.
+          </p>
+
+          <p className="text-white/80 mb-8 leading-relaxed">
+            We help you turn this estimation into a complete strategy —
+            including layout optimisation, system selection and accurate
+            financial analysis tailored to your home.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+
+            <button
+              onClick={() =>
+                document.getElementById("enquiry")?.scrollIntoView({
+                  behavior: "smooth"
+                })
+              }
+              className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
+            >
+              Get full analysis
+              <ChevronRight className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => window.location.href = "mailto:db@dbsdesigner.com"}
+              className="border border-white/30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-black transition-all"
+            >
+              Contact directly
+            </button>
+
+          </div>
+        </div>
 
         {/* ============================================================ */}
         {/* 13. BIBLIOGRAPHY */}
