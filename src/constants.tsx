@@ -5,7 +5,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CategoryGroup, Project, StudioSection } from "../types";
-import ProjectCard from "./ProjectCard";
 import {
   ChevronRight,
   CheckCircle,
