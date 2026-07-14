@@ -17,7 +17,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import ProjectJourney from "./ProjectJourney";
-import SolarPanelsPage from "./SolarPanelsPage";
+import SolarPanelsPage from './components/SolarPanelsPage';
 
 // ✅ NUEVO TEXTO OPTIMIZADO
 const homeInsightDescription = `
