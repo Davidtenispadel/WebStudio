@@ -1,47 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
-import SolarPanelCalculator from './components/SolarPanelCalculator';
-import BatteriesPage from './components/BatteriesPage'; // <-- NUEVA IMPORTACIÓN
 import { CATEGORIES } from './constants';
 import { Project, CategoryGroup, StudioSection } from './types';
+import { PATH_TO_SECTION, SECTION_TO_PATH } from './routes';
 
-const App: React.FC = () => {
+const Studio: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState<CategoryGroup>(CATEGORIES[0]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Comprobar rutas especiales
-  const isCalculatorRoute = window.location.pathname === '/solar-calculator';
-  const isBatteriesRoute = window.location.pathname === '/batteries'; // <-- NUEVA RUTA
+  // La categoría activa se deriva de la URL, no de un estado interno
+  const activeCategory: CategoryGroup = React.useMemo(() => {
+    const sectionName = PATH_TO_SECTION[location.pathname] ?? CATEGORIES[0].name;
+    return CATEGORIES.find(cat => cat.name === sectionName) ?? CATEGORIES[0];
+  }, [location.pathname]);
 
-  // Si estamos en la ruta de baterías, renderizamos la página completa de baterías
-  if (isBatteriesRoute) {
-    return <BatteriesPage />;
-  }
-
-  // Si estamos en la ruta de la calculadora, renderizamos solo la calculadora
-  if (isCalculatorRoute) {
-    return <SolarPanelCalculator />;
-  }
-
-  /* ------------------------
-     CATEGORY SYNC (solo si no estamos en rutas especiales)
-  ------------------------ */
   useEffect(() => {
-    setActiveCategory(CATEGORIES[currentCategoryIndex]);
-  }, [currentCategoryIndex]);
-
-  // Efecto de depuración (opcional)
-  useEffect(() => {
-    console.log("CATEGORIES ORDER:", CATEGORIES.map(c => c.name));
     console.log("ACTIVE CATEGORY:", activeCategory.name);
   }, [activeCategory]);
 
   /* ------------------------
-     CUSTOM CURSOR (se mantiene)
+     CUSTOM CURSOR (sin cambios)
   ------------------------ */
   useEffect(() => {
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
@@ -71,28 +54,18 @@ const App: React.FC = () => {
   }, []);
 
   /* ------------------------
-     NAVIGATION HANDLERS
+     NAVIGATION HANDLERS (ahora navegan de verdad)
   ------------------------ */
   const handleNavClick = useCallback((sectionName: string) => {
-    console.log("NAV CLICK:", sectionName);
-    console.log("MATCHING:", CATEGORIES.map(c => c.name));
-
-    const index = CATEGORIES.findIndex(
-      cat => cat.name.trim().toLowerCase() === sectionName.trim().toLowerCase()
-    );
-
-    console.log("FOUND INDEX:", index);
-
-    if (index !== -1) {
-      setCurrentCategoryIndex(index);
-      setSelectedProject(null);
-    }
-  }, []);
+    const path = SECTION_TO_PATH[sectionName] ?? '/';
+    navigate(path);
+    setSelectedProject(null);
+  }, [navigate]);
 
   const handleGoHome = useCallback(() => {
-    setCurrentCategoryIndex(0);
+    navigate('/');
     setSelectedProject(null);
-  }, []);
+  }, [navigate]);
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
@@ -103,15 +76,10 @@ const App: React.FC = () => {
     [activeCategory.name]
   );
 
-  /* ------------------------
-     BACKGROUNDS
-  ------------------------ */
-  const isHome = activeCategory.name === StudioSection.HOME;
+  const isHome = location.pathname === '/';
   const isDarkBackground =
-    activeCategory.name === StudioSection.ENQUIRY ||
-    activeCategory.name === StudioSection.HOME;
+    activeCategory.name === StudioSection.ENQUIRY || isHome;
 
-  // Renderizado normal del portfolio
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
@@ -155,5 +123,7 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+export default Studio;
 
 export default App;
