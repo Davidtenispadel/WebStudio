@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Menu } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // <-- NUEVA IMPORTACIÓN
 import { CATEGORIES } from '../constants';
 import { StudioSection } from '../types';
 
@@ -15,7 +14,6 @@ const Header: React.FC<HeaderProps> = ({
   onGoHomeClick,
   isDarkBackground,
 }) => {
-  const navigate = useNavigate(); // <-- NUEVO HOOK
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
@@ -24,7 +22,6 @@ const Header: React.FC<HeaderProps> = ({
   
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // Detectar orientación
   useEffect(() => {
     const checkOrientation = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
@@ -34,7 +31,6 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
-  // Sonido clic
   useEffect(() => {
     if (typeof window !== 'undefined') {
       clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
@@ -64,17 +60,9 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
-  // Manejar clic en categorías del portfolio
   const handleMenuItemClick = (section: string) => {
     playClickSound();
     onNavClick(section);
-    setIsMenuOpen(false);
-  };
-
-  // Manejar clic en rutas independientes (Batteries, Solar Calculator)
-  const handleSpecialRouteClick = (path: string) => {
-    playClickSound();
-    navigate(path);
     setIsMenuOpen(false);
   };
 
@@ -116,7 +104,11 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header
-        className="fixed top-0 left-0 w-full bg-white/40 backdrop-blur-md border-b border-black/[0.05]"
+        className={`fixed top-0 left-0 w-full backdrop-blur-md border-b transition-colors duration-500 ${
+          isDarkBackground
+            ? 'bg-black/50 border-white/10'
+            : 'bg-white/40 border-black/[0.05]'
+        }`}
         style={{ zIndex: 9999 }}
       >
         <div className="max-w-7xl mx-auto px-10 h-24 flex items-center justify-between">
@@ -126,44 +118,21 @@ const Header: React.FC<HeaderProps> = ({
             onClick={handleDbPlusLogoClick}
             aria-label="Go to home page"
           >
-            <span className="text-3xl font-light tracking-tighter text-black">DB</span>
-            <span className="text-2xl font-thin text-gray-400">+</span>
+            <span className={`text-3xl font-light tracking-tighter transition-colors ${isDarkBackground ? 'text-white' : 'text-black'}`}>DB</span>
+            <span className={`text-2xl font-thin transition-colors ${isDarkBackground ? 'text-white/50' : 'text-gray-400'}`}>+</span>
           </div>
 
-          {/* DESKTOP NAV - Mostrar categorías + rutas especiales */}
+          {/* DESKTOP NAV - todas las categorías, incluida Enquiry */}
           <nav className="hidden md:flex items-center gap-10 text-[12px] tracking-[0.15em] font-light">
-            {/* Categorías del portfolio */}
-            {CATEGORIES.map((category) => {
-              if (category.name === 'Enquiry') return null;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => handleMenuItemClick(category.name)}
-                  className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-                >
-                  {category.name}
-                </button>
-              );
-            })}
-            
-            {/* Separador visual (opcional) */}
-            <span className="text-gray-300">|</span>
-            
-            {/* Ruta especial: Solar Calculator */}
-            <button
-              onClick={() => handleSpecialRouteClick('/solar-calculator')}
-              className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-            >
-              Solar Calculator
-            </button>
-            
-            {/* Ruta especial: Batteries */}
-            <button
-              onClick={() => handleSpecialRouteClick('/batteries')}
-              className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
-            >
-              Batteries
-            </button>
+            {CATEGORIES.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => handleMenuItemClick(category.name)}
+                className={`${navLinkColorClass} transition-all hover:scale-105 active:scale-95`}
+              >
+                {category.name === StudioSection.ENQUIRY ? 'Contact' : category.name}
+              </button>
+            ))}
           </nav>
 
           {/* Botón hamburguesa móvil */}
@@ -172,7 +141,7 @@ const Header: React.FC<HeaderProps> = ({
             onClick={handleMenuButtonClick}
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6 text-black" />
+            <Menu className={`w-6 h-6 transition-colors ${isDarkBackground ? 'text-white' : 'text-black'}`} />
           </button>
         </div>
       </header>
@@ -211,42 +180,16 @@ const Header: React.FC<HeaderProps> = ({
         </div>
 
         <nav className={`flex flex-col ${navPadding} ${buttonGap}`}>
-          {/* Categorías del portfolio */}
-          {CATEGORIES.map((category) => {
-            if (category.name === 'Enquiry') return null;
-            return (
-              <button
-                key={category.id}
-                onClick={() => handleMenuItemClick(category.name)}
-                className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
-                style={{
-                  WebkitTapHighlightColor: 'rgba(0,0,0,0.05)',
-                }}
-              >
-                {category.name}
-              </button>
-            );
-          })}
-          
-          {/* Separador visual en menú móvil */}
-          <div className="border-t border-gray-200 my-2"></div>
-          
-          {/* Ruta especial: Solar Calculator */}
-          <button
-            onClick={() => handleSpecialRouteClick('/solar-calculator')}
-            className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
-          >
-            Solar Calculator
-          </button>
-          
-          {/* Ruta especial: Batteries */}
-          <button
-            onClick={() => handleSpecialRouteClick('/batteries')}
-            className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
-          >
-            Batteries
-          </button>
-          
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleMenuItemClick(category.name)}
+              className={`text-left ${buttonTextSize} tracking-[0.03em] ${buttonPadding} px-2 hover:text-red-600 active:scale-105 active:bg-gray-50 transition-all duration-75 rounded-md`}
+              style={{ WebkitTapHighlightColor: 'rgba(0,0,0,0.05)' }}
+            >
+              {category.name === StudioSection.ENQUIRY ? 'Contact' : category.name}
+            </button>
+          ))}
           <div style={{ height: isLandscape ? 15 : 20 }} />
         </nav>
       </div>
