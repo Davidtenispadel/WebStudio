@@ -6,7 +6,7 @@
   "main": "src/main.tsx",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite-react-ssg build",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },
@@ -19,6 +19,7 @@
     "react-dom": "^19.2.3",
     "react-router-dom": "^6.26.2",
     "three": "^0.128.0"
+    "vite-react-ssg": "^0.8.9",
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.0",
