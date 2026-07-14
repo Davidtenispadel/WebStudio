@@ -1,4 +1,4 @@
-// src/pages/BatteriesPage.tsx
+// src/components/BatteriesPage.tsx
 
 import React from 'react';
 import { Link } from 'react-router-dom';
