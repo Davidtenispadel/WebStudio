@@ -489,48 +489,53 @@ const SolarPanelsPage: React.FC = () => {
 
         {/* 🔥 NUEVO BLOQUE (AQUÍ ESTÁ EL ÚNICO CAMBIO REAL) */}
 
-        <div className="mt-16 max-w-4xl mx-auto p-8 bg-black/90 text-white rounded-2xl shadow-2xl border border-white/10">
+        {/* CTA final: análisis completo */}
 
-          <h3 className="text-2xl md:text-3xl font-light mb-4">
-            Your results are just the starting point
-          </h3>
+<div className="mt-16 max-w-4xl mx-auto p-8 bg-black/90 text-white rounded-2xl shadow-2xl border border-white/10">
 
-          <p className="text-white/80 mb-6 leading-relaxed">
-            This tool provides a simplified estimation based on general assumptions.
-            Every property is different, and factors such as roof orientation,
-            shading, structural constraints and system configuration can significantly
-            affect the final performance and return.
-          </p>
+  <h3 className="text-2xl md:text-3xl font-light mb-4">
+    Your results are just the starting point
+  </h3>
 
-          <p className="text-white/80 mb-8 leading-relaxed">
-            We help you turn this estimation into a complete strategy —
-            including layout optimisation, system selection and accurate
-            financial analysis tailored to your home.
-          </p>
+  <p className="text-white/80 mb-6 leading-relaxed">
+    This tool provides a simplified estimation based on general assumptions.
+    Every property is different, and factors such as roof orientation,
+    shading, structural constraints and system configuration can significantly
+    affect the final performance and return.
+  </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+  <p className="text-white/80 mb-6 leading-relaxed">
+    We help you turn this estimation into a complete strategy — including
+    layout optimisation, system selection and accurate financial analysis
+    tailored to your home.
+  </p>
 
-            <button
-              onClick={() =>
-                document.getElementById("enquiry")?.scrollIntoView({
-                  behavior: "smooth"
-                })
-              }
-              className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
-            >
-              Get full analysis
-              <ChevronRight className="w-5 h-5" />
-            </button>
+  <p className="text-white/80 mb-8 leading-relaxed">
+    As part of this process, we also check whether your property type carries
+    any planning restrictions — such as listed building status, conservation
+    area rules, or Article 4 directions — and confirm whether you would need
+    planning permission before installing.
+  </p>
 
-            <button
-              onClick={() => window.location.href = "mailto:db@dbsdesigner.com"}
-              className="border border-white/30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-black transition-all"
-            >
-              Contact directly
-            </button>
+  <div className="flex flex-col sm:flex-row gap-4">
 
-          </div>
-        </div>
+    <button
+      onClick={() => navigate('/enquiry')}
+      className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
+    >
+      Start your project
+      <ChevronRight className="w-5 h-5" />
+    </button>
+
+    <button
+      onClick={() => navigate('/enquiry')}
+      className="border border-white/30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-black transition-all"
+    >
+      Contact directly
+    </button>
+
+  </div>
+</div>
 
         {/* ============================================================ */}
         {/* 13. BIBLIOGRAPHY */}
