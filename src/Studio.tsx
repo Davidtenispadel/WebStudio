@@ -13,30 +13,28 @@ const Studio: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // La categoría activa se deriva de la URL, no de un estado interno
-  const activeCategory: CategoryGroup = React.useMemo(() => {
-    const sectionName = PATH_TO_SECTION[location.pathname] ?? CATEGORIES[0].name;
-    return CATEGORIES.find(cat => cat.name === sectionName) ?? CATEGORIES[0];
-  }, [location.pathname]);
+  const isHome = location.pathname === '/';
+
+  // En Home (/) no hay categoría de contenido — solo vídeo + header.
+  const activeCategory: CategoryGroup | null = React.useMemo(() => {
+    if (isHome) return null;
+    const sectionName = PATH_TO_SECTION[location.pathname];
+    if (!sectionName) return null;
+    return CATEGORIES.find(cat => cat.name === sectionName) ?? null;
+  }, [location.pathname, isHome]);
 
   useEffect(() => {
-    console.log("ACTIVE CATEGORY:", activeCategory.name);
+    console.log("ACTIVE CATEGORY:", activeCategory?.name ?? 'Home (video)');
   }, [activeCategory]);
 
-  /* ------------------------
-     CUSTOM CURSOR (sin cambios)
-  ------------------------ */
   useEffect(() => {
     const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     if (isTouch) return;
-
     const cursor = document.getElementById('custom-cursor');
     if (!cursor) return;
-
     const move = (e: MouseEvent) => {
       cursor.style.left = `${e.clientX}px`;
       cursor.style.top = `${e.clientY}px`;
-
       const target = e.target as HTMLElement;
       const interactive =
         target.closest('button') ||
@@ -45,17 +43,12 @@ const Studio: React.FC = () => {
         target.closest('textarea') ||
         target.closest('select') ||
         target.closest('.cursor-pointer');
-
       cursor.classList.toggle('active', Boolean(interactive));
     };
-
     window.addEventListener('mousemove', move, { passive: true });
     return () => window.removeEventListener('mousemove', move);
   }, []);
 
-  /* ------------------------
-     NAVIGATION HANDLERS (ahora navegan de verdad)
-  ------------------------ */
   const handleNavClick = useCallback((sectionName: string) => {
     const path = SECTION_TO_PATH[sectionName] ?? '/';
     navigate(path);
@@ -69,25 +62,20 @@ const Studio: React.FC = () => {
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
-      if (activeCategory.name !== StudioSection.STRUCTURE) {
+      if (activeCategory?.name !== StudioSection.STRUCTURE) {
         setSelectedProject(project);
       }
     },
-    [activeCategory.name]
+    [activeCategory]
   );
 
-  const isHome = location.pathname === '/';
-  const isDarkBackground =
-    activeCategory.name === StudioSection.ENQUIRY || isHome;
+  const isEnquiry = activeCategory?.name === StudioSection.ENQUIRY;
+  const isDarkBackground = isEnquiry || isHome;
 
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
-        ${activeCategory.name === StudioSection.ENQUIRY 
-          ? 'bg-black' 
-          : isHome 
-            ? 'bg-transparent' 
-            : 'bg-white'}
+        ${isEnquiry ? 'bg-black' : 'bg-white'}
         text-black overflow-hidden relative z-0`}
     >
       <h1 className="sr-only">
@@ -108,12 +96,14 @@ const Studio: React.FC = () => {
           isDarkBackground={isDarkBackground}
         />
 
-        <SectionView
-          category={activeCategory}
-          onProjectClick={handleProjectCardClick}
-          isActive={true}
-          currentSectionName={activeCategory.name}
-        />
+        {activeCategory && (
+          <SectionView
+            category={activeCategory}
+            onProjectClick={handleProjectCardClick}
+            isActive={true}
+            currentSectionName={activeCategory.name}
+          />
+        )}
 
         <ProjectModal
           project={selectedProject}
