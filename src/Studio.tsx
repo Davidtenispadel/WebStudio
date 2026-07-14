@@ -125,5 +125,3 @@ const Studio: React.FC = () => {
 };
 
 export default Studio;
-
-export default App;
