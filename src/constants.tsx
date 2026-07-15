@@ -234,7 +234,7 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.URBANISM,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
-      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach</p>
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>
       <ul class="list-none pt-6 space-y-3 text-lg md:text-xl font-light">
         <li>Masterplanning – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
         <li>Urban Design – From concept to execution, creating cohesive, adaptable, and functional developments</li>
@@ -290,7 +290,7 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.STRUCTURE,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach:</p>s="text-xl font-bold pt-6">Our approach:</p>
+      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>s="text-xl font-bold pt-6">Our Approach</p>
       <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
         <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
         <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
