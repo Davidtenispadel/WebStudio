@@ -49,19 +49,23 @@ export const architectureDescription = `<div class="text-black leading-tight">
   
   <div class="pt-6">
     <div class="pb-6">
-      <p class="text-lg md:text-xl font-light"><strong>• Extensions & Renovations</strong><br/>More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
+      <p class="text-xl md:text-2xl font-light">Extensions & Renovations</p>
+      <p class="text-lg md:text-xl font-light pt-2">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
     </div>
 
     <div class="pb-6">
-      <p class="text-lg md:text-xl font-light"><strong>• Planning Applications</strong><br/>Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
+      <p class="text-xl md:text-2xl font-light">Planning Applications</p>
+      <p class="text-lg md:text-xl font-light pt-2">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
     </div>
 
      <div class="pb-6">
-      <p class="text-lg md:text-xl font-light"><strong>• New Build Projects</strong><br/>From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
+      <p class="text-xl md:text-2xl font-light">New Build Projects</p>
+      <p class="text-lg md:text-xl font-light pt-2">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
     </div>
 
     <div>
-      <p class="text-lg md:text-xl font-light"><strong>• All Building Types</strong><br/>Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
+      <p class="text-xl md:text-2xl font-light">All Building Types</p>
+      <p class="text-lg md:text-xl font-light pt-2">Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
     </div>
   </div>
 </div>`;
@@ -230,12 +234,12 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.URBANISM,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
-      <ul class="pt-6 space-y-3 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Masterplanning</span> – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
-        <li>• <span class="font-bold">Urban Design</span> – From concept to execution, creating cohesive, adaptable, and functional developments</li>
-        <li>• <span class="font-bold">Infrastructure coordination</span> – integration of water, energy, telecoms and mobility with work sequencing</li>
-        <li>• <span class="font-bold">Sustainability & Community</span> – Integrating environmental, social, and functional considerations</li>
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach:</p>
+      <ul class="list-none pt-6 space-y-3 text-xl md:text-2xl font-light">
+        <li>Masterplanning – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
+        <li>Urban Design – From concept to execution, creating cohesive, adaptable, and functional developments</li>
+        <li>Infrastructure coordination – integration of water, energy, telecoms and mobility with work sequencing</li>
+        <li>Sustainability & Community – Integrating environmental, social, and functional considerations</li>
       </ul>
     </div>`,
     imageUrl: '',
@@ -286,7 +290,7 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.STRUCTURE,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p class="text-xl font-bold pt-6">Our approach:</p>
+      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach:</p>s="text-xl font-bold pt-6">Our approach:</p>
       <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
         <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
         <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
