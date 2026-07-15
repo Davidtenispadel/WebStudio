@@ -102,6 +102,7 @@ const Studio: React.FC = () => {
             onProjectClick={handleProjectCardClick}
             isActive={true}
             currentSectionName={activeCategory.name}
+            onNavigateToEnquiry={() => navigate('/enquiry')}
           />
         )}
 
