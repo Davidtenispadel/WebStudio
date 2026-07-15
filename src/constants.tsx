@@ -45,7 +45,7 @@ export const designPhilosophy = `<div class="text-black leading-tight">
 export const architectureDescription = `<div class="text-black leading-tight">
   <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages.</p>
 
-  <p class="text-lg md:text-xl font-light pt-6"><strong>What we offer</strong></p>
+  <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">What we offer</p>
   
   <div class="pt-6">
     <div class="pb-6">
