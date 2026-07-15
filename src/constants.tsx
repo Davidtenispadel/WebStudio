@@ -234,8 +234,8 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.URBANISM,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
-      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach:</p>
-      <ul class="list-none pt-6 space-y-3 text-xl md:text-2xl font-light">
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach</p>
+      <ul class="list-none pt-6 space-y-3 text-lg md:text-xl font-light">
         <li>Masterplanning – Land use, public spaces, green networks, infrastructure, and sustainable strategies</li>
         <li>Urban Design – From concept to execution, creating cohesive, adaptable, and functional developments</li>
         <li>Infrastructure coordination – integration of water, energy, telecoms and mobility with work sequencing</li>
