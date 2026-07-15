@@ -593,7 +593,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                   </aside>
                   <section className="bg-neutral-800/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl text-white">
                     <form onSubmit={handleEnquirySubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-4 sm:px-10 mt-20">
                         <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Full Name</label><input type="text" required placeholder="John Doe" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} disabled={isSending} /></div>
                         <div><label className="block text-[11px] tracking-[0.25em] text-white/70 uppercase mb-2">Email Address</label><input type="email" required placeholder="john@example.com" className="w-full bg-neutral-700/60 border border-white/15 rounded-md px-4 py-3 outline-none placeholder-white/40 focus:ring-2 focus:ring-white/20" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} disabled={isSending} /></div>
                       </div>
