@@ -750,7 +750,15 @@ const SolarPanelCalculator: React.FC = () => {
           ← Back to Home Insight
         </button>
       </div>
-      <h2 className="text-3xl font-light mb-6 text-center px-4 md:px-0">Solar Panel Designer – Single & Dual Roof</h2>
+     <div className="mx-4 md:mx-0 mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300 text-sm text-gray-700">
+        <p className="font-semibold mb-2">📐 How we calculate this</p>
+        <p className="mb-1">
+          <strong>Panel count</strong> = ⌊(usable roof length) ÷ (panel width + gap)⌋ × ⌊(usable roof width) ÷ (panel height + gap)⌋, avoiding chimneys and other obstacles.
+        </p>
+        <p>
+          <strong>Annual generation (kWh)</strong> = (Total power in Wp ÷ 1000) × Local solar irradiation (kWh/m²/year) × Orientation factor × Tilt factor × (1 − Shading %) × Climate factor
+        </p>
+      </div>
 
       {/* Section 1: Location & Panel Count - Dark grey background */}
       <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
