@@ -721,13 +721,6 @@ const SectionView: React.FC<SectionViewProps> = ({
               {/* RESTO DE SECCIONES (Urban, Structure, etc.) */}
               {(isUrbanSection || isStructureSection || isDesignSection || isProjectSupportSection || isArchitectureSection || isProjectJourney) && (
                 <div className="flex flex-col gap-12">
-                  {isArchitectureSection && (
-                    <div className={`flex flex-col gap-12 ${isDesignSection ? "mb-8" : "mb-24"}`}>
-                      <div className="w-full max-w-5xl p-10 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-                        <div>{/* Architecture content */}</div>
-                      </div>
-                    </div>
-                  )}
                   {isProjectJourney && (
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   )}
