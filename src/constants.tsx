@@ -290,7 +290,7 @@ export const CATEGORIES: CategoryGroup[] = [
     name: StudioSection.STRUCTURE,
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>s="text-xl font-bold pt-6">Our Approach</p>
+      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p> clas<p claas="text-xl font-bold pt-6">Our Approach</p>
       <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
         <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
         <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
