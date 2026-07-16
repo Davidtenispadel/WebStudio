@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Category{!isProjectJourney && !isHomeInsight && (
+import { Category, Group, Project, StudioSection } from "../types";
                     <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}Group, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
@@ -726,10 +726,12 @@ const SectionView: React.FC<SectionViewProps> = ({
                   {isProjectJourney && (
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   
-                  {!isProjectJourney && !isHomeInsight && (
-                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
-                  )}
-                </div>
+                  
+               {!isProjectJourney && !isHomeInsight && (
+                  <div
+                    className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24"
+                    dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
+                   />
               )}
 
               {!isProjectJourney && !isHomeInsight && (
