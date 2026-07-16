@@ -7,7 +7,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CategoryGroup, Project, StudioSection } from "../types";
+import { Category{!isProjectJourney && !isHomeInsight && (
+                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  )}Group, Project, StudioSection } from "../types";
 import ProjectCard from "./ProjectCard";
 import {
   ChevronRight,
@@ -723,6 +725,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 <div className="flex flex-col gap-12">
                   {isProjectJourney && (
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
+                  
                   {!isProjectJourney && !isHomeInsight && (
                     <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
                   )}
