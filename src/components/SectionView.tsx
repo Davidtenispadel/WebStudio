@@ -727,12 +727,9 @@ const SectionView: React.FC<SectionViewProps> = ({
                     <ProjectJourney onNavigateToEnquiry={navigateToEnquiry} />
                   
                   
-               {!isProjectJourney && !isHomeInsight && (
-                  <div
-                    className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24"
-                    dangerouslySetInnerHTML={{ __html: displayedCategory.description }}
-                   />
-              )}
+              {!isProjectJourney && !isHomeInsight && (
+                    <div className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24" dangerouslySetInnerHTML={{ __html: displayedCategory.description }} />
+                  )}
 
               {!isProjectJourney && !isHomeInsight && (
                 <>
