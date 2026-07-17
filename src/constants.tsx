@@ -232,7 +232,7 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'urban',
     name: StudioSection.URBANISM,
-   description: `<div class="text-black leading-tight">
+  description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
       <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach</p>
       <div class="pt-6">
@@ -300,15 +300,27 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'struct',
     name: StudioSection.STRUCTURE,
-    description: `<div class="text-black leading-tight">
+   description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p clas<p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p> clas<p class="text-xl font-bold pt-6">Our Approach</p>
-      <ul class="pt-6 space-y-2 text-base md:text-lg font-light">
-        <li>• <span class="font-bold">Building Services Design</span> – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
-        <li>• <span class="font-bold">MEP Coordination</span> – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
-        <li>• <span class="font-bold">Systems Integration</span> – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
-        <li>• <span class="font-bold">Structural Pre‑Design</span> – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
-      </ul>
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>
+      <div class="pt-6">
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">Building Services Design</p>
+          <p class="text-lg md:text-xl font-light pt-2">HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</p>
+        </div>
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">MEP Coordination</p>
+          <p class="text-lg md:text-xl font-light pt-2">Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</p>
+        </div>
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">Systems Integration</p>
+          <p class="text-lg md:text-xl font-light pt-2">Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</p>
+        </div>
+        <div>
+          <p class="text-xl md:text-2xl font-light">Structural Pre‑Design</p>
+          <p class="text-lg md:text-xl font-light pt-2">Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</p>
+        </div>
+      </div>
     </div>`,
     imageUrl: '',
     projects: [
