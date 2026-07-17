@@ -232,15 +232,27 @@ export const CATEGORIES: CategoryGroup[] = [
   {
     id: 'urban',
     name: StudioSection.URBANISM,
-    description: `<div class="text-black leading-tight">
-      <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
-      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>
-      <ul class="list-none pt-6 space-y-3 text-2xl md:text-3xl font-light">
-        <li>Building Services Design – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
-        <li>MEP Coordination – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
-        <li>Systems Integration – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
-        <li>Structural Pre‑Design – Preliminary sizing of elements, load assessments, feasibility studies, and coordination with structural engineers to ensure safe, buildable, and cost‑efficient solutions.</li>
-      </ul>
+   description: `<div class="text-black leading-tight">
+      <p class="text-lg md:text-xl font-light">We shape urban spaces with strategic planning and design, balancing function, sustainability, and community needs</p>
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our approach</p>
+      <div class="pt-6">
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">Masterplanning</p>
+          <p class="text-lg md:text-xl font-light pt-2">Land use, public spaces, green networks, infrastructure, and sustainable strategies</p>
+        </div>
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">Urban Design</p>
+          <p class="text-lg md:text-xl font-light pt-2">From concept to execution, creating cohesive, adaptable, and functional developments</p>
+        </div>
+        <div class="pb-6">
+          <p class="text-xl md:text-2xl font-light">Infrastructure coordination</p>
+          <p class="text-lg md:text-xl font-light pt-2">Integration of water, energy, telecoms and mobility with work sequencing</p>
+        </div>
+        <div>
+          <p class="text-xl md:text-2xl font-light">Sustainability & Community</p>
+          <p class="text-lg md:text-xl font-light pt-2">Integrating environmental, social, and functional considerations</p>
+        </div>
+      </div>
     </div>`,
     imageUrl: '',
     projects: [
