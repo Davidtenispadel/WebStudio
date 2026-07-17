@@ -235,7 +235,7 @@ export const CATEGORIES: CategoryGroup[] = [
     description: `<div class="text-black leading-tight">
       <p class="text-lg md:text-xl font-light">Delivering building systems through the calculation and design of all required installations</p>
       <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">Our Approach</p>
-      <ul class="list-none pt-6 space-y-3 text-lg md:text-xl font-light">
+      <ul class="list-none pt-6 space-y-3 text-2xl md:text-3xl font-light">
         <li>Building Services Design – HVAC, plumbing, drainage, fire protection, electrical systems, lighting, and low‑voltage networks, developed from concept through detailed design.</li>
         <li>MEP Coordination – Spatial planning, clash‑free routing, equipment integration, and construction‑ready layouts aligned with architectural and structural requirements.</li>
         <li>Systems Integration – Harmonising mechanical, electrical, and public‑health services with energy strategies, smart‑building technologies, and operational needs.</li>
