@@ -238,13 +238,17 @@ const SolarPanelCalculator: React.FC = () => {
   const [incrementalCostPerPanel, setIncrementalCostPerPanel] = useState(5);
 
   // Inverter configuration with manual override
-  const [inverterType, setInverterType] = useState<string>('string_3_68');
+  const [inverterType, setInverterType] = useState<string>('givenergy_gen3');
   const [manualInverterCost, setManualInverterCost] = useState<number | null>(null);
   const [dualInverter, setDualInverter] = useState(false);
 
   // Individual installation costs
   const [mountingCost, setMountingCost] = useState(450);
-  const [scaffoldingCost, setScaffoldingCost] = useState(600);
+  const [scaffoldingCost, setScaffoldingCost] = useState<'1' | '2' | '3'>('2');
+  const scaffoldingByHeight: Record<'1' | '2' | '3', number> = { '1': 500, '2': 750, '3': 1150 };
+  const [scaffoldingCost, setScaffoldingCost] = useState(scaffoldingByHeight['2']);
+
+Y busca este bloque (dentro de la Sección 4 "Other Installation Costs"):;
   const [electricalCost, setElectricalCost] = useState(350);
   const [adminCost, setAdminCost] = useState(175);
 
@@ -291,17 +295,6 @@ const SolarPanelCalculator: React.FC = () => {
 
   // Inverter catalog
   const inverterPrices: Record<string, { single: number; dual: number; name: string; power: number; hybrid: boolean; island?: boolean }> = {
-    string_3_68: { single: 900, dual: 1700, name: "String 3.68 kW", power: 3.68, hybrid: false, island: false },
-    string_5: { single: 1100, dual: 2100, name: "String 5.0 kW", power: 5.0, hybrid: false, island: false },
-    string_6: { single: 1300, dual: 2500, name: "String 6.0 kW", power: 6.0, hybrid: false, island: false },
-    string_8: { single: 1600, dual: 3000, name: "String 8.0 kW (3‑phase)", power: 8.0, hybrid: false, island: false },
-    string_10: { single: 1900, dual: 3600, name: "String 10.0 kW (3‑phase)", power: 10.0, hybrid: false, island: false },
-    hybrid_3_68: { single: 1600, dual: 3000, name: "Hybrid 3.68 kW (battery ready)", power: 3.68, hybrid: true, island: true },
-    hybrid_5: { single: 1900, dual: 3600, name: "Hybrid 5.0 kW (battery ready)", power: 5.0, hybrid: true, island: true },
-    hybrid_6: { single: 2200, dual: 4200, name: "Hybrid 6.0 kW (battery ready)", power: 6.0, hybrid: true, island: true },
-    hybrid_8: { single: 2600, dual: 5000, name: "Hybrid 8.0 kW (3‑phase)", power: 8.0, hybrid: true, island: true },
-    hybrid_10: { single: 3100, dual: 6000, name: "Hybrid 10.0 kW (3‑phase)", power: 10.0, hybrid: true, island: true },
-    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel)", power: 3.68, hybrid: false, island: false },
     growatt_min: { single: 650, dual: 1250, name: "Growatt MIN / budget string (3.68kW)", power: 3.68, hybrid: false, island: false },
     solis_hybrid: { single: 1100, dual: 2100, name: "Solis Hybrid (5.0kW)", power: 5.0, hybrid: true, island: true },
     givenergy_gen3: { single: 1400, dual: 2700, name: "GivEnergy Gen 3 (5.0kW)", power: 5.0, hybrid: true, island: true },
@@ -939,7 +932,21 @@ const SolarPanelCalculator: React.FC = () => {
             <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white">Scaffolding (£)</label>
+            <label className="block text-sm font-medium text-white">Building height (scaffolding)</label>
+            <select
+              value={buildingHeight}
+              onChange={(e) => {
+                const height = e.target.value as '1' | '2' | '3';
+                setBuildingHeight(height);
+                setScaffoldingCost(scaffoldingByHeight[height]);
+              }}
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            >
+              <option value="1">Single‑storey (bungalow) — £400–£600</option>
+              <option value="2">Two‑storey (standard house) — £600–£900</option>
+              <option value="3">Three‑storey (townhouse / large home) — £900–£1,400</option>
+            </select>
+            <label className="block text-sm font-medium text-white mt-2">Scaffolding cost (£) — fine‑tune if needed</label>
             <input type="number" step="10" min="0" value={scaffoldingCost} onChange={(e) => setScaffoldingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
           <div>
