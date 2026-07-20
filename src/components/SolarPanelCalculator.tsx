@@ -202,7 +202,7 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Roof A ---
   const [roofALength, setRoofALength] = useState(8);
   const [roofAWidth, setRoofAWidth] = useState(5);
-  const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
+ const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
   const [obstaclesA, setObstaclesA] = useState<Obstacle[]>([]);
   const [orientationDegA, setOrientationDegA] = useState(180);
   const [enablePitchA, setEnablePitchA] = useState(true);
@@ -214,7 +214,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [enableRoofB, setEnableRoofB] = useState(true);
   const [roofBLength, setRoofBLength] = useState(6);
   const [roofBWidth, setRoofBWidth] = useState(4);
-  const [panelKeyB, setPanelKeyB] = useState<PanelKey>('topcon');
+  const [panelKeyB, setPanelKeyB] = useState<PanelKey>('trina_jinko');
   const [obstaclesB, setObstaclesB] = useState<Obstacle[]>([]);
   const [orientationDegB, setOrientationDegB] = useState(180);
   const [enablePitchB, setEnablePitchB] = useState(true);
@@ -301,7 +301,17 @@ const SolarPanelCalculator: React.FC = () => {
     hybrid_6: { single: 2200, dual: 4200, name: "Hybrid 6.0 kW (battery ready)", power: 6.0, hybrid: true, island: true },
     hybrid_8: { single: 2600, dual: 5000, name: "Hybrid 8.0 kW (3‑phase)", power: 8.0, hybrid: true, island: true },
     hybrid_10: { single: 3100, dual: 6000, name: "Hybrid 10.0 kW (3‑phase)", power: 10.0, hybrid: true, island: true },
-    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel)", power: 3.68, hybrid: false, island: false }
+    micro: { single: 1400, dual: 2800, name: "Microinverters (per panel)", power: 3.68, hybrid: false, island: false },
+    growatt_min: { single: 650, dual: 1250, name: "Growatt MIN / budget string (3.68kW)", power: 3.68, hybrid: false, island: false },
+    solis_hybrid: { single: 1100, dual: 2100, name: "Solis Hybrid (5.0kW)", power: 5.0, hybrid: true, island: true },
+    givenergy_gen3: { single: 1400, dual: 2700, name: "GivEnergy Gen 3 (5.0kW)", power: 5.0, hybrid: true, island: true },
+    sunsynk_ecco: { single: 1500, dual: 2900, name: "Sunsynk ECCO (6.0kW)", power: 6.0, hybrid: true, island: true },
+    solaredge_hub: { single: 1700, dual: 3300, name: "SolarEdge Home Hub + optimisers (6.0kW)", power: 6.0, hybrid: true, island: true },
+    fronius_primo: { single: 1800, dual: 3500, name: "Fronius Primo GEN24 (6.0kW)", power: 6.0, hybrid: true, island: true },
+    foxess_k: { single: 1600, dual: 3100, name: "Fox ESS K‑Series (8.0kW)", power: 8.0, hybrid: true, island: true },
+    string_10: { single: 1900, dual: 3600, name: "String 10.0 kW (3‑phase)", power: 10.0, hybrid: false, island: false },
+    hybrid_10: { single: 3100, dual: 6000, name: "Hybrid 10.0 kW (3‑phase, battery ready)", power: 10.0, hybrid: true, island: true },
+    enphase_iq8: { single: 2200, dual: 4300, name: "Enphase IQ8 Microinverters (per‑panel)", power: 3.68, hybrid: false, island: false }
   };
 
   const panelsA = layoutA?.totalPanels || 0;
