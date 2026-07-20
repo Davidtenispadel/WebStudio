@@ -95,11 +95,17 @@ const getCountryPriceMultiplier = (country: string): number => {
 };
 
 const PANEL_CATALOG_BASE = {
-  perc: { name: "PERC (monocrystalline)", price: 75, powerWp: 410, efficiency: "18‑20%" },
-  topcon: { name: "TOPCon (monocrystalline)", price: 85, powerWp: 440, efficiency: "20‑22.5%" },
-  hjt: { name: "HJT (monocrystalline)", price: 95, powerWp: 460, efficiency: "21‑23%" },
-  ibc: { name: "IBC (monocrystalline)", price: 110, powerWp: 480, efficiency: "22‑24%" },
-  poly: { name: "Polycrystalline", price: 65, powerWp: 400, efficiency: "16‑18%" }
+  budget_mono: { name: "Generic Tier‑1 budget mono (410Wp)", price: 110, powerWp: 410, efficiency: "19‑20%" },
+  ja_solar: { name: "JA Solar TOPCon (435Wp)", price: 120, powerWp: 435, efficiency: "21‑22%" },
+  trina_jinko: { name: "Trina / Jinko TOPCon (440Wp)", price: 125, powerWp: 440, efficiency: "21‑22%" },
+  qcells_qtron: { name: "Qcells Q.TRON (445Wp)", price: 135, powerWp: 445, efficiency: "21‑22.5%" },
+  rea_fusion2: { name: "REA Fusion2 Type R HJT (448Wp)", price: 200, powerWp: 448, efficiency: "21.5‑22.5%" },
+  longi_himo6: { name: "LONGi Hi‑MO 6 (450Wp)", price: 130, powerWp: 450, efficiency: "21‑22%" },
+  rec_alpha: { name: "REC Alpha Pure‑RX (455Wp)", price: 235, powerWp: 455, efficiency: "22.3‑22.8%" },
+  aiko_neostar: { name: "Aiko Neostar 3S / 3P54 (462Wp)", price: 175, powerWp: 462, efficiency: "22.5‑23.5%" },
+  sunpower_maxeon: { name: "SunPower Maxeon 7 (468Wp)", price: 330, powerWp: 468, efficiency: "23.5‑24%" },
+  longi_x10: { name: "LONGi Hi‑MO X10 (485Wp)", price: 185, powerWp: 485, efficiency: "23.8%" },
+  project_solar: { name: "Project Solar Evolution Max (500Wp)", price: 165, powerWp: 500, efficiency: "22‑23%" },
 };
 type PanelKey = keyof typeof PANEL_CATALOG_BASE;
 
