@@ -929,7 +929,6 @@ const SolarPanelCalculator: React.FC = () => {
             <label className="block text-sm font-medium text-white">Mounting system (£)</label>
             <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
-          <div>
             <label className="block text-sm font-medium text-white">Building height (scaffolding)</label>
             <select
               value={buildingHeight}
