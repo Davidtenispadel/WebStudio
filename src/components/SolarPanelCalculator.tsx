@@ -244,12 +244,10 @@ const SolarPanelCalculator: React.FC = () => {
 
   // Individual installation costs
   const [mountingCost, setMountingCost] = useState(450);
-  const [scaffoldingCost, setScaffoldingCost] = useState<'1' | '2' | '3'>('2');
+  const [buildingHeight, setBuildingHeight] = useState<'1' | '2' | '3'>('2');
   const scaffoldingByHeight: Record<'1' | '2' | '3', number> = { '1': 500, '2': 750, '3': 1150 };
-  const [scaffoldingCost, setScaffoldingCost] = useState(scaffoldingByHeight['2']);
-
-Y busca este bloque (dentro de la Sección 4 "Other Installation Costs"):;
-  const [electricalCost, setElectricalCost] = useState(350);
+  const [scaffoldingCost, setScaffoldingCost] = useState(750);
+  const [electricalCost, setElectricalCost] = useState(350)
   const [adminCost, setAdminCost] = useState(175);
 
   // Maintenance
