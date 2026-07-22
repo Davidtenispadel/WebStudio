@@ -202,7 +202,7 @@ const SolarPanelCalculator: React.FC = () => {
   // --- Roof A ---
   const [roofALength, setRoofALength] = useState(8);
   const [roofAWidth, setRoofAWidth] = useState(5);
- const [panelKeyA, setPanelKeyA] = useState<PanelKey>('topcon');
+  const [panelKeyA, setPanelKeyA] = useState<PanelKey>('trina_jinko');
   const [obstaclesA, setObstaclesA] = useState<Obstacle[]>([]);
   const [orientationDegA, setOrientationDegA] = useState(180);
   const [enablePitchA, setEnablePitchA] = useState(true);
@@ -247,7 +247,7 @@ const SolarPanelCalculator: React.FC = () => {
   const [buildingHeight, setBuildingHeight] = useState<'1' | '2' | '3'>('2');
   const scaffoldingByHeight: Record<'1' | '2' | '3', number> = { '1': 500, '2': 750, '3': 1150 };
   const [scaffoldingCost, setScaffoldingCost] = useState(750);
-  const [electricalCost, setElectricalCost] = useState(350)
+  const [electricalCost, setElectricalCost] = useState(350);
   const [adminCost, setAdminCost] = useState(175);
 
   // Maintenance
@@ -929,6 +929,7 @@ const SolarPanelCalculator: React.FC = () => {
             <label className="block text-sm font-medium text-white">Mounting system (£)</label>
             <input type="number" step="10" min="0" value={mountingCost} onChange={(e) => setMountingCost(parseFloat(e.target.value) || 0)} className="border p-2 rounded w-full bg-gray-100 text-gray-800" />
           </div>
+          <div>
             <label className="block text-sm font-medium text-white">Building height (scaffolding)</label>
             <select
               value={buildingHeight}
