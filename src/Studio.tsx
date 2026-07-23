@@ -71,7 +71,7 @@ const Studio: React.FC = () => {
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
-      if (activeCategory.name !== StudioSection.STRUCTURE) {
+      if (activeCategory?.name !== StudioSection.STRUCTURE) {
         setSelectedProject(project);
       }
     },
@@ -97,7 +97,7 @@ const Studio: React.FC = () => {
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
-        ${activeCategory.name === StudioSection.ENQUIRY 
+        ${activeCategory?.name === StudioSection.ENQUIRY 
           ? 'bg-black' 
           : isHome 
             ? 'bg-transparent' 
@@ -122,13 +122,15 @@ const Studio: React.FC = () => {
           isDarkBackground={isDarkBackground}
         />
 
-        <SectionView
-          category={activeCategory}
-          onProjectClick={handleProjectCardClick}
-          isActive={true}
-          currentSectionName={activeCategory.name}
-          onNavigateToEnquiry={() => navigate('/enquiry')}
-        />
+       {activeCategory && (
+          <SectionView
+            category={activeCategory}
+            onProjectClick={handleProjectCardClick}
+            isActive={true}
+            currentSectionName={activeCategory.name}
+            onNavigateToEnquiry={() => navigate('/enquiry')}
+          />
+        )}
 
         <ProjectModal
           project={selectedProject}
