@@ -20,10 +20,12 @@ const Studio: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
   const [isTyping, setIsTyping] = useState(false);
 
-  const activeCategory: CategoryGroup = React.useMemo(() => {
-    const sectionName = PATH_TO_SECTION[location.pathname] ?? CATEGORIES[0].name;
-    return CATEGORIES.find(cat => cat.name === sectionName) ?? CATEGORIES[0];
-  }, [location.pathname]);
+  const activeCategory: CategoryGroup | null = React.useMemo(() => {
+    if (isHome) return null;
+    const sectionName = PATH_TO_SECTION[location.pathname];
+    if (!sectionName) return null;
+    return CATEGORIES.find(cat => cat.name === sectionName) ?? null;
+  }, [location.pathname, isHome]);
 
   useEffect(() => {
     console.log("ACTIVE CATEGORY:", activeCategory.name);
