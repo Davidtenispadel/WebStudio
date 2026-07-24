@@ -14,6 +14,8 @@ const Studio: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  
+  const isHome = location.pathname === '/';
 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
@@ -28,7 +30,7 @@ const Studio: React.FC = () => {
   }, [location.pathname, isHome]);
 
   useEffect(() => {
-    console.log("ACTIVE CATEGORY:", activeCategory.name);
+    console.log("ACTIVE CATEGORY:", activeCategory?.name);
   }, [activeCategory]);
 
   useEffect(() => {
@@ -71,12 +73,13 @@ const Studio: React.FC = () => {
 
   const handleProjectCardClick = useCallback(
     (project: Project) => {
-      if (activeCategory?.name !== StudioSection.STRUCTURE) {
-        setSelectedProject(project);
-      }
-    },
-    [activeCategory.name]
-  );
+     if (activeCategory?.name !== StudioSection.STRUCTURE) {
+      setSelectedProject(project);
+    }
+  },
+  [activeCategory]
+)
+;
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,10 +93,9 @@ const Studio: React.FC = () => {
     setIsTyping(false);
   };
 
-  const isHome = location.pathname === '/';
-  const isDarkBackground =
-    activeCategory.name === StudioSection.ENQUIRY || isHome;
-
+    const isDarkBackground =
+  activeCategory?.name === StudioSection.ENQUIRY || isHome;
+  
   return (
     <div
       className={`min-h-screen w-screen transition-colors duration-700 
