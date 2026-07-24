@@ -111,11 +111,28 @@ const Studio: React.FC = () => {
       </h1>
 
       {isHome && (
-        <VideoBackground
-          videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
-          onVideoLoaded={() => {}}
-        />
-      )}
+  <>
+    <VideoBackground
+      videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
+      onVideoLoaded={() => {}}
+    />
+    <div className="absolute bottom-16 left-6 right-6 md:left-16 md:right-auto md:max-w-xl z-20 text-white">
+      <p className="text-sm tracking-[0.3em] uppercase text-white/70 mb-3">Corby, Northamptonshire</p>
+      <h2 className="text-3xl md:text-5xl font-light leading-tight mb-4">
+        Full‑service architecture practice, from planning permission to completed build.
+      </h2>
+      <p className="text-base md:text-lg text-white/80 mb-6 max-w-lg">
+        DB+ designs extensions, new builds and full architectural projects across Corby and a 20‑mile radius, backed by BIM‑led technical delivery and RIBA/ARB‑registered expertise.
+      </p>
+      <div className="flex flex-wrap gap-4 items-center">
+        <button onClick={() => navigate('/enquiry')} className="bg-white text-black px-6 py-3 rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white transition-all">
+          Start your project
+        </button>
+        <a href="tel:+4407955018937" className="text-white/90 underline text-sm">+44 07955 018937</a>
+      </div>
+    </div>
+  </>
+)}
 
       <div className="relative z-10">
         <Header 
