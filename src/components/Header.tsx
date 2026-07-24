@@ -31,20 +31,8 @@ const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      clickSoundRef.current = new Audio('https://res.cloudinary.com/dwealmbfi/video/upload/v1777554320/dragon-studio-notification-click-sound-455421_onilfm.mp3');
-      clickSoundRef.current.volume = 0.04;
-      clickSoundRef.current.preload = 'auto';
-    }
-  }, []);
-
   const playClickSound = () => {
-    if (clickSoundRef.current) {
-      const soundClone = clickSoundRef.current.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.04;
-      soundClone.play().catch(() => {});
-    }
+    // Sonido de clic desactivado
   };
 
   useEffect(() => {
