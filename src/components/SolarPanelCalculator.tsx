@@ -750,12 +750,26 @@ const SolarPanelCalculator: React.FC = () => {
       id="solar-calculator"
       className="w-full bg-white shadow-lg scroll-mt-24 md:max-w-7xl md:mx-auto md:p-6 md:rounded-xl p-0 rounded-none"
     >
-      <
-Helmet>
-  <title>
-    Solar Panel Calculator UK | Panel Layout, ROI & Cost Estimator – DB+
-  </title>
-
+      <Helmet>
+        <title>Solar Panel Calculator UK | Panel Layout, ROI & Cost Estimator – DB+</title>
+        <meta name="description" content="Free interactive solar panel calculator: design your roof layout, compare real UK panel and inverter models by power and price, and estimate ROI, payback period and annual savings." />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "DB+ Solar Panel Calculator",
+            "applicationCategory": "UtilitiesApplication",
+            "operatingSystem": "Any (web browser)",
+            "description": "Interactive tool to design solar panel layouts, compare real UK panel and inverter models by power and price, and calculate ROI, payback period and annual savings.",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+            "provider": {
+              "@type": "Organization",
+              "name": "DB+ Design & Management",
+              "url": "https://dbsdesigner.com"
+            }
+          })}
+        </script>
+      </Helmet>
   <meta
     name="description"
     content="Free interactive solar panel calculator: design your roof layout, compare real UK panel and inverter models by power and price, and estimate ROI, payback period and annual savings."
