@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SolarPanelCalculator from './SolarPanelCalculator';
+import BatteriesPage from "./BatteriesPage";
 import { ChevronRight } from "lucide-react";
 
 const SolarPanelsPage: React.FC = () => {
