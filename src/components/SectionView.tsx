@@ -27,6 +27,7 @@ import {
 import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
 import SolarPanelsPage from "./SolarPanelsPage";
+import BatteriesPage from "./BatteriesPage";
 
 // ============================
 // TIPO PARA NODOS DE TECNOLOGÍA
@@ -42,17 +43,13 @@ type TechNode = {
 };
 
 // Componentes placeholder
-const BatteriesPlaceholder: React.FC = () => (
-  <div className="p-8 bg-white rounded-2xl shadow-xl">
-    <h2 className="text-3xl font-light mb-4">Batteries</h2>
-    <p className="text-gray-600">Information about energy storage systems will appear here soon.</p>
-  </div>
-);
 
 const WindTurbinesPlaceholder: React.FC = () => (
   <div className="p-8 bg-white rounded-2xl shadow-xl">
     <h2 className="text-3xl font-light mb-4">Wind Turbines</h2>
-    <p className="text-gray-600">Information about wind energy systems will appear here soon.</p>
+    <p className="text-gray-600">
+      Information about wind energy systems will appear here soon.
+    </p>
   </div>
 );
 
@@ -78,7 +75,7 @@ const homeInsightRootNodes: TechNode[] = [
         title: "Batteries",
         imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780078524/bater%C3%ADa_verde_con_ed_a8rxo8.png",
         description: "Energy storage systems",
-        articleComponent: <BatteriesPlaceholder />,
+        articleComponent: <BatteriesPage />,
       },
       {
         id: "wind-turbines",
