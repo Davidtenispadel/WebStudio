@@ -1,6 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+mport React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import {
+  saveNamedSolarProfile,
+  listSavedSolarProfiles,
+  loadSolarProfileById,
+  deleteSolarProfile,
+  renameSolarProfile,
+  SavedSolarProfile,
+  RoofInput,
+} from '../utils/energyProfile';
 
 // -------------------- DATA --------------------
 type CountryInsolation = { name: string; north: number; south: number };
@@ -261,6 +270,21 @@ const SolarPanelCalculator: React.FC = () => {
   const [customStandbyW, setCustomStandbyW] = useState(0);
   const [standbySource, setStandbySource] = useState<'preset' | 'custom'>('preset');
 
+  // --- Save / Load project (named, localStorage-based; no accounts yet) ---
+  const [projectName, setProjectName] = useState('');
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+  const [savedProjects, setSavedProjects] = useState<SavedSolarProfile[]>([]);
+  const [selectedLoadId, setSelectedLoadId] = useState<string>('');
+  const [saveMessage, setSaveMessage] = useState<string>('');
+
+  const refreshSavedProjects = () => {
+    setSavedProjects(listSavedSolarProfiles());
+  };
+
+  useEffect(() => {
+    refreshSavedProjects();
+  }, []);
+
   const climateFactor = getClimateFactor(selectedCountry);
   const gridFactor = getGridDependencyFactor(selectedCountry);
 
@@ -365,6 +389,12 @@ const SolarPanelCalculator: React.FC = () => {
   const totalAnnualKwh = prodA.annualKwh + (enableRoofB ? prodB.annualKwh : 0);
   const seasonalA = prodA.seasonalKwh;
   const seasonalB = prodB.seasonalKwh;
+  const combinedSeasonalKwh = {
+    spring: seasonalA.spring + (enableRoofB ? seasonalB.spring : 0),
+    summer: seasonalA.summer + (enableRoofB ? seasonalB.summer : 0),
+    autumn: seasonalA.autumn + (enableRoofB ? seasonalB.autumn : 0),
+    winter: seasonalA.winter + (enableRoofB ? seasonalB.winter : 0),
+  };
 
   const totalInstallCost = totalPanelCost + currentInverterCost + mountingCost + scaffoldingCost + electricalCost + adminCost;
 
@@ -465,6 +495,132 @@ const SolarPanelCalculator: React.FC = () => {
   const removeObstacle = (roof: 'A' | 'B', index: number) => {
     if (roof === 'A') setObstaclesA(obstaclesA.filter((_, i) => i !== index));
     else setObstaclesB(obstaclesB.filter((_, i) => i !== index));
+  };
+
+  // -------------------- SAVE / LOAD PROJECT --------------------
+  const buildRoofInput = (
+    length: number, width: number, panelKey: string, obstacles: Obstacle[],
+    orientationDeg: number, enablePitch: boolean, tiltDeg: number, shadingPercent: number
+  ): RoofInput => ({ length, width, panelKey, obstacles, orientationDeg, enablePitch, tiltDeg, shadingPercent });
+
+  const handleSaveProject = () => {
+    const name = projectName.trim();
+    if (!name) {
+      setSaveMessage('Give your project a name before saving.');
+      return;
+    }
+    const data = {
+      country: selectedCountry,
+      region,
+      importTariff,
+      exportTariff,
+      standingCharge,
+      roofA: buildRoofInput(roofALength, roofAWidth, panelKeyA, obstaclesA, orientationDegA, enablePitchA, tiltDegA, shadingPercentA),
+      roofBEnabled: enableRoofB,
+      roofB: buildRoofInput(roofBLength, roofBWidth, panelKeyB, obstaclesB, orientationDegB, enablePitchB, tiltDegB, shadingPercentB),
+      inverterType,
+      dualInverter,
+      manualInverterCost,
+      useManualPanelPrice,
+      minPanelPrice,
+      incrementalCostPerPanel,
+      mountingCost,
+      buildingHeight,
+      scaffoldingCost,
+      electricalCost,
+      adminCost,
+      includeMaintenance,
+      cleaningCost3Years,
+      electricalInspection3Years,
+      standbyPowerW,
+      selfConsumptionPercent,
+      totalPanelsCount,
+      totalWp,
+      totalInstallCost,
+      totalAnnualKwh,
+      avgMonthlyGeneration,
+      seasonalKwh: combinedSeasonalKwh,
+      selfConsumedKwhMonthly,
+      gridPurchaseKwhMonthly,
+      exportedKwhMonthly,
+    };
+    const saved = saveNamedSolarProfile(name, data, currentProfileId);
+    setCurrentProfileId(saved.id);
+    setProjectName(saved.name);
+    refreshSavedProjects();
+    setSaveMessage(`Saved "${saved.name}".`);
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const handleLoadProject = (id: string) => {
+    const saved = loadSolarProfileById(id);
+    if (!saved) return;
+    const d = saved.data;
+
+    setSelectedCountry(d.country);
+    setRegion(d.region);
+    setImportTariff(d.importTariff);
+    setExportTariff(d.exportTariff);
+    setStandingCharge(d.standingCharge);
+
+    setRoofALength(d.roofA.length);
+    setRoofAWidth(d.roofA.width);
+    setPanelKeyA(d.roofA.panelKey as PanelKey);
+    setObstaclesA(d.roofA.obstacles);
+    setOrientationDegA(d.roofA.orientationDeg);
+    setEnablePitchA(d.roofA.enablePitch);
+    setTiltDegA(d.roofA.tiltDeg);
+    setShadingPercentA(d.roofA.shadingPercent);
+
+    setEnableRoofB(d.roofBEnabled);
+    setRoofBLength(d.roofB.length);
+    setRoofBWidth(d.roofB.width);
+    setPanelKeyB(d.roofB.panelKey as PanelKey);
+    setObstaclesB(d.roofB.obstacles);
+    setOrientationDegB(d.roofB.orientationDeg);
+    setEnablePitchB(d.roofB.enablePitch);
+    setTiltDegB(d.roofB.tiltDeg);
+    setShadingPercentB(d.roofB.shadingPercent);
+
+    setInverterType(d.inverterType);
+    setDualInverter(d.dualInverter);
+    setManualInverterCost(d.manualInverterCost);
+    setUseManualPanelPrice(d.useManualPanelPrice);
+    setMinPanelPrice(d.minPanelPrice);
+    setIncrementalCostPerPanel(d.incrementalCostPerPanel);
+    setMountingCost(d.mountingCost);
+    setBuildingHeight(d.buildingHeight);
+    setScaffoldingCost(d.scaffoldingCost);
+    setElectricalCost(d.electricalCost);
+    setAdminCost(d.adminCost);
+    setIncludeMaintenance(d.includeMaintenance);
+    setCleaningCost3Years(d.cleaningCost3Years);
+    setElectricalInspection3Years(d.electricalInspection3Years);
+    setStandbyPowerW(d.standbyPowerW);
+    setSelfConsumptionPercent(d.selfConsumptionPercent);
+
+    setCurrentProfileId(saved.id);
+    setProjectName(saved.name);
+    setSelectedLoadId(saved.id);
+    setSaveMessage(`Loaded "${saved.name}".`);
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const handleDeleteProject = (id: string) => {
+    deleteSolarProfile(id);
+    refreshSavedProjects();
+    if (currentProfileId === id) {
+      setCurrentProfileId(null);
+      setProjectName('');
+    }
+    if (selectedLoadId === id) setSelectedLoadId('');
+  };
+
+  const handleNewProject = () => {
+    setCurrentProfileId(null);
+    setProjectName('');
+    setSelectedLoadId('');
+    setSaveMessage('');
   };
 
   const renderSVG = (layout: any, widthM: number, lengthM: number, obstacles: Obstacle[], title: string) => {
@@ -752,37 +908,37 @@ const SolarPanelCalculator: React.FC = () => {
     >
       <Helmet>
         <title>Solar Panel Calculator UK | Panel Layout, ROI & Cost Estimator – DB+</title>
-       
-  <meta
-    name="description"
-    content="Free interactive solar panel calculator: design your roof layout, compare real UK panel and inverter models by power and price, and estimate ROI, payback period and annual savings."
-  />
 
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "DB+ Solar Panel Calculator",
-      "applicationCategory": "UtilitiesApplication",
-      "operatingSystem": "Any (web browser)",
-      "description":
-        "Interactive tool to design solar panel layouts, compare real UK panel and inverter models by power and price, and calculate ROI, payback period and annual savings.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "GBP"
-      },
-      "provider": {
-        "@type": "Organization",
-        "name": "DB+ Design & Management",
-        "url": "https://dbsdesigner.com"
-      }
-    })}
-  </script>
-</Helmet>
+        <meta
+          name="description"
+          content="Free interactive solar panel calculator: design your roof layout, compare real UK panel and inverter models by power and price, and estimate ROI, payback period and annual savings."
+        />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "DB+ Solar Panel Calculator",
+            "applicationCategory": "UtilitiesApplication",
+            "operatingSystem": "Any (web browser)",
+            "description":
+              "Interactive tool to design solar panel layouts, compare real UK panel and inverter models by power and price, and calculate ROI, payback period and annual savings.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "GBP"
+            },
+            "provider": {
+              "@type": "Organization",
+              "name": "DB+ Design & Management",
+              "url": "https://dbsdesigner.com"
+            }
+          })}
+        </script>
+      </Helmet>
       <div className="flex justify-start mb-4 px-4 md:px-0 pt-4 md:pt-0">
         <button 
-          onClick={() => navigate('/')}  // Redirige a Home Insight (ruta raíz)
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md"
         >
           ← Back to Home Insight
@@ -796,6 +952,93 @@ const SolarPanelCalculator: React.FC = () => {
         <p>
           <strong>Annual generation (kWh)</strong> = (Total power in Wp ÷ 1000) × Local solar irradiation (kWh/m²/year) × Orientation factor × Tilt factor × (1 − Shading %) × Climate factor
         </p>
+      </div>
+
+      {/* Section 0: Save / Load Project */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+        <h3 className="font-bold text-xl mb-3 text-white">0. Project</h3>
+        <p className="text-xs text-gray-300 mb-3">
+          Saved locally in this browser under a project name — no account needed yet. Give your calculation a name
+          (e.g. "Casa Corby – south roof") so you can reopen it later, or reuse it in the Battery Calculator.
+        </p>
+        <div className="grid md:grid-cols-3 gap-3 items-end">
+          <div className="md:col-span-1">
+            <label className="text-white text-sm">Project name</label>
+            <input
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="e.g. Casa Corby – south roof"
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            />
+          </div>
+          <div className="md:col-span-1 flex gap-2">
+            <button
+              onClick={handleSaveProject}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              {currentProfileId ? 'Update project' : 'Save project'}
+            </button>
+            <button
+              onClick={handleNewProject}
+              className="border border-white/30 text-white px-4 py-2 rounded-md text-sm hover:bg-white hover:text-black transition-colors"
+            >
+              New
+            </button>
+          </div>
+          <div className="md:col-span-1">
+            <label className="text-white text-sm">Reopen a saved project</label>
+            <select
+              value={selectedLoadId}
+              onChange={(e) => {
+                setSelectedLoadId(e.target.value);
+                if (e.target.value) handleLoadProject(e.target.value);
+              }}
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            >
+              <option value="">— Select a saved project —</option>
+              {savedProjects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({new Date(p.updatedAt).toLocaleDateString()})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {saveMessage && <p className="text-green-300 text-sm mt-2">{saveMessage}</p>}
+
+        {savedProjects.length > 0 && (
+          <div className="mt-3 border-t border-gray-600 pt-3">
+            <p className="text-white text-sm font-medium mb-2">Your saved projects</p>
+            <div className="space-y-1">
+              {savedProjects.map((p) => (
+                <div key={p.id} className="flex items-center justify-between bg-gray-700 rounded px-3 py-2 text-sm">
+                  <span className="text-white">
+                    {p.name}
+                    <span className="text-gray-400 ml-2">
+                      · {p.data.totalPanelsCount} panels · {p.data.totalAnnualKwh.toFixed(0)} kWh/yr
+                    </span>
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleLoadProject(p.id)}
+                      className="text-blue-300 hover:text-blue-100 text-xs underline"
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProject(p.id)}
+                      className="text-red-300 hover:text-red-100 text-xs underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Section 1: Location & Panel Count - Dark grey background */}
