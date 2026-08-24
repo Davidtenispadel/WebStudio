@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from "lucide-react";
-// import BatteryCalculator from './BatteryCalculator'; // ⬅ descomentar cuando exista el componente
+import BatteryCalculator from './BatteryCalculator';
 
 const BatteriesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -431,23 +431,18 @@ const BatteriesPage: React.FC = () => {
         </div>
 
         {/* ============================================================ */}
-        {/* 12. CALCULATOR (COMING SOON) */}
+        {/* 12. INTERACTIVE BATTERY CALCULATOR */}
         {/* ============================================================ */}
         <h3 className="text-2xl font-semibold mt-12 mb-4">12. Design your own battery system — intelligent storage calculator</h3>
         <p className="mb-6">
-          DB+ is developing a complete <strong>Battery Selection Formula</strong> that will analyse your solar
-          production, consumption profile, tariffs, battery chemistry, EV ownership, heating system and local
-          regulations to recommend the right technology, the right size, and whether a battery makes sense for your
-          home at all — plus expected savings, payback period and V2H suitability.
+          Use the calculator below to compare battery chemistries, size a system against your solar generation or
+          backup needs, and see weight, cost, payback and UK certification requirements for your own property.
+          If you've already run the Solar Panel Calculator, link that saved project here to size the battery against
+          your real generation and export figures.
         </p>
-        <div className="bg-gray-100 border border-dashed border-gray-300 rounded-md p-8 text-center mb-6">
-          <p className="font-semibold text-lg mb-1">🛠️ Interactive battery calculator — coming soon</p>
-          <p className="text-sm text-gray-600">
-            In the meantime, use the enquiry form below and our team will run these numbers for your property
-            manually.
-          </p>
+        <div className="mb-16">
+          <BatteryCalculator />
         </div>
-        {/* <BatteryCalculator /> */}
 
         {/* ============================================================ */}
         {/* CTA final — same style as SolarPanelsPage */}
