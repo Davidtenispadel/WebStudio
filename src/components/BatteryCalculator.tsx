@@ -1,0 +1,706 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import {
+  listSavedSolarProfiles,
+  loadSolarProfileById,
+  SavedSolarProfile,
+  saveNamedBatteryProfile,
+  listSavedBatteryProfiles,
+  loadBatteryProfileById,
+  deleteBatteryProfile,
+  SavedBatteryProfile,
+  BatterySizingMode,
+} from '../utils/energyProfile';
+
+// -------------------- DATA --------------------
+// Orientative UK-market figures (hardware only, ex-installation labour).
+// Chemistry notes are general guidance, not manufacturer specifications —
+// always confirm exact figures against the datasheet of the unit quoted.
+const BATTERY_CATALOG = {
+  lfp_modular_ac: {
+    name: 'LFP modular AC-coupled (e.g. GivEnergy / Growatt / Alpha ESS cabinet)',
+    chemistry: 'LiFePO4 (LFP)',
+    pricePerKwh: 350, // £ per nameplate kWh, hardware only
+    typicalUnitKwh: 5.2,
+    cycleLife: 6000,
+    dod: 0.95,
+    roundTripEfficiency: 0.95,
+    weightPerKwhKg: 11,
+    fireRisk: 'Low — thermally stable chemistry, still needs a certified installation',
+    warrantyYears: 10,
+  },
+  lfp_integrated_hybrid: {
+    name: 'LFP integrated hybrid, inverter built in (e.g. Tesla Powerwall‑style)',
+    chemistry: 'LiFePO4 (LFP)',
+    pricePerKwh: 430,
+    typicalUnitKwh: 13.5,
+    cycleLife: 6000,
+    dod: 0.975,
+    roundTripEfficiency: 0.9,
+    weightPerKwhKg: 9.6,
+    fireRisk: 'Low',
+    warrantyYears: 10,
+  },
+  nmc_compact: {
+    name: 'NMC compact wall‑mounted (entry‑level residential systems)',
+    chemistry: 'NMC (Nickel Manganese Cobalt)',
+    pricePerKwh: 300,
+    typicalUnitKwh: 3.3,
+    cycleLife: 4000,
+    dod: 0.9,
+    roundTripEfficiency: 0.92,
+    weightPerKwhKg: 13,
+    fireRisk: 'Moderate — higher energy density, more thermally sensitive than LFP; mind clearances',
+    warrantyYears: 7,
+  },
+  lead_acid_offgrid: {
+    name: 'Sealed lead‑acid / AGM (budget or off‑grid only)',
+    chemistry: 'Lead‑acid (AGM/Gel)',
+    pricePerKwh: 150,
+    typicalUnitKwh: 2.4,
+    cycleLife: 1200,
+    dod: 0.5,
+    roundTripEfficiency: 0.8,
+    weightPerKwhKg: 33,
+    fireRisk: 'Very low, but vents hydrogen while charging — needs a ventilated enclosure',
+    warrantyYears: 3,
+  },
+};
+type BatteryKey = keyof typeof BATTERY_CATALOG;
+
+// Assumed number of days per year a home battery can usefully complete a
+// full useful cycle (accounts for low-generation winter days, cloudy
+// spells, etc.) — used only to cap the financial "shifted kWh" estimate.
+const USEFUL_CYCLE_DAYS_PER_YEAR = 300;
+
+// -------------------- MAIN COMPONENT --------------------
+const BatteryCalculator: React.FC = () => {
+  const navigate = useNavigate();
+  const calculatorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.location.hash === '#battery-calculator') {
+      setTimeout(() => {
+        const el = document.getElementById('battery-calculator');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+    }
+  }, []);
+
+  // --- Linked solar project ---
+  const [solarProjects, setSolarProjects] = useState<SavedSolarProfile[]>([]);
+  const [linkedSolarId, setLinkedSolarId] = useState<string>('');
+  const [linkedSolar, setLinkedSolar] = useState<SavedSolarProfile | null>(null);
+
+  useEffect(() => {
+    setSolarProjects(listSavedSolarProfiles());
+  }, []);
+
+  const handleLinkSolar = (id: string) => {
+    setLinkedSolarId(id);
+    if (!id) {
+      setLinkedSolar(null);
+      return;
+    }
+    const saved = loadSolarProfileById(id);
+    setLinkedSolar(saved);
+    if (saved) {
+      // Sensible defaults once a solar project is linked: use its export
+      // surplus as the self-consumption sizing target and its self-
+      // consumption as the backup critical load.
+      setCriticalLoadKwhDay(Math.max(1, saved.data.selfConsumedKwhMonthly / 30));
+    }
+  };
+
+  // --- Battery selection & sizing ---
+  const [batteryKey, setBatteryKey] = useState<BatteryKey>('lfp_modular_ac');
+  const [sizingMode, setSizingMode] = useState<BatterySizingMode>('self_consumption');
+  const [backupDays, setBackupDays] = useState(1);
+  const [criticalLoadKwhDay, setCriticalLoadKwhDay] = useState(8);
+  const [manualCapacityKwh, setManualCapacityKwh] = useState(10);
+
+  // --- EV / bidirectional charging ---
+  const [hasEV, setHasEV] = useState(false);
+  const [dailyEvKwh, setDailyEvKwh] = useState(8);
+  const [vehicleToHome, setVehicleToHome] = useState(false);
+
+  // --- Save / load battery project (named, localStorage-based) ---
+  const [projectName, setProjectName] = useState('');
+  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+  const [savedProjects, setSavedProjects] = useState<SavedBatteryProfile[]>([]);
+  const [selectedLoadId, setSelectedLoadId] = useState<string>('');
+  const [saveMessage, setSaveMessage] = useState<string>('');
+
+  const refreshSavedProjects = () => setSavedProjects(listSavedBatteryProfiles());
+  useEffect(() => {
+    refreshSavedProjects();
+  }, []);
+
+  const battery = BATTERY_CATALOG[batteryKey];
+
+  // -------------------- SIZING --------------------
+  const dailyExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly / 30 : 0;
+
+  const evBackupAddKwh = hasEV && !vehicleToHome ? dailyEvKwh : 0;
+
+  let targetUsableKwh = 0;
+  if (sizingMode === 'self_consumption') {
+    targetUsableKwh = dailyExportedKwh;
+  } else if (sizingMode === 'backup') {
+    targetUsableKwh = criticalLoadKwhDay * backupDays + evBackupAddKwh * backupDays;
+  } else {
+    targetUsableKwh = manualCapacityKwh * battery.dod; // manual figure is treated as the nameplate size the user typed
+  }
+
+  const requiredNameplateKwh =
+    sizingMode === 'manual' ? manualCapacityKwh : targetUsableKwh > 0 ? targetUsableKwh / battery.dod : 0;
+  const usableKwh = requiredNameplateKwh * battery.dod;
+  const totalCost = requiredNameplateKwh * battery.pricePerKwh;
+  const totalWeightKg = requiredNameplateKwh * battery.weightPerKwhKg;
+  const approxModules = requiredNameplateKwh > 0 ? Math.max(1, Math.ceil(requiredNameplateKwh / battery.typicalUnitKwh)) : 0;
+
+  // -------------------- FINANCIALS (only meaningful with a linked solar project) --------------------
+  const annualExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly * 12 : 0;
+  const annualShiftedKwh = linkedSolar
+    ? Math.min(annualExportedKwh, requiredNameplateKwh * battery.dod * battery.roundTripEfficiency * USEFUL_CYCLE_DAYS_PER_YEAR)
+    : 0;
+  const tariffSpread = linkedSolar ? Math.max(0, linkedSolar.data.importTariff - linkedSolar.data.exportTariff) : 0;
+  const annualSavings = linkedSolar ? annualShiftedKwh * tariffSpread : 0;
+  const paybackYears = linkedSolar && annualSavings > 0 ? totalCost / annualSavings : null;
+
+  // -------------------- SAVE / LOAD PROJECT --------------------
+  const handleSaveProject = () => {
+    const name = projectName.trim();
+    if (!name) {
+      setSaveMessage('Give your battery project a name before saving.');
+      return;
+    }
+    const data = {
+      linkedSolarProfileId: linkedSolar ? linkedSolar.id : null,
+      linkedSolarProfileName: linkedSolar ? linkedSolar.name : null,
+      batteryKey,
+      sizingMode,
+      backupDays,
+      criticalLoadKwhDay,
+      manualCapacityKwh,
+      hasEV,
+      dailyEvKwh,
+      vehicleToHome,
+      requiredNameplateKwh,
+      usableKwh,
+      totalCost,
+      totalWeightKg,
+      approxModules,
+      annualShiftedKwh,
+      annualSavings,
+      paybackYears,
+    };
+    const saved = saveNamedBatteryProfile(name, data, currentProfileId);
+    setCurrentProfileId(saved.id);
+    setProjectName(saved.name);
+    refreshSavedProjects();
+    setSaveMessage(`Saved "${saved.name}".`);
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const handleLoadProject = (id: string) => {
+    const saved = loadBatteryProfileById(id);
+    if (!saved) return;
+    const d = saved.data;
+
+    if (d.linkedSolarProfileId) {
+      handleLinkSolar(d.linkedSolarProfileId);
+    } else {
+      setLinkedSolarId('');
+      setLinkedSolar(null);
+    }
+    setBatteryKey(d.batteryKey as BatteryKey);
+    setSizingMode(d.sizingMode);
+    setBackupDays(d.backupDays);
+    setCriticalLoadKwhDay(d.criticalLoadKwhDay);
+    setManualCapacityKwh(d.manualCapacityKwh);
+    setHasEV(d.hasEV);
+    setDailyEvKwh(d.dailyEvKwh);
+    setVehicleToHome(d.vehicleToHome);
+
+    setCurrentProfileId(saved.id);
+    setProjectName(saved.name);
+    setSelectedLoadId(saved.id);
+    setSaveMessage(`Loaded "${saved.name}".`);
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  const handleDeleteProject = (id: string) => {
+    deleteBatteryProfile(id);
+    refreshSavedProjects();
+    if (currentProfileId === id) {
+      setCurrentProfileId(null);
+      setProjectName('');
+    }
+    if (selectedLoadId === id) setSelectedLoadId('');
+  };
+
+  const handleNewProject = () => {
+    setCurrentProfileId(null);
+    setProjectName('');
+    setSelectedLoadId('');
+    setSaveMessage('');
+  };
+
+  // -------------------- RENDER --------------------
+  return (
+    <div
+      ref={calculatorRef}
+      id="battery-calculator"
+      className="w-full bg-white shadow-lg scroll-mt-24 md:max-w-7xl md:mx-auto md:p-6 md:rounded-xl p-0 rounded-none"
+    >
+      <Helmet>
+        <title>Home Battery Calculator UK | Sizing, Weight, Cost & Certification – DB+</title>
+
+        <meta
+          name="description"
+          content="Free interactive home battery calculator: compare LFP, NMC and lead‑acid battery types, size a system against your solar generation or backup needs, and see weight, cost, payback and UK certification requirements."
+        />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareApplication',
+            name: 'DB+ Home Battery Calculator',
+            applicationCategory: 'UtilitiesApplication',
+            operatingSystem: 'Any (web browser)',
+            description:
+              'Interactive tool to compare home battery chemistries, size a battery system against solar generation or backup needs, and estimate weight, cost, savings and UK MCS/Part P certification requirements.',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'GBP',
+            },
+            provider: {
+              '@type': 'Organization',
+              name: 'DB+ Design & Management',
+              url: 'https://dbsdesigner.com',
+            },
+          })}
+        </script>
+      </Helmet>
+
+      <div className="flex justify-start mb-4 px-4 md:px-0 pt-4 md:pt-0">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-md"
+        >
+          ← Back to Home Insight
+        </button>
+      </div>
+
+      <div className="mx-4 md:mx-0 mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300 text-sm text-gray-700">
+        <p className="font-semibold mb-2">📐 How we calculate this</p>
+        <p className="mb-1">
+          <strong>Nameplate capacity (kWh)</strong> = target usable energy ÷ Depth of Discharge (DoD) of the chosen
+          chemistry.
+        </p>
+        <p className="mb-1">
+          <strong>Weight (kg)</strong> = nameplate capacity × weight‑per‑kWh of the chosen chemistry. <strong>Cost</strong> =
+          nameplate capacity × price‑per‑kWh (hardware only, excludes installation labour).
+        </p>
+        <p>
+          <strong>Annual saving</strong> (only with a linked solar project) = min(your annual exported kWh, what the battery
+          can physically cycle in a year) × (import tariff − export tariff).
+        </p>
+      </div>
+
+      {/* Section 0: Link a solar project + save/load this battery project */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+        <h3 className="font-bold text-xl mb-3 text-white">0. Project</h3>
+
+        <div className="mb-4">
+          <label className="text-white text-sm">Link a saved solar project (optional, but needed for savings/payback)</label>
+          <select
+            value={linkedSolarId}
+            onChange={(e) => handleLinkSolar(e.target.value)}
+            className="border p-2 rounded w-full bg-gray-100 text-gray-800 mt-1"
+          >
+            <option value="">— No solar project linked (sizing/weight only) —</option>
+            {solarProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} ({p.data.totalAnnualKwh.toFixed(0)} kWh/yr, {new Date(p.updatedAt).toLocaleDateString()})
+              </option>
+            ))}
+          </select>
+          {solarProjects.length === 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              No saved solar projects found in this browser yet. Run and save a project in the Solar Panel Calculator first
+              if you want automatic sizing and savings figures.
+            </p>
+          )}
+          {linkedSolar && (
+            <div className="mt-2 text-xs text-gray-300 bg-gray-700 rounded p-2">
+              Linked to <strong>{linkedSolar.name}</strong>: {linkedSolar.data.totalAnnualKwh.toFixed(0)} kWh/yr generated,{' '}
+              {linkedSolar.data.exportedKwhMonthly.toFixed(1)} kWh/month currently exported at £
+              {linkedSolar.data.exportTariff.toFixed(3)}/kWh vs £{linkedSolar.data.importTariff.toFixed(3)}/kWh import.
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-300 mb-3">
+          Saved locally in this browser under a project name — no account needed yet. Give this battery calculation a name
+          so you can reopen it later.
+        </p>
+        <div className="grid md:grid-cols-3 gap-3 items-end">
+          <div className="md:col-span-1">
+            <label className="text-white text-sm">Battery project name</label>
+            <input
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="e.g. Casa Corby – 10kWh LFP"
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            />
+          </div>
+          <div className="md:col-span-1 flex gap-2">
+            <button
+              onClick={handleSaveProject}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              {currentProfileId ? 'Update project' : 'Save project'}
+            </button>
+            <button
+              onClick={handleNewProject}
+              className="border border-white/30 text-white px-4 py-2 rounded-md text-sm hover:bg-white hover:text-black transition-colors"
+            >
+              New
+            </button>
+          </div>
+          <div className="md:col-span-1">
+            <label className="text-white text-sm">Reopen a saved battery project</label>
+            <select
+              value={selectedLoadId}
+              onChange={(e) => {
+                setSelectedLoadId(e.target.value);
+                if (e.target.value) handleLoadProject(e.target.value);
+              }}
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            >
+              <option value="">— Select a saved project —</option>
+              {savedProjects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({new Date(p.updatedAt).toLocaleDateString()})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {saveMessage && <p className="text-green-300 text-sm mt-2">{saveMessage}</p>}
+
+        {savedProjects.length > 0 && (
+          <div className="mt-3 border-t border-gray-600 pt-3">
+            <p className="text-white text-sm font-medium mb-2">Your saved battery projects</p>
+            <div className="space-y-1">
+              {savedProjects.map((p) => (
+                <div key={p.id} className="flex items-center justify-between bg-gray-700 rounded px-3 py-2 text-sm">
+                  <span className="text-white">
+                    {p.name}
+                    <span className="text-gray-400 ml-2">
+                      · {p.data.requiredNameplateKwh.toFixed(1)} kWh · {p.data.totalWeightKg.toFixed(0)} kg
+                    </span>
+                  </span>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleLoadProject(p.id)} className="text-blue-300 hover:text-blue-100 text-xs underline">
+                      Open
+                    </button>
+                    <button onClick={() => handleDeleteProject(p.id)} className="text-red-300 hover:text-red-100 text-xs underline">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Section 1: Battery type */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+        <h3 className="font-bold text-xl mb-3 text-white">1. Battery type</h3>
+        <select
+          value={batteryKey}
+          onChange={(e) => setBatteryKey(e.target.value as BatteryKey)}
+          className="border p-2 rounded w-full bg-gray-100 text-gray-800 mb-3"
+        >
+          {(Object.keys(BATTERY_CATALOG) as BatteryKey[]).map((key) => (
+            <option key={key} value={key}>
+              {BATTERY_CATALOG[key].name}
+            </option>
+          ))}
+        </select>
+        <div className="grid md:grid-cols-3 gap-3 text-sm">
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Chemistry</p>
+            <p className="text-white font-semibold">{battery.chemistry}</p>
+          </div>
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Depth of Discharge (DoD)</p>
+            <p className="text-white font-semibold">{(battery.dod * 100).toFixed(0)}%</p>
+          </div>
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Round‑trip efficiency</p>
+            <p className="text-white font-semibold">{(battery.roundTripEfficiency * 100).toFixed(0)}%</p>
+          </div>
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Cycle life</p>
+            <p className="text-white font-semibold">~{battery.cycleLife.toLocaleString()} cycles</p>
+          </div>
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Weight</p>
+            <p className="text-white font-semibold">~{battery.weightPerKwhKg} kg/kWh</p>
+          </div>
+          <div className="bg-gray-700 p-3 rounded">
+            <p className="text-gray-300">Typical unit size</p>
+            <p className="text-white font-semibold">{battery.typicalUnitKwh} kWh/module</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-300 mt-3">🔥 Fire/safety note: {battery.fireRisk}</p>
+        <p className="text-xs text-gray-400 mt-1">
+          Figures are orientative UK‑market averages (hardware only) — always check the exact datasheet of the unit your
+          installer quotes.
+        </p>
+      </div>
+
+      {/* Section 2: Sizing */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+        <h3 className="font-bold text-xl mb-3 text-white">2. Sizing</h3>
+        <div className="flex flex-wrap gap-3 mb-4">
+          {(
+            [
+              ['self_consumption', 'Capture my solar surplus'],
+              ['backup', 'Backup / resilience (days of autonomy)'],
+              ['manual', 'Enter a capacity myself'],
+            ] as [BatterySizingMode, string][]
+          ).map(([mode, label]) => (
+            <button
+              key={mode}
+              onClick={() => setSizingMode(mode)}
+              className={`px-3 py-2 rounded-md text-sm font-medium border ${
+                sizingMode === mode ? 'bg-red-600 border-red-600 text-white' : 'border-white/30 text-white hover:bg-white hover:text-black'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {sizingMode === 'self_consumption' && (
+          <div className="text-sm text-white">
+            {linkedSolar ? (
+              <p>
+                Sizing to capture the <strong>{dailyExportedKwh.toFixed(1)} kWh/day</strong> currently exported at low tariff
+                by <strong>{linkedSolar.name}</strong>, so it's stored and self‑consumed instead of sold to the grid.
+              </p>
+            ) : (
+              <p className="text-yellow-300">
+                Link a saved solar project above to size against your actual exported surplus — otherwise this mode has
+                nothing to size against.
+              </p>
+            )}
+          </div>
+        )}
+
+        {sizingMode === 'backup' && (
+          <div className="grid md:grid-cols-2 gap-3 text-sm">
+            <div>
+              <label className="text-white">Critical daily load to cover (kWh/day)</label>
+              <input
+                type="number"
+                step="0.5"
+                value={criticalLoadKwhDay}
+                onChange={(e) => setCriticalLoadKwhDay(parseFloat(e.target.value))}
+                className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Fridge, lighting, router, boiler controls etc. — not the whole house. Typical UK home: 3–5 kWh/day for
+                essentials only.
+              </p>
+            </div>
+            <div>
+              <label className="text-white">Days of autonomy wanted</label>
+              <input
+                type="number"
+                step="0.5"
+                value={backupDays}
+                onChange={(e) => setBackupDays(parseFloat(e.target.value))}
+                className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+              />
+            </div>
+          </div>
+        )}
+
+        {sizingMode === 'manual' && (
+          <div className="text-sm">
+            <label className="text-white">Nameplate capacity (kWh)</label>
+            <input
+              type="number"
+              step="0.5"
+              value={manualCapacityKwh}
+              onChange={(e) => setManualCapacityKwh(parseFloat(e.target.value))}
+              className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+            />
+          </div>
+        )}
+
+        <div className="mt-4 border-t border-gray-600 pt-3">
+          <label className="flex items-center gap-2 text-white text-sm">
+            <input type="checkbox" checked={hasEV} onChange={(e) => setHasEV(e.target.checked)} />
+            I have (or plan to get) an EV
+          </label>
+          {hasEV && (
+            <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
+              <div>
+                <label className="text-white">Typical daily EV charge (kWh/day)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={dailyEvKwh}
+                  onChange={(e) => setDailyEvKwh(parseFloat(e.target.value))}
+                  className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                />
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 text-white">
+                  <input type="checkbox" checked={vehicleToHome} onChange={(e) => setVehicleToHome(e.target.checked)} />
+                  I have (or plan) a bidirectional (V2H/V2G) charger
+                </label>
+              </div>
+            </div>
+          )}
+          {hasEV && !vehicleToHome && (
+            <p className="text-xs text-gray-400 mt-2">
+              Added to your backup target in "Backup / resilience" mode. Without V2H, the EV only draws from the home
+              battery — it doesn't add storage.
+            </p>
+          )}
+          {hasEV && vehicleToHome && (
+            <p className="text-xs text-yellow-300 mt-2">
+              With a V2H/V2G‑capable charger, the EV's own battery can act as extra home storage — but check with the
+              vehicle and charger manufacturer whether this is supported and whether it affects your battery warranty
+              before relying on it for sizing.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Section 3: Results */}
+      <div className="bg-black text-white p-6 rounded-lg mx-4 md:mx-0 mb-6">
+        <h3 className="font-bold text-2xl mb-4">📊 Sizing results</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Nameplate capacity</p>
+            <p className="text-2xl font-bold text-yellow-400">{requiredNameplateKwh.toFixed(1)} kWh</p>
+          </div>
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Usable capacity (after DoD)</p>
+            <p className="text-2xl font-bold text-green-400">{usableKwh.toFixed(1)} kWh</p>
+          </div>
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Approx. modules needed</p>
+            <p className="text-2xl font-bold text-blue-400">{approxModules}</p>
+          </div>
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Total weight</p>
+            <p className="text-2xl font-bold text-white">{totalWeightKg.toFixed(0)} kg</p>
+          </div>
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Hardware cost (est.)</p>
+            <p className="text-2xl font-bold text-red-400">£{totalCost.toFixed(0)}</p>
+          </div>
+          <div className="bg-gray-900 p-3 rounded-lg text-center">
+            <p className="text-sm text-gray-400">Warranty (typical)</p>
+            <p className="text-2xl font-bold text-white">{battery.warrantyYears} yrs</p>
+          </div>
+        </div>
+        <p className="text-xs text-gray-400">
+          Weight matters for where it can be sited: check the manufacturer's fixing detail and, for wall‑mounted units, get
+          confirmation the wall/floor can take the point load — this is exactly the kind of check our MEP team does as
+          part of a battery installation design.
+        </p>
+      </div>
+
+      {/* Section 4: Financial analysis */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
+        <h3 className="font-bold text-xl mb-3 text-white">4. Financial analysis</h3>
+        {linkedSolar ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-700 p-3 rounded-lg text-center">
+              <p className="text-sm text-gray-300">Shifted from export → self‑use</p>
+              <p className="text-2xl font-bold text-green-400">{annualShiftedKwh.toFixed(0)} kWh/yr</p>
+            </div>
+            <div className="bg-gray-700 p-3 rounded-lg text-center">
+              <p className="text-sm text-gray-300">Estimated annual saving</p>
+              <p className="text-2xl font-bold text-green-400">£{annualSavings.toFixed(0)}</p>
+            </div>
+            <div className="bg-gray-700 p-3 rounded-lg text-center">
+              <p className="text-sm text-gray-300">Payback period</p>
+              <p className="text-2xl font-bold text-yellow-400">{paybackYears ? `${paybackYears.toFixed(1)} yrs` : '—'}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-yellow-300">
+            Link a saved solar project in Section 0 to see estimated savings and payback — without it, this is sizing and
+            cost only (e.g. a pure backup/off‑grid battery with no solar array to compare against).
+          </p>
+        )}
+      </div>
+
+      {/* Section 5: Placement & installation guidance */}
+      <div className="mx-4 md:mx-0 mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300 text-sm text-gray-700">
+        <h3 className="font-bold text-lg mb-3 text-gray-900">5. Where can it go?</h3>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Not in a bedroom, and not blocking an escape route — this applies to lithium and lead‑acid systems alike.</li>
+          <li>Keep manufacturer‑specified clearances around the unit for ventilation and heat dissipation.</li>
+          <li>
+            Attached garages and utility rooms are common locations in the UK; some manufacturers restrict siting directly
+            below or above habitable rooms, or require a fire‑rated enclosure in that case.
+          </li>
+          <li>Outdoor installation needs an IP‑rated enclosure and protection from direct sun and flooding.</li>
+          <li>Lead‑acid batteries vent hydrogen while charging and need active or passive ventilation — never a sealed cupboard.</li>
+          <li>Wall‑mounted units need the wall (and, for heavier lithium cabinets, sometimes the floor) checked for point‑load capacity — see the weight figure in Section 3.</li>
+        </ul>
+        <p className="text-xs text-gray-500 mt-3">
+          General good‑practice guidance, not a substitute for the manufacturer's installation manual or a site‑specific
+          design.
+        </p>
+      </div>
+
+      {/* Section 6: Certification & DIY */}
+      <div className="mx-4 md:mx-0 mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300 text-sm text-gray-700">
+        <h3 className="font-bold text-lg mb-3 text-gray-900">6. Certification — can I install it myself?</h3>
+        <p className="mb-2">
+          <strong>Grid‑connected battery (AC‑coupled or via a hybrid inverter):</strong> in the UK this needs an{' '}
+          <strong>MCS‑certified installer</strong>, compliance with <strong>Building Regs Part P</strong> for the electrical
+          work, and notification to the local electricity network operator (DNO) under <strong>G98</strong> for small,
+          deemed‑compliant systems, or prior approval under <strong>G99</strong> for larger installations. This isn't
+          something a homeowner can self‑certify — it's a safety requirement (arc‑fault and thermal‑runaway risk) as well
+          as a condition of most manufacturer warranties, home insurance policies and mortgage lenders.
+        </p>
+        <p className="mb-2">
+          <strong>Small stand‑alone off‑grid systems</strong> (e.g. a portable power station, or a battery/panel set not
+          wired into the property's fixed installation or export meter) can generally be installed and used by a
+          competent homeowner — because it isn't connected to the grid or the house wiring, the Part P/MCS/DNO
+          requirements above don't apply in the same way.
+        </p>
+        <p>
+          Keep the installer's <strong>MCS certificate</strong> and the <strong>DNO acknowledgement</strong> — you'll need
+          them for home insurance, any export tariff application, and when selling the property.
+        </p>
+        <p className="text-xs text-gray-500 mt-3">
+          General information, not legal advice — requirements can vary by network operator, property type and system
+          size; confirm the specifics for your project with your installer and DNO.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default BatteryCalculator;
