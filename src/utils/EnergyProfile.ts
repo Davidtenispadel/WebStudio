@@ -260,3 +260,156 @@ export function profileAgeLabel(isoDate: string): string {
   const days = Math.round(hours / 24);
   return `${days}d ago`;
 }
+
+// =====================================================================
+// BatteryCalculator storage — same named-project pattern as the solar
+// profiles above, but for a battery sizing/costing project.
+//
+// A battery project can optionally be linked to a saved solar project
+// (by id) so that BatteryCalculator can reuse its generation, self-
+// consumption and tariff figures. The link is stored by id + a copy of
+// the name for display, but is NOT required — the calculator also works
+// stand-alone (e.g. backup-only sizing with no solar array).
+// =====================================================================
+
+export const BATTERY_PROFILES_KEY = 'dbplus_battery_profiles_v1';
+export const BATTERY_DATA_VERSION = 1;
+
+export type BatterySizingMode = 'self_consumption' | 'backup' | 'manual';
+
+/** Full battery calculation: raw inputs + computed results. */
+export interface BatteryProfileData {
+  version: number;
+
+  // Link back to a saved solar project (optional)
+  linkedSolarProfileId: string | null;
+  linkedSolarProfileName: string | null;
+
+  // Battery selection
+  batteryKey: string; // key into BATTERY_CATALOG (defined in BatteryCalculator.tsx)
+
+  // Sizing inputs
+  sizingMode: BatterySizingMode;
+  backupDays: number;
+  criticalLoadKwhDay: number;
+  manualCapacityKwh: number;
+
+  // EV / bidirectional charging
+  hasEV: boolean;
+  dailyEvKwh: number;
+  vehicleToHome: boolean;
+
+  // -------- Computed results (denormalised, so a reopened project shows
+  // its figures instantly without recomputation) --------
+  requiredNameplateKwh: number;
+  usableKwh: number;
+  totalCost: number;
+  totalWeightKg: number;
+  approxModules: number;
+  annualShiftedKwh: number;
+  annualSavings: number;
+  paybackYears: number | null;
+}
+
+/** A named, saved battery project as stored in localStorage. */
+export interface SavedBatteryProfile {
+  id: string;
+  name: string;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
+  data: BatteryProfileData;
+}
+
+function readAllBatteries(): SavedBatteryProfile[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(BATTERY_PROFILES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p): p is SavedBatteryProfile =>
+        p && typeof p === 'object' && typeof p.id === 'string' && p.data?.version === BATTERY_DATA_VERSION
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeAllBatteries(list: SavedBatteryProfile[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(BATTERY_PROFILES_KEY, JSON.stringify(list));
+  } catch {
+    // Storage can fail (private browsing, quota, etc.) — safe to ignore.
+  }
+}
+
+function makeBatteryId(name: string): string {
+  return `${slugify(name)}-${Date.now().toString(36)}`;
+}
+
+/**
+ * Save a new named battery project, or update an existing one if
+ * `existingId` is provided and still exists. Returns the saved record.
+ */
+export function saveNamedBatteryProfile(
+  name: string,
+  data: Omit<BatteryProfileData, 'version'>,
+  existingId?: string | null
+): SavedBatteryProfile {
+  const list = readAllBatteries();
+  const fullData: BatteryProfileData = { ...data, version: BATTERY_DATA_VERSION };
+  const now = new Date().toISOString();
+
+  if (existingId) {
+    const idx = list.findIndex((p) => p.id === existingId);
+    if (idx !== -1) {
+      const updated: SavedBatteryProfile = {
+        ...list[idx],
+        name: name.trim() || list[idx].name,
+        updatedAt: now,
+        data: fullData,
+      };
+      list[idx] = updated;
+      writeAllBatteries(list);
+      return updated;
+    }
+  }
+
+  const record: SavedBatteryProfile = {
+    id: makeBatteryId(name || 'battery-project'),
+    name: name.trim() || 'Untitled battery project',
+    createdAt: now,
+    updatedAt: now,
+    data: fullData,
+  };
+  list.unshift(record);
+  writeAllBatteries(list);
+  return record;
+}
+
+/** List all saved battery projects, most recently updated first. */
+export function listSavedBatteryProfiles(): SavedBatteryProfile[] {
+  return readAllBatteries().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+
+/** Load one saved battery project by id, or null if it no longer exists. */
+export function loadBatteryProfileById(id: string): SavedBatteryProfile | null {
+  return readAllBatteries().find((p) => p.id === id) ?? null;
+}
+
+/** Rename an existing saved battery project. */
+export function renameBatteryProfile(id: string, newName: string): void {
+  const list = readAllBatteries();
+  const idx = list.findIndex((p) => p.id === id);
+  if (idx === -1) return;
+  list[idx] = { ...list[idx], name: newName.trim() || list[idx].name, updatedAt: new Date().toISOString() };
+  writeAllBatteries(list);
+}
+
+/** Delete a saved battery project. */
+export function deleteBatteryProfile(id: string): void {
+  const list = readAllBatteries().filter((p) => p.id !== id);
+  writeAllBatteries(list);
+}
