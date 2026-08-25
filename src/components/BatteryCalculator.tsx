@@ -11,7 +11,7 @@ import {
   deleteBatteryProfile,
   SavedBatteryProfile,
   BatterySizingMode,
-} from '../utils/energyProfile';
+} from '../utils/EnergyProfile';
 
 // -------------------- DATA --------------------
 // Orientative UK-market figures (hardware only, ex-installation labour).
