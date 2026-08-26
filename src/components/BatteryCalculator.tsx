@@ -113,6 +113,11 @@ const BatteryCalculator: React.FC = () => {
     }
   };
 
+  // --- Manual fallback values (used only when no solar project is linked) ---
+  const [manualExportedKwhMonth, setManualExportedKwhMonth] = useState(0);
+  const [manualImportTariff, setManualImportTariff] = useState(0.28);
+  const [manualExportTariff, setManualExportTariff] = useState(0.09);
+
   // --- Battery selection & sizing ---
   const [batteryKey, setBatteryKey] = useState<BatteryKey>('lfp_modular_ac');
   const [sizingMode, setSizingMode] = useState<BatterySizingMode>('self_consumption');
@@ -140,7 +145,9 @@ const BatteryCalculator: React.FC = () => {
   const battery = BATTERY_CATALOG[batteryKey];
 
   // -------------------- SIZING --------------------
-  const dailyExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly / 30 : 0;
+  // Prefer the linked solar project's real export figure; fall back to the
+  // manually entered value (never recomputed) when nothing is linked.
+  const dailyExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly / 30 : manualExportedKwhMonth / 30;
 
   const evBackupAddKwh = hasEV && !vehicleToHome ? dailyEvKwh : 0;
 
@@ -160,14 +167,17 @@ const BatteryCalculator: React.FC = () => {
   const totalWeightKg = requiredNameplateKwh * battery.weightPerKwhKg;
   const approxModules = requiredNameplateKwh > 0 ? Math.max(1, Math.ceil(requiredNameplateKwh / battery.typicalUnitKwh)) : 0;
 
-  // -------------------- FINANCIALS (only meaningful with a linked solar project) --------------------
-  const annualExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly * 12 : 0;
-  const annualShiftedKwh = linkedSolar
+  // -------------------- FINANCIALS (works with a linked solar project, or with manually entered figures) --------------------
+  const annualExportedKwh = linkedSolar ? linkedSolar.data.exportedKwhMonthly * 12 : manualExportedKwhMonth * 12;
+  const effectiveImportTariff = linkedSolar ? linkedSolar.data.importTariff : manualImportTariff;
+  const effectiveExportTariff = linkedSolar ? linkedSolar.data.exportTariff : manualExportTariff;
+  const hasFinancialInputs = linkedSolar !== null || manualExportedKwhMonth > 0;
+  const annualShiftedKwh = hasFinancialInputs
     ? Math.min(annualExportedKwh, requiredNameplateKwh * battery.dod * battery.roundTripEfficiency * USEFUL_CYCLE_DAYS_PER_YEAR)
     : 0;
-  const tariffSpread = linkedSolar ? Math.max(0, linkedSolar.data.importTariff - linkedSolar.data.exportTariff) : 0;
-  const annualSavings = linkedSolar ? annualShiftedKwh * tariffSpread : 0;
-  const paybackYears = linkedSolar && annualSavings > 0 ? totalCost / annualSavings : null;
+  const tariffSpread = hasFinancialInputs ? Math.max(0, effectiveImportTariff - effectiveExportTariff) : 0;
+  const annualSavings = hasFinancialInputs ? annualShiftedKwh * tariffSpread : 0;
+  const paybackYears = hasFinancialInputs && annualSavings > 0 ? totalCost / annualSavings : null;
 
   // -------------------- SAVE / LOAD PROJECT --------------------
   const handleSaveProject = () => {
@@ -179,6 +189,9 @@ const BatteryCalculator: React.FC = () => {
     const data = {
       linkedSolarProfileId: linkedSolar ? linkedSolar.id : null,
       linkedSolarProfileName: linkedSolar ? linkedSolar.name : null,
+      manualExportedKwhMonth,
+      manualImportTariff,
+      manualExportTariff,
       batteryKey,
       sizingMode,
       backupDays,
@@ -215,6 +228,9 @@ const BatteryCalculator: React.FC = () => {
       setLinkedSolarId('');
       setLinkedSolar(null);
     }
+    setManualExportedKwhMonth(d.manualExportedKwhMonth ?? 0);
+    setManualImportTariff(d.manualImportTariff ?? 0.28);
+    setManualExportTariff(d.manualExportTariff ?? 0.09);
     setBatteryKey(d.batteryKey as BatteryKey);
     setSizingMode(d.sizingMode);
     setBackupDays(d.backupDays);
@@ -332,14 +348,122 @@ const BatteryCalculator: React.FC = () => {
           {solarProjects.length === 0 && (
             <p className="text-xs text-gray-400 mt-1">
               No saved solar projects found in this browser yet. Run and save a project in the Solar Panel Calculator first
-              if you want automatic sizing and savings figures.
+              if you want automatic sizing and savings figures — or enter your own figures manually below.
             </p>
           )}
           {linkedSolar && (
-            <div className="mt-2 text-xs text-gray-300 bg-gray-700 rounded p-2">
-              Linked to <strong>{linkedSolar.name}</strong>: {linkedSolar.data.totalAnnualKwh.toFixed(0)} kWh/yr generated,{' '}
-              {linkedSolar.data.exportedKwhMonthly.toFixed(1)} kWh/month currently exported at £
-              {linkedSolar.data.exportTariff.toFixed(3)}/kWh vs £{linkedSolar.data.importTariff.toFixed(3)}/kWh import.
+            <div className="mt-3 text-sm text-gray-200 bg-gray-700 rounded-lg p-3 space-y-2">
+              <p className="font-semibold text-white">
+                📋 Linked project: {linkedSolar.name}
+                <span className="text-xs text-gray-400 font-normal ml-2">
+                  ({linkedSolar.data.country}, {linkedSolar.data.region} region)
+                </span>
+              </p>
+              <p className="text-xs text-gray-400">
+                These figures are taken exactly as saved by the Solar Panel Calculator — nothing here is recalculated.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Panels — Roof A</p>
+                  <p className="text-white font-semibold">
+                    {linkedSolar.data.panelsRoofA !== undefined ? linkedSolar.data.panelsRoofA : '—'}
+                  </p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Panels — Roof B</p>
+                  <p className="text-white font-semibold">
+                    {linkedSolar.data.panelsRoofB !== undefined ? linkedSolar.data.panelsRoofB : '—'}
+                  </p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Total panels</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.totalPanelsCount}</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Total power</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.totalWp.toFixed(0)} Wp</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Inverter</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.inverterName || '—'}</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Annual generation</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.totalAnnualKwh.toFixed(0)} kWh/yr</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Solar install cost</p>
+                  <p className="text-white font-semibold">£{linkedSolar.data.totalInstallCost.toFixed(0)}</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Self‑consumed</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.selfConsumedKwhMonthly.toFixed(1)} kWh/mo</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Grid purchase</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.gridPurchaseKwhMonthly.toFixed(1)} kWh/mo</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Exported</p>
+                  <p className="text-white font-semibold">{linkedSolar.data.exportedKwhMonthly.toFixed(1)} kWh/mo</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Import tariff</p>
+                  <p className="text-white font-semibold">£{linkedSolar.data.importTariff.toFixed(3)}/kWh</p>
+                </div>
+                <div className="bg-gray-800 rounded p-2">
+                  <p className="text-gray-400">Export tariff</p>
+                  <p className="text-white font-semibold">£{linkedSolar.data.exportTariff.toFixed(3)}/kWh</p>
+                </div>
+              </div>
+              {(linkedSolar.data.panelsRoofA === undefined) && (
+                <p className="text-xs text-yellow-300">
+                  ⚠️ This project was saved before per‑roof panel counts were tracked — reopen and re‑save it in the Solar
+                  Panel Calculator to fill in the Roof A/B figures above.
+                </p>
+              )}
+            </div>
+          )}
+
+          {!linkedSolar && (
+            <div className="mt-3 bg-gray-700 rounded-lg p-3">
+              <p className="text-sm text-white font-medium mb-1">Or enter your own figures manually</p>
+              <p className="text-xs text-gray-400 mb-2">
+                No solar project needed — type in your own numbers (e.g. from a quote, your inverter app, or an estimate).
+                These are used exactly as entered, not recalculated.
+              </p>
+              <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div>
+                  <label className="text-white">Exported surplus (kWh/month)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={manualExportedKwhMonth}
+                    onChange={(e) => setManualExportedKwhMonth(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white">Import tariff (£/kWh)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={manualImportTariff}
+                    onChange={(e) => setManualImportTariff(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white">Export tariff (£/kWh)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={manualExportTariff}
+                    onChange={(e) => setManualExportTariff(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -499,10 +623,15 @@ const BatteryCalculator: React.FC = () => {
                 Sizing to capture the <strong>{dailyExportedKwh.toFixed(1)} kWh/day</strong> currently exported at low tariff
                 by <strong>{linkedSolar.name}</strong>, so it's stored and self‑consumed instead of sold to the grid.
               </p>
+            ) : manualExportedKwhMonth > 0 ? (
+              <p>
+                Sizing to capture the <strong>{dailyExportedKwh.toFixed(1)} kWh/day</strong> you entered manually in
+                Section 0.
+              </p>
             ) : (
               <p className="text-yellow-300">
-                Link a saved solar project above to size against your actual exported surplus — otherwise this mode has
-                nothing to size against.
+                Link a saved solar project, or enter an exported surplus manually in Section 0, to size against a real
+                figure — otherwise this mode has nothing to size against.
               </p>
             )}
           </div>
@@ -630,7 +759,7 @@ const BatteryCalculator: React.FC = () => {
       {/* Section 4: Financial analysis */}
       <div className="bg-gray-800 rounded-lg p-4 mb-6 mx-4 md:mx-0">
         <h3 className="font-bold text-xl mb-3 text-white">4. Financial analysis</h3>
-        {linkedSolar ? (
+        {hasFinancialInputs ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-gray-700 p-3 rounded-lg text-center">
               <p className="text-sm text-gray-300">Shifted from export → self‑use</p>
@@ -647,8 +776,9 @@ const BatteryCalculator: React.FC = () => {
           </div>
         ) : (
           <p className="text-sm text-yellow-300">
-            Link a saved solar project in Section 0 to see estimated savings and payback — without it, this is sizing and
-            cost only (e.g. a pure backup/off‑grid battery with no solar array to compare against).
+            Link a saved solar project, or enter your export/tariff figures manually, in Section 0 to see estimated
+            savings and payback — without either, this is sizing and cost only (e.g. a pure backup/off‑grid battery
+            with no solar array to compare against).
           </p>
         )}
       </div>
