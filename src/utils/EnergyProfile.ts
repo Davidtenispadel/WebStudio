@@ -84,7 +84,10 @@ export interface SolarEnergyProfileData {
 
   // -------- Computed results (denormalised for BatteryCalculator) --------
   totalPanelsCount: number;
+  panelsRoofA?: number;
+  panelsRoofB?: number;
   totalWp: number;
+  inverterName?: string;
   totalInstallCost: number;
   totalAnnualKwh: number;
   avgMonthlyGeneration: number;
@@ -284,6 +287,12 @@ export interface BatteryProfileData {
   // Link back to a saved solar project (optional)
   linkedSolarProfileId: string | null;
   linkedSolarProfileName: string | null;
+
+  // Manual fallback values, used only when no solar project is linked —
+  // entered by hand, never recomputed by BatteryCalculator itself.
+  manualExportedKwhMonth: number;
+  manualImportTariff: number;
+  manualExportTariff: number;
 
   // Battery selection
   batteryKey: string; // key into BATTERY_CATALOG (defined in BatteryCalculator.tsx)
