@@ -609,6 +609,22 @@ const SolarPanelCalculator: React.FC = () => {
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
+  // Deep-link support: /solar-calculator?project=<id> auto-loads that saved
+  // project for editing (used by the "Edit this solar project" button in
+  // BatteryCalculator). Runs once on mount, after handleLoadProject exists.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get('project');
+    if (projectId) {
+      handleLoadProject(projectId);
+      setTimeout(() => {
+        const el = document.getElementById('solar-calculator');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleDeleteProject = (id: string) => {
     deleteSolarProfile(id);
     refreshSavedProjects();
