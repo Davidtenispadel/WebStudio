@@ -303,9 +303,21 @@ export interface BatteryProfileData {
   criticalLoadKwhDay: number;
   manualCapacityKwh: number;
 
-  // EV / bidirectional charging
+  // Household consumption profile & future-proofing
+  consumptionProfile?: 'low' | 'medium' | 'high';
+  futureIncrease?: boolean;
+
+  // EV / bidirectional charging — modelled per vehicle from daily miles,
+  // battery capacity and efficiency, not typed in directly.
   hasEV: boolean;
-  dailyEvKwh: number;
+  numEVs?: 0 | 1 | 2;
+  ev1BatteryKwh?: number;
+  ev1DailyMiles?: number;
+  ev1EfficiencyMiPerKwh?: number;
+  ev2BatteryKwh?: number;
+  ev2DailyMiles?: number;
+  ev2EfficiencyMiPerKwh?: number;
+  dailyEvKwh: number; // computed total across all EVs, denormalised for display
   vehicleToHome: boolean;
 
   // -------- Computed results (denormalised, so a reopened project shows
