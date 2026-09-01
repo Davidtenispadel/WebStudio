@@ -42,6 +42,30 @@ const BATTERY_CATALOG = {
     fireRisk: 'Low',
     warrantyYears: 10,
   },
+  lfp_all_in_one: {
+    name: 'LFP all‑in‑one cabinet, battery + hybrid inverter + EPS in one unit (e.g. GivEnergy AIO‑style)',
+    chemistry: 'LiFePO4 (LFP)',
+    pricePerKwh: 400,
+    typicalUnitKwh: 8.2,
+    cycleLife: 6000,
+    dod: 0.95,
+    roundTripEfficiency: 0.93,
+    weightPerKwhKg: 12,
+    fireRisk: 'Low',
+    warrantyYears: 10,
+  },
+  lfp_stackable_high_capacity: {
+    name: 'LFP stackable high‑capacity tower (e.g. Sonnen / Huawei LUNA‑style, expandable)',
+    chemistry: 'LiFePO4 (LFP)',
+    pricePerKwh: 460,
+    typicalUnitKwh: 5.0,
+    cycleLife: 8000,
+    dod: 0.95,
+    roundTripEfficiency: 0.94,
+    weightPerKwhKg: 10.5,
+    fireRisk: 'Low',
+    warrantyYears: 10,
+  },
   nmc_compact: {
     name: 'NMC compact wall‑mounted (entry‑level residential systems)',
     chemistry: 'NMC (Nickel Manganese Cobalt)',
@@ -54,9 +78,69 @@ const BATTERY_CATALOG = {
     fireRisk: 'Moderate — higher energy density, more thermally sensitive than LFP; mind clearances',
     warrantyYears: 7,
   },
+  nmc_high_density: {
+    name: 'NMC high energy‑density (EV‑derived cells, compact footprint)',
+    chemistry: 'NMC (Nickel Manganese Cobalt)',
+    pricePerKwh: 340,
+    typicalUnitKwh: 4.8,
+    cycleLife: 3000,
+    dod: 0.9,
+    roundTripEfficiency: 0.93,
+    weightPerKwhKg: 8,
+    fireRisk: 'Moderate‑high — needs strict thermal management; mind fire‑rated enclosure rules',
+    warrantyYears: 8,
+  },
+  sodium_ion_emerging: {
+    name: 'Sodium‑ion (emerging technology, first residential units ~2025‑26)',
+    chemistry: 'Sodium‑ion (Na‑ion)',
+    pricePerKwh: 320,
+    typicalUnitKwh: 5.0,
+    cycleLife: 4000,
+    dod: 0.9,
+    roundTripEfficiency: 0.9,
+    weightPerKwhKg: 14,
+    fireRisk: 'Very low — inherently more thermally stable than lithium chemistries; supply/track record still limited',
+    warrantyYears: 6,
+  },
+  saltwater_aqueous: {
+    name: 'Saltwater / aqueous electrolyte (non‑flammable, niche availability)',
+    chemistry: 'Saltwater (aqueous Na‑ion)',
+    pricePerKwh: 380,
+    typicalUnitKwh: 2.6,
+    cycleLife: 3000,
+    dod: 1.0,
+    roundTripEfficiency: 0.8,
+    weightPerKwhKg: 28,
+    fireRisk: 'Very low — non‑flammable electrolyte; larger and heavier than lithium for the same usable kWh',
+    warrantyYears: 5,
+  },
+  flow_vanadium: {
+    name: 'Vanadium redox flow (long‑duration, whole‑house/off‑grid scale)',
+    chemistry: 'Vanadium redox flow',
+    pricePerKwh: 550,
+    typicalUnitKwh: 10.0,
+    cycleLife: 15000,
+    dod: 1.0,
+    roundTripEfficiency: 0.75,
+    weightPerKwhKg: 25,
+    fireRisk: 'Very low — non‑flammable liquid electrolyte, but large tanks and plant‑room space needed',
+    warrantyYears: 10,
+  },
+  second_life_ev: {
+    name: 'Second‑life EV battery pack (repurposed, budget large‑capacity)',
+    chemistry: 'NMC or LFP (varies by donor EV)',
+    pricePerKwh: 220,
+    typicalUnitKwh: 20.0,
+    cycleLife: 2500,
+    dod: 0.8,
+    roundTripEfficiency: 0.88,
+    weightPerKwhKg: 10,
+    fireRisk: 'Moderate — condition depends on the donor pack\u2019s history; ask for a health/degradation report',
+    warrantyYears: 3,
+  },
   lead_acid_offgrid: {
     name: 'Sealed lead‑acid / AGM (budget or off‑grid only)',
-    chemistry: 'Lead‑acid (AGM/Gel)',
+    chemistry: 'Lead‑acid (AGM)',
     pricePerKwh: 150,
     typicalUnitKwh: 2.4,
     cycleLife: 1200,
@@ -65,6 +149,18 @@ const BATTERY_CATALOG = {
     weightPerKwhKg: 33,
     fireRisk: 'Very low, but vents hydrogen while charging — needs a ventilated enclosure',
     warrantyYears: 3,
+  },
+  lead_acid_flooded_gel: {
+    name: 'Flooded / Gel lead‑acid (traditional off‑grid, lowest upfront cost)',
+    chemistry: 'Lead‑acid (Flooded/Gel)',
+    pricePerKwh: 120,
+    typicalUnitKwh: 2.0,
+    cycleLife: 800,
+    dod: 0.5,
+    roundTripEfficiency: 0.75,
+    weightPerKwhKg: 36,
+    fireRisk: 'Very low, but flooded types need topping up and strong ventilation; shortest lifespan here',
+    warrantyYears: 2,
   },
 };
 type BatteryKey = keyof typeof BATTERY_CATALOG;
@@ -125,10 +221,39 @@ const BatteryCalculator: React.FC = () => {
   const [criticalLoadKwhDay, setCriticalLoadKwhDay] = useState(8);
   const [manualCapacityKwh, setManualCapacityKwh] = useState(10);
 
-  // --- EV / bidirectional charging ---
-  const [hasEV, setHasEV] = useState(false);
-  const [dailyEvKwh, setDailyEvKwh] = useState(8);
+  // --- Household consumption profile (informs the suggested backup load) ---
+  const [consumptionProfile, setConsumptionProfile] = useState<'low' | 'medium' | 'high'>('medium');
+  const [futureIncrease, setFutureIncrease] = useState(false);
+  const CONSUMPTION_ANNUAL_KWH: Record<'low' | 'medium' | 'high', number> = {
+    low: 1800,
+    medium: 2700,
+    high: 4100,
+  };
+  const FUTURE_INCREASE_ANNUAL_KWH = 2500; // rough allowance for an added heat pump / more appliances
+
+  const applyConsumptionProfile = (profile: 'low' | 'medium' | 'high', future: boolean) => {
+    const annual = CONSUMPTION_ANNUAL_KWH[profile] + (future ? FUTURE_INCREASE_ANNUAL_KWH : 0);
+    // Rough share of daily household consumption treated as "critical" backup
+    // load (fridge, lighting, router, boiler controls) — about a third of
+    // average daily use, editable afterwards.
+    setCriticalLoadKwhDay(Math.round(((annual / 365) * 0.35) * 10) / 10);
+  };
+
+  // --- EV / bidirectional charging — modelled per vehicle from daily miles,
+  // battery capacity and real‑world efficiency, not typed in directly ---
+  const [numEVs, setNumEVs] = useState<0 | 1 | 2>(0);
+  const [ev1BatteryKwh, setEv1BatteryKwh] = useState(60);
+  const [ev1DailyMiles, setEv1DailyMiles] = useState(22);
+  const [ev1EfficiencyMiPerKwh, setEv1EfficiencyMiPerKwh] = useState(3.8);
+  const [ev2BatteryKwh, setEv2BatteryKwh] = useState(60);
+  const [ev2DailyMiles, setEv2DailyMiles] = useState(22);
+  const [ev2EfficiencyMiPerKwh, setEv2EfficiencyMiPerKwh] = useState(3.8);
   const [vehicleToHome, setVehicleToHome] = useState(false);
+
+  const hasEV = numEVs > 0;
+  const ev1DailyKwh = numEVs >= 1 ? ev1DailyMiles / Math.max(0.1, ev1EfficiencyMiPerKwh) : 0;
+  const ev2DailyKwh = numEVs >= 2 ? ev2DailyMiles / Math.max(0.1, ev2EfficiencyMiPerKwh) : 0;
+  const dailyEvKwh = ev1DailyKwh + ev2DailyKwh;
 
   // --- Save / load battery project (named, localStorage-based) ---
   const [projectName, setProjectName] = useState('');
@@ -197,7 +322,16 @@ const BatteryCalculator: React.FC = () => {
       backupDays,
       criticalLoadKwhDay,
       manualCapacityKwh,
+      consumptionProfile,
+      futureIncrease,
       hasEV,
+      numEVs,
+      ev1BatteryKwh,
+      ev1DailyMiles,
+      ev1EfficiencyMiPerKwh,
+      ev2BatteryKwh,
+      ev2DailyMiles,
+      ev2EfficiencyMiPerKwh,
       dailyEvKwh,
       vehicleToHome,
       requiredNameplateKwh,
@@ -236,8 +370,15 @@ const BatteryCalculator: React.FC = () => {
     setBackupDays(d.backupDays);
     setCriticalLoadKwhDay(d.criticalLoadKwhDay);
     setManualCapacityKwh(d.manualCapacityKwh);
-    setHasEV(d.hasEV);
-    setDailyEvKwh(d.dailyEvKwh);
+    setConsumptionProfile(d.consumptionProfile ?? 'medium');
+    setFutureIncrease(d.futureIncrease ?? false);
+    setNumEVs((d.numEVs ?? (d.hasEV ? 1 : 0)) as 0 | 1 | 2);
+    setEv1BatteryKwh(d.ev1BatteryKwh ?? 60);
+    setEv1DailyMiles(d.ev1DailyMiles ?? 22);
+    setEv1EfficiencyMiPerKwh(d.ev1EfficiencyMiPerKwh ?? 3.8);
+    setEv2BatteryKwh(d.ev2BatteryKwh ?? 60);
+    setEv2DailyMiles(d.ev2DailyMiles ?? 22);
+    setEv2EfficiencyMiPerKwh(d.ev2EfficiencyMiPerKwh ?? 3.8);
     setVehicleToHome(d.vehicleToHome);
 
     setCurrentProfileId(saved.id);
@@ -353,14 +494,23 @@ const BatteryCalculator: React.FC = () => {
           )}
           {linkedSolar && (
             <div className="mt-3 text-sm text-gray-200 bg-gray-700 rounded-lg p-3 space-y-2">
-              <p className="font-semibold text-white">
-                📋 Linked project: {linkedSolar.name}
-                <span className="text-xs text-gray-400 font-normal ml-2">
-                  ({linkedSolar.data.country}, {linkedSolar.data.region} region)
-                </span>
-              </p>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <p className="font-semibold text-white">
+                  📋 Linked project: {linkedSolar.name}
+                  <span className="text-xs text-gray-400 font-normal ml-2">
+                    ({linkedSolar.data.country}, {linkedSolar.data.region} region)
+                  </span>
+                </p>
+                <button
+                  onClick={() => navigate(`/solar-calculator?project=${linkedSolar.id}#solar-calculator`)}
+                  className="text-xs bg-white text-gray-900 px-3 py-1.5 rounded-md font-medium hover:bg-gray-200"
+                >
+                  ✏️ Edit this solar project
+                </button>
+              </div>
               <p className="text-xs text-gray-400">
                 These figures are taken exactly as saved by the Solar Panel Calculator — nothing here is recalculated.
+                Use "Edit" to open it there and change roof, panels, inverter or tariffs, then come back and re‑link.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 <div className="bg-gray-800 rounded p-2">
@@ -638,30 +788,74 @@ const BatteryCalculator: React.FC = () => {
         )}
 
         {sizingMode === 'backup' && (
-          <div className="grid md:grid-cols-2 gap-3 text-sm">
-            <div>
-              <label className="text-white">Critical daily load to cover (kWh/day)</label>
-              <input
-                type="number"
-                step="0.5"
-                value={criticalLoadKwhDay}
-                onChange={(e) => setCriticalLoadKwhDay(parseFloat(e.target.value))}
-                className="border p-2 rounded w-full bg-gray-100 text-gray-800"
-              />
+          <div>
+            <div className="mb-3">
+              <label className="text-white text-sm">Household consumption profile</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(
+                  [
+                    ['low', 'Low (small/efficient home)'],
+                    ['medium', 'Medium (typical UK home)'],
+                    ['high', 'High (large home / high use)'],
+                  ] as ['low' | 'medium' | 'high', string][]
+                ).map(([level, label]) => (
+                  <button
+                    key={level}
+                    onClick={() => {
+                      setConsumptionProfile(level);
+                      applyConsumptionProfile(level, futureIncrease);
+                    }}
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+                      consumptionProfile === level
+                        ? 'bg-red-600 border-red-600 text-white'
+                        : 'border-white/30 text-white hover:bg-white hover:text-black'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 text-white text-xs mt-2">
+                <input
+                  type="checkbox"
+                  checked={futureIncrease}
+                  onChange={(e) => {
+                    setFutureIncrease(e.target.checked);
+                    applyConsumptionProfile(consumptionProfile, e.target.checked);
+                  }}
+                />
+                Planning a heat pump or other big new electric load soon (future‑proof the sizing)
+              </label>
               <p className="text-xs text-gray-400 mt-1">
-                Fridge, lighting, router, boiler controls etc. — not the whole house. Typical UK home: 3–5 kWh/day for
-                essentials only.
+                Suggests a critical‑load figure below (~⅓ of typical daily use — fridge, lighting, router, boiler
+                controls). Adjust it freely; it's a starting point, not a fixed rule.
               </p>
             </div>
-            <div>
-              <label className="text-white">Days of autonomy wanted</label>
-              <input
-                type="number"
-                step="0.5"
-                value={backupDays}
-                onChange={(e) => setBackupDays(parseFloat(e.target.value))}
-                className="border p-2 rounded w-full bg-gray-100 text-gray-800"
-              />
+            <div className="grid md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <label className="text-white">Critical daily load to cover (kWh/day)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={criticalLoadKwhDay}
+                  onChange={(e) => setCriticalLoadKwhDay(parseFloat(e.target.value))}
+                  className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Fridge, lighting, router, boiler controls etc. — not the whole house. Typical UK home: 3–5 kWh/day for
+                  essentials only.
+                </p>
+              </div>
+              <div>
+                <label className="text-white">Days of autonomy wanted</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={backupDays}
+                  onChange={(e) => setBackupDays(parseFloat(e.target.value))}
+                  className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -680,42 +874,125 @@ const BatteryCalculator: React.FC = () => {
         )}
 
         <div className="mt-4 border-t border-gray-600 pt-3">
-          <label className="flex items-center gap-2 text-white text-sm">
-            <input type="checkbox" checked={hasEV} onChange={(e) => setHasEV(e.target.checked)} />
-            I have (or plan to get) an EV
-          </label>
-          {hasEV && (
-            <div className="grid md:grid-cols-2 gap-3 mt-2 text-sm">
-              <div>
-                <label className="text-white">Typical daily EV charge (kWh/day)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={dailyEvKwh}
-                  onChange={(e) => setDailyEvKwh(parseFloat(e.target.value))}
-                  className="border p-2 rounded w-full bg-gray-100 text-gray-800"
-                />
+          <label className="text-white text-sm">Electric vehicles at home</label>
+          <div className="flex flex-wrap gap-2 mt-1 mb-3">
+            {([0, 1, 2] as const).map((n) => (
+              <button
+                key={n}
+                onClick={() => setNumEVs(n)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+                  numEVs === n ? 'bg-red-600 border-red-600 text-white' : 'border-white/30 text-white hover:bg-white hover:text-black'
+                }`}
+              >
+                {n === 0 ? 'No EV' : n === 1 ? '1 EV' : '2 EVs'}
+              </button>
+            ))}
+          </div>
+
+          {numEVs >= 1 && (
+            <div className="mb-3 bg-gray-700 rounded p-3">
+              <p className="text-white text-sm font-medium mb-2">🚗 Vehicle 1</p>
+              <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div>
+                  <label className="text-white text-xs">Battery capacity (kWh)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={ev1BatteryKwh}
+                    onChange={(e) => setEv1BatteryKwh(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white text-xs">Daily miles driven</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={ev1DailyMiles}
+                    onChange={(e) => setEv1DailyMiles(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white text-xs">Efficiency (miles/kWh)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={ev1EfficiencyMiPerKwh}
+                    onChange={(e) => setEv1EfficiencyMiPerKwh(parseFloat(e.target.value) || 3.8)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
               </div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 text-white">
-                  <input type="checkbox" checked={vehicleToHome} onChange={(e) => setVehicleToHome(e.target.checked)} />
-                  I have (or plan) a bidirectional (V2H/V2G) charger
-                </label>
-              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                ≈ {ev1DailyKwh.toFixed(1)} kWh/day to charge (UK average: ~22 miles/day, ~3.5‑4.0 mi/kWh).
+              </p>
             </div>
           )}
-          {hasEV && !vehicleToHome && (
-            <p className="text-xs text-gray-400 mt-2">
-              Added to your backup target in "Backup / resilience" mode. Without V2H, the EV only draws from the home
-              battery — it doesn't add storage.
-            </p>
+
+          {numEVs >= 2 && (
+            <div className="mb-3 bg-gray-700 rounded p-3">
+              <p className="text-white text-sm font-medium mb-2">🚗 Vehicle 2</p>
+              <div className="grid md:grid-cols-3 gap-3 text-sm">
+                <div>
+                  <label className="text-white text-xs">Battery capacity (kWh)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={ev2BatteryKwh}
+                    onChange={(e) => setEv2BatteryKwh(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white text-xs">Daily miles driven</label>
+                  <input
+                    type="number"
+                    step="1"
+                    value={ev2DailyMiles}
+                    onChange={(e) => setEv2DailyMiles(parseFloat(e.target.value) || 0)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-white text-xs">Efficiency (miles/kWh)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={ev2EfficiencyMiPerKwh}
+                    onChange={(e) => setEv2EfficiencyMiPerKwh(parseFloat(e.target.value) || 3.8)}
+                    className="border p-2 rounded w-full bg-gray-100 text-gray-800"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                ≈ {ev2DailyKwh.toFixed(1)} kWh/day to charge.
+              </p>
+            </div>
           )}
-          {hasEV && vehicleToHome && (
-            <p className="text-xs text-yellow-300 mt-2">
-              With a V2H/V2G‑capable charger, the EV's own battery can act as extra home storage — but check with the
-              vehicle and charger manufacturer whether this is supported and whether it affects your battery warranty
-              before relying on it for sizing.
-            </p>
+
+          {hasEV && (
+            <>
+              <label className="flex items-center gap-2 text-white text-sm">
+                <input type="checkbox" checked={vehicleToHome} onChange={(e) => setVehicleToHome(e.target.checked)} />
+                At least one vehicle has a bidirectional (V2H/V2G) charger
+              </label>
+              <p className="text-xs text-gray-300 mt-2">
+                Combined EV charging demand: <strong>{dailyEvKwh.toFixed(1)} kWh/day</strong>.
+              </p>
+              {!vehicleToHome ? (
+                <p className="text-xs text-gray-400 mt-1">
+                  Added to your backup target in "Backup / resilience" mode. Without V2H, the EV only draws from the home
+                  battery — it doesn't add storage.
+                </p>
+              ) : (
+                <p className="text-xs text-yellow-300 mt-1">
+                  With a V2H/V2G‑capable charger, the EV's own battery can act as extra home storage — but check with the
+                  vehicle and charger manufacturer whether this is supported and whether it affects your battery warranty
+                  before relying on it for sizing.
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
