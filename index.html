@@ -16,6 +16,53 @@
 
     <link rel="icon" type="image/png" href="/icon-192.png" />
 
+    <!-- ==================== SITEWIDE STRUCTURED DATA (SEO / E-E-A-T) ==================== -->
+    <!-- Organization + LocalBusiness + founder, shared across every page. -->
+    <!-- Page-specific schema (SoftwareApplication, Article, FAQPage, etc.) -->
+    <!-- is added per-page via react-helmet and coexists fine with this.   -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["Organization", "LocalBusiness", "ProfessionalService"],
+      "name": "DB+ Design & Management",
+      "alternateName": "DB+ Architecture Practice",
+      "url": "https://dbsdesigner.com",
+      "image": "https://dbsdesigner.com/og-image.jpg",
+      "logo": "https://dbsdesigner.com/icon-192.png",
+      "telephone": "+44 7955 018937",
+      "email": "david@dbsdesigner.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "108 Kestrel Road",
+        "addressLocality": "Corby",
+        "addressRegion": "Northamptonshire",
+        "postalCode": "NN17 5FP",
+        "addressCountry": "GB"
+      },
+      "areaServed": [
+        "Corby",
+        "Kettering",
+        "Wellingborough",
+        "Rushden",
+        "Desborough",
+        "Market Harborough",
+        "Oundle",
+        "Uppingham",
+        "Stamford"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "David Bonilla-Saavedra",
+        "jobTitle": "Architect",
+        "sameAs": [
+          "https://members.architecture.com/custom/bespoke/directory/dir_details.asp?id=279877&type=I&dir=3",
+          "https://architects-register.org.uk/Architect/083457B?filterId=Architect"
+        ]
+      }
+    }
+    </script>
+    <!-- =================================================================================== -->
+
     <!-- ==================== PLAUSIBLE ANALYTICS (PRIVACY-FIRST) ==================== -->
     <script async src="https://plausible.io/js/pa-aQAdpEUzJktdnd40vHTEQ.js"></script>
     <script>
