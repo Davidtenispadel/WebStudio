@@ -1,174 +1,223 @@
-import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import HomeContent from './components/HomeContent';
+import ProjectModal from './components/ProjectModal';
+import SectionView from './components/SectionView';
+import VideoBackground from './components/VideoBackground';
+import { CATEGORIES } from './constants';
+import { Project, CategoryGroup, StudioSection } from './types';
+import { PATH_TO_SECTION, SECTION_TO_PATH } from './routes';
+import { MessageSquare, Send } from 'lucide-react';
+import { askStudioAssistant } from './services/geminiService';
 
-interface HomeContentProps {
-  onNavigate: (path: string) => void;
-}
+const Studio: React.FC = () => {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const isHome = location.pathname === '/';
 
-// NOTE ON ROUTES: the five paths below (/architecture, /design-management,
-// /mep-structure, /masterplanning-urban, /project-support) are taken from
-// the site's generated page filenames. Please confirm they match the exact
-// strings in src/routes.ts (SECTION_TO_PATH) before deploying — if any
-// differ, just update the `path` value on that card below.
-const SERVICES = [
-  {
-    title: 'Architecture',
-    path: '/architecture',
-    description:
-      'Extensions, new builds and full architectural design, from concept sketches through to planning-ready drawings.',
-  },
-  {
-    title: 'Design & Management',
-    path: '/design-management',
-    description:
-      'BIM-led design coordination and project management that keeps your build on programme and on budget.',
-  },
-  {
-    title: 'Masterplanning & Urban',
-    path: '/masterplanning-urban',
-    description:
-      'Site layout, feasibility studies and masterplanning for larger residential and mixed-use sites.',
-  },
-  {
-    title: 'MEP & Structure',
-    path: '/mep-structure',
-    description:
-      'Mechanical, electrical, plumbing and structural design — including solar, battery storage and heat pump integration.',
-  },
-  {
-    title: 'Project Support',
-    path: '/project-support',
-    description:
-      'Planning applications, Building Regulations submissions and on-site support through to completion.',
-  },
-];
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'assistant', text: string}[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
 
-const HomeContent: React.FC<HomeContentProps> = ({ onNavigate }) => {
+  const activeCategory: CategoryGroup | null = React.useMemo(() => {
+    if (isHome) return null;
+    const sectionName = PATH_TO_SECTION[location.pathname];
+    if (!sectionName) return null;
+    return CATEGORIES.find(cat => cat.name === sectionName) ?? null;
+  }, [location.pathname, isHome]);
+
+  useEffect(() => {
+    console.log("ACTIVE CATEGORY:", activeCategory?.name);
+  }, [activeCategory]);
+
+  useEffect(() => {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch) return;
+
+    const cursor = document.getElementById('custom-cursor');
+    if (!cursor) return;
+
+    const move = (e: MouseEvent) => {
+      cursor.style.left = `${e.clientX}px`;
+      cursor.style.top = `${e.clientY}px`;
+
+      const target = e.target as HTMLElement;
+      const interactive =
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('select') ||
+        target.closest('.cursor-pointer');
+
+      cursor.classList.toggle('active', Boolean(interactive));
+    };
+
+    window.addEventListener('mousemove', move, { passive: true });
+    return () => window.removeEventListener('mousemove', move);
+  }, []);
+
+  const handleNavClick = useCallback((sectionName: string) => {
+    const path = SECTION_TO_PATH[sectionName] ?? '/';
+    navigate(path);
+    setSelectedProject(null);
+  }, [navigate]);
+
+  const handleGoHome = useCallback(() => {
+    navigate('/');
+    setSelectedProject(null);
+  }, [navigate]);
+
+  const handleProjectCardClick = useCallback(
+    (project: Project) => {
+     if (activeCategory?.name !== StudioSection.STRUCTURE) {
+      setSelectedProject(project);
+    }
+  },
+  [activeCategory]
+)
+;
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+    const userMsg = chatMessage;
+    setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
+    setChatMessage('');
+    setIsTyping(true);
+    const response = await askStudioAssistant(userMsg);
+    setChatHistory(prev => [...prev, { role: 'assistant', text: response || '' }]);
+    setIsTyping(false);
+  };
+
+    const isDarkBackground =
+  activeCategory?.name === StudioSection.ENQUIRY || isHome;
+  
   return (
-    <div className="bg-white text-black">
-      {/* ============================================================ */}
-      {/* INTRO / WHO WE ARE */}
-      {/* ============================================================ */}
-      <section className="max-w-5xl mx-auto px-6 md:px-10 py-16 md:py-24">
-        <h2 className="text-2xl md:text-3xl font-light mb-6">
-          Architectural design for Corby, Kettering, Wellingborough and the surrounding area
-        </h2>
-        <div className="space-y-4 text-base md:text-lg text-gray-700 leading-relaxed max-w-3xl">
-          <p>
-            DB+ Design &amp; Management is a full-service architecture practice based in Corby,
-            Northamptonshire. We design house extensions, loft conversions, new-build homes and larger
-            residential projects for homeowners, self-builders and small developers, taking a project from
-            an early feasibility sketch through to a Building Regulations-ready technical package.
-          </p>
-          <p>
-            Every project is led by a RIBA Chartered, ARB-registered architect and delivered using a
-            BIM-led workflow, which means your drawings, structural information and MEP (mechanical,
-            electrical and plumbing) coordination all sit in one consistent 3D model — reducing the design
-            clashes and late-stage surprises that typically add cost and delay to a build.
-          </p>
-          <p>
-            We work across Corby and within roughly a 20-mile radius, including{' '}
-            <strong>Kettering</strong>, <strong>Wellingborough</strong>, <strong>Rushden</strong>,{' '}
-            <strong>Desborough</strong>, <strong>Market Harborough</strong>, <strong>Oundle</strong>,{' '}
-            <strong>Uppingham</strong> and <strong>Stamford</strong>. If you're planning an extension, a
-            new build, or need help navigating planning permission and Building Regulations anywhere in
-            this area, we can help.
-          </p>
-          <p>
-            Beyond traditional architecture, we also build free, in‑depth tools to help decide which
-            technology systems belong in a project — useful whether you're a homeowner client, a fellow
-            architect, or an installer sizing up a job. We started with electricity generation and storage:
-            solar panel layout and output, and battery chemistry, sizing and location. Each tool goes beyond
-            a rough estimate — it works through the real constraints (roof size, orientation, tariffs,
-            battery weight and placement rules) and gives a projected payback period, so you can see whether
-            a given system genuinely pays for itself before committing to it. Our{' '}
-            <button
-              onClick={() => onNavigate('/solar-calculator')}
-              className="text-red-600 underline hover:text-red-700"
-            >
-              solar panel calculator
-            </button>{' '}
-            and{' '}
-            <button
-              onClick={() => onNavigate('/batteries')}
-              className="text-red-600 underline hover:text-red-700"
-            >
-              battery storage guide
-            </button>{' '}
-            are the first two — more will follow as we cover the rest of what a modern home's technical
-            systems need.
-          </p>
-        </div>
-      </section>
+    <div
+      className={`min-h-screen w-screen transition-colors duration-700 
+        ${activeCategory?.name === StudioSection.ENQUIRY 
+          ? 'bg-black' 
+          : isHome 
+            ? 'bg-transparent' 
+            : 'bg-white'}
+        text-black overflow-hidden relative z-0`}
+    >
+      <h1 className="sr-only">
+        DB+ Architecture | Expert Design, BIM & Planning Services
+      </h1>
 
-      {/* ============================================================ */}
-      {/* SERVICES GRID */}
-      {/* ============================================================ */}
-      <section className="bg-gray-50 py-16 md:py-24">
-        <div className="max-w-6xl mx-auto px-6 md:px-10">
-          <h2 className="text-2xl md:text-3xl font-light mb-10">What we do</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map((service) => (
-              <button
-                key={service.path}
-                onClick={() => onNavigate(service.path)}
-                className="text-left bg-white rounded-xl p-6 border border-gray-200 hover:border-red-600 hover:shadow-lg transition-all group"
-              >
-                <h3 className="text-lg font-semibold mb-2 flex items-center justify-between">
-                  {service.title}
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-red-600 transition-colors" />
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{service.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
-      {/* FOUNDER BIO — E-E-A-T */}
-      {/* ============================================================ */}
-      <section className="max-w-5xl mx-auto px-6 md:px-10 py-16 md:py-24">
-        <h2 className="text-2xl md:text-3xl font-light mb-8">Who's behind DB+</h2>
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="flex-1">
-            <p className="text-lg font-semibold mb-1">David Bonilla‑Saavedra</p>
-            <p className="text-sm text-gray-500 mb-4">
-              RIBA Chartered Member · ARB Registered Architect No. 083457B
+      {isHome && (
+        <div className="relative h-screen">
+          <VideoBackground
+            videoUrl="https://res.cloudinary.com/dwealmbfi/video/upload/v1771095957/Gen-3_Alpha_Turbo_1476360428_usando_el_sketch_de_Cropped_-_scketch_1_M_5_jjwom8.mp4"
+            onVideoLoaded={() => {}}
+          />
+          <div className="absolute bottom-16 left-6 right-6 md:left-16 md:right-auto md:max-w-xl z-20 text-white">
+            <p className="text-sm tracking-[0.3em] uppercase text-white/70 mb-3">Corby, Northamptonshire</p>
+            <h2 className="text-3xl md:text-5xl font-light leading-tight mb-4">
+              Full‑service architecture practice, from planning permission to completed build.
+            </h2>
+            <p className="text-base md:text-lg text-white/80 mb-6 max-w-lg">
+              DB+ designs extensions, new builds and full architectural projects across Corby and a 20‑mile radius, backed by BIM‑led technical delivery and RIBA/ARB‑registered expertise.
             </p>
-            <div className="space-y-3 text-gray-700 leading-relaxed">
-              <p>
-                David founded DB+ to bring a technically rigorous, BIM-first approach to residential
-                architecture in Northamptonshire — the kind of detailed coordination usually reserved for
-                larger commercial projects, applied to house extensions and new builds.
-              </p>
-              <p>
-                His registration can be checked directly on the official registers:{' '}
-                <a
-                  href="https://members.architecture.com/custom/bespoke/directory/dir_details.asp?id=279877&type=I&dir=3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red-600 underline hover:text-red-700"
-                >
-                  RIBA Chartered Members directory
-                </a>{' '}
-                and the{' '}
-                <a
-                  href="https://architects-register.org.uk/Architect/083457B?filterId=Architect"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red-600 underline hover:text-red-700"
-                >
-                  Architects Registration Board (ARB) public register
-                </a>
-                .
-              </p>
+            <div className="flex flex-wrap gap-4 items-center">
+              <button onClick={() => navigate('/enquiry')} className="bg-white text-black px-6 py-3 rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white transition-all">
+                Start your project
+              </button>
+              <a href="tel:+4407955018937" className="text-white/90 underline text-sm">+44 07955 018937</a>
             </div>
           </div>
         </div>
-      </section>
+      )}
+
+      <div className="relative z-10">
+        <Header 
+          onNavClick={handleNavClick}
+          onGoHomeClick={handleGoHome}
+          isDarkBackground={isDarkBackground}
+        />
+
+       {activeCategory && (
+          <SectionView
+            category={activeCategory}
+            onProjectClick={handleProjectCardClick}
+            isActive={true}
+            currentSectionName={activeCategory.name}
+            onNavigateToEnquiry={() => navigate('/enquiry')}
+          />
+        )}
+
+        {/* HomeContent and Footer only render on the true root "/" page,
+            directly under the hero video — NOT on "Home Insight" or any
+            other section, since those are separate routes (/home-insight,
+            /architecture, etc.) handled by SectionView above. */}
+        {isHome && (
+          <>
+            <HomeContent onNavigate={(path) => navigate(path)} />
+            <Footer />
+          </>
+        )}
+
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+
+        {/* WIDGET DE CHAT (DB+ Assistant) */}
+        <div className="fixed bottom-8 right-8" style={{ zIndex: 60 }}>
+          {!isChatOpen ? (
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="bg-black text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all flex items-center gap-2"
+            >
+              <MessageSquare className="w-6 h-6" />
+            </button>
+          ) : (
+            <div className="bg-white/90 backdrop-blur-xl w-80 md:w-96 shadow-2xl rounded-2xl flex flex-col border border-white/20 overflow-hidden" style={{ height: '500px' }}>
+              <div className="bg-black p-4 text-white flex justify-between items-center">
+                <span className="text-xs font-bold tracking-widest uppercase">DB+ Assistant</span>
+                <button onClick={() => setIsChatOpen(false)} className="text-gray-400 hover:text-white">&times;</button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll bg-gray-50/50">
+                {chatHistory.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`p-3 rounded-xl text-xs font-medium leading-relaxed ${msg.role === 'user' ? 'bg-black text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-700 shadow-sm rounded-bl-none'}`} style={{ maxWidth: '80%' }}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-gray-100 p-3 rounded-xl shadow-sm">
+                      <div className="flex gap-1">
+                        <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce delay-75"></div>
+                        <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-100 bg-white">
+                <div className="relative">
+                  <input type="text" value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} placeholder="Enquire about services..." className="w-full pl-4 pr-10 py-2 bg-gray-100 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-black" />
+                  <button type="submit" className="absolute right-2 top-2 p-1 text-black">
+                    <Send className="w-3 h-3" />
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default HomeContent;
+export default Studio;
