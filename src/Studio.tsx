@@ -155,6 +155,9 @@ const Studio: React.FC = () => {
 
         {isHome && <HomeContent onNavigate={(path) => navigate(path)} />}
 
+        {/* Sitewide footer — always rendered last, at the very bottom of
+            whichever page is showing (home hero+content, or a section page
+            via SectionView above). */}
         <Footer />
 
         <ProjectModal
