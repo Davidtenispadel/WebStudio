@@ -1,162 +1,114 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
 
-interface HomeContentProps {
-  onNavigate: (path: string) => void;
-}
-
-// NOTE ON ROUTES: the five paths below (/architecture, /design-management,
-// /mep-structure, /masterplanning-urban, /project-support) are taken from
-// the site's generated page filenames. Please confirm they match the exact
-// strings in src/routes.ts (SECTION_TO_PATH) before deploying — if any
-// differ, just update the `path` value on that card below.
-const SERVICES = [
-  {
-    title: 'Architecture',
-    path: '/architecture',
-    description:
-      'Extensions, new builds and full architectural design, from concept sketches through to planning-ready drawings.',
-  },
-  {
-    title: 'Design & Management',
-    path: '/design-management',
-    description:
-      'BIM-led design coordination and project management that keeps your build on programme and on budget.',
-  },
-  {
-    title: 'Masterplanning & Urban',
-    path: '/masterplanning-urban',
-    description:
-      'Site layout, feasibility studies and masterplanning for larger residential and mixed-use sites.',
-  },
-  {
-    title: 'MEP & Structure',
-    path: '/mep-structure',
-    description:
-      'Mechanical, electrical, plumbing and structural design — including energy, storage and heat pump integration.',
-  },
-  {
-    title: 'Project Support',
-    path: '/project-support',
-    description:
-      'Planning applications, Building Regulations submissions and on-site support through to completion.',
-  },
-];
-
-const HomeContent: React.FC<HomeContentProps> = ({ onNavigate }) => {
+export const HomeContent: React.FC = () => {
   return (
-    <div className="bg-white text-black">
-      {/* ============================================================ */}
-      {/* INTRO / WHO WE ARE */}
-      {/* ============================================================ */}
-      <section className="max-w-5xl mx-auto px-6 md:px-10 py-16 md:py-24">
-        <h2 className="text-2xl md:text-3xl font-light mb-6">
-          Architectural design for Corby, Kettering, Wellingborough and the surrounding area
+    <article className="home-content max-w-4xl mx-auto px-4 py-8 space-y-12">
+      {/* Hero / Main Introduction */}
+      <header className="space-y-4">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+          Architecture &amp; Building Solutions in Northamptonshire and Surrounding Areas
+        </h1>
+        <p className="text-xl font-medium text-gray-700 leading-relaxed">
+          Your home should be comfortable, efficient, and ready for the future — not a mystery you have to solve on your own.
+        </p>
+        <p className="text-base text-gray-600 leading-normal">
+          Whether you are planning a new build, adding an extension, tackling a persistent building fault, or trying to make sense of low-carbon heating, the starting point is always the same: understanding what you actually need and what is practical for your property.
+        </p>
+      </header>
+
+      <hr className="border-gray-200" />
+
+      {/* Pain Points / Client Needs */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Is Your Home Trying to Tell You Something?
         </h2>
-        <div className="space-y-4 text-base md:text-lg text-gray-700 leading-relaxed max-w-3xl text-justify">
-          <p>
-            DB+ Design &amp; Management is a full-service architecture practice based in Corby,
-            Northamptonshire. We design house extensions, loft conversions, new-build homes and larger
-            residential projects for homeowners, self-builders and small developers, taking a project from
-            an early feasibility sketch through to a Building Regulations-ready technical package.
-          </p>
-          <p>
-            Every project is led by a RIBA Chartered, ARB-registered architect and delivered using a
-            BIM-led workflow, which means your drawings, structural information and MEP (mechanical,
-            electrical and plumbing) coordination all sit in one consistent 3D model — reducing the design
-            clashes and late-stage surprises that typically add cost and delay to a build.
-          </p>
-          <p>
-            We work across Corby and within roughly a 20-mile radius, including{' '}
-            <strong>Kettering</strong>, <strong>Wellingborough</strong>, <strong>Rushden</strong>,{' '}
-            <strong>Desborough</strong>, <strong>Market Harborough</strong>, <strong>Oundle</strong>,{' '}
-            <strong>Uppingham</strong> and <strong>Stamford</strong>. If you're planning an extension, a
-            new build, or need help navigating planning permission and Building Regulations anywhere in
-            this area, we can help.
-          </p>
-          <p>
-            Beyond traditional architecture, we maintain a dedicated section on{' '}
-            <button
-              onClick={() => onNavigate('/home-insight')}
-              className="text-red-600 underline hover:text-red-700"
-            >
-              architecture and applied technologies
-            </button>
-            , aimed at helping both clients and fellow professionals — architects and installers alike —
-            understand the materials, systems and tools relevant to a project, from initial research
-            through to free, interactive calculators you can use directly before deciding what to install.
-            It's a space we keep expanding as new technologies become relevant to residential design.
-          </p>
+        <p className="text-base text-gray-600">
+          Houses have a way of letting us know when something isn't working. You might be facing:
+        </p>
+        <ul className="space-y-3 list-disc pl-6 text-gray-700">
+          <li>
+            <strong>Space constraints:</strong> A growing family, a cramped layout, or a desperate need for a home office that isn't the dining table.
+          </li>
+          <li>
+            <strong>Thermal drama:</strong> A home that feels like an igloo in January, an oven in August, and leaves you with rising energy bills all year round.
+          </li>
+          <li>
+            <strong>Persistent defects:</strong> Mystery damp patches, water ingress during heavy rain, condensation, or new cracks appearing around doors and windows.
+          </li>
+          <li>
+            <strong>Tech confusion:</strong> Knowing your heating or energy setup needs updating, but feeling unsure whether air source heat pumps, solar PV, battery storage, or traditional systems actually make financial and technical sense for your roof and layout.
+          </li>
+        </ul>
+      </section>
+
+      {/* Solutions & Methodology */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900">
+          You Don't Need All the Answers Before You Start
+        </h2>
+        <p className="text-base text-gray-600 leading-relaxed">
+          You don't need to have every detail worked out before speaking to an architect. You might simply know that your living space feels small, or that a room is permanently freezing.
+        </p>
+        <p className="text-base text-gray-600 leading-relaxed">
+          Good architecture is about far more than just producing drawings for planning approval — it's about identifying the root cause of a problem, exploring realistic spatial options, and designing spaces that perform as well as they look.
+        </p>
+
+        <h3 className="text-lg font-semibold text-gray-800 pt-2">
+          How we approach your project:
+        </h3>
+        <ul className="space-y-2 list-disc pl-6 text-gray-700">
+          <li>
+            <strong>Spatial &amp; Technical Integration:</strong> Every design balances space, light, structure, and energy efficiency so your home functions seamlessly as a single system.
+          </li>
+          <li>
+            <strong>Coordinated 3D Modeling:</strong> Architectural, structural, and mechanical details are coordinated within an intelligent 3D BIM model before construction begins. This catches design conflicts early and avoids expensive surprises on site.
+          </li>
+          <li>
+            <strong>Balanced Energy &amp; Comfort:</strong> We focus on proper insulation, smart ventilation, and solar control to keep your home warm in winter without overheating in summer.
+          </li>
+        </ul>
+      </section>
+
+      {/* Knowledge Hub & Interactive Tools Integration */}
+      <section className="bg-gray-50 p-6 rounded-lg space-y-3 border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900">
+          Explore Options Before Making Expensive Decisions
+        </h2>
+        <p className="text-base text-gray-600 leading-relaxed">
+          Building technology and energy choices are changing fast. To help you navigate the noise before investing in major works, explore our <strong>Knowledge Hub and Interactive Calculators</strong>.
+        </p>
+        <p className="text-base text-gray-600 leading-relaxed">
+          Use these free tools to estimate solar PV requirements, explore battery storage sizing, or dive into practical technical guides on materials and building performance. Gather information at your own pace, run the numbers, and understand your choices before committing to a single build or equipment purchase.
+        </p>
+      </section>
+
+      {/* SEO & Regional Coverage */}
+      <section className="space-y-3">
+        <h2 className="text-xl font-bold text-gray-900">
+          Local Expertise Across Northamptonshire &amp; Surrounding Areas
+        </h2>
+        <p className="text-base text-gray-600">
+          Based in Corby, we work with homeowners, self-builders, and property developers across Northamptonshire and surrounding areas, including:
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-sm text-gray-700 font-medium">
+          <div className="bg-gray-100 p-2 rounded text-center">Corby &amp; Kettering</div>
+          <div className="bg-gray-100 p-2 rounded text-center">Wellingborough &amp; Rushden</div>
+          <div className="bg-gray-100 p-2 rounded text-center">Market Harborough &amp; Desborough</div>
+          <div className="bg-gray-100 p-2 rounded text-center">Oundle, Uppingham &amp; Stamford</div>
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/* SERVICES GRID */}
-      {/* ============================================================ */}
-      <section className="bg-gray-50 py-16 md:py-24">
-        <div className="max-w-6xl mx-auto px-6 md:px-10">
-          <h2 className="text-2xl md:text-3xl font-light mb-10">What we do</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SERVICES.map((service) => (
-              <button
-                key={service.path}
-                onClick={() => onNavigate(service.path)}
-                className="text-left bg-white rounded-xl p-6 border border-gray-200 hover:border-red-600 hover:shadow-lg transition-all group"
-              >
-                <h3 className="text-lg font-semibold mb-2 flex items-center justify-between">
-                  {service.title}
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-red-600 transition-colors" />
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{service.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
-      {/* FOUNDER BIO — E-E-A-T */}
-      {/* ============================================================ */}
-      <section className="max-w-5xl mx-auto px-6 md:px-10 py-16 md:py-24">
-        <h2 className="text-2xl md:text-3xl font-light mb-8">Who's behind DB+</h2>
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="flex-1">
-            <p className="text-lg font-semibold mb-1">David Bonilla‑Saavedra</p>
-            <p className="text-sm text-gray-500 mb-4">
-              RIBA Chartered Member · ARB Registered Architect No. 083457B
-            </p>
-            <div className="space-y-3 text-gray-700 leading-relaxed text-justify">
-              <p>
-                David founded DB+ to bring a technically rigorous, BIM-first approach to residential
-                architecture in Northamptonshire — the kind of detailed coordination usually reserved for
-                larger commercial projects, applied to house extensions and new builds.
-              </p>
-              <p>
-                His registration can be checked directly on the official registers:{' '}
-                <a
-                  href="https://members.architecture.com/custom/bespoke/directory/dir_details.asp?id=279877&type=I&dir=3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red-600 underline hover:text-red-700"
-                >
-                  RIBA Chartered Members directory
-                </a>{' '}
-                and the{' '}
-                <a
-                  href="https://architects-register.org.uk/Architect/083457B?filterId=Architect"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red-600 underline hover:text-red-700"
-                >
-                  Architects Registration Board (ARB) public register
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+      {/* Call to Action */}
+      <footer className="pt-6 text-center space-y-3 border-t border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900">
+          Plan with Confidence. Build with Clarity.
+        </h2>
+        <p className="text-base text-gray-600 max-w-2xl mx-auto">
+          Whether you are starting from a blank plot, expanding your existing layout, resolving a structural defect, or upgrading your energy systems, let's turn your initial questions into a clear, workable solution.
+        </p>
+      </footer>
+    </article>
   );
 };
 
