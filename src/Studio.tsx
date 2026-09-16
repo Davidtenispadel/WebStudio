@@ -153,12 +153,18 @@ const Studio: React.FC = () => {
           />
         )}
 
-        {isHome && <HomeContent onNavigate={(path) => navigate(path)} />}
-
-        {/* Sitewide footer — always rendered last, at the very bottom of
-            whichever page is showing (home hero+content, or a section page
-            via SectionView above). */}
-        <Footer />
+        {/* NOTE: for section pages, the Footer is rendered *inside*
+            SectionView.tsx itself (inside its scrollable container),
+            because SectionView's root is `position: fixed` and a Footer
+            placed here in normal flow would not end up at the true bottom
+            of that page. On the home page ("/"), there is no SectionView,
+            so Footer is rendered here directly after HomeContent. */}
+        {isHome && (
+          <>
+            <HomeContent onNavigate={(path) => navigate(path)} />
+            <Footer />
+          </>
+        )}
 
         <ProjectModal
           project={selectedProject}
