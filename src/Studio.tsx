@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomeContent from './components/HomeContent';
+import SiteOverview from './components/SiteOverview';
 import ProjectModal from './components/ProjectModal';
 import SectionView from './components/SectionView';
 import VideoBackground from './components/VideoBackground';
@@ -161,6 +162,7 @@ const Studio: React.FC = () => {
             so Footer is rendered here directly after HomeContent. */}
         {isHome && (
           <>
+            <SiteOverview onNavigate={(path) => navigate(path)} />
             <HomeContent onNavigate={(path) => navigate(path)} />
             <Footer />
           </>
