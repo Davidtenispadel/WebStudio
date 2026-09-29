@@ -22,6 +22,7 @@ import { sendProjectEnquiry } from "../services/emailService";
 import ProjectJourney from "./ProjectJourney";
 import SolarPanelsPage from "./SolarPanelsPage";
 import BatteriesPage from "./BatteriesPage";
+import WindTurbinesPage from "./WindTurbinesPage";
 
 // ============================
 // TIPO PARA NODOS DE TECNOLOGÍA
@@ -37,15 +38,6 @@ type TechNode = {
 };
 
 // Componentes placeholder
-
-const WindTurbinesPlaceholder: React.FC = () => (
-  <div className="p-8 bg-white rounded-2xl shadow-xl">
-    <h2 className="text-3xl font-light mb-4">Wind Turbines</h2>
-    <p className="text-gray-600">
-      Information about wind energy systems will appear here soon.
-    </p>
-  </div>
-);
 
 // ============================
 // CONFIGURACIÓN DE LOS NODOS DE HOME INSIGHT (iconos grandes)
@@ -76,7 +68,7 @@ const homeInsightRootNodes: TechNode[] = [
         title: "Wind Turbines",
         imageUrl: "https://res.cloudinary.com/dwealmbfi/image/upload/v1780079324/wind_Turbines_oft0q6.png",
         description: "Wind energy generation",
-        articleComponent: <WindTurbinesPlaceholder />,
+        articleComponent: <WindTurbinesPage />,
       },
     ],
   },
