@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from "lucide-react";
 
 const WindTurbinesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -305,40 +304,7 @@ const WindTurbinesPage: React.FC = () => {
           battery system can.
         </p>
 
-        {/* ============================================================ */}
-        {/* CTA */}
-        {/* ============================================================ */}
-        <div className="mt-16 max-w-4xl mx-auto p-8 bg-black/90 text-white rounded-2xl shadow-2xl border border-white/10">
-          <h3 className="text-2xl md:text-3xl font-light mb-4">
-            Wind only pays off on the right site
-          </h3>
-          <p className="text-white/80 mb-6 leading-relaxed">
-            More than any other home energy technology, a wind turbine's return depends on your exact site
-            — wind speed, turbulence, planning constraints and structural conditions all interact in ways a
-            generic calculator can't capture reliably.
-          </p>
-          <p className="text-white/80 mb-6 leading-relaxed">
-            We can help you assess whether your plot has the wind resource to justify one, run the planning
-            and noise pre-checks, and — in most UK cases — work out whether your budget is better spent on
-            solar and battery storage instead.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={() => navigate("/enquiry")}
-              className="bg-white text-black px-8 py-4 rounded-full font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
-            >
-              Start your project
-              <ChevronRight className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => navigate("/enquiry")}
-              className="border border-white/30 px-8 py-4 rounded-full text-white hover:bg-white hover:text-black transition-all"
-            >
-              Contact directly
-            </button>
-          </div>
-        </div>
-
+   
         {/* ============================================================ */}
         {/* REFERENCES */}
         {/* ============================================================ */}
