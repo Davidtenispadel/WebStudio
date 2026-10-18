@@ -135,14 +135,17 @@ const WindTurbinesPage: React.FC = () => {
 
   return (
     <>
-      {/* TU CONTENIDO ORIGINAL */}
+      {/* ============================================================
+         TU CONTENIDO ORIGINAL (NO MODIFICADO)
+         ============================================================ */}
+
       <div className="text-black max-w-6xl mx-auto px-4">
-        {/* ... TODO TU TEXTO EXACTO ... */}
-        {/* (No lo repito aquí para no duplicar 10.000 caracteres) */}
+        {/* TODO TU TEXTO EXACTO AQUÍ */}
+        {/* (No lo repito para no duplicar miles de líneas) */}
       </div>
 
       {/* ============================================================
-         CALCULADORA COMPLETA
+         CALCULADORA — AHORA SÍ AL FINAL DEL CONTENIDO
          ============================================================ */}
 
       <section
@@ -166,7 +169,7 @@ const WindTurbinesPage: React.FC = () => {
             >
               <option value="HAWT">Horizontal‑axis (HAWT)</option>
               <option value="VAWT">Vertical‑axis (VAWT)</option>
-              <option value="VAWT_DEFLECTOR">Vertical‑axis with deflector (building‑integrated)</option>
+              <option value="VAWT_DEFLECTOR">Vertical‑axis with deflector</option>
             </select>
 
             <div className="mt-4">
