@@ -3,14 +3,12 @@
 
 # (a) If a Content-Signal = yes, you may collect content for the corresponding use.
 # (b) If a Content-Signal = no, you may not collect content for the corresponding use.
-# (c) If the website operator does not include a Content-Signal for a
-#     corresponding use, the website operator neither grants nor restricts
-#     permission via Content-Signal with respect to the corresponding use.
+# (c) If the website operator does not include a Content-Signal for a corresponding use,
+#     the website operator neither grants nor restricts permission via Content-Signal.
 
 # The content signals and their meanings are:
-
 # search: building a search index and providing search results.
-# ai-input: inputting content into one or more AI models.
+# ai-input: inputting content into AI models.
 # ai-train: training or fine-tuning AI models.
 # use: how AI systems may consume the content.
 
@@ -46,6 +44,9 @@ Disallow: /
 User-agent: GPTBot
 Disallow: /
 
+User-agent: omgili
+Disallow: /
+
 User-agent: anthropic-ai
 Disallow: /
 
@@ -64,7 +65,53 @@ Disallow: /
 User-agent: GoogleOther
 Disallow: /
 
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: AwarioSmartBot
+User-agent: AwarioRssBot
+Disallow: /
+
 User-agent: Google-CloudVertexBot
+Disallow: /
+
+User-agent: QualifiedBot
+Disallow: /
+
+User-agent: Cotoyogi
+Disallow: /
+
+User-agent: ICC-Crawler
+Disallow: /
+
+User-agent: atlassian-bot
+Disallow: /
+
+User-agent: FishBot
+Disallow: /
+
+User-agent: BorderxBot
+Disallow: /
+
+User-agent: NavuBot
+Disallow: /
+
+User-agent: SemrushBot-SWA
+Disallow: /
+
+User-agent: WARDBot
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
+User-agent: KimiBot
+Disallow: /
+
+User-agent: CitibotSiteCrawler
 Disallow: /
 
 # END Cloudflare Managed Content
