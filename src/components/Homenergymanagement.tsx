@@ -17,6 +17,7 @@ import {
   Network,
   PlugZap,
   Sun,
+  ShieldCheck,
   Wifi,
   Zap,
 } from 'lucide-react';
