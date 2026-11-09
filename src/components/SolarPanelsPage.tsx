@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SolarPanelCalculator from './SolarPanelCalculator';
-import BatteriesPage from "./BatteriesPage";
-import { ChevronRight } from "lucide-react";
+import BatteriesPage from './BatteriesPage';
+import { ChevronRight } from 'lucide-react';
 
 const SolarPanelsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +34,6 @@ const SolarPanelsPage: React.FC = () => {
       </style>
 
       <div className="text-black max-w-6xl mx-auto px-4">
-
         <h2 className="text-3xl md:text-4xl font-light mb-6">
           <strong>Solar panels: complete technical guide for homeowners 2026</strong>
         </h2>
@@ -46,10 +45,10 @@ const SolarPanelsPage: React.FC = () => {
         </p>
 
         <div className="flex justify-center my-4">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png" 
-            alt="Investment" 
-            className="w-auto" 
+          <img
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122307/hombre_en_traje_de_c_tmj9sf.png"
+            alt="Investment"
+            className="w-auto"
             style={{ height: '13.2rem' }}
           />
         </div>
@@ -59,10 +58,10 @@ const SolarPanelsPage: React.FC = () => {
         </p>
 
         <div className="flex justify-center my-4">
-          <img 
-            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png" 
-            alt="Inversion" 
-            className="w-auto" 
+          <img
+            src="https://res.cloudinary.com/dwealmbfi/image/upload/v1780122594/Inersion_xdcdrw.png"
+            alt="Investment"
+            className="w-auto"
             style={{ height: '13.2rem' }}
           />
         </div>
@@ -71,7 +70,7 @@ const SolarPanelsPage: React.FC = () => {
           Tailored to the real characteristics of your home, you'll get the exact data you need to understand your investment clearly and confidently. But first, let's learn more about the history of solar panels to understand the current state of this technology, as well as the future of the next technologies being researched. <strong>Let's go.</strong>
         </p>
 
-        {/* ========== 1. HISTORY ========== */}
+        {/* 1. HISTORY */}
         <h3 className="text-2xl font-semibold mt-8 mb-4">
           1. Origins and evolution of solar panels – from 19th century to today's technology
         </h3>
@@ -95,33 +94,3 @@ const SolarPanelsPage: React.FC = () => {
               <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952645/fa9cf63c-2bce-454e-be4a-47a0bc1c09b2.png" alt="Diagram 2" className="w-full h-auto object-cover" />
             </div>
           </div>
-        </div>
-
-        <p className="mb-2">
-          The true “big bang” of solar energy happened in <strong>1954</strong> when engineers at
-          <strong>Bell Laboratories</strong> developed the first practical silicon solar cell, achieving
-          <strong>6% efficiency</strong>. That cell was made of <strong>crystalline silicon</strong> – the
-          same base material still used in almost <strong>all panels today</strong>.
-        </p>
-
-        <div className="flex justify-center my-6">
-          <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779952879/4396d0fd-a82f-424e-bcac-dcf41e8911d6.png" alt="Solar panel diagram" className="w-full max-w-md rounded-lg shadow-md" />
-        </div>
-
-        <h4 className="text-xl font-semibold mt-6 mb-2">🚀 The Space Race (late 1950s – 1960s)</h4>
-        <p className="mb-2">
-          The need for reliable power in space catapulted solar technology. By <strong>1959</strong>,
-          <strong>Hoffman Electronics</strong> was manufacturing commercial cells with
-          <strong>10% efficiency</strong>, used primarily on satellites. Costs remained astronomical
-          for Earth‑based use, but the technology matured rapidly.
-        </p>
-
-        <div className="flex justify-center my-6">
-          <img src="https://res.cloudinary.com/dwealmbfi/image/upload/v1779956789/1703e28d-97a4-4f98-a2d2-69166a1c8755.png" alt="Space race solar panel diagram" className="w-full max-w-md rounded-lg shadow-md" />
-        </div>
-
-        <h4 className="text-xl font-semibold mt-6 mb-2">🏠 First Rooftops (1970 – 2000)</h4>
-        <p className="mb-2">
-          The oil crisis of the 1970s spurred research into terrestrial applications. The first
-          residential solar panels were <strong>polycrystalline</strong> – cheaper to produce but less
-          efficient than monocrystalline. During this period, two main types of silicon panels emerged:
