@@ -131,8 +131,7 @@ const Studio: React.FC = () => {
               <button onClick={() => navigate('/enquiry')} className="bg-white text-black px-6 py-3 rounded-full text-sm font-semibold hover:bg-red-600 hover:text-white transition-all">
                 Start your project
               </button>
-              <a href="tel:+4407955018937" className="text-white/90 underline text-sm">+44 07955 018937</a>
-            </div>
+             </div>
           </div>
         </div>
       )}
