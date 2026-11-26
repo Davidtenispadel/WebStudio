@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
               <img
                 src="/riba_logo_white.svg"
                 alt="RIBA Chartered Member"
-                className="h-16 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                className="h-20 w-auto opacity-80 hover:opacity-100 transition-opacity"
               />
             </a>
 
@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
               <img
                 src="/arb-2-083157B.png"
                 alt="ARB Registered Architect"
-                className="h-18 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                className="h-25 w-auto opacity-80 hover:opacity-100 transition-opacity"
               />
             </a>
 
