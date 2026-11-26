@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
               <img
                 src="/arb-2-083157B.png"
                 alt="ARB Registered Architect"
-                className="h-30 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                className="h-35 w-auto opacity-80 hover:opacity-100 transition-opacity"
               />
             </a>
 
