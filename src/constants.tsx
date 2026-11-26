@@ -43,30 +43,73 @@ export const designPhilosophy = `<div class="text-black leading-tight">
 </div>`;
 
 export const architectureDescription = `<div class="text-black leading-tight">
-  <p class="text-lg md:text-xl font-light pt-6">DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding villages.</p>
+  <p class="text-lg md:text-xl font-light pt-6">
+    DB+ is a full‑service architecture practice and design studio delivering projects from initial concept to full realisation through BIM technology in Corby, Kettering & Northampton, serving homes and businesses across Northamptonshire and the surrounding area.
+  </p>
 
-  <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">What we offer</p>
-  
+  <p class="text-2xl md:text-3xl lg:text-4xl font-light pt-6">
+    What we offer
+  </p>
+
   <div class="pt-6">
+
     <div class="pb-6">
-      <p class="text-xl md:text-2xl font-light">Extensions & Renovations</p>
-      <p class="text-lg md:text-xl font-light pt-2">More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.</p>
+      <p class="text-xl md:text-2xl font-light">
+        Extensions & Renovations
+      </p>
+      <p class="text-lg md:text-xl font-light pt-2">
+        More comfort. Better flow. A home that feels renewed. Whether a partial refresh or full refurbishment, we help you love where you live across Corby, Kettering, Wellingborough, Market Harborough and beyond.
+      </p>
     </div>
 
     <div class="pb-6">
-      <p class="text-xl md:text-2xl font-light">Planning Applications</p>
-      <p class="text-lg md:text-xl font-light pt-2">Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area including villages where rules differ from towns.</p>
+      <p class="text-xl md:text-2xl font-light">
+        Planning Applications
+      </p>
+      <p class="text-lg md:text-xl font-light pt-2">
+        Do you need planning permission for your extension or new build? We prepare and submit planning applications to North Northamptonshire Council, advise on permitted development rights, and manage approvals from start to finish. Based in Corby, we know the local planning policies across Northamptonshire and the surrounding area.
+      </p>
     </div>
 
-     <div class="pb-6">
-      <p class="text-xl md:text-2xl font-light">New Build Projects</p>
-      <p class="text-lg md:text-xl font-light pt-2">From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future – designed around how you'll actually use them.</p>
+    <div class="pb-6">
+      <p class="text-xl md:text-2xl font-light">
+        New Build Projects
+      </p>
+      <p class="text-lg md:text-xl font-light pt-2">
+        From single‑family homes to multi‑unit developments. Contemporary, efficient, and ready for the future, designed around how you'll actually use them.
+      </p>
     </div>
 
     <div>
-      <p class="text-xl md:text-2xl font-light">All Building Types</p>
-      <p class="text-lg md:text-xl font-light pt-2">Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability – and a space that works for you.</p>
+      <p class="text-xl md:text-2xl font-light">
+        All Building Types
+      </p>
+      <p class="text-lg md:text-xl font-light pt-2">
+        Tailored architectural solutions for any building. Full compliance, optimal performance, long‑term durability and a space that works for you.
+      </p>
     </div>
+
+    <div class="pt-10 mt-10 border-t border-black/10">
+
+      <p class="text-2xl md:text-3xl lg:text-4xl font-light">
+        Areas Covered
+      </p>
+
+      <p class="text-lg md:text-xl font-light pt-4">
+        Based in Corby, DB+ provides architectural design, planning applications, house extensions, new-build homes and BIM-led services across Northamptonshire and surrounding areas.
+      </p>
+
+      <p class="text-lg md:text-xl font-light pt-6 leading-relaxed">
+        Corby • Kettering • Wellingborough • Rushden • Desborough •
+        Market Harborough • Oundle • Uppingham • Stamford
+      </p>
+
+      <p class="text-lg md:text-xl font-light pt-6">
+        Whether you are planning a home extension, renovation, planning application, self-build home or residential development, we provide professional architectural services tailored to your location and project requirements.
+      </p>
+
+    </div>
+
   </div>
 </div>`;
 
