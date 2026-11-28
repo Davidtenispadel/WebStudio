@@ -116,49 +116,67 @@ export const architectureDescription = `<div class="text-black leading-tight">
 // ==================== DESCRIPCIÓN PARA HOME INSIGHT (todo el contenido técnico) ====================
 export const homeInsightDescription = `
 <div class="text-black leading-tight">
-  <h2 class="text-3xl md:text-4xl font-light mb-6">Home Insight</h2>
-  
+
+  <h2 class="text-3xl md:text-5xl font-light mb-6">
+    DB+ Building Intelligence Assistant
+  </h2>
+
   <p class="text-lg md:text-xl font-light mb-6">
-    A contemporary home is more than just a habitable space. It is a complex technological system where the building envelope, energy systems, materials, and climate control converge.
+    An AI-powered assistant designed to support homeowners, developers, architects and construction professionals with planning guidance, building regulations, technical knowledge and building performance.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-6">
-    This section is a living technical resource that will grow over time. Here you will find the latest advances, backed by scientific research and real‑world evidence, along with practical tools to make informed decisions. Above all, we will guide you to obtain the key information you need – from analysing your energy consumption and assessing your roof orientation, to calculating the return on investment of a photovoltaic installation or choosing the most efficient systems for your climate control.
+    Ask questions about house extensions, loft conversions, new-build homes, planning permission, permitted development rights, fire safety, drainage, ventilation, structural design, energy systems, materials, sustainability and construction technology.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-6">
-    Our goal is to help you identify what your project requires based on your real needs, your budget, and the specific conditions of your home. We will provide clear data, objective comparisons, and a roadmap so you can plan with confidence.
+    The goal is not only to provide answers, but to explain the reasoning behind them. The system is being developed to analyse technical guidance, regulations, standards and building knowledge while identifying the sources used to support every response.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-6">
-    <strong>How can you improve your home, and what tools do you have to understand the real scope of those improvements?</strong><br />
-    Here you will discover practical methods to evaluate each intervention: from energy efficiency simulations to return-on-investment calculators. You will learn to prioritise actions, quantify the impact on your bills and comfort, and avoid decisions based on assumptions.
+    Future versions of the assistant will provide references to building regulations, planning guidance, approved documents, technical standards and source documentation, enabling users to understand the basis of every recommendation and identify potential risks, uncertainties and areas requiring professional judgement.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-6">
-    As architects, we will continually update this space with new regulations, emerging research, and real-case insights. We want you to understand not only what works, but exactly how you can transform your home and measure the benefit of every step you take.
+    Typical questions may include:
   </p>
 
-  <p class="text-lg md:text-xl font-light mb-6">
-    <strong>Practical tools:</strong> Explore our interactive solar panel calculator, compare photovoltaic technologies, and access data‑driven insights tailored to your home's specific characteristics. Use the tree below to navigate through Green Energy systems, materials, HVAC, structural systems, and smart home technologies. Each branch contains in‑depth guides, calculators, and up‑to‑date references.
+  <ul class="space-y-2 text-lg md:text-xl font-light mb-8">
+    <li>• Can I build a 3 metre rear extension?</li>
+    <li>• Do I need planning permission?</li>
+    <li>• What insulation thickness should I use?</li>
+    <li>• Should I install an air source heat pump?</li>
+    <li>• What fire separation is required?</li>
+    <li>• Can I convert my loft?</li>
+    <li>• What ventilation strategy is most appropriate?</li>
+    <li>• Which construction system is best for my project?</li>
+  </ul>
+
+  <p class="text-2xl md:text-3xl font-light mb-4">
+    Knowledge Library
+  </p>
+
+  <p class="text-lg md:text-xl font-light mb-8">
+    Alongside the Building Intelligence Assistant, this section contains technical articles, practical guides, calculators and research covering energy systems, materials, HVAC, sustainability, digital twins, smart homes and building technologies.
   </p>
 
   <p class="text-lg md:text-xl font-light mb-12">
-    Let's build knowledge together, branch by branch.
+    This knowledge base will continue to expand with new technical content, planning guidance, regulatory resources and professional tools.
   </p>
+
 </div>`;
 
 export const urbanMasterplanningHeaderDescription = 'Key Urban Projects and Planning.';
 export const projectSupportHeaderDescription = 'Specialized Technical Support for Complex Projects.';
 
 export const CATEGORIES: CategoryGroup[] = [
-  // ==================== HOME INSIGHT (primer elemento, con tecnología) ====================
+  // ==================== Building Intelligence  (primer elemento, con tecnología) ====================
   {
-    id: 'home-insight',
-    name: 'Home Insight',
-    description: homeInsightDescription,
-    imageUrl: '',
-    projects: []
+    id: 'Building Intelligence',
+  name: 'Building Intelligence',
+  description: homeInsightDescription,
+  imageUrl: '',
+  projects: []
   },
 
   // ==================== PROJECT JOURNEY ====================
