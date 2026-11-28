@@ -43,7 +43,7 @@ type TechNode = {
 };
 
 // ============================
-// CONFIGURACIÓN DE LOS NODOS DE HOME INSIGHT
+// CONFIGURACIÓN DE LOS NODOS DE BUILDING INTELLIGENCE
 // ============================
 const homeInsightRootNodes: TechNode[] = [
   {
