@@ -313,7 +313,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     displayedCategory.name === StudioSection.BEHIND_DB;
   const isProjectJourney =
     displayedCategory.name === StudioSection.PROJECT_JOURNEY;
- const isHomeInsight =
+ const isBuildingIntelligence =
   displayedCategory.name === "Building Intelligence";
 
   const scaleTarget =
@@ -1129,7 +1129,7 @@ const SectionView: React.FC<SectionViewProps> = ({
               }`}
             >
               {/* SECCIÓN HOME INSIGHT */}
-              {isHomeInsight && (
+              {isBuildingIntelligence && (
   <div className="mb-12">
 
     <div
@@ -1271,7 +1271,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                     />
                   )}
 
-                  {!isProjectJourney && !isHomeInsight && (
+                  {!isProjectJourney && !isBuildingIntelligence && (
                     <div
                       className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mt-24"
                       dangerouslySetInnerHTML={{
@@ -1282,7 +1282,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 </div>
               )}
 
-              {!isProjectJourney && !isHomeInsight && (
+              {!isProjectJourney && !isBuildingIntelligence && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 px-4 sm:px-10 mt-32">
                     {displayedCategory.projects.map((project) => (
