@@ -198,7 +198,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Estados para navegación en Home Insight
+  // Estados para navegación enBuilding Intelligence
   const [currentTechNodes, setCurrentTechNodes] =
     useState<TechNode[]>(homeInsightRootNodes);
 
@@ -280,7 +280,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   }, [displayedCategory.name]);
 
-  // Home Insight: al entrar, reseteamos la navegación
+  // Building Intelligence: al entrar, reseteamos la navegación
   useEffect(() => {
     if (if (displayedCategory.name === "Building Intelligence") {) {
       setStage("gallery");
@@ -527,7 +527,7 @@ const SectionView: React.FC<SectionViewProps> = ({
     }
   };
 
-  // ========== NAVEGACIÓN EN HOME INSIGHT ==========
+  // ========== NAVEGACIÓN EN Building Intelligence ==========
   const handleTechNodeClick = (node: TechNode) => {
     if (node.externalLink) {
       navigate(node.externalLink);
@@ -1128,7 +1128,7 @@ const SectionView: React.FC<SectionViewProps> = ({
                 showGalleryItems ? "opacity-100" : "opacity-0"
               }`}
             >
-              {/* SECCIÓN HOME INSIGHT */}
+              {/* SECCIÓN Building Intelligence */}
               {isBuildingIntelligence && (
   <div className="mb-12">
 
