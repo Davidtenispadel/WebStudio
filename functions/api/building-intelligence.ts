@@ -1,6 +1,7 @@
 // functions/api/building-intelligence.js
+// DB+ Building Intelligence — Cloudflare Pages Function
+// Endpoint público: /api/building-intelligence
 
-// El sistema de instrucciones se mantiene igual
 const SYSTEM_INSTRUCTIONS = `
 You are DB+ Building Intelligence, a technical AI assistant
 specialising in buildings, architecture and construction.
@@ -38,60 +39,87 @@ RESPONSE STYLE:
   but do not invent specific references.
 `;
 
-// Manejador para peticiones POST
-export async function onRequestPost(context) {
-  // Accedemos al request y a las variables de entorno a través de context
-  const { request, env } = context;
+const CORS_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
-  const corsHeaders = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
+function jsonResponse(status, payload) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: CORS_HEADERS,
+  });
+}
+
+// Preflight CORS
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
+}
+
+// Petición principal
+export async function onRequestPost(context) {
+  const { request, env } = context;
 
   try {
     const body = await request.json();
-    const question = typeof body?.question === "string" ? body.question.trim() : "";
+    const question =
+      typeof body?.question === "string" ? body.question.trim() : "";
 
     if (!question) {
-      return new Response(
-        JSON.stringify({ success: false, answer: "Please enter a technical question." }),
-        { status: 400, headers: corsHeaders }
-      );
+      return jsonResponse(400, {
+        success: false,
+        answer: "Please enter a technical question.",
+      });
     }
 
     if (question.length > 8000) {
-      return new Response(
-        JSON.stringify({ success: false, answer: "Your question is too long." }),
-        { status: 400, headers: corsHeaders }
-      );
+      return jsonResponse(400, {
+        success: false,
+        answer: "Your question is too long.",
+      });
     }
 
-    // ACCESO A LA VARIABLE DE ENTORNO EN CLOUDFLARE
     const apiKey = env.OPENAI_API_KEY;
-    const model = env.OPENAI_MODEL || "gpt-4o"; // Modelo válido
+    const model = env.OPENAI_MODEL || "gpt-4o";
 
     if (!apiKey) {
-      throw new Error("Missing API configuration. Set OPENAI_API_KEY in Cloudflare.");
+      return jsonResponse(500, {
+        success: false,
+        answer:
+          "DB+ Building Intelligence is not configured. Missing OPENAI_API_KEY.",
+      });
     }
 
     const aiResponse = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
         instructions: SYSTEM_INSTRUCTIONS,
         input: question,
-        store: false
-      })
+        store: false,
+      }),
     });
 
     if (!aiResponse.ok) {
-      throw new Error("AI service request failed.");
+      const errorText = await aiResponse.text();
+      return jsonResponse(502, {
+        success: false,
+        answer: "AI service request failed.",
+        details: errorText.slice(0, 500),
+      });
     }
 
     const result = await aiResponse.json();
@@ -106,37 +134,19 @@ export async function onRequestPost(context) {
         ?.join("\n") ||
       "The AI could not generate a response.";
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        question,
-        answer,
-        module: "building-regulations",
-        jurisdiction: "England",
-        sources: [],
-        verified: false
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    return jsonResponse(200, {
+      success: true,
+      question,
+      answer,
+      module: "building-regulations",
+      jurisdiction: "England",
+      sources: [],
+      verified: false,
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        success: false,
-        answer: "DB+ Building Intelligence is temporarily unavailable."
-      }),
-      { status: 500, headers: corsHeaders }
-    );
+    return jsonResponse(500, {
+      success: false,
+      answer: "DB+ Building Intelligence is temporarily unavailable.",
+    });
   }
-}
-
-// Manejador para peticiones OPTIONS (preflight CORS)
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    }
-  });
 }
