@@ -113,8 +113,8 @@ export const architectureDescription = `<div class="text-black leading-tight">
   </div>
 </div>`;
 
-// ==================== DESCRIPCIÓN PARA HOME INSIGHT (todo el contenido técnico) ====================
-export const homeInsightDescription = `
+// ==================== DESCRIPCIÓN PARA Building Intelligence (todo el contenido técnico) ====================
+export const buildingIntelligenceDescription = `
 <div class="text-black leading-tight">
 
   <h2 class="text-3xl md:text-5xl font-light mb-6">
