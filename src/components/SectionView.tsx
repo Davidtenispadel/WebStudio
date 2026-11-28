@@ -1129,15 +1129,65 @@ const SectionView: React.FC<SectionViewProps> = ({
             >
               {/* SECCIÓN HOME INSIGHT */}
               {isHomeInsight && (
-                <div className="mb-12">
-                  <div
-                    className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mb-8"
-                    dangerouslySetInnerHTML={{
-                      __html: displayedCategory.description,
-                    }}
-                  />
+  <div className="mb-12">
 
-                  <div className="px-4 sm:px-10">
+    <div
+      className="text-black font-normal text-lg md:text-xl leading-tight px-4 sm:px-10 mb-8"
+      dangerouslySetInnerHTML={{
+        __html: displayedCategory.description,
+      }}
+    />
+
+    {/* DB+ BUILDING INTELLIGENCE ASSISTANT */}
+
+    <div className="px-4 sm:px-10 mb-12">
+      <div className="bg-black text-white rounded-3xl p-8 md:p-12 shadow-2xl">
+
+        <p className="text-xs tracking-[0.35em] uppercase text-white/50 mb-4">
+          Artificial Intelligence
+        </p>
+
+        <h3 className="text-3xl md:text-5xl font-light mb-6">
+          DB+ Building Intelligence Assistant
+        </h3>
+
+        <p className="text-white/70 text-lg leading-relaxed max-w-4xl mb-8">
+          Ask questions about planning permission, building regulations,
+          architecture, house extensions, loft conversions, structures,
+          HVAC systems, renewable energy, materials, fire safety and
+          construction technology.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-3 text-sm text-white/70 mb-8">
+
+          <div>• Building Regulations</div>
+          <div>• Planning Permission</div>
+
+          <div>• House Extensions</div>
+          <div>• Loft Conversions</div>
+
+          <div>• New Build Homes</div>
+          <div>• Structural Design</div>
+
+          <div>• HVAC Systems</div>
+          <div>• Fire Safety</div>
+
+          <div>• Energy & Sustainability</div>
+          <div>• BIM & Digital Construction</div>
+
+        </div>
+
+        <input
+          type="text"
+          disabled
+          placeholder="Coming soon: Ask the Building Intelligence Assistant..."
+          className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white"
+        />
+
+      </div>
+    </div>
+
+    <div className="px-4 sm:px-10">
                     {(techHistory.length > 0 || activeArticle) && (
                       <button
                         onClick={handleTechGoBack}
