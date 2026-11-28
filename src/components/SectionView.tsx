@@ -282,7 +282,7 @@ const SectionView: React.FC<SectionViewProps> = ({
 
   // Home Insight: al entrar, reseteamos la navegación
   useEffect(() => {
-    if (displayedCategory.name === "Home Insight") {
+    if (if (displayedCategory.name === "Building Intelligence") {) {
       setStage("gallery");
       setShowGalleryItems(true);
       setCurrentTechNodes(homeInsightRootNodes);
@@ -292,7 +292,7 @@ const SectionView: React.FC<SectionViewProps> = ({
   }, [displayedCategory.name]);
 
   useEffect(() => {
-    if (displayedCategory.name !== "Home Insight") {
+    if (displayedCategory.name !== "Building Intelligence") {
       setActiveArticle(null);
     }
   }, [displayedCategory.name]);
@@ -313,7 +313,8 @@ const SectionView: React.FC<SectionViewProps> = ({
     displayedCategory.name === StudioSection.BEHIND_DB;
   const isProjectJourney =
     displayedCategory.name === StudioSection.PROJECT_JOURNEY;
-  const isHomeInsight = displayedCategory.name === "Home Insight";
+ const isHomeInsight =
+  displayedCategory.name === "Building Intelligence";
 
   const scaleTarget =
     typeof window !== "undefined" && window.innerWidth >= 768 ? 0.5 : 0.4;
